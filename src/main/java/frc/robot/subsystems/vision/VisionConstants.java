@@ -4,8 +4,6 @@
 
 package frc.robot.subsystems.vision;
 
-import java.util.Map;
-
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
