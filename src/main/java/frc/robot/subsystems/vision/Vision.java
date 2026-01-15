@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.Logger;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -17,6 +18,7 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
+import frc.robot.subsystems.vision.VisionIO.VisionInputs;
 import frc.robot.util.FieldConstants;
 import frc.robot.util.PoseMath;
 
@@ -53,12 +55,17 @@ public class Vision extends SubsystemBase {
       cameras[i].updateInputs(inputs[i]);
       cameras[i].updatePose(poseSupplier.get());
       Logger.processInputs("Vision/Camera "+i,inputs[i]);
+      if (Robot.isReal()) {
+        if (FieldConstants.inFieldBounds(inputs[i].pose) && (MathUtil.applyDeadband(Timer.getFPGATimestamp()-inputs[i].timestamp,2.5) == 0.0)) {
+          consumer.accept(inputs[i].pose, inputs[i].timestamp, calculateSTDDevs(inputs[i]));
+        }
+      }
     }
     if (Robot.isReal()) {
-      Pose2d average = PoseMath.average(poses);
-      if (FieldConstants.inFieldBounds(average)) {
-        consumer.accept(average, Timer.getFPGATimestamp(), VecBuilder.fill(3, 3, 3));
-      }
+      // Pose2d average = PoseMath.average(poses);
+      // if (FieldConstants.inFieldBounds(average)) {
+      //   consumer.accept(average, Timer.getFPGATimestamp(), VecBuilder.fill(3, 3, 3));
+      // }
     } else {
       Logger.recordOutput("Vision/Estimated Pose", PoseMath.average(poses));
     }
@@ -70,5 +77,10 @@ public class Vision extends SubsystemBase {
         Pose2d visionRobotPoseMeters,
         double timestampSeconds,
         Matrix<N3, N1> visionMeasurementStdDevs);
+  }
+
+  private Matrix<N3,N1> calculateSTDDevs(VisionInputs inputs) {
+    Matrix<N3,N1> stdDevs = VisionConstants.StandardDevs.getStdDevs(inputs.type);
+    return stdDevs;
   }
 }

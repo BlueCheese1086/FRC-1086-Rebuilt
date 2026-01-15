@@ -75,7 +75,7 @@ public class RobotContainer {
         vision = new Vision(
             drive::addVisionMeasurement, 
             drive::getPose, 
-            // new VisionIOPhotonVision("left", VisionConstants.PhysicalConstants.cameraTransforms[0]),
+            new VisionIOPhotonVision("left", VisionConstants.PhysicalConstants.cameraTransforms[0]),
             new VisionIOPhotonVision("right", VisionConstants.PhysicalConstants.cameraTransforms[1]));
         break;
 

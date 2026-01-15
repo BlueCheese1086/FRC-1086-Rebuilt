@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems.vision;
 
+import java.util.Map;
+
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -14,6 +16,7 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
+import frc.robot.subsystems.vision.VisionIO.ObservationType;
 import frc.robot.util.FieldConstants;
 
 /** Add your docs here. */
@@ -41,7 +44,18 @@ public class VisionConstants {
     }
 
     public static class StandardDevs {
-        public static final Matrix<N3,N1> multiTagDevs = VecBuilder.fill(0, 0, 0);
-        public static final Matrix<N3,N1> trigDevs = VecBuilder.fill(0, 0, 0);
+        public static final Matrix<N3,N1> multiTagDevs = VecBuilder.fill(1, 1, 1);
+        public static final Matrix<N3,N1> trigDevs = VecBuilder.fill(1, 1, Double.MAX_VALUE);
+
+        public static Matrix<N3,N1> getStdDevs(ObservationType type) {
+            switch (type) {
+                case PhotonPnP:
+                    return multiTagDevs;
+                case PhotonTrig:
+                    return trigDevs;
+                default:
+                    return multiTagDevs;
+            }
+        }
     }
 }
