@@ -5,7 +5,9 @@
 package frc.robot.subsystems.vision;
 
 import java.util.List;
+import java.util.Optional;
 
+import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
@@ -27,9 +29,9 @@ public class VisionIOPhotonVision implements VisionIO {
     private Pose2d currentPose;
     public VisionIOPhotonVision(String name, Transform3d transform) {
         camera = new PhotonCamera(name);
-        poseEstimator = new PhotonPoseEstimator(VisionConstants.PhysicalConstants.fieldLayout, VisionConstants.Strategies.primary, transform);
-        poseEstimator.setMultiTagFallbackStrategy(VisionConstants.Strategies.secondary);
+        poseEstimator = new PhotonPoseEstimator(VisionConstants.PhysicalConstants.fieldLayout, transform);
     }
+    
     @Override
     public Pose3d getPose() {
         return latestPose;
@@ -47,7 +49,8 @@ public class VisionIOPhotonVision implements VisionIO {
         if (results.size() > 0) {
             result = results.get(0);
             inputs.type = result.getMultiTagResult().isPresent() ? ObservationType.PhotonMultiTag : (VisionConstants.Strategies.secondary == PoseStrategy.PNP_DISTANCE_TRIG_SOLVE ? ObservationType.PhotonTrig : ObservationType.PhotonPnP);
-            poseEstimator.update(result).ifPresent((poseEstimated) -> {
+            Optional<EstimatedRobotPose> vPoseEstimated = inputs.type == ObservationType.PhotonMultiTag ? poseEstimator.estimateCoprocMultiTagPose(result) : poseEstimator.estimatePnpDistanceTrigSolvePose(result);
+            vPoseEstimated.ifPresent((poseEstimated) -> {
                 if (FieldConstants.inFieldBounds(poseEstimated.estimatedPose.toPose2d()) && MathUtil.applyDeadband(poseEstimated.estimatedPose.getZ(),0.1) == 0.0) {
                     latestPose = poseEstimated.estimatedPose;
                     inputs.estimatedPose = poseEstimated.estimatedPose;
