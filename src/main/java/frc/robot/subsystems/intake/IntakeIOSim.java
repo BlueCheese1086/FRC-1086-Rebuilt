@@ -31,7 +31,7 @@ public class IntakeIOSim implements IntakeIO {
     @Override
     public void updateInputs(IntakeInputs inputs) {
         simRoller.setInputVoltage(appliedVoltage);
-        armSim.setInputVoltage(pid.calculate(armSim.getAngleRads() + ff.calculate(pid.getSetpoint(), 0.0)));
+        armSim.setInputVoltage(pid.calculate(armSim.getAngleRads())+ff.calculate(pid.getSetpoint(), 0.0));
 
         armSim.update(0.0);
         simRoller.update(0.0);
