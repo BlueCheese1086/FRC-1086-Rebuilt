@@ -8,6 +8,16 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.drive.Drive;
 
 public class Superstructure extends SubsystemBase {
+  public enum SuperstructureState { // Ideas
+    Intaking,
+    Travelling,
+    Targetting,
+    Shooting,
+    Passing,
+    Climbing,
+    Disabled,
+    Idle
+  }
   /** Creates a new Superstructure. */
   public Superstructure(final Drive drive) {
     
