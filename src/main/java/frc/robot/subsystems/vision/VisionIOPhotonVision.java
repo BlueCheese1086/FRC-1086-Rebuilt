@@ -51,7 +51,7 @@ public class VisionIOPhotonVision implements VisionIO {
             inputs.type = result.getMultiTagResult().isPresent() ? ObservationType.PhotonMultiTag : (VisionConstants.Strategies.secondary == PoseStrategy.PNP_DISTANCE_TRIG_SOLVE ? ObservationType.PhotonTrig : ObservationType.PhotonPnP);
             Optional<EstimatedRobotPose> vPoseEstimated = inputs.type == ObservationType.PhotonMultiTag ? poseEstimator.estimateCoprocMultiTagPose(result) : poseEstimator.estimatePnpDistanceTrigSolvePose(result);
             vPoseEstimated.ifPresent((poseEstimated) -> {
-                if (FieldConstants.inFieldBounds(poseEstimated.estimatedPose.toPose2d()) && MathUtil.applyDeadband(poseEstimated.estimatedPose.getZ(),0.1) == 0.0) {
+                if (VisionConstants.inFieldBounds(poseEstimated.estimatedPose.toPose2d()) && MathUtil.applyDeadband(poseEstimated.estimatedPose.getZ(),0.1) == 0.0) {
                     latestPose = poseEstimated.estimatedPose;
                     inputs.estimatedPose = poseEstimated.estimatedPose;
                     inputs.pose = inputs.type == ObservationType.PhotonMultiTag ? poseEstimated.estimatedPose.toPose2d() : new Pose2d(poseEstimated.estimatedPose.toPose2d().getTranslation(), currentPose.getRotation());

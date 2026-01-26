@@ -38,9 +38,9 @@ public class Vision extends SubsystemBase {
     for (int i=0;i<inputs.length;i++) {
       inputs[i] = new VisionInputsAutoLogged();
     }
-    tagPoses = new Pose3d[FieldConstants.layout.getTags().size()];
+    tagPoses = new Pose3d[FieldConstants.defaultAprilTagType.getTags().size()];
     for (int i=0;i<tagPoses.length; i++) {
-      tagPoses[i] = FieldConstants.layout.getTags().get(i).pose;
+      tagPoses[i] = FieldConstants.defaultAprilTagType.getTags().get(i).pose;
     }
     Logger.recordOutput("Vision/Tags", tagPoses);
   }
@@ -55,7 +55,7 @@ public class Vision extends SubsystemBase {
       cameras[i].updatePose(poseSupplier.get());
       Logger.processInputs("Vision/Camera "+i,inputs[i]);
       if (Robot.isReal()) {
-        if (FieldConstants.inFieldBounds(inputs[i].pose) && (MathUtil.applyDeadband(Timer.getFPGATimestamp()-inputs[i].timestamp,2.5) == 0.0)) {
+        if (VisionConstants.inFieldBounds(inputs[i].pose) && (MathUtil.applyDeadband(Timer.getFPGATimestamp()-inputs[i].timestamp,2.5) == 0.0)) {
           consumer.accept(inputs[i].pose, inputs[i].timestamp, calculateSTDDevs(inputs[i]));
         }
       }

@@ -27,7 +27,6 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.util.FieldConstants;
 
 import java.io.IOException;
-import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -75,7 +74,6 @@ public class Robot extends LoggedRobot {
       case SIM:
         // Running a physics simulator, log to NT
         Logger.addDataReceiver(new NT4Publisher());
-        SimulatedArena.getInstance().resetFieldForAuto();
         break;
 
       case REPLAY:
@@ -106,16 +104,6 @@ public class Robot extends LoggedRobot {
       }
     }
 
-    try {
-        String path = Filesystem.getDeployDirectory()+"/fields/FRC-2026-Rebuilt.json";
-        FieldConstants.layout = new AprilTagFieldLayout(path);
-    } catch (IOException e) {
-        e.printStackTrace();
-        System.out.println("Failed to load custom field defaulting to WPILib default");
-        if (FieldConstants.layout == null) {
-          FieldConstants.layout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
-        }
-    }
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
     robotContainer = new RobotContainer();
@@ -124,7 +112,6 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically during all modes. */
   @Override
   public void robotPeriodic() {
-    AutoRoutines.periodic();
     robotContainer.periodic();
     // Optionally switch the thread to high priority to improve loop
     // timing (see the template project documentation for details)
@@ -203,8 +190,5 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically whilst in simulation. */
   @Override
   public void simulationPeriodic() {
-    SimulatedArena.getInstance().simulationPeriodic();
-    Logger.recordOutput("Simulated Arena/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
-    Logger.recordOutput("Simulated Arena/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Arena"));
   }
 }
