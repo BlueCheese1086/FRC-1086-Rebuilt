@@ -4,8 +4,12 @@
 
 package frc.robot.subsystems.hood;
 
+import static edu.wpi.first.units.Units.Millimeters;
+import static edu.wpi.first.units.Units.Second;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Servo;
+import edu.wpi.first.wpilibj.Timer;
 import frc.robot.RobotMap;
 
 /** Add your docs here. */
@@ -26,8 +30,8 @@ public class HoodIOServo implements HoodIO {
     @Override
     public void setPosition(double position) {
         double clampedPosition = MathUtil.clamp(position,HoodConstants.Mechanical.minPosition,HoodConstants.Mechanical.maxPosition);
-        left.set(clampedPosition);
-        right.set(clampedPosition);
+        left.set(clampedPosition*HoodConstants.Mechanical.scaledDist);
+        right.set(clampedPosition*HoodConstants.Mechanical.scaledDist);
         setpoint = clampedPosition;
     }
 
@@ -36,12 +40,15 @@ public class HoodIOServo implements HoodIO {
         return MathUtil.isNear(setpoint, left.get(), HoodConstants.Mechanical.kPositionTolerance) && MathUtil.isNear(setpoint, right.get(), HoodConstants.Mechanical.kPositionTolerance);
     }
 
+    private double prevDelta = 0.0;
     @Override
     public void updateInputs(HoodInputs inputs) {
+        double deltaTime = Timer.getFPGATimestamp()-prevDelta;
+        prevDelta = Timer.getFPGATimestamp();
         inputs.setPosition = setpoint;
-        inputs.leftAtSetpoint = MathUtil.isNear(setpoint, left.get(), HoodConstants.Mechanical.kPositionTolerance);
-        inputs.leftPosition = left.get();
-        inputs.rightAtSetpoint = MathUtil.isNear(setpoint, right.get(), HoodConstants.Mechanical.kPositionTolerance);
-        inputs.rightPosition = right.get();
+        inputs.leftPosition += HoodConstants.Mechanical.kMaxServoSpeed.in(Millimeters.per(Second))*deltaTime * Math.signum(setpoint-inputs.leftPosition);
+        inputs.rightPosition += HoodConstants.Mechanical.kMaxServoSpeed.in(Millimeters.per(Second))*deltaTime * Math.signum(setpoint-inputs.rightPosition);
+        inputs.leftAtSetpoint = MathUtil.isNear(setpoint, inputs.leftPosition, HoodConstants.Mechanical.kPositionTolerance);
+        inputs.rightAtSetpoint = MathUtil.isNear(setpoint, inputs.rightPosition, HoodConstants.Mechanical.kPositionTolerance);
     }
 }
