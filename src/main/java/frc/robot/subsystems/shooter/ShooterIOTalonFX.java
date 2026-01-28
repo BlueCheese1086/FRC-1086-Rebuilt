@@ -34,7 +34,10 @@ public class ShooterIOTalonFX implements ShooterIO {
         config.Slot0.kP = ShooterConstants.PID.kP;
         config.Slot0.kI = ShooterConstants.PID.kI;
         config.Slot0.kD = ShooterConstants.PID.kD;
+        
+        config.Slot0.kS = ShooterConstants.PID.kS;
         config.Slot0.kV = ShooterConstants.PID.kV;
+        config.Slot0.kA = ShooterConstants.PID.kA;
 
         left.getConfigurator().apply(config);
         middle.getConfigurator().apply(config);
