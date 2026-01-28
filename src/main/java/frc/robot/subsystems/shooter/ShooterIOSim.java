@@ -4,12 +4,18 @@
 
 package frc.robot.subsystems.shooter;
 
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Volts;
+
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.system.LinearSystem;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 
 /** Add your docs here. */
@@ -18,12 +24,17 @@ public class ShooterIOSim implements ShooterIO {
     private final PIDController left_pid, middle_pid, right_pid;
     private final SimpleMotorFeedforward left_ff, middle_ff, right_ff;
 
-    private double targetRPS;
-    private double manualVolts;
+    private Voltage appliedVoltage;
     private boolean isVelocityControl;
 
     public ShooterIOSim() {
-        LinearSystem<N1,N1,N1> plant = LinearSystemId.createFlywheelSystem(DCMotor.getKrakenX60Foc(1), 0.0008, 1.0);
+        appliedVoltage = Volts.zero();
+        isVelocityControl = false;
+
+        LinearSystem<N1,N1,N1> plant = LinearSystemId.createFlywheelSystem(
+            DCMotor.getKrakenX60Foc(1), 
+            ShooterConstants.Mechanical.J.in(KilogramSquareMeters), 
+            ShooterConstants.Mechanical.gearing);
 
         left = new FlywheelSim(plant, DCMotor.getKrakenX60Foc(1));
         middle = new FlywheelSim(plant, DCMotor.getKrakenX60Foc(1));
@@ -41,37 +52,40 @@ public class ShooterIOSim implements ShooterIO {
     @Override
     public void updateInputs(ShooterInputs inputs) {
         if (isVelocityControl) {
-            double leftVolts = left_pid.calculate(left.getAngularVelocityRPM() / 60.0, targetRPS) + left_ff.calculate(targetRPS);
-            double middleVolts = middle_pid.calculate(middle.getAngularVelocityRPM() / 60.0, targetRPS) + middle_ff.calculate(targetRPS);
-            double rightVolts = right_pid.calculate(right.getAngularVelocityRPM() / 60.0, targetRPS) + right_ff.calculate(targetRPS);
-            
+            double leftVolts = left_pid.calculate(left.getAngularVelocity().in(RadiansPerSecond)) + left_ff.calculate(left_pid.getSetpoint());
+            double middleVolts = middle_pid.calculate(middle.getAngularVelocity().in(RadiansPerSecond)) + middle_ff.calculate(middle_pid.getSetpoint());
+            double rightVolts = right_pid.calculate(right.getAngularVelocity().in(RadiansPerSecond)) + right_ff.calculate(right_pid.getSetpoint());
+
             left.setInputVoltage(leftVolts);
             middle.setInputVoltage(middleVolts);
             right.setInputVoltage(rightVolts);
         } else {
-            left.setInputVoltage(manualVolts);
-            middle.setInputVoltage(manualVolts);
-            right.setInputVoltage(manualVolts);
+            left.setInputVoltage(appliedVoltage.in(Volts));
+            middle.setInputVoltage(appliedVoltage.in(Volts));
+            right.setInputVoltage(appliedVoltage.in(Volts));
         }
         
         left.update(0.02);
         middle.update(0.02);
         right.update(0.02);
 
-        inputs.leftCurrentRPM = left.getAngularVelocityRPM();
-        inputs.middleCurrentRPM = middle.getAngularVelocityRPM();
-        inputs.rightCurrentRPM = right.getAngularVelocityRPM();
+        inputs.leftVelocity = left.getAngularVelocity();
+        inputs.middleVelocity = middle.getAngularVelocity();
+        inputs.rightVelocity = right.getAngularVelocity();
     }
 
     @Override
-    public void setVolts(double volts) {
+    public void setVoltage(Voltage volts) {
         isVelocityControl = false;
-        manualVolts = volts;
+        appliedVoltage = volts;
     }
 
     @Override
-    public void setRPM(double rpm) {
+    public void setVelocity(AngularVelocity velocity) {
         isVelocityControl = true;
-        targetRPS = rpm / 60.0;
+
+        left_pid.setSetpoint(velocity.in(RadiansPerSecond));
+        middle_pid.setSetpoint(velocity.in(RadiansPerSecond));
+        right_pid.setSetpoint(velocity.in(RadiansPerSecond));
     }
 }

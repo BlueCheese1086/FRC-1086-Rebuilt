@@ -4,6 +4,10 @@
 
 package frc.robot.subsystems.shooter;
 
+import static edu.wpi.first.units.Units.Volts;
+
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.shooter.ShooterIO.ShooterInputs;
@@ -18,17 +22,17 @@ public class Shooter extends SubsystemBase {
     inputs = new ShooterInputsAutoLogged();
   }
 
-  public Command setRPM(double rpm) {
+  public Command setVelocity(AngularVelocity vel) {
     return this.run(() -> {
-      io.setRPM(rpm);
+      io.setVelocity(vel);
     });
   }
 
-  public Command setVolts(double volts) {
+  public Command setVoltage(Voltage volts) {
     return this.run(() -> {
-      io.setVolts(volts);
+      io.setVoltage(volts);
     }).finallyDo(() -> {
-      io.setVolts(0.0);
+      io.setVoltage(Volts.zero());
     });
   }
 

@@ -4,10 +4,14 @@
 
 package frc.robot.subsystems.shooter;
 
+import static edu.wpi.first.units.Units.Volts;
+
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Voltage;
 import frc.robot.RobotMap;
 
 /** Add your docs here. */
@@ -40,23 +44,22 @@ public class ShooterIOTalonFX implements ShooterIO {
 
     @Override
     public void updateInputs(ShooterInputs inputs) {
-        inputs.leftCurrentRPM = left.getVelocity().getValueAsDouble() * 60.0;
-        inputs.middleCurrentRPM = middle.getVelocity().getValueAsDouble() * 60.0;
-        inputs.rightCurrentRPM = right.getVelocity().getValueAsDouble() * 60.0;
+        inputs.leftVelocity = left.getVelocity().getValue();
+        inputs.middleVelocity = middle.getVelocity().getValue();
+        inputs.rightVelocity = right.getVelocity().getValue();
     }
 
     @Override
-    public void setRPM(double rpm) {
-        double rps = rpm / 60.0;
-        left.setControl(left_v.withVelocity(rps));
-        middle.setControl(middle_v.withVelocity(rps));
-        right.setControl(right_v.withVelocity(rps));
+    public void setVelocity(AngularVelocity vel) {
+        left.setControl(left_v.withVelocity(vel));
+        middle.setControl(middle_v.withVelocity(vel));
+        right.setControl(right_v.withVelocity(vel));
     }
 
     @Override
-    public void setVolts(double volts) {
-        left.setVoltage(volts);
-        middle.setVoltage(volts);
-        right.setVoltage(volts);
+    public void setVoltage(Voltage volts) {
+        left.setVoltage(volts.in(Volts));
+        middle.setVoltage(volts.in(Volts));
+        right.setVoltage(volts.in(Volts));
     }
 }

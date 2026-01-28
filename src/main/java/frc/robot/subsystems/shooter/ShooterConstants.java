@@ -4,6 +4,10 @@
 
 package frc.robot.subsystems.shooter;
 
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
+
+import edu.wpi.first.units.measure.MomentOfInertia;
+
 /** Add your docs here. */
 public class ShooterConstants {
     public static class PID {
@@ -14,5 +18,10 @@ public class ShooterConstants {
         public static final double kS = 0.0;
         public static final double kV = 0.0;
         public static final double kA = 0.0;
+    }
+
+    public static class Mechanical {
+        public static final MomentOfInertia J = KilogramSquareMeters.of(0.0008);
+        public static final double gearing = 1.0;
     }
 }
