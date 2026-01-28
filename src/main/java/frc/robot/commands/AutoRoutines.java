@@ -4,8 +4,15 @@
 
 package frc.robot.commands;
 
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.Volts;
+
 import java.util.function.Consumer;
-import java.util.function.DoubleSupplier;
+// import java.util.function.DoubleSupplier;
 
 import org.littletonrobotics.junction.Logger;
 
@@ -15,12 +22,18 @@ import choreo.trajectory.SwerveSample;
 // import dev.doglog.DogLog;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism;
 import frc.robot.subsystems.drive.Drive;
 
 /** Add your docs here. */
@@ -102,5 +115,74 @@ public class AutoRoutines {
                 DriverStation.reportWarning("FMS Attached so not entering or using tuning mode. Only uses the values currently saved on the robot", false);
             }
         }
+    }
+
+    private static SysIdRoutine linearRoutine;
+    private static Translation2d initialTranslation;
+    private static double appliedLinearVelocity = 0.0;
+    public static Command autoTranslationSysId(Drive drive) {
+        linearRoutine = new SysIdRoutine(
+            new Config(
+                Volts.of(0.5).per(Second),
+                Volts.of(3), 
+                Seconds.of(6)), 
+            new Mechanism(
+                (applied) -> {
+                    appliedLinearVelocity = applied.in(Volts);
+
+                    drive.runVelocity(
+                        ChassisSpeeds.fromFieldRelativeSpeeds(
+                            applied.in(Volts), 
+                            0, 
+                            0, 
+                            drive.getRotation()));
+                }, 
+                (log) -> {
+                    log
+                        .motor("AutoTranslate")
+                        .voltage(Volts.of(appliedLinearVelocity))
+                        .linearPosition(Meters.of(drive.getPose().getTranslation().minus(initialTranslation).getX()))
+                        .linearVelocity(MetersPerSecond.of(ChassisSpeeds.fromFieldRelativeSpeeds(drive.getChassisSpeeds(), drive.getRotation()).vxMetersPerSecond));}, 
+                drive));
+        return Commands.sequence(
+            linearRoutine.quasistatic(Direction.kForward).withTimeout(6.0),
+            linearRoutine.quasistatic(Direction.kReverse).withTimeout(6.0),
+            linearRoutine.dynamic(Direction.kForward).withTimeout(6.0),
+            linearRoutine.dynamic(Direction.kReverse).withTimeout(6.0)
+        ).beforeStarting(() -> {initialTranslation = drive.getPose().getTranslation();}).finallyDo(drive::stop);
+    }
+
+    private static Rotation2d initialRotation;
+    private static SysIdRoutine rotationRoutine;
+    private static double appliedRotationVelocity = 0.0;
+    public static Command autoRotationSysId(Drive drive) {
+        rotationRoutine = new SysIdRoutine(
+            new Config(
+                Volts.of(Math.PI/3).per(Second), 
+                Volts.of(Math.PI*2),
+                Seconds.of(6.0)), 
+            new Mechanism(
+                (applied) -> {
+                    appliedRotationVelocity = applied.in(Volts);
+                    drive.runVelocity(
+                        new ChassisSpeeds(
+                            0.0, 
+                            0.0, 
+                            applied.in(Volts)));
+                }, 
+                (log) -> {
+                    log
+                        .motor("Auto Rotation")
+                        .voltage(Volts.of(appliedRotationVelocity))
+                        .angularPosition(drive.getRotation().minus(initialRotation).getMeasure())
+                        .angularVelocity(RadiansPerSecond.of(drive.getChassisSpeeds().omegaRadiansPerSecond));
+                }, 
+                drive));
+        return Commands.sequence(
+            rotationRoutine.quasistatic(Direction.kForward).withTimeout(6.0),
+            rotationRoutine.quasistatic(Direction.kReverse).withTimeout(6.0),
+            rotationRoutine.dynamic(Direction.kForward).withTimeout(6.0),
+            rotationRoutine.dynamic(Direction.kReverse).withTimeout(6.0)
+        ).beforeStarting(() -> {initialRotation = drive.getRotation();}).finallyDo(drive::stop);
     }
 }
