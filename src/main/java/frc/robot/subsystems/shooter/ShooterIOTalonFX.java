@@ -8,18 +8,12 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
-import edu.wpi.first.math.util.Units;
 import frc.robot.RobotMap;
 
 /** Add your docs here. */
 public class ShooterIOTalonFX implements ShooterIO {
-    private final TalonFX left;
-    private final TalonFX middle;
-    private final TalonFX right;
-
-    private final VelocityVoltage left_v;
-    private final VelocityVoltage middle_v;
-    private final VelocityVoltage right_v;
+    private final TalonFX left, middle, right;
+    private final VelocityVoltage left_v, middle_v, right_v;
 
     public ShooterIOTalonFX() {
         left = new TalonFX(RobotMap.Shooter.left);
@@ -34,7 +28,7 @@ public class ShooterIOTalonFX implements ShooterIO {
         config.Slot0.kP = ShooterConstants.PID.kP;
         config.Slot0.kI = ShooterConstants.PID.kI;
         config.Slot0.kD = ShooterConstants.PID.kD;
-        
+
         config.Slot0.kS = ShooterConstants.PID.kS;
         config.Slot0.kV = ShooterConstants.PID.kV;
         config.Slot0.kA = ShooterConstants.PID.kA;
@@ -46,14 +40,14 @@ public class ShooterIOTalonFX implements ShooterIO {
 
     @Override
     public void updateInputs(ShooterInputs inputs) {
-        inputs.leftCurrentRPM = Units.radiansPerSecondToRotationsPerMinute(left.getVelocity().getValueAsDouble());
-        inputs.middleCurrentRPM = Units.radiansPerSecondToRotationsPerMinute(middle.getVelocity().getValueAsDouble());
-        inputs.rightCurrentRPM = Units.radiansPerSecondToRotationsPerMinute(right.getVelocity().getValueAsDouble());
+        inputs.leftCurrentRPM = left.getVelocity().getValueAsDouble() * 60.0;
+        inputs.middleCurrentRPM = middle.getVelocity().getValueAsDouble() * 60.0;
+        inputs.rightCurrentRPM = right.getVelocity().getValueAsDouble() * 60.0;
     }
 
     @Override
     public void setRPM(double rpm) {
-        double rps = Units.rotationsPerMinuteToRadiansPerSecond(rpm);
+        double rps = rpm / 60.0;
         left.setControl(left_v.withVelocity(rps));
         middle.setControl(middle_v.withVelocity(rps));
         right.setControl(right_v.withVelocity(rps));

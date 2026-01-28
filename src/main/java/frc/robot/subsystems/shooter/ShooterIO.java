@@ -10,9 +10,7 @@ import org.littletonrobotics.junction.AutoLog;
 public interface ShooterIO {
     @AutoLog
     public class ShooterInputs {
-        public double leftCurrentRPM;
-        public double middleCurrentRPM;
-        public double rightCurrentRPM;
+        public double leftCurrentRPM, middleCurrentRPM, rightCurrentRPM;
     }
 
     public default void updateInputs(ShooterInputs inputs) {}
