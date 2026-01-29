@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.shooter;
 
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import org.littletonrobotics.junction.Logger;
@@ -12,35 +13,48 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.shooter.ShooterIO.ShooterInputs;
 
 public class Shooter extends SubsystemBase {
-  private final ShooterIO io;
-  private final ShooterInputsAutoLogged inputs;
+  private ShooterInputsAutoLogged[] inputs;
+  private ShooterIO[] io;
 
-  /** Creates a new Shooter. */
-  public Shooter(ShooterIO io) {
+  public Shooter(ShooterIO... io) {
     this.io = io;
-    inputs = new ShooterInputsAutoLogged();
+    inputs = new ShooterInputsAutoLogged[io.length];
+    for (int i = 0; i < io.length; i++) {
+      inputs[i] = new ShooterInputsAutoLogged();
+    }
   }
 
-  public Command setVelocity(AngularVelocity vel) {
+  public Command setVelocity(double vel) {
     return this.run(() -> {
-      io.setVelocity(vel);
+      for (int i = 0; i < io.length; i++) {
+        io[i].setVelocity(vel);
+      }
     });
   }
 
-  public Command setVoltage(Voltage volts) {
+  public Command setVoltage(double volts) {
     return this.run(() -> {
-      io.setVoltage(volts);
+      for (int i = 0; i < io.length; i++) {
+        io[i].setVoltage(volts);
+      }
     }).finallyDo(() -> {
-      io.setVoltage(Volts.zero());
+      this.stopAll();
     });
+  }
+
+  private void stopAll() {
+    for (int i = 0; i < io.length; i++) {
+      io[i].setVoltage(0.0);
+    }
   }
 
   @Override
   public void periodic() {
-    io.updateInputs(inputs);
-    Logger.processInputs("Shooter", inputs);
+    for (int i = 0; i < io.length; i++) {
+      io[i].updateInputs(inputs[i]);
+      Logger.processInputs("Shooter" + i, inputs[i]);
+    }
   }
 }

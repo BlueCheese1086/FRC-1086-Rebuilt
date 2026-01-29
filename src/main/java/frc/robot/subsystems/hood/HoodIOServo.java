@@ -16,7 +16,8 @@ import frc.robot.RobotMap;
 public class HoodIOServo implements HoodIO {
     private final Servo left;
     private final Servo right;
-
+    
+    private double prevDelta = 0.0;
     private double setpoint = 0.5;
 
     public HoodIOServo() {
@@ -40,7 +41,7 @@ public class HoodIOServo implements HoodIO {
         return MathUtil.isNear(setpoint, left.get(), HoodConstants.Mechanical.kPositionTolerance) && MathUtil.isNear(setpoint, right.get(), HoodConstants.Mechanical.kPositionTolerance);
     }
 
-    private double prevDelta = 0.0;
+    
     @Override
     public void updateInputs(HoodInputs inputs) {
         double deltaTime = Timer.getFPGATimestamp()-prevDelta;

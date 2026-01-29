@@ -4,21 +4,22 @@
 
 package frc.robot.subsystems.shooter;
 
-import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import org.littletonrobotics.junction.AutoLog;
 
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Voltage;
-
-/** Add your docs here. */
 public interface ShooterIO {
     @AutoLog
     public class ShooterInputs {
-        public AngularVelocity leftVelocity, middleVelocity, rightVelocity = RadiansPerSecond.zero();
+        public double velocity = 0.0;
+        public double temp = 0.0;
+        public double positionRadPerSec = 0.0;
+        public double statorCurrent = 0.0;
+        public double supplyCurrent = 0.0;
+        public double appliedVoltage = 0.0;
+
     }
 
     public default void updateInputs(ShooterInputs inputs) {}
-    public default void setVelocity(AngularVelocity vel) {}
-    public default void setVoltage(Voltage volts) {}
+    public default void setVelocity(double vel) {}
+    public default void setVoltage(double volts) {}
 }
