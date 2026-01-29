@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems.intake;
 
-import static edu.wpi.first.units.Units.Amp;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;

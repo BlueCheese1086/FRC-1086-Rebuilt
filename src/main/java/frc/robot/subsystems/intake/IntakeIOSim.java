@@ -33,8 +33,8 @@ public class IntakeIOSim implements IntakeIO {
         simRoller.setInputVoltage(appliedVoltage);
         armSim.setInputVoltage(pid.calculate(armSim.getAngleRads())+ff.calculate(pid.getSetpoint(), 0.0));
 
-        armSim.update(0.0);
-        simRoller.update(0.0);
+        armSim.update(0.02);
+        simRoller.update(0.02);
 
         inputs.pivotAngle = Radians.of(armSim.getAngleRads());
         inputs.pivotVelocity = RadiansPerSecond.of(armSim.getVelocityRadPerSec());
