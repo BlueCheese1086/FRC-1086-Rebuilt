@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.shooter;
 
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import org.littletonrobotics.junction.Logger;
@@ -12,7 +13,6 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.shooter.ShooterIO.ShooterInputs;
 
 public class Shooter extends SubsystemBase {
   private final ShooterIO io;
@@ -27,6 +27,8 @@ public class Shooter extends SubsystemBase {
   public Command setVelocity(AngularVelocity vel) {
     return this.run(() -> {
       io.setVelocity(vel);
+    }).finallyDo(() -> {
+      io.setVelocity(RadiansPerSecond.zero());
     });
   }
 
@@ -42,5 +44,9 @@ public class Shooter extends SubsystemBase {
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Shooter", inputs);
+
+    Logger.recordOutput("Shooter/leftVelocity", inputs.leftVelocity);
+    Logger.recordOutput("Shooter/middleVelocity", inputs.middleVelocity);
+    Logger.recordOutput("Shooter/rightVelocity", inputs.rightVelocity);
   }
 }
