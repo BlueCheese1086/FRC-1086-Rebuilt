@@ -17,6 +17,7 @@ import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 
+import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -28,6 +29,7 @@ import frc.robot.RobotMap;
 public class ShooterIOTalonFX implements ShooterIO {
     private final TalonFX shooter;
     private final MotionMagicVelocityVoltage velocityVoltage;
+    private final BangBangController bbController;
 
     // Status Signals
     private StatusSignal<AngularVelocity> velocity;
@@ -38,10 +40,12 @@ public class ShooterIOTalonFX implements ShooterIO {
     private StatusSignal<Angle> position;
     private StatusSignal<Temperature> temp;
 
+    private double setpoint = 0.0;
+
 
     public ShooterIOTalonFX(int id) {
         shooter = new TalonFX(id);
-
+        bbController = new BangBangController();
         velocityVoltage = new MotionMagicVelocityVoltage(0.0).withEnableFOC(true);
 
         TalonFXConfiguration config = new TalonFXConfiguration();
@@ -97,10 +101,13 @@ public class ShooterIOTalonFX implements ShooterIO {
         inputs.supplyCurrent = supplyCurrent.getValueAsDouble();
         inputs.temp = temp.getValueAsDouble();
         inputs.positionRadPerSec = position.getValueAsDouble();
+
+        shooter.setVoltage(bbController.calculate(inputs.setpoint));
     }
 
     @Override
     public void setVelocity(double vel) {
+        this.setpoint = vel;
         shooter.setControl(velocityVoltage.withVelocity(vel));
     }
 
