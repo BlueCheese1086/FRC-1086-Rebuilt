@@ -25,6 +25,7 @@ public interface IntakeIO {
         public boolean pivotConnected = false;
         public Angle pivotAngle = Radians.zero();
         public AngularVelocity pivotVelocity = RadiansPerSecond.zero();
+        public boolean nearSetpoint = false;
         public Current pivotSupply = Amps.zero();
         public Current pivotStator = Amps.zero();
         public Temperature pivotTemp = Celsius.zero();
@@ -41,4 +42,5 @@ public interface IntakeIO {
     public default void setPosition(Angle angle) {}
     public default void setCurrent(Current desired) {}
     public default void setVoltage(Voltage applied) {}
+    public default void setPivotVoltage(Voltage applied) {}
 }

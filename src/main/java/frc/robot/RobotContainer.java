@@ -31,6 +31,7 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.IntakeConstants;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.IntakeIOSim;
 import frc.robot.subsystems.intake.IntakeIOTalonFX;
@@ -214,6 +215,8 @@ public class RobotContainer {
                                 .ignoringDisable(true));
 
         controller.y().onTrue(shooter.setVelocity(200));
+        controller.leftTrigger().onTrue(intake.setPosition(IntakeConstants.setpoints.deployed));
+        controller.leftBumper().onTrue(intake.setPosition(IntakeConstants.setpoints.stowed));
     }
 
     public void periodic() {
@@ -228,6 +231,6 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
-        return autoChooser.get();
+        return intake.setPosition(IntakeConstants.setpoints.deployed).andThen(autoChooser.get()); // Ensures we put our intake down first.
     }
 }

@@ -17,7 +17,7 @@ import edu.wpi.first.units.measure.Voltage;
 /** Add your docs here. */
 public class IntakeConstants {
     public static class PID {
-        public static final double kP = 1.0;
+        public static final double kP = 2.0;
         public static final double kI = 0.0;
         public static final double kD = 0.0;
         public static final double kS = 0.0;
@@ -38,6 +38,7 @@ public class IntakeConstants {
 
     public static class setpoints {
         public static final Angle stowed = Degrees.of(110);
+        public static final Angle deployed = Degrees.of(-4);
     }
 
     public static class Mechanical { // TODO: Update all of these with the actual values
