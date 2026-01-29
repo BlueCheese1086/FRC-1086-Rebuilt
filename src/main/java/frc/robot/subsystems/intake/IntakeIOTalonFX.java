@@ -7,8 +7,6 @@ package frc.robot.subsystems.intake;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Volts;
 
-import java.io.ObjectInputFilter.Status;
-
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
@@ -18,7 +16,6 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
@@ -49,8 +46,8 @@ public class IntakeIOTalonFX implements IntakeIO {
     private final StatusSignal<Temperature> pivotTemperature;
     
     public IntakeIOTalonFX() {
-        pivot = new TalonFX(RobotMap.Intake.pivot, RobotMap.systemBus);
-        roller = new TalonFX(RobotMap.Intake.roller, RobotMap.systemBus);
+        pivot = new TalonFX(RobotMap.IntakeMap.pivot, RobotMap.systemBus);
+        roller = new TalonFX(RobotMap.IntakeMap.roller, RobotMap.systemBus);
 
         config.CurrentLimits.StatorCurrentLimit = IntakeConstants.CurrentLimits.maxStator.in(Amps);
         config.CurrentLimits.StatorCurrentLimitEnable = true;

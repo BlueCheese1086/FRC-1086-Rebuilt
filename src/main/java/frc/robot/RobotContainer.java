@@ -16,7 +16,6 @@ package frc.robot;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -31,6 +30,10 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.IntakeIO;
+import frc.robot.subsystems.intake.IntakeIOSim;
+import frc.robot.subsystems.intake.IntakeIOTalonFX;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterIOSim;
@@ -56,8 +59,10 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
     // Subsystems
     private final Drive drive;
+    @SuppressWarnings("unused")
     private final Vision vision;
     private final Shooter shooter;
+    private final Intake intake;
 
     // Controller
     private final CommandXboxController controller = new CommandXboxController(0);
@@ -66,7 +71,7 @@ public class RobotContainer {
     private final LoggedDashboardChooser<Command> autoChooser;
 
     /**
-     * The container for the robot. Contains subsystems, OI devices, and commands.
+     * The container for the robot. Contains subsystems, IO devices, and commands.
      */
     public RobotContainer() {
         switch (Constants.currentMode) {
@@ -86,10 +91,11 @@ public class RobotContainer {
                         new VisionIOPhotonVision("right", VisionConstants.PhysicalConstants.cameraTransforms[1]));
 
                 shooter = new Shooter(
-                        new ShooterIOTalonFX(RobotMap.Shooter.left),
-                        new ShooterIOTalonFX(RobotMap.Shooter.middle),
-                        new ShooterIOTalonFX(RobotMap.Shooter.right));
-
+                        new ShooterIOTalonFX(RobotMap.ShooterMap.left),
+                        new ShooterIOTalonFX(RobotMap.ShooterMap.middle),
+                        new ShooterIOTalonFX(RobotMap.ShooterMap.right));
+                
+                intake = new Intake(new IntakeIOTalonFX());
                 break;
 
             case SIM:
@@ -112,7 +118,8 @@ public class RobotContainer {
                     new ShooterIOSim(),
                     new ShooterIOSim()
                 );
-
+                        
+                intake = new Intake(new IntakeIOSim());
                 break;
 
             default:
@@ -138,6 +145,7 @@ public class RobotContainer {
                         });
                 
                 shooter = new Shooter(new ShooterIO() {});
+                intake = new Intake(new IntakeIO() {});
                 break;
         }
 

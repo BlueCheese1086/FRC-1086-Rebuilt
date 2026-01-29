@@ -21,8 +21,8 @@ public class HoodIOServo implements HoodIO {
     private double setpoint = 0.5;
 
     public HoodIOServo() {
-        left = new Servo(RobotMap.Hood.left);
-        right = new Servo(RobotMap.Hood.right);
+        left = new Servo(RobotMap.HoodMap.left);
+        right = new Servo(RobotMap.HoodMap.right);
 
         left.setBoundsMicroseconds(2000, 1800, 1500, 1200, 1000);
         right.setBoundsMicroseconds(2000, 1800, 1500, 1200, 1000);
