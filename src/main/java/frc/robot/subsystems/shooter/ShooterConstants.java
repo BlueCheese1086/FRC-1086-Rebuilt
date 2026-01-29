@@ -15,8 +15,8 @@ public class ShooterConstants {
         public static final double kI = 0.0;
         public static final double kD = 0.0;
 
-        public static final double kS = 0.0;
-        public static final double kV = 0.1;
+        public static final double kS = 0.1;
+        public static final double kV = 12.0 / 600.0; // adjust later when i feel like it
         public static final double kA = 0.0;
     }
 

@@ -34,15 +34,15 @@ public class ShooterIOSim implements ShooterIO {
                 ShooterConstants.Mechanical.gearing), DCMotor.getKrakenX60Foc(1));
         shooterFF = new SimpleMotorFeedforward(ShooterConstants.PID.kS, ShooterConstants.PID.kV,
                 ShooterConstants.PID.kA);
-        bbController = new BangBangController(5.0);
+        bbController = new BangBangController(15.0);
     }
 
     @Override
     public void updateInputs(ShooterInputs inputs) {
         shooter.update(0.02);
-        // shooter.setInputVoltage(bbController.calculate(shooter.getAngularVelocityRadPerSec()));
-               // + shooterFF.calculate(bbController.getSetpoint()));
-        shooter.setInputVoltage(pid.calculate(shooter.getAngularVelocityRadPerSec()));
+        shooter.setInputVoltage(bbController.calculate(shooter.getAngularVelocityRadPerSec()) * 12.0 +
+               + shooterFF.calculate(bbController.getSetpoint()));
+        // shooter.setInputVoltage(pid.calculate(shooter.getAngularVelocityRadPerSec()));
         inputs.velocity = shooter.getAngularVelocityRadPerSec();
         inputs.appliedVoltage = shooter.getInputVoltage();
         inputs.statorCurrent = shooter.getCurrentDrawAmps();
