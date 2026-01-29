@@ -102,7 +102,7 @@ public class ShooterIOTalonFX implements ShooterIO {
         inputs.temp = temp.getValueAsDouble();
         inputs.positionRadPerSec = position.getValueAsDouble();
 
-        shooter.setVoltage(bbController.calculate(inputs.setpoint));
+        shooter.setVoltage(bbController.calculate(inputs.velocity));
     }
 
     @Override
