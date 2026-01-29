@@ -23,7 +23,7 @@ public class RobotMap {
     public static final int feeder = 0;
 
     public static class Shooter {
-        public static final int left = 0;
+        public static final int left = 1;
         public static final int middle = 0;
         public static final int right = 0;
     }

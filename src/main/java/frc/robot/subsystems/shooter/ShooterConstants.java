@@ -21,7 +21,7 @@ public class ShooterConstants {
     }
 
     public static class Mechanical {
-        public static final MomentOfInertia J = KilogramSquareMeters.of(0.0008);
+        public static final MomentOfInertia J = KilogramSquareMeters.of(0.001);
         public static final double gearing = 1.0;
     }
 }

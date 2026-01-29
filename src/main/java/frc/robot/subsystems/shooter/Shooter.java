@@ -28,7 +28,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public Command setVelocity(double vel) {
-    return this.run(() -> {
+    return this.runOnce(() -> {
       for (int i = 0; i < io.length; i++) {
         io[i].setVelocity(vel);
       }

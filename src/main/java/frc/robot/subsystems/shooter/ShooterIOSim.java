@@ -8,71 +8,56 @@ import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
+import java.util.InputMismatchException;
+
+import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.system.LinearSystem;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 
 public class ShooterIOSim implements ShooterIO {
-    private final FlywheelSim left, middle, right;
-    private final PIDController left_pid, middle_pid, right_pid;
-    private final SimpleMotorFeedforward left_ff, middle_ff, right_ff;
-
-    private Voltage appliedVoltage;
+    private final FlywheelSim shooter;
+    private final SimpleMotorFeedforward shooterFF;
+    private final BangBangController bbController;
+    private final PIDController pid = new PIDController(0.12, 0, 0);
 
     public ShooterIOSim() {
-        appliedVoltage = Volts.zero();
 
-        LinearSystem<N1, N1, N1> plant = LinearSystemId.createFlywheelSystem(
+        shooter = new FlywheelSim(LinearSystemId.createFlywheelSystem(
                 DCMotor.getKrakenX60Foc(1),
                 ShooterConstants.Mechanical.J.in(KilogramSquareMeters),
-                ShooterConstants.Mechanical.gearing);
-
-        left = new FlywheelSim(plant, DCMotor.getKrakenX60Foc(1));
-        middle = new FlywheelSim(plant, DCMotor.getKrakenX60Foc(1));
-        right = new FlywheelSim(plant, DCMotor.getKrakenX60Foc(1));
-
-        left_pid = new PIDController(ShooterConstants.PID.kP, ShooterConstants.PID.kI, ShooterConstants.PID.kD);
-        middle_pid = new PIDController(ShooterConstants.PID.kP, ShooterConstants.PID.kI, ShooterConstants.PID.kD);
-        right_pid = new PIDController(ShooterConstants.PID.kP, ShooterConstants.PID.kI, ShooterConstants.PID.kD);
-
-        left_ff = new SimpleMotorFeedforward(ShooterConstants.PID.kS, ShooterConstants.PID.kV, ShooterConstants.PID.kA);
-        middle_ff = new SimpleMotorFeedforward(ShooterConstants.PID.kS, ShooterConstants.PID.kV,
+                ShooterConstants.Mechanical.gearing), DCMotor.getKrakenX60Foc(1));
+        shooterFF = new SimpleMotorFeedforward(ShooterConstants.PID.kS, ShooterConstants.PID.kV,
                 ShooterConstants.PID.kA);
-        right_ff = new SimpleMotorFeedforward(ShooterConstants.PID.kS, ShooterConstants.PID.kV,
-                ShooterConstants.PID.kA);
+        bbController = new BangBangController(5.0);
     }
 
     @Override
     public void updateInputs(ShooterInputs inputs) {
-        left.setInputVoltage(left_pid.calculate(left.getAngularVelocityRadPerSec()) + left_ff.calculate(left_pid.getSetpoint()));
-        middle.setInputVoltage(middle_pid.calculate(left.getAngularVelocityRadPerSec()) + middle_ff.calculate(middle_pid.getSetpoint()));
-        right.setInputVoltage(right_pid.calculate(left.getAngularVelocityRadPerSec()) + right_ff.calculate(right_pid.getSetpoint()));
-
-        left.update(0.02);
-        middle.update(0.02);
-        right.update(0.02);
-
-        inputs.velocity = right.getAngularVelocityRadPerSec();
-
+        shooter.update(0.02);
+        // shooter.setInputVoltage(bbController.calculate(shooter.getAngularVelocityRadPerSec()));
+               // + shooterFF.calculate(bbController.getSetpoint()));
+        shooter.setInputVoltage(pid.calculate(shooter.getAngularVelocityRadPerSec()));
+        inputs.velocity = shooter.getAngularVelocityRadPerSec();
+        inputs.appliedVoltage = shooter.getInputVoltage();
+        inputs.statorCurrent = shooter.getCurrentDrawAmps();
+        inputs.positionRadPerSec = 0.0;
+        inputs.setpoint = bbController.getSetpoint();
     }
 
     @Override
     public void setVoltage(double volts) {
-        left.setInputVoltage(volts);
-        middle.setInputVoltage(volts);
-        right.setInputVoltage(volts);
+        shooter.setInputVoltage(volts);
     }
 
     @Override
     public void setVelocity(double velocity) {
-        left_pid.setSetpoint(velocity);
-        middle_pid.setSetpoint(velocity);
-        right_pid.setSetpoint(velocity);
+        pid.setSetpoint(velocity);
+        bbController.setSetpoint(velocity);
     }
 }
