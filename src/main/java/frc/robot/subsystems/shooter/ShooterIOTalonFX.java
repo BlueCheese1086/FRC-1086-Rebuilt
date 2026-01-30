@@ -4,19 +4,14 @@
 
 package frc.robot.subsystems.shooter;
 
-import static edu.wpi.first.units.Units.Volts;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static frc.robot.util.PhoenixUtil.tryUntilOk;
-
-import java.io.ObjectInputFilter.Status;
-
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
-import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.controls.MotionMagicVelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
-
 import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -24,13 +19,12 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
-import frc.robot.RobotMap;
 
 public class ShooterIOTalonFX implements ShooterIO {
     private final TalonFX shooter;
-    private final MotionMagicVelocityVoltage velocityVoltage;
     private final BangBangController bbController;
-
+    private final MotionMagicVelocityTorqueCurrentFOC velocityTorqueCurrentFOC;
+    
     // Status Signals
     private StatusSignal<AngularVelocity> velocity;
     private StatusSignal<AngularAcceleration> acceleration;
@@ -41,12 +35,14 @@ public class ShooterIOTalonFX implements ShooterIO {
     private StatusSignal<Temperature> temp;
 
     private double setpoint = 0.0;
+    private double bangBangVoltage = 0.0;
 
 
     public ShooterIOTalonFX(int id) {
         shooter = new TalonFX(id);
         bbController = new BangBangController();
-        velocityVoltage = new MotionMagicVelocityVoltage(0.0).withEnableFOC(true);
+
+        velocityTorqueCurrentFOC = new MotionMagicVelocityTorqueCurrentFOC(0.0);
 
         TalonFXConfiguration config = new TalonFXConfiguration();
         config.Slot0.kS = ShooterConstants.PID.kS;
@@ -54,11 +50,15 @@ public class ShooterIOTalonFX implements ShooterIO {
         config.Slot0.kA = ShooterConstants.PID.kA;
 
         config.Audio.BeepOnBoot = true;
-        config.MotionMagic.MotionMagicAcceleration = 0.0;
-        config.MotionMagic.MotionMagicCruiseVelocity = 0.0;
+        config.MotionMagic.MotionMagicAcceleration = ShooterConstants.PID.acceleration;
+        config.MotionMagic.MotionMagicCruiseVelocity = ShooterConstants.PID.cruiseVelocity;
         config.Slot0.StaticFeedforwardSign = StaticFeedforwardSignValue.UseVelocitySign;
 
-        config.Feedback.SensorToMechanismRatio = Math.PI * 2;
+        config.CurrentLimits.StatorCurrentLimitEnable = true;
+        config.CurrentLimits.StatorCurrentLimit = 80.0; // arbittury
+        config.CurrentLimits.SupplyCurrentLimitEnable = true;
+        config.CurrentLimits.SupplyCurrentLimit = 80.0; // arbittury
+
         config.ClosedLoopRamps.VoltageClosedLoopRampPeriod = 0.1;
 
         tryUntilOk(5, () -> shooter.getConfigurator().apply(config));
@@ -102,13 +102,14 @@ public class ShooterIOTalonFX implements ShooterIO {
         inputs.temp = temp.getValueAsDouble();
         inputs.positionRadPerSec = position.getValueAsDouble();
 
-        shooter.setVoltage(bbController.calculate(inputs.velocity));
+        this.bangBangVoltage = bbController.calculate(inputs.velocity);
     }
 
     @Override
-    public void setVelocity(double vel) {
-        this.setpoint = vel;
-        shooter.setControl(velocityVoltage.withVelocity(vel));
+    public void setVelocity(AngularVelocity velocityRadPerSec) {
+        this.setpoint = velocityRadPerSec.in(RotationsPerSecond);
+        bbController.setSetpoint(setpoint);
+        shooter.setControl(velocityTorqueCurrentFOC.withVelocity(velocityRadPerSec.in(RotationsPerSecond)).withFeedForward(bangBangVoltage));
     }
 
     @Override

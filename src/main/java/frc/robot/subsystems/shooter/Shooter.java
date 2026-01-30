@@ -13,26 +13,35 @@ import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Shooter extends SubsystemBase {
   private ShooterInputsAutoLogged[] inputs;
   private ShooterIO[] io;
+  private FeederIO feederIO;
+  private FeederIOInputsAutoLogged feederIOInputsAutoLogged;
 
-  public Shooter(ShooterIO... io) {
+  public Shooter( FeederIO feederIO, ShooterIO... io){
     this.io = io;
+    this.feederIO = feederIO;
+    this.feederIOInputsAutoLogged = new FeederIOInputsAutoLogged();
     inputs = new ShooterInputsAutoLogged[io.length];
     for (int i = 0; i < io.length; i++) {
       inputs[i] = new ShooterInputsAutoLogged();
     }
   }
 
-  public Command setVelocity(double vel) {
+  public Command setVelocity(AngularVelocity radPerSec) {
     return this.runOnce(() -> {
       for (int i = 0; i < io.length; i++) {
-        io[i].setVelocity(vel);
+        io[i].setVelocity(radPerSec);
       }
     });
+  }
+
+  public Command runFeederVoltage(double volts) {
+    return Commands.run(()-> feederIO.setFeedVoltage(volts), this);
   }
 
   public Command setVoltage(double volts) {
@@ -57,5 +66,6 @@ public class Shooter extends SubsystemBase {
       io[i].updateInputs(inputs[i]);
       Logger.processInputs("Shooter" + i, inputs[i]);
     }
+    feederIO.updateInputs(feederIOInputsAutoLogged);
   }
 }

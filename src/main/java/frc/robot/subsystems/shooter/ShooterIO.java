@@ -7,9 +7,12 @@ package frc.robot.subsystems.shooter;
 
 import org.littletonrobotics.junction.AutoLog;
 
+import edu.wpi.first.units.measure.AngularVelocity;
+
 public interface ShooterIO {
     @AutoLog
     public class ShooterInputs {
+        // Shooter
         public double velocity = 0.0;
         public double temp = 0.0;
         public double positionRadPerSec = 0.0;
@@ -20,6 +23,6 @@ public interface ShooterIO {
     }
 
     public default void updateInputs(ShooterInputs inputs) {}
-    public default void setVelocity(double vel) {}
+    public default void setVelocity(AngularVelocity radPerSecond) {}
     public default void setVoltage(double volts) {}
 }
