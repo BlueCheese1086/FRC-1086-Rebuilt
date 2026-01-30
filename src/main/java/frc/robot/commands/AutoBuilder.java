@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 
 public class AutoBuilder {
     private final SendableChooser<String> startPos = new SendableChooser<>();
-    private final SendableChooser<Boolean> isPreloaded = new SendableChooser<>();
+    private final SendableChooser<Boolean> shouldShoot = new SendableChooser<>();
     private final SendableChooser<String> preloadShootPos = new SendableChooser<>();
     private final SendableChooser<String> intakeType = new SendableChooser<>();
     private final SendableChooser<String> nzEntry = new SendableChooser<>();
@@ -24,8 +24,8 @@ public class AutoBuilder {
         startPos.addOption("Outpost Trench Start", "ots");
         startPos.addOption("Outpost Bump Start", "obs");
         
-        isPreloaded.setDefaultOption("Yes", true);
-        isPreloaded.addOption("No", false);
+        shouldShoot.setDefaultOption("Yes", true);
+        shouldShoot.addOption("No", false);
 
         preloadShootPos.setDefaultOption("Center Shot", "cs");
         preloadShootPos.addOption("Depot Far Shot", "dfs");
@@ -63,11 +63,11 @@ public class AutoBuilder {
         finalShootPos.addOption("Outpost Near Shot", "ons");
 
         climbPos.setDefaultOption("None", "none");
-        climbPos.addOption("Left Climb", "lc");
-        climbPos.addOption("Right Climb", "rc");
+        climbPos.addOption("Depot Climb", "dc");
+        climbPos.addOption("Outpost Climb", "oc");
 
         SmartDashboard.putData("Auto/1. Start Pos", startPos);
-        SmartDashboard.putData("Auto/2. Preloaded", isPreloaded);
+        SmartDashboard.putData("Auto/2. Preloaded", shouldShoot);
         SmartDashboard.putData("Auto/3. Preload Shoot Pos", preloadShootPos);
         SmartDashboard.putData("Auto/4. Intake Source", intakeType);
         SmartDashboard.putData("Auto/5a. NZ Entry", nzEntry);
@@ -79,18 +79,18 @@ public class AutoBuilder {
 
     public Command build() {
         String start = startPos.getSelected();
-        boolean preloaded = isPreloaded.getSelected();
+        boolean startShoot = shouldShoot.getSelected();
         String pShoot = preloadShootPos.getSelected();
         String intake = intakeType.getSelected();
         String fShoot = finalShootPos.getSelected();
         String climb = climbPos.getSelected();
 
         return AutoRoutines.runPath(
-            preloaded ? //if preloaded,
+            startShoot ? //if it should shoot,
                 (start + "-" + pShoot) : //go to shooting position
                 (start + "-" + getIntakePoint()) //else go to intake point
         ).andThen(
-            preloaded ? //shoot and go to intake if preloaded
+            startShoot ? //shoot and go to intake if preloaded
                 dummyShoot().andThen(follow(pShoot + "-" + getIntakePoint())) : 
                 Commands.none(),
             intake.equals("none") ? //if no intake was selected,
