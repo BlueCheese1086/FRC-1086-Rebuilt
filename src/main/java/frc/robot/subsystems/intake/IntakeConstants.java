@@ -4,22 +4,48 @@
 
 package frc.robot.subsystems.intake;
 
+import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Volts;
 
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.Voltage;
 
 /** Add your docs here. */
 public class IntakeConstants {
     public static class PID {
-        public static final double kP = 1.0;
+        public static final double kP = 300.0;
         public static final double kI = 0.0;
         public static final double kD = 0.0;
         public static final double kS = 0.0;
         public static final double kG = 0.0;
+        public static final double kV = 0.0;
+        public static final double kA = 0.0;
+    }
+
+    public static class CurrentLimits {
+        public static final Current maxSupply = Amps.of(60);
+        public static final Current maxStator = Amps.of(60.0);
+    }
+
+    public static class VoltageLimits {
+        public static final Voltage peakForwardVoltage = Volts.of(12);
+        public static final Voltage peakReverseVoltage = Volts.of(-12);
+    }
+
+    public static class setpoints {
+        public static final Angle stowed = Degrees.of(100);
+        public static final Angle homed = Degrees.of(110);
+        public static final Angle agitate = Degrees.of(20);
+        public static final Angle deployed = Degrees.of(-4);
     }
 
     public static class Mechanical { // TODO: Update all of these with the actual values
         public static final Distance intakeLength = Inches.of(14);
-        public static final double gearing = 1.0;
+        public static final double gearing = 50.0;
+        public static final Angle kPositionTolerance = Degrees.of(5);
     }
 }

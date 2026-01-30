@@ -20,24 +20,24 @@ import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 
 /** Add your docs here. */
 public class IntakeIOSim implements IntakeIO {
-    private final PIDController pid = new PIDController(0, 0, 0);
-    private final ArmFeedforward ff = new ArmFeedforward(0.0, 0.0, 0.0);
-    private double appliedVoltage = 0.0;
+    private final PIDController pid = new PIDController(IntakeConstants.PID.kP, IntakeConstants.PID.kI, IntakeConstants.PID.kD);
+    private final ArmFeedforward ff = new ArmFeedforward(IntakeConstants.PID.kS, IntakeConstants.PID.kG, IntakeConstants.PID.kV);
 
-    private final SingleJointedArmSim armSim = new SingleJointedArmSim(DCMotor.getKrakenX60Foc(1), IntakeConstants.Mechanical.gearing, 0.04,IntakeConstants.Mechanical.intakeLength.in(Meters), 0.0, Math.PI/2, true, 0.0);
+    private final SingleJointedArmSim armSim = new SingleJointedArmSim(DCMotor.getKrakenX60Foc(1), IntakeConstants.Mechanical.gearing, 0.04,IntakeConstants.Mechanical.intakeLength.in(Meters), IntakeConstants.setpoints.deployed.in(Radians), IntakeConstants.setpoints.stowed.in(Radians), false, IntakeConstants.setpoints.stowed.in(Radians));
     private final DCMotorSim simRoller = new DCMotorSim(LinearSystemId.createDCMotorSystem(DCMotor.getKrakenX60Foc(1), 0.04, 1.0), DCMotor.getKrakenX60Foc(1));
     public IntakeIOSim() {}
 
     @Override
     public void updateInputs(IntakeInputs inputs) {
-        simRoller.setInputVoltage(appliedVoltage);
+        System.out.println("Testing");
         armSim.setInputVoltage(pid.calculate(armSim.getAngleRads())+ff.calculate(pid.getSetpoint(), 0.0));
 
-        armSim.update(0.0);
-        simRoller.update(0.0);
+        armSim.update(0.02);
+        simRoller.update(0.02);
 
         inputs.pivotAngle = Radians.of(armSim.getAngleRads());
         inputs.pivotVelocity = RadiansPerSecond.of(armSim.getVelocityRadPerSec());
+        inputs.pivotAppliedVoltage = Volts.of(armSim.getInput(0));
         
         inputs.rollerAppliedVoltage = Volts.of(simRoller.getInputVoltage());
         inputs.rollerVelocity = RadiansPerSecond.of(simRoller.getAngularVelocityRadPerSec());
@@ -50,6 +50,6 @@ public class IntakeIOSim implements IntakeIO {
 
     @Override
     public void setVoltage(Voltage applied) {
-        appliedVoltage = applied.in(Volts);
+        simRoller.setInputVoltage(applied.in(Volts));
     }
 }

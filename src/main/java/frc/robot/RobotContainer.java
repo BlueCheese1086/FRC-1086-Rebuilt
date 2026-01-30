@@ -16,7 +16,6 @@ package frc.robot;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -31,6 +30,15 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.indexer.Indexer;
+import frc.robot.subsystems.indexer.IndexerIO;
+import frc.robot.subsystems.indexer.IndexerIOSim;
+import frc.robot.subsystems.indexer.IndexerIOTalonFX;
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.IntakeConstants;
+import frc.robot.subsystems.intake.IntakeIO;
+import frc.robot.subsystems.intake.IntakeIOSim;
+import frc.robot.subsystems.intake.IntakeIOTalonFX;
 import frc.robot.subsystems.shooter.FeederIO;
 import frc.robot.subsystems.shooter.FeederIOTalonFX;
 import frc.robot.subsystems.shooter.Shooter;
@@ -42,8 +50,6 @@ import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOSim;
-
-import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -60,8 +66,10 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
         // Subsystems
         private final Drive drive;
+    @SuppressWarnings("unused")
         private final Vision vision;
         private final Shooter shooter;
+    private final Intake intake;
 
         // Controller
         private final CommandXboxController controller = new CommandXboxController(0);
@@ -69,19 +77,19 @@ public class RobotContainer {
         // Dashboard inputs
         private final LoggedDashboardChooser<Command> autoChooser;
 
-        /**
-         * The container for the robot. Contains subsystems, OI devices, and commands.
-         */
-        public RobotContainer() {
-                switch (Constants.currentMode) {
-                        case REAL:
-                                // Real robot, instantiate hardware IO implementations
-                                drive = new Drive(
-                                                new GyroIOPigeon2(),
-                                                new ModuleIOTalonFX(TunerConstants.FrontLeft),
-                                                new ModuleIOTalonFX(TunerConstants.FrontRight),
-                                                new ModuleIOTalonFX(TunerConstants.BackLeft),
-                                                new ModuleIOTalonFX(TunerConstants.BackRight));
+    /**
+     * The container for the robot. Contains subsystems, IO devices, and commands.
+     */
+    public RobotContainer() {
+        switch (Constants.currentMode) {
+            case REAL:
+                // Real robot, instantiate hardware IO implementations
+                drive = new Drive(
+                        new GyroIOPigeon2(),
+                        new ModuleIOTalonFX(TunerConstants.FrontLeft),
+                        new ModuleIOTalonFX(TunerConstants.FrontRight),
+                        new ModuleIOTalonFX(TunerConstants.BackLeft),
+                        new ModuleIOTalonFX(TunerConstants.BackRight));
 
                                 vision = new Vision(
                                                 drive::addVisionMeasurement,
@@ -91,6 +99,10 @@ public class RobotContainer {
                                                 new VisionIOPhotonVision("right",
                                                                 VisionConstants.PhysicalConstants.cameraTransforms[1]));
 
+                
+                intake = new Intake(new IntakeIOTalonFX());
+                indexer = new Indexer(new IndexerIOTalonFX());
+                break;
                                 shooter = new Shooter(
                                                 new FeederIOTalonFX(1),
                                                 new ShooterIOTalonFX(RobotMap.Shooter.left),
@@ -148,6 +160,8 @@ public class RobotContainer {
                                                 });
 
                                 shooter = new Shooter(new FeederIO() {}, new ShooterIO() {});
+                intake = new Intake(new IntakeIO() {});
+                indexer = new Indexer(new IndexerIO() {});
                                 break;
                 }
 
@@ -222,8 +236,8 @@ public class RobotContainer {
                                                                 drive)
                                                                 .ignoringDisable(true));
 
-                controller.y().onTrue(shooter.setVelocity(RadiansPerSecond.of(400)));
-        }
+        controller.y().onTrue(shooter.setVelocity(200));
+    }
 
         public void periodic() {
                 Logger.recordOutput("Targetting/Estimated Angle",
@@ -234,12 +248,12 @@ public class RobotContainer {
                                                                                 Rotation2d.kZero))));
         }
 
-        /**
-         * Use this to pass the autonomous command to the main {@link Robot} class.
-         *
-         * @return the command to run in autonomous
-         */
-        public Command getAutonomousCommand() {
-                return autoChooser.get();
-        }
+    /**
+     * Use this to pass the autonomous command to the main {@link Robot} class.
+     *
+     * @return the command to run in autonomous
+     */
+    public Command getAutonomousCommand() {
+        return autoChooser.get();
+    }
 }

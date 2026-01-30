@@ -4,13 +4,13 @@
 
 package frc.robot.subsystems;
 
-import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.Map;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.drive.Drive;
@@ -26,8 +26,8 @@ public class Superstructure extends SubsystemBase {
     Idle
   }
 
-  private Map<State, Trigger> stateRequests = new EnumMap<>(State.class);
-  private Map<State, Trigger> stateTriggers = new EnumMap<>(State.class);
+  private HashMap<State, Trigger> stateRequests = new HashMap<State,Trigger>();
+  private HashMap<State, Trigger> stateTriggers = new HashMap<State,Trigger>();
 
   @AutoLogOutput(key = "RobotState/CurrentState")
   private State state = State.Idle;
@@ -45,6 +45,11 @@ public class Superstructure extends SubsystemBase {
     stateRequests.put(State.Pass, null);
     stateRequests.put(State.Climb, null);
     stateRequests.put(State.Idle, null);
+
+    // State Trigger stuff here
+    for (State state : State.values()) {
+      stateRequests.get(state).onTrue(setState(state));
+    }
     
     this.setupIdle();
     this.setupIntake();
@@ -78,8 +83,14 @@ public class Superstructure extends SubsystemBase {
 
   }
 
+  private Command setState(State newState) {
+    return Commands.run(() -> {
+      state = newState;
+    }).withTimeout(0.01);
+  }
+
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
+    // This method will only be used for logging and nothing else.
   }
 }
