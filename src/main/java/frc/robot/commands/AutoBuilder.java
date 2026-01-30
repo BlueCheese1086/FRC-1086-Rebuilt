@@ -18,48 +18,6 @@ public class AutoBuilder {
     private final SendableChooser<String> climbPos = new SendableChooser<>();
 
     public AutoBuilder() {
-        initChoosers();
-    }
-
-    public Command build() {
-        String start = startPos.getSelected();
-        boolean preloaded = isPreloaded.getSelected();
-        String pShoot = preloadShootPos.getSelected();
-        String intake = intakeType.getSelected();
-        String fShoot = finalShootPos.getSelected();
-        String climb = climbPos.getSelected();
-
-        return AutoRoutines.runPath(
-            preloaded ? //if preloaded,
-                (start + "-" + pShoot) : //go to shooting position
-                (start + "-" + getIntakePoint()) //else go to intake point
-        ).andThen(
-            preloaded ? //shoot and go to intake if preloaded
-                dummyShoot().andThen(follow(pShoot + "-" + getIntakePoint())) : 
-                Commands.none(),
-            intake.equals("none") ? //if no intake was selected,
-                follow(nzEntry.getSelected() + "-" + nzTarget.getSelected()).andThen( //go to neutral zone target
-                    dummyIntake(), //intake
-                    follow(nzTarget.getSelected() + "-" + nzExit.getSelected()), //go to exit
-                    follow(nzExit.getSelected() + "-" + fShoot) //go to shoot
-                ) : 
-                dummyIntake().andThen(follow(intake + "-" + fShoot)), //else go to shoot
-            dummyShoot(), //shoot
-            !climb.equals("none") ? //if climb selected,
-                follow(fShoot + "-" + climb).andThen(dummyClimb()) : //go to climb positon and climb
-                Commands.none()
-        );
-    }
-
-    private Command follow(String pathName) { //follow a trajectory by name
-        return AutoRoutines.getFactory().trajectoryCmd(pathName);
-    }
-
-    private String getIntakePoint() { //get intake point based on intake type (either neutral zone or depot/outpost)
-        return intakeType.getSelected().equals("none") ? nzEntry.getSelected() : intakeType.getSelected();
-    }
-
-    private void initChoosers() {
         startPos.setDefaultOption("Hub Start", "hs");
         startPos.addOption("Depot Trench Start", "dts");
         startPos.addOption("Depot Bump Start", "dbs");
@@ -117,6 +75,44 @@ public class AutoBuilder {
         SmartDashboard.putData("Auto/5c. NZ Exit", nzExit);
         SmartDashboard.putData("Auto/6. Final Shoot Pos", finalShootPos);
         SmartDashboard.putData("Auto/7. Climb Pos", climbPos);
+    }
+
+    public Command build() {
+        String start = startPos.getSelected();
+        boolean preloaded = isPreloaded.getSelected();
+        String pShoot = preloadShootPos.getSelected();
+        String intake = intakeType.getSelected();
+        String fShoot = finalShootPos.getSelected();
+        String climb = climbPos.getSelected();
+
+        return AutoRoutines.runPath(
+            preloaded ? //if preloaded,
+                (start + "-" + pShoot) : //go to shooting position
+                (start + "-" + getIntakePoint()) //else go to intake point
+        ).andThen(
+            preloaded ? //shoot and go to intake if preloaded
+                dummyShoot().andThen(follow(pShoot + "-" + getIntakePoint())) : 
+                Commands.none(),
+            intake.equals("none") ? //if no intake was selected,
+                follow(nzEntry.getSelected() + "-" + nzTarget.getSelected()).andThen( //go to neutral zone target
+                    dummyIntake(), //intake
+                    follow(nzTarget.getSelected() + "-" + nzExit.getSelected()), //go to exit
+                    follow(nzExit.getSelected() + "-" + fShoot) //go to shoot
+                ) : 
+                dummyIntake().andThen(follow(intake + "-" + fShoot)), //else go to shoot
+            dummyShoot(), //shoot
+            !climb.equals("none") ? //if climb selected,
+                follow(fShoot + "-" + climb).andThen(dummyClimb()) : //go to climb positon and climb
+                Commands.none()
+        );
+    }
+
+    private Command follow(String pathName) { //follow a trajectory by name
+        return AutoRoutines.getFactory().trajectoryCmd(pathName);
+    }
+
+    private String getIntakePoint() { //get intake point based on intake type (either neutral zone or depot/outpost)
+        return intakeType.getSelected().equals("none") ? nzEntry.getSelected() : intakeType.getSelected();
     }
 
     //TODO: put actual commands here
