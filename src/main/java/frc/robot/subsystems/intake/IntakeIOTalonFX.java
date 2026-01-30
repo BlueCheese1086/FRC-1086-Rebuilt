@@ -13,6 +13,7 @@ import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.units.measure.Angle;
@@ -70,6 +71,9 @@ public class IntakeIOTalonFX implements IntakeIO {
         config.Slot0.kS = IntakeConstants.PID.kS;
         config.Slot0.kV = IntakeConstants.PID.kV;
         config.Slot0.kA = IntakeConstants.PID.kA;
+
+        config.Feedback.SensorToMechanismRatio = IntakeConstants.Mechanical.gearing;
+        config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
 
         PhoenixUtil.tryUntilOk(5, () -> (pivot.getConfigurator().apply(config, 5)));
 
