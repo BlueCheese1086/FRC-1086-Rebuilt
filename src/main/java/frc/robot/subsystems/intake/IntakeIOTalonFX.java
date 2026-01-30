@@ -33,6 +33,7 @@ public class IntakeIOTalonFX implements IntakeIO {
     private final TalonFXConfiguration config = new TalonFXConfiguration();
 
     // Status Signals
+    private final StatusSignal<AngularVelocity> rollerVelocity;
     private final StatusSignal<Voltage> rollerVoltage;
     private final StatusSignal<Current> rollerSupply;
     private final StatusSignal<Current> rollerStator;
@@ -72,6 +73,7 @@ public class IntakeIOTalonFX implements IntakeIO {
 
         PhoenixUtil.tryUntilOk(5, () -> (pivot.getConfigurator().apply(config, 5)));
 
+        rollerVelocity = roller.getVelocity();
         rollerVoltage = roller.getMotorVoltage();
         rollerSupply = roller.getSupplyCurrent();
         rollerStator = roller.getStatorCurrent();
@@ -84,15 +86,16 @@ public class IntakeIOTalonFX implements IntakeIO {
         pivotStator = pivot.getStatorCurrent();
         pivotTemperature = pivot.getDeviceTemp();
 
-        StatusSignal.setUpdateFrequencyForAll(RobotMap.systemBus.isNetworkFD() ? 250.0 : 100.0, rollerVoltage,rollerSupply,rollerStator,rollerTemperature,pivotAngle,pivotVelocity,pivotVoltage,pivotSupply,pivotStator,pivotTemperature);
+        StatusSignal.setUpdateFrequencyForAll(RobotMap.systemBus.isNetworkFD() ? 250.0 : 100.0, rollerVelocity, rollerVoltage,rollerSupply,rollerStator,rollerTemperature,pivotAngle,pivotVelocity,pivotVoltage,pivotSupply,pivotStator,pivotTemperature);
         PhoenixUtil.tryUntilOk(5, () -> roller.optimizeBusUtilization());
         PhoenixUtil.tryUntilOk(5, () -> pivot.optimizeBusUtilization());
     }
     
     @Override
     public void updateInputs(IntakeInputs inputs) {
-        StatusSignal.refreshAll(rollerVoltage,rollerSupply,rollerStator,rollerTemperature,pivotAngle,pivotVelocity,pivotVoltage,pivotSupply,pivotStator,pivotTemperature);
-        inputs.rollerConnected = StatusSignal.isAllGood(rollerVoltage,rollerSupply,rollerStator,rollerTemperature);
+        StatusSignal.refreshAll(rollerVelocity,rollerVoltage,rollerSupply,rollerStator,rollerTemperature,pivotAngle,pivotVelocity,pivotVoltage,pivotSupply,pivotStator,pivotTemperature);
+        inputs.rollerConnected = StatusSignal.isAllGood(rollerVelocity,rollerVoltage,rollerSupply,rollerStator,rollerTemperature);
+        inputs.rollerVelocity = rollerVelocity.getValue();
         inputs.rollerAppliedVoltage = rollerVoltage.getValue();
         inputs.rollerStator = rollerStator.getValue();
         inputs.rollerSupply = rollerSupply.getValue();

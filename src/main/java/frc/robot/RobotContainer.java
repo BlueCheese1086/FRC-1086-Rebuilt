@@ -30,6 +30,10 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.indexer.Indexer;
+import frc.robot.subsystems.indexer.IndexerIO;
+import frc.robot.subsystems.indexer.IndexerIOSim;
+import frc.robot.subsystems.indexer.IndexerIOTalonFX;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeConstants;
 import frc.robot.subsystems.intake.IntakeIO;
@@ -44,6 +48,8 @@ import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOSim;
+
+import static edu.wpi.first.units.Units.Volts;
 
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -64,6 +70,7 @@ public class RobotContainer {
     private final Vision vision;
     private final Shooter shooter;
     private final Intake intake;
+    private final Indexer indexer;
 
     // Controller
     private final CommandXboxController controller = new CommandXboxController(0);
@@ -97,6 +104,7 @@ public class RobotContainer {
                         new ShooterIOTalonFX(RobotMap.ShooterMap.right));
                 
                 intake = new Intake(new IntakeIOTalonFX());
+                indexer = new Indexer(new IndexerIOTalonFX());
                 break;
 
             case SIM:
@@ -121,6 +129,7 @@ public class RobotContainer {
                 );
                         
                 intake = new Intake(new IntakeIOSim());
+                indexer = new Indexer(new IndexerIOSim());
                 break;
 
             default:
@@ -147,6 +156,7 @@ public class RobotContainer {
                 
                 shooter = new Shooter(new ShooterIO() {});
                 intake = new Intake(new IntakeIO() {});
+                indexer = new Indexer(new IndexerIO() {});
                 break;
         }
 
@@ -215,8 +225,9 @@ public class RobotContainer {
                                 .ignoringDisable(true));
 
         controller.y().onTrue(shooter.setVelocity(200));
-        controller.leftTrigger().onTrue(intake.setPosition(IntakeConstants.setpoints.deployed));
-        controller.leftBumper().onTrue(intake.setPosition(IntakeConstants.setpoints.stowed));
+        controller.leftTrigger().whileTrue(intake.setVoltage(Volts.of(12.0)));
+        controller.leftBumper().whileTrue(intake.setVoltage(Volts.of(-12.0)));
+        controller.rightTrigger().whileTrue(indexer.setVoltage(Volts.of(6.0)));
     }
 
     public void periodic() {

@@ -13,7 +13,6 @@ import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
-import edu.wpi.first.units.UnitBuilder;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
@@ -23,7 +22,6 @@ import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 public class IntakeIOSim implements IntakeIO {
     private final PIDController pid = new PIDController(IntakeConstants.PID.kP, IntakeConstants.PID.kI, IntakeConstants.PID.kD);
     private final ArmFeedforward ff = new ArmFeedforward(IntakeConstants.PID.kS, IntakeConstants.PID.kG, IntakeConstants.PID.kV);
-    private double appliedVoltage = 0.0;
 
     private final SingleJointedArmSim armSim = new SingleJointedArmSim(DCMotor.getKrakenX60Foc(1), IntakeConstants.Mechanical.gearing, 0.04,IntakeConstants.Mechanical.intakeLength.in(Meters), IntakeConstants.setpoints.deployed.in(Radians), IntakeConstants.setpoints.stowed.in(Radians), false, IntakeConstants.setpoints.stowed.in(Radians));
     private final DCMotorSim simRoller = new DCMotorSim(LinearSystemId.createDCMotorSystem(DCMotor.getKrakenX60Foc(1), 0.04, 1.0), DCMotor.getKrakenX60Foc(1));
@@ -32,7 +30,6 @@ public class IntakeIOSim implements IntakeIO {
     @Override
     public void updateInputs(IntakeInputs inputs) {
         System.out.println("Testing");
-        simRoller.setInputVoltage(appliedVoltage);
         armSim.setInputVoltage(pid.calculate(armSim.getAngleRads())+ff.calculate(pid.getSetpoint(), 0.0));
 
         armSim.update(0.02);
@@ -53,6 +50,6 @@ public class IntakeIOSim implements IntakeIO {
 
     @Override
     public void setVoltage(Voltage applied) {
-        appliedVoltage = applied.in(Volts);
+        simRoller.setInputVoltage(applied.in(Volts));
     }
 }
