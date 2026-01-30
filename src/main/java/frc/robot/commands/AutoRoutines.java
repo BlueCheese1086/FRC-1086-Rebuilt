@@ -222,4 +222,8 @@ public class AutoRoutines {
             })
         .finallyDo(drive::stop);
   }
+
+  public static AutoFactory getFactory() {
+    return factory;
+  }
 }
