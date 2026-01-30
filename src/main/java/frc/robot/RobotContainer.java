@@ -51,6 +51,8 @@ import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOSim;
 
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -66,10 +68,11 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
         // Subsystems
         private final Drive drive;
-    @SuppressWarnings("unused")
+        @SuppressWarnings("unused")
         private final Vision vision;
         private final Shooter shooter;
-    private final Intake intake;
+        private final Intake intake;
+        private final Indexer indexer;
 
         // Controller
         private final CommandXboxController controller = new CommandXboxController(0);
@@ -77,19 +80,19 @@ public class RobotContainer {
         // Dashboard inputs
         private final LoggedDashboardChooser<Command> autoChooser;
 
-    /**
-     * The container for the robot. Contains subsystems, IO devices, and commands.
-     */
-    public RobotContainer() {
-        switch (Constants.currentMode) {
-            case REAL:
-                // Real robot, instantiate hardware IO implementations
-                drive = new Drive(
-                        new GyroIOPigeon2(),
-                        new ModuleIOTalonFX(TunerConstants.FrontLeft),
-                        new ModuleIOTalonFX(TunerConstants.FrontRight),
-                        new ModuleIOTalonFX(TunerConstants.BackLeft),
-                        new ModuleIOTalonFX(TunerConstants.BackRight));
+        /**
+         * The container for the robot. Contains subsystems, IO devices, and commands.
+         */
+        public RobotContainer() {
+                switch (Constants.currentMode) {
+                        case REAL:
+                                // Real robot, instantiate hardware IO implementations
+                                drive = new Drive(
+                                                new GyroIOPigeon2(),
+                                                new ModuleIOTalonFX(TunerConstants.FrontLeft),
+                                                new ModuleIOTalonFX(TunerConstants.FrontRight),
+                                                new ModuleIOTalonFX(TunerConstants.BackLeft),
+                                                new ModuleIOTalonFX(TunerConstants.BackRight));
 
                                 vision = new Vision(
                                                 drive::addVisionMeasurement,
@@ -99,15 +102,13 @@ public class RobotContainer {
                                                 new VisionIOPhotonVision("right",
                                                                 VisionConstants.PhysicalConstants.cameraTransforms[1]));
 
-                
-                intake = new Intake(new IntakeIOTalonFX());
-                indexer = new Indexer(new IndexerIOTalonFX());
-                break;
+                                intake = new Intake(new IntakeIOTalonFX());
+                                indexer = new Indexer(new IndexerIOTalonFX());
                                 shooter = new Shooter(
                                                 new FeederIOTalonFX(1),
-                                                new ShooterIOTalonFX(RobotMap.Shooter.left),
-                                                new ShooterIOTalonFX(RobotMap.Shooter.middle),
-                                                new ShooterIOTalonFX(RobotMap.Shooter.right));
+                                                new ShooterIOTalonFX(RobotMap.ShooterMap.left),
+                                                new ShooterIOTalonFX(RobotMap.ShooterMap.middle),
+                                                new ShooterIOTalonFX(RobotMap.ShooterMap.right));
 
                                 break;
 
@@ -128,6 +129,8 @@ public class RobotContainer {
                                                                 VisionConstants.PhysicalConstants.cameraTransforms[0]),
                                                 new VisionIOSim("right",
                                                                 VisionConstants.PhysicalConstants.cameraTransforms[1]));
+                                indexer = new Indexer(new IndexerIOSim());
+                                intake = new Intake(new IntakeIOSim());
                                 shooter = new Shooter(
                                                 new FeederIO() {
                                                 },
@@ -159,9 +162,13 @@ public class RobotContainer {
                                                 new VisionIO() {
                                                 });
 
-                                shooter = new Shooter(new FeederIO() {}, new ShooterIO() {});
-                intake = new Intake(new IntakeIO() {});
-                indexer = new Indexer(new IndexerIO() {});
+                                shooter = new Shooter(new FeederIO() {
+                                }, new ShooterIO() {
+                                });
+                                intake = new Intake(new IntakeIO() {
+                                });
+                                indexer = new Indexer(new IndexerIO() {
+                                });
                                 break;
                 }
 
@@ -236,8 +243,8 @@ public class RobotContainer {
                                                                 drive)
                                                                 .ignoringDisable(true));
 
-        controller.y().onTrue(shooter.setVelocity(200));
-    }
+                controller.y().onTrue(shooter.setVelocity(RadiansPerSecond.of(400)));
+        }
 
         public void periodic() {
                 Logger.recordOutput("Targetting/Estimated Angle",
@@ -248,12 +255,12 @@ public class RobotContainer {
                                                                                 Rotation2d.kZero))));
         }
 
-    /**
-     * Use this to pass the autonomous command to the main {@link Robot} class.
-     *
-     * @return the command to run in autonomous
-     */
-    public Command getAutonomousCommand() {
-        return autoChooser.get();
-    }
+        /**
+         * Use this to pass the autonomous command to the main {@link Robot} class.
+         *
+         * @return the command to run in autonomous
+         */
+        public Command getAutonomousCommand() {
+                return autoChooser.get();
+        }
 }
