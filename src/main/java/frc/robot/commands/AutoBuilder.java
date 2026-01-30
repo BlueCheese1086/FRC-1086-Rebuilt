@@ -87,22 +87,22 @@ public class AutoBuilder {
 
         return AutoRoutines.runPath(
             startShoot ? //if it should shoot,
-                (start + "-" + pShoot) : //go to shooting position
-                (start + "-" + getIntakePoint()) //else go to intake point
+                (start + "_" + pShoot) : //go to shooting position
+                (start + "_" + getIntakePoint()) //else go to intake point
         ).andThen(
             startShoot ? //shoot and go to intake if preloaded
-                dummyShoot().andThen(AutoRoutines.runPath(pShoot + "-" + getIntakePoint())) : 
+                dummyShoot().andThen(AutoRoutines.runPath(pShoot + "_" + getIntakePoint())) : 
                 Commands.none(),
             intake.equals("none") ? //if no intake was selected,
-                AutoRoutines.runPath(nzEntry.getSelected() + "-" + nzTarget.getSelected()).andThen( //go to neutral zone target
+                AutoRoutines.runPath(nzEntry.getSelected() + "_" + nzTarget.getSelected()).andThen( //go to neutral zone target
                     dummyIntake(), //intake
-                    AutoRoutines.runPath(nzTarget.getSelected() + "-" + nzExit.getSelected()), //go to exit
-                    AutoRoutines.runPath(nzExit.getSelected() + "-" + fShoot) //go to shoot
+                    AutoRoutines.runPath(nzTarget.getSelected() + "_" + nzExit.getSelected()), //go to exit
+                    AutoRoutines.runPath(nzExit.getSelected() + "_" + fShoot) //go to shoot
                 ) : 
-                dummyIntake().andThen(AutoRoutines.runPath(intake + "-" + fShoot)), //else go to shoot
+                dummyIntake().andThen(AutoRoutines.runPath(intake + "_" + fShoot)), //else go to shoot
             dummyShoot(), //shoot
             !climb.equals("none") ? //if climb selected,
-                AutoRoutines.runPath(fShoot + "-" + climb).andThen(dummyClimb()) : //go to climb positon and climb
+                AutoRoutines.runPath(fShoot + "_" + climb).andThen(dummyClimb()) : //go to climb positon and climb
                 Commands.none()
         );
     }
