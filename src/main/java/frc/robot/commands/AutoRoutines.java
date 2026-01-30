@@ -103,7 +103,7 @@ public class AutoRoutines {
               xControl.reset();
               yControl.reset();
               rotControl.reset();
-              kDrive.stopWithX();
+              kDrive.stop();
             });
   }
 
