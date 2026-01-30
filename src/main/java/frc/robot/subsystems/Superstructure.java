@@ -4,16 +4,14 @@
 
 package frc.robot.subsystems;
 
-import java.util.HashMap;
-
-import org.littletonrobotics.junction.AutoLogOutput;
-
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.drive.Drive;
+import java.util.HashMap;
+import org.littletonrobotics.junction.AutoLogOutput;
 
 public class Superstructure extends SubsystemBase {
 
@@ -26,11 +24,12 @@ public class Superstructure extends SubsystemBase {
     Idle
   }
 
-  private HashMap<State, Trigger> stateRequests = new HashMap<State,Trigger>();
-  private HashMap<State, Trigger> stateTriggers = new HashMap<State,Trigger>();
+  private HashMap<State, Trigger> stateRequests = new HashMap<State, Trigger>();
+  private HashMap<State, Trigger> stateTriggers = new HashMap<State, Trigger>();
 
   @AutoLogOutput(key = "RobotState/CurrentState")
   private State state = State.Idle;
+
   @AutoLogOutput(key = "RobotState/PreviousState")
   private State previousState = State.Idle;
 
@@ -50,7 +49,7 @@ public class Superstructure extends SubsystemBase {
     for (State state : State.values()) {
       stateRequests.get(state).onTrue(setState(state));
     }
-    
+
     this.setupIdle();
     this.setupIntake();
     this.setupShoot();
@@ -59,34 +58,24 @@ public class Superstructure extends SubsystemBase {
     this.setupClimb();
   }
 
-  private void setupIdle() {
+  private void setupIdle() {}
 
-  }
+  private void setupIntake() {}
 
-  private void setupIntake() {
+  private void setupShoot() {}
 
-  }
+  private void setupPreShoot() {}
 
-  private void setupShoot() {
+  private void setupPass() {}
 
-  }
-
-  private void setupPreShoot() {
-
-  }
-
-  private void setupPass() {
-
-  }
-
-  private void setupClimb() {
-
-  }
+  private void setupClimb() {}
 
   private Command setState(State newState) {
-    return Commands.run(() -> {
-      state = newState;
-    }).withTimeout(0.01);
+    return Commands.run(
+            () -> {
+              state = newState;
+            })
+        .withTimeout(0.01);
   }
 
   @Override

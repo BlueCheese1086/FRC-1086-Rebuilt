@@ -6,10 +6,10 @@ package frc.robot.subsystems.leds;
 
 /** Add your docs here. */
 public class LEDConstants {
-    public enum LED_MODE {
-        PWM,
-        CANDle
-    }
+  public enum LED_MODE {
+    PWM,
+    CANDle
+  }
 
-    public static final int length = 120;
+  public static final int length = 120;
 }

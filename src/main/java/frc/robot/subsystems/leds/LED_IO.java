@@ -5,11 +5,12 @@
 package frc.robot.subsystems.leds;
 
 import com.ctre.phoenix6.controls.ControlRequest;
-
 import edu.wpi.first.wpilibj.LEDPattern;
 
 /** Add your docs here. */
 public interface LED_IO {
-    public default void setPattern(LEDPattern pattern) {}
-    public default void setAnimation(ControlRequest animation) {} // Don't put a talonFX control request in here I beg of you.
+  public default void setPattern(LEDPattern pattern) {}
+
+  public default void setAnimation(
+      ControlRequest animation) {} // Don't put a talonFX control request in here I beg of you.
 }

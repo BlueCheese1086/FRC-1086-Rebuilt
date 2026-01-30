@@ -6,6 +6,7 @@ package frc.robot.subsystems.shooter;
 
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+
 import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -14,42 +15,47 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 
 public class ShooterIOSim implements ShooterIO {
-    private final FlywheelSim shooter;
-    private final SimpleMotorFeedforward shooterFF;
-    private final BangBangController bbController;
+  private final FlywheelSim shooter;
+  private final SimpleMotorFeedforward shooterFF;
+  private final BangBangController bbController;
 
-    public ShooterIOSim() {
+  public ShooterIOSim() {
 
-        shooter = new FlywheelSim(LinearSystemId.createFlywheelSystem(
+    shooter =
+        new FlywheelSim(
+            LinearSystemId.createFlywheelSystem(
                 DCMotor.getKrakenX60Foc(1),
                 ShooterConstants.Mechanical.J.in(KilogramSquareMeters),
-                ShooterConstants.Mechanical.gearing), DCMotor.getKrakenX60Foc(1));
-        shooterFF = new SimpleMotorFeedforward(ShooterConstants.PID.kS, ShooterConstants.PID.kV,
-                ShooterConstants.PID.kA);
-        bbController = new BangBangController(5.0);
-    }
+                ShooterConstants.Mechanical.gearing),
+            DCMotor.getKrakenX60Foc(1));
+    shooterFF =
+        new SimpleMotorFeedforward(
+            ShooterConstants.PID.kS, ShooterConstants.PID.kV, ShooterConstants.PID.kA);
+    bbController = new BangBangController(5.0);
+  }
 
-    @Override
-    public void updateInputs(ShooterInputs inputs) {
-        shooter.update(0.02);
+  @Override
+  public void updateInputs(ShooterInputs inputs) {
+    shooter.update(0.02);
 
-        shooter.setInputVoltage(bbController.calculate(shooter.getAngularVelocity().in(RotationsPerSecond)) * 12.0 +
-               + shooterFF.calculate(bbController.getSetpoint()));
+    shooter.setInputVoltage(
+        bbController.calculate(shooter.getAngularVelocity().in(RotationsPerSecond)) * 12.0
+            + +shooterFF.calculate(bbController.getSetpoint()));
 
-        inputs.velocity = shooter.getAngularVelocity().in(RotationsPerSecond);
-        inputs.appliedVoltage = shooter.getInputVoltage();
-        inputs.statorCurrent = shooter.getCurrentDrawAmps();
-        inputs.positionRadPerSec = 0.0;
-        inputs.setpoint = bbController.getSetpoint();
-    }
+    inputs.velocity = shooter.getAngularVelocity().in(RotationsPerSecond);
+    inputs.appliedVoltage = shooter.getInputVoltage();
+    inputs.statorCurrent = shooter.getCurrentDrawAmps();
+    inputs.positionRadPerSec = 0.0;
+    inputs.setpoint = bbController.getSetpoint();
+  }
 
-    @Override
-    public void setVoltage(double volts) {
-        shooter.setInputVoltage(volts);
-    }
+  @Override
+  public void setVoltage(double volts) {
+    shooter.setInputVoltage(volts);
+  }
 
-    @Override
-    public void setVelocity(AngularVelocity velocityRadPerSec) {
-        bbController.setSetpoint(velocityRadPerSec.in(RotationsPerSecond));
-    }
+  @Override
+  public void setVelocity(AngularVelocity velocityRadPerSec) {
+    bbController.setSetpoint(velocityRadPerSec.in(RotationsPerSecond));
+  }
 }

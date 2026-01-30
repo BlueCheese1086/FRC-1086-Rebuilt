@@ -6,21 +6,23 @@ package frc.robot.subsystems.hood;
 
 /** Add your docs here. */
 public class HoodIOSim implements HoodIO {
-    private double setpoint = 0.0;
+  private double setpoint = 0.0;
 
-    public HoodIOSim() {}
+  public HoodIOSim() {}
 
-    @Override
-    public void updateInputs(HoodInputs inputs) {
-        inputs.setPosition = setpoint;
-        inputs.leftPosition = 0.0;
-    }
+  @Override
+  public void updateInputs(HoodInputs inputs) {
+    inputs.setPosition = setpoint;
+    inputs.leftPosition = 0.0;
+  }
 
-    @Override
-    public void setPosition(double position) {
-        setpoint = position;
-    }
+  @Override
+  public void setPosition(double position) {
+    setpoint = position;
+  }
 
-    @Override
-    public boolean atSetpoint() {return true;}
+  @Override
+  public boolean atSetpoint() {
+    return true;
+  }
 }

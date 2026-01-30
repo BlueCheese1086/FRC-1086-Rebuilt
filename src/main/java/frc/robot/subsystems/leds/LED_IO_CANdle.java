@@ -9,13 +9,14 @@ import com.ctre.phoenix6.hardware.CANdle;
 
 /** Add your docs here. */
 public class LED_IO_CANdle implements LED_IO {
-    private final CANdle candle;
-    public LED_IO_CANdle(int id) {
-        candle = new CANdle(id);
-    }
+  private final CANdle candle;
 
-    @Override
-    public void setAnimation(ControlRequest request) {
-        candle.setControl(request);
-    }
+  public LED_IO_CANdle(int id) {
+    candle = new CANdle(id);
+  }
+
+  @Override
+  public void setAnimation(ControlRequest request) {
+    candle.setControl(request);
+  }
 }

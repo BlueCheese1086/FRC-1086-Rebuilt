@@ -6,6 +6,7 @@ package frc.robot.subsystems.shooter;
 
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static frc.robot.util.PhoenixUtil.tryUntilOk;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -21,99 +22,88 @@ import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 
 public class ShooterIOTalonFX implements ShooterIO {
-    private final TalonFX shooter;
-    private final BangBangController bbController;
-    private final MotionMagicVelocityTorqueCurrentFOC velocityTorqueCurrentFOC;
-    
-    // Status Signals
-    private StatusSignal<AngularVelocity> velocity;
-    private StatusSignal<AngularAcceleration> acceleration;
-    private StatusSignal<Current> statorCurrent;
-    private StatusSignal<Current> supplyCurrent;
-    private StatusSignal<Voltage> volts;
-    private StatusSignal<Angle> position;
-    private StatusSignal<Temperature> temp;
+  private final TalonFX shooter;
+  private final BangBangController bbController;
+  private final MotionMagicVelocityTorqueCurrentFOC velocityTorqueCurrentFOC;
 
-    private double setpoint = 0.0;
-    private double bangBangVoltage = 0.0;
+  // Status Signals
+  private StatusSignal<AngularVelocity> velocity;
+  private StatusSignal<AngularAcceleration> acceleration;
+  private StatusSignal<Current> statorCurrent;
+  private StatusSignal<Current> supplyCurrent;
+  private StatusSignal<Voltage> volts;
+  private StatusSignal<Angle> position;
+  private StatusSignal<Temperature> temp;
 
+  private double setpoint = 0.0;
+  private double bangBangVoltage = 0.0;
 
-    public ShooterIOTalonFX(int id) {
-        shooter = new TalonFX(id);
-        bbController = new BangBangController();
+  public ShooterIOTalonFX(int id) {
+    shooter = new TalonFX(id);
+    bbController = new BangBangController();
 
-        velocityTorqueCurrentFOC = new MotionMagicVelocityTorqueCurrentFOC(0.0);
+    velocityTorqueCurrentFOC = new MotionMagicVelocityTorqueCurrentFOC(0.0);
 
-        TalonFXConfiguration config = new TalonFXConfiguration();
-        config.Slot0.kS = ShooterConstants.PID.kS;
-        config.Slot0.kV = ShooterConstants.PID.kV;
-        config.Slot0.kA = ShooterConstants.PID.kA;
+    TalonFXConfiguration config = new TalonFXConfiguration();
+    config.Slot0.kS = ShooterConstants.PID.kS;
+    config.Slot0.kV = ShooterConstants.PID.kV;
+    config.Slot0.kA = ShooterConstants.PID.kA;
 
-        config.Audio.BeepOnBoot = true;
-        config.MotionMagic.MotionMagicAcceleration = ShooterConstants.PID.acceleration;
-        config.MotionMagic.MotionMagicCruiseVelocity = ShooterConstants.PID.cruiseVelocity;
-        config.Slot0.StaticFeedforwardSign = StaticFeedforwardSignValue.UseVelocitySign;
+    config.Audio.BeepOnBoot = true;
+    config.MotionMagic.MotionMagicAcceleration = ShooterConstants.PID.acceleration;
+    config.MotionMagic.MotionMagicCruiseVelocity = ShooterConstants.PID.cruiseVelocity;
+    config.Slot0.StaticFeedforwardSign = StaticFeedforwardSignValue.UseVelocitySign;
 
-        config.CurrentLimits.StatorCurrentLimitEnable = true;
-        config.CurrentLimits.StatorCurrentLimit = 80.0; // arbittury
-        config.CurrentLimits.SupplyCurrentLimitEnable = true;
-        config.CurrentLimits.SupplyCurrentLimit = 80.0; // arbittury
+    config.CurrentLimits.StatorCurrentLimitEnable = true;
+    config.CurrentLimits.StatorCurrentLimit = 80.0; // arbittury
+    config.CurrentLimits.SupplyCurrentLimitEnable = true;
+    config.CurrentLimits.SupplyCurrentLimit = 80.0; // arbittury
 
-        config.ClosedLoopRamps.VoltageClosedLoopRampPeriod = 0.1;
+    config.ClosedLoopRamps.VoltageClosedLoopRampPeriod = 0.1;
 
-        tryUntilOk(5, () -> shooter.getConfigurator().apply(config));
+    tryUntilOk(5, () -> shooter.getConfigurator().apply(config));
 
-        BaseStatusSignal.setUpdateFrequencyForAll(
-                50.0,
-                acceleration,
-                position,
-                statorCurrent,
-                supplyCurrent,
-                temp,
-                velocity,
-                volts);
+    BaseStatusSignal.setUpdateFrequencyForAll(
+        50.0, acceleration, position, statorCurrent, supplyCurrent, temp, velocity, volts);
 
-        acceleration = shooter.getAcceleration();
-        position = shooter.getPosition();
-        statorCurrent = shooter.getStatorCurrent();
-        supplyCurrent = shooter.getSupplyCurrent();
-        temp = shooter.getDeviceTemp();
-        velocity = shooter.getVelocity();
-        volts = shooter.getMotorVoltage();
+    acceleration = shooter.getAcceleration();
+    position = shooter.getPosition();
+    statorCurrent = shooter.getStatorCurrent();
+    supplyCurrent = shooter.getSupplyCurrent();
+    temp = shooter.getDeviceTemp();
+    velocity = shooter.getVelocity();
+    volts = shooter.getMotorVoltage();
 
-        shooter.optimizeBusUtilization();
-    }
+    shooter.optimizeBusUtilization();
+  }
 
-    @Override
-    public void updateInputs(ShooterInputs inputs) {
-        BaseStatusSignal.refreshAll(
-                acceleration,
-                position,
-                statorCurrent,
-                supplyCurrent,
-                temp,
-                velocity,
-                volts);
+  @Override
+  public void updateInputs(ShooterInputs inputs) {
+    BaseStatusSignal.refreshAll(
+        acceleration, position, statorCurrent, supplyCurrent, temp, velocity, volts);
 
-        inputs.velocity = velocity.getValueAsDouble();
-        inputs.appliedVoltage = volts.getValueAsDouble();
-        inputs.statorCurrent = statorCurrent.getValueAsDouble();
-        inputs.supplyCurrent = supplyCurrent.getValueAsDouble();
-        inputs.temp = temp.getValueAsDouble();
-        inputs.positionRadPerSec = position.getValueAsDouble();
+    inputs.velocity = velocity.getValueAsDouble();
+    inputs.appliedVoltage = volts.getValueAsDouble();
+    inputs.statorCurrent = statorCurrent.getValueAsDouble();
+    inputs.supplyCurrent = supplyCurrent.getValueAsDouble();
+    inputs.temp = temp.getValueAsDouble();
+    inputs.positionRadPerSec = position.getValueAsDouble();
 
-        this.bangBangVoltage = bbController.calculate(inputs.velocity);
-    }
+    this.bangBangVoltage = bbController.calculate(inputs.velocity);
+  }
 
-    @Override
-    public void setVelocity(AngularVelocity velocityRadPerSec) {
-        this.setpoint = velocityRadPerSec.in(RotationsPerSecond);
-        bbController.setSetpoint(setpoint);
-        shooter.setControl(velocityTorqueCurrentFOC.withVelocity(velocityRadPerSec.in(RotationsPerSecond)).withFeedForward(bangBangVoltage));
-    }
+  @Override
+  public void setVelocity(AngularVelocity velocityRadPerSec) {
+    this.setpoint = velocityRadPerSec.in(RotationsPerSecond);
+    bbController.setSetpoint(setpoint);
+    shooter.setControl(
+        velocityTorqueCurrentFOC
+            .withVelocity(velocityRadPerSec.in(RotationsPerSecond))
+            .withFeedForward(bangBangVoltage));
+  }
 
-    @Override
-    public void setVoltage(double volts) {
-        shooter.setVoltage(volts);
-    }
+  @Override
+  public void setVoltage(double volts) {
+    shooter.setVoltage(volts);
+  }
 }

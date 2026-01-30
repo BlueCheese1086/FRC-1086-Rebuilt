@@ -4,8 +4,6 @@
 
 package frc.robot.subsystems.vision;
 
-import org.photonvision.PhotonPoseEstimator.PoseStrategy;
-
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
@@ -17,54 +15,60 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import frc.robot.subsystems.vision.VisionIO.ObservationType;
 import frc.robot.util.FieldConstants;
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
 /** Add your docs here. */
 public class VisionConstants {
-    public static class PhysicalConstants {
-        public static final Transform3d[] cameraTransforms = new Transform3d[] { // Camera Transforms Left to Right,
-                                                                                 // Front to Back
-                new Transform3d(
-                        Units.inchesToMeters(12.066),
-                        Units.inchesToMeters(11.906),
-                        Units.inchesToMeters(8.355),
-                        new Rotation3d(0.0, -Units.degreesToRadians(13.125000), Units.degreesToRadians(-35))), // Front
-                                                                                                               // Left
-                                                                                                               // Camera
-                new Transform3d(
-                        Units.inchesToMeters(12.066),
-                        Units.inchesToMeters(-11.906),
-                        Units.inchesToMeters(8.355),
-                        new Rotation3d(0.0, -Units.degreesToRadians(13.125000), Units.degreesToRadians(35))) // Front
-                                                                                                             // Right
-                                                                                                             // Camera
+  public static class PhysicalConstants {
+    public static final Transform3d[] cameraTransforms =
+        new Transform3d[] { // Camera Transforms Left to Right,
+          // Front to Back
+          new Transform3d(
+              Units.inchesToMeters(12.066),
+              Units.inchesToMeters(11.906),
+              Units.inchesToMeters(8.355),
+              new Rotation3d(
+                  0.0, -Units.degreesToRadians(13.125000), Units.degreesToRadians(-35))), // Front
+          // Left
+          // Camera
+          new Transform3d(
+              Units.inchesToMeters(12.066),
+              Units.inchesToMeters(-11.906),
+              Units.inchesToMeters(8.355),
+              new Rotation3d(
+                  0.0, -Units.degreesToRadians(13.125000), Units.degreesToRadians(35))) // Front
+          // Right
+          // Camera
         };
 
-        public static final AprilTagFieldLayout fieldLayout = FieldConstants.defaultAprilTagType;
-    }
+    public static final AprilTagFieldLayout fieldLayout = FieldConstants.defaultAprilTagType;
+  }
 
-    public static class Strategies {
-        public static final PoseStrategy primary = PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR;
-        public static final PoseStrategy secondary = PoseStrategy.PNP_DISTANCE_TRIG_SOLVE;
-    }
+  public static class Strategies {
+    public static final PoseStrategy primary = PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR;
+    public static final PoseStrategy secondary = PoseStrategy.PNP_DISTANCE_TRIG_SOLVE;
+  }
 
-    public static class StandardDevs {
-        public static final Matrix<N3, N1> multiTagDevs = VecBuilder.fill(1, 1, 1);
-        public static final Matrix<N3, N1> trigDevs = VecBuilder.fill(1, 1, Double.MAX_VALUE);
+  public static class StandardDevs {
+    public static final Matrix<N3, N1> multiTagDevs = VecBuilder.fill(1, 1, 1);
+    public static final Matrix<N3, N1> trigDevs = VecBuilder.fill(1, 1, Double.MAX_VALUE);
 
-        public static Matrix<N3, N1> getStdDevs(ObservationType type) {
-            switch (type) {
-                case PhotonPnP:
-                    return multiTagDevs;
-                case PhotonTrig:
-                    return trigDevs;
-                default:
-                    return multiTagDevs;
-            }
-        }
+    public static Matrix<N3, N1> getStdDevs(ObservationType type) {
+      switch (type) {
+        case PhotonPnP:
+          return multiTagDevs;
+        case PhotonTrig:
+          return trigDevs;
+        default:
+          return multiTagDevs;
+      }
     }
+  }
 
-    public static boolean inFieldBounds(Pose2d pose) {
-        return pose.getX() >= 0 && pose.getX() <= FieldConstants.defaultAprilTagType.getFieldLength() && pose.getY() >= 0
-                && pose.getY() <= FieldConstants.defaultAprilTagType.getFieldWidth();
-    }
+  public static boolean inFieldBounds(Pose2d pose) {
+    return pose.getX() >= 0
+        && pose.getX() <= FieldConstants.defaultAprilTagType.getFieldLength()
+        && pose.getY() >= 0
+        && pose.getY() <= FieldConstants.defaultAprilTagType.getFieldWidth();
+  }
 }

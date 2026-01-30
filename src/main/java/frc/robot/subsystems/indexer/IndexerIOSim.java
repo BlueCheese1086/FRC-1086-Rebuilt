@@ -14,19 +14,23 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 
 /** Add your docs here. */
 public class IndexerIOSim implements IndexerIO {
-    private final DCMotorSim sim = new DCMotorSim(LinearSystemId.createDCMotorSystem(DCMotor.getKrakenX60Foc(1), 0.04, 1.0), DCMotor.getKrakenX60Foc(1));
-    public IndexerIOSim() {}
+  private final DCMotorSim sim =
+      new DCMotorSim(
+          LinearSystemId.createDCMotorSystem(DCMotor.getKrakenX60Foc(1), 0.04, 1.0),
+          DCMotor.getKrakenX60Foc(1));
 
-    @Override
-    public void updateInputs(IndexerInputs inputs) {
-        sim.update(0.020);
-        inputs.connected = true;
-        inputs.velocity = RadiansPerSecond.of(sim.getAngularVelocityRadPerSec());
-        inputs.voltage = Volts.of(sim.getInputVoltage());
-    }
+  public IndexerIOSim() {}
 
-    @Override
-    public void setVoltage(Voltage applied) {
-        sim.setInputVoltage(applied.in(Volts));
-    }
+  @Override
+  public void updateInputs(IndexerInputs inputs) {
+    sim.update(0.020);
+    inputs.connected = true;
+    inputs.velocity = RadiansPerSecond.of(sim.getAngularVelocityRadPerSec());
+    inputs.voltage = Volts.of(sim.getInputVoltage());
+  }
+
+  @Override
+  public void setVoltage(Voltage applied) {
+    sim.setInputVoltage(applied.in(Volts));
+  }
 }

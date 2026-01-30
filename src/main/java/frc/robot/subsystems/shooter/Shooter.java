@@ -4,17 +4,11 @@
 
 package frc.robot.subsystems.shooter;
 
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.Volts;
-
-import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
   private ShooterInputsAutoLogged[] inputs;
@@ -22,7 +16,7 @@ public class Shooter extends SubsystemBase {
   private FeederIO feederIO;
   private FeederIOInputsAutoLogged feederIOInputsAutoLogged;
 
-  public Shooter( FeederIO feederIO, ShooterIO... io){
+  public Shooter(FeederIO feederIO, ShooterIO... io) {
     this.io = io;
     this.feederIO = feederIO;
     this.feederIOInputsAutoLogged = new FeederIOInputsAutoLogged();
@@ -33,25 +27,29 @@ public class Shooter extends SubsystemBase {
   }
 
   public Command setVelocity(AngularVelocity radPerSec) {
-    return this.runOnce(() -> {
-      for (int i = 0; i < io.length; i++) {
-        io[i].setVelocity(radPerSec);
-      }
-    });
+    return this.runOnce(
+        () -> {
+          for (int i = 0; i < io.length; i++) {
+            io[i].setVelocity(radPerSec);
+          }
+        });
   }
 
   public Command runFeederVoltage(double volts) {
-    return Commands.run(()-> feederIO.setFeedVoltage(volts), this);
+    return Commands.run(() -> feederIO.setFeedVoltage(volts), this);
   }
 
   public Command setVoltage(double volts) {
-    return this.run(() -> {
-      for (int i = 0; i < io.length; i++) {
-        io[i].setVoltage(volts);
-      }
-    }).finallyDo(() -> {
-      this.stopAll();
-    });
+    return this.run(
+            () -> {
+              for (int i = 0; i < io.length; i++) {
+                io[i].setVoltage(volts);
+              }
+            })
+        .finallyDo(
+            () -> {
+              this.stopAll();
+            });
   }
 
   private void stopAll() {

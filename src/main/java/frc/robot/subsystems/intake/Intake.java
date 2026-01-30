@@ -10,9 +10,6 @@ import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
-import org.littletonrobotics.junction.AutoLogOutput;
-import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Current;
@@ -25,54 +22,84 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism;
+import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 
 public class Intake extends SubsystemBase {
   /** Creates a new Intake. */
   private final IntakeIO io;
+
   private final IntakeInputsAutoLogged inputs = new IntakeInputsAutoLogged();
   private final SysIdRoutine routine;
 
   private double setpoint = 0.0;
+
   public Intake(IntakeIO io) {
     this.io = io;
-    routine = new SysIdRoutine(new Config(Volts.of(1.0).per(Second), Volts.of(4.0), Seconds.of(5.0)), new Mechanism((applied) -> {io.setPivotVoltage(applied);}, (log) -> {log.motor("Pivot").angularPosition(inputs.pivotAngle).angularVelocity(inputs.pivotVelocity).voltage(inputs.pivotAppliedVoltage);}, this));
+    routine =
+        new SysIdRoutine(
+            new Config(Volts.of(1.0).per(Second), Volts.of(4.0), Seconds.of(5.0)),
+            new Mechanism(
+                (applied) -> {
+                  io.setPivotVoltage(applied);
+                },
+                (log) -> {
+                  log.motor("Pivot")
+                      .angularPosition(inputs.pivotAngle)
+                      .angularVelocity(inputs.pivotVelocity)
+                      .voltage(inputs.pivotAppliedVoltage);
+                },
+                this));
   }
 
   public Command setPosition(Angle newPos) {
-    return this.run(() -> {
-      setpoint = newPos.in(Radians);
-      io.setPosition(newPos);
-    }).until(this::atSetpoint);
+    return this.run(
+            () -> {
+              setpoint = newPos.in(Radians);
+              io.setPosition(newPos);
+            })
+        .until(this::atSetpoint);
   }
 
   public Command setVoltage(Voltage applied) {
-    return this.run(() -> {
-      io.setVoltage(applied);
-    }).finallyDo(() -> {
-      io.setVoltage(Volts.zero());
-    });
+    return this.run(
+            () -> {
+              io.setVoltage(applied);
+            })
+        .finallyDo(
+            () -> {
+              io.setVoltage(Volts.zero());
+            });
   }
 
   public Command setCurrent(Current applied) {
-    return this.run(() -> {
-      io.setCurrent(applied);
-    }).finallyDo(() -> {
-      io.setVoltage(Volts.zero());
-    });
+    return this.run(
+            () -> {
+              io.setCurrent(applied);
+            })
+        .finallyDo(
+            () -> {
+              io.setVoltage(Volts.zero());
+            });
   }
 
   public Command sysId() {
     return Commands.sequence(
-      routine.quasistatic(Direction.kForward).until(() -> (inputs.pivotAngle.in(Degrees) == -4)), //TODO: Double Check This
-      routine.quasistatic(Direction.kReverse).until(() -> (inputs.pivotAngle.in(Degrees) == 110)), 
-      routine.dynamic(Direction.kForward).until(() -> (inputs.pivotAngle.in(Degrees) == -4)),
-      routine.dynamic(Direction.kReverse).until(() -> (inputs.pivotAngle.in(Degrees) == 110))
-    );
+        routine
+            .quasistatic(Direction.kForward)
+            .until(() -> (inputs.pivotAngle.in(Degrees) == -4)), // TODO: Double Check This
+        routine.quasistatic(Direction.kReverse).until(() -> (inputs.pivotAngle.in(Degrees) == 110)),
+        routine.dynamic(Direction.kForward).until(() -> (inputs.pivotAngle.in(Degrees) == -4)),
+        routine.dynamic(Direction.kReverse).until(() -> (inputs.pivotAngle.in(Degrees) == 110)));
   }
 
-  @AutoLogOutput(key="Intake/Near Setpoint")
+  @AutoLogOutput(key = "Intake/Near Setpoint")
   public boolean atSetpoint() {
-    return MathUtil.isNear(setpoint, inputs.pivotAngle.in(Radians), IntakeConstants.Mechanical.kPositionTolerance.in(Radians)); // TODO: Tune this to require it to be more accurate.
+    return MathUtil.isNear(
+        setpoint,
+        inputs.pivotAngle.in(Radians),
+        IntakeConstants.Mechanical.kPositionTolerance.in(
+            Radians)); // TODO: Tune this to require it to be more accurate.
   }
 
   @Override

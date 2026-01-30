@@ -14,42 +14,53 @@ import frc.robot.RobotMap;
 
 /** Add your docs here. */
 public class HoodIOServo implements HoodIO {
-    private final Servo left;
-    private final Servo right;
-    
-    private double prevDelta = 0.0;
-    private double setpoint = 0.5;
+  private final Servo left;
+  private final Servo right;
 
-    public HoodIOServo() {
-        left = new Servo(RobotMap.HoodMap.left);
-        right = new Servo(RobotMap.HoodMap.right);
+  private double prevDelta = 0.0;
+  private double setpoint = 0.5;
 
-        left.setBoundsMicroseconds(2000, 1800, 1500, 1200, 1000);
-        right.setBoundsMicroseconds(2000, 1800, 1500, 1200, 1000);
-    }
+  public HoodIOServo() {
+    left = new Servo(RobotMap.HoodMap.left);
+    right = new Servo(RobotMap.HoodMap.right);
 
-    @Override
-    public void setPosition(double position) {
-        double clampedPosition = MathUtil.clamp(position,HoodConstants.Mechanical.minPosition,HoodConstants.Mechanical.maxPosition);
-        left.set(clampedPosition*HoodConstants.Mechanical.scaledDist);
-        right.set(clampedPosition*HoodConstants.Mechanical.scaledDist);
-        setpoint = clampedPosition;
-    }
+    left.setBoundsMicroseconds(2000, 1800, 1500, 1200, 1000);
+    right.setBoundsMicroseconds(2000, 1800, 1500, 1200, 1000);
+  }
 
-    @Override
-    public boolean atSetpoint() {
-        return MathUtil.isNear(setpoint, left.get(), HoodConstants.Mechanical.kPositionTolerance) && MathUtil.isNear(setpoint, right.get(), HoodConstants.Mechanical.kPositionTolerance);
-    }
+  @Override
+  public void setPosition(double position) {
+    double clampedPosition =
+        MathUtil.clamp(
+            position, HoodConstants.Mechanical.minPosition, HoodConstants.Mechanical.maxPosition);
+    left.set(clampedPosition * HoodConstants.Mechanical.scaledDist);
+    right.set(clampedPosition * HoodConstants.Mechanical.scaledDist);
+    setpoint = clampedPosition;
+  }
 
-    
-    @Override
-    public void updateInputs(HoodInputs inputs) {
-        double deltaTime = Timer.getFPGATimestamp()-prevDelta;
-        prevDelta = Timer.getFPGATimestamp();
-        inputs.setPosition = setpoint;
-        inputs.leftPosition += HoodConstants.Mechanical.kMaxServoSpeed.in(Millimeters.per(Second))*deltaTime * Math.signum(setpoint-inputs.leftPosition);
-        inputs.rightPosition += HoodConstants.Mechanical.kMaxServoSpeed.in(Millimeters.per(Second))*deltaTime * Math.signum(setpoint-inputs.rightPosition);
-        inputs.leftAtSetpoint = MathUtil.isNear(setpoint, inputs.leftPosition, HoodConstants.Mechanical.kPositionTolerance);
-        inputs.rightAtSetpoint = MathUtil.isNear(setpoint, inputs.rightPosition, HoodConstants.Mechanical.kPositionTolerance);
-    }
+  @Override
+  public boolean atSetpoint() {
+    return MathUtil.isNear(setpoint, left.get(), HoodConstants.Mechanical.kPositionTolerance)
+        && MathUtil.isNear(setpoint, right.get(), HoodConstants.Mechanical.kPositionTolerance);
+  }
+
+  @Override
+  public void updateInputs(HoodInputs inputs) {
+    double deltaTime = Timer.getFPGATimestamp() - prevDelta;
+    prevDelta = Timer.getFPGATimestamp();
+    inputs.setPosition = setpoint;
+    inputs.leftPosition +=
+        HoodConstants.Mechanical.kMaxServoSpeed.in(Millimeters.per(Second))
+            * deltaTime
+            * Math.signum(setpoint - inputs.leftPosition);
+    inputs.rightPosition +=
+        HoodConstants.Mechanical.kMaxServoSpeed.in(Millimeters.per(Second))
+            * deltaTime
+            * Math.signum(setpoint - inputs.rightPosition);
+    inputs.leftAtSetpoint =
+        MathUtil.isNear(setpoint, inputs.leftPosition, HoodConstants.Mechanical.kPositionTolerance);
+    inputs.rightAtSetpoint =
+        MathUtil.isNear(
+            setpoint, inputs.rightPosition, HoodConstants.Mechanical.kPositionTolerance);
+  }
 }
