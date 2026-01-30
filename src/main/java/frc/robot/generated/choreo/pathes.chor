@@ -1,5 +1,5 @@
 {
- "name":"poses",
+ "name":"pathes",
  "version":2,
  "type":"Swerve",
  "variables":{
@@ -76,7 +76,7 @@
  },
  "generationFeatures":[],
  "codegen":{
-  "root":"..\\C:\\1086\\FRC-1086-Rebuilt\\src\\main\\java\\frc\\robot\\generated\\choreo",
+  "root":"",
   "genVars":true,
   "genTrajData":true,
   "useChoreoLib":true
