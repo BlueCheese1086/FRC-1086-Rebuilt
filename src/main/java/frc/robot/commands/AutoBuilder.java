@@ -83,22 +83,27 @@ public class AutoBuilder {
     String _climbPos = climbPos.getSelected();
 
     return Commands.sequence(
-      (_preloadShootPos.equals("none")) ?
-        ((_startPos.equals("hs")) ? AutoRoutines.runPath(_startPos + "_" + _nzEntry) : Commands.none())
-          .andThen(AutoRoutines.runPath(_startPos + "_" + _intakePos)) :
-        AutoRoutines.runPath(_startPos + "_" + _preloadShootPos)
+      (_preloadShootPos.equals("none")) ? //if not preloaded
+        (
+          (_startPos.equals("hs") && _intakePos.endsWith("n")) ? //if starting at the hub and wants to go to neutral zone
+            AutoRoutines.runPath(_startPos + "_" + _nzEntry) //go to nz entry then intake position
+              .andThen(AutoRoutines.runPath(_nzEntry + "_" + _intakePos)) : 
+            AutoRoutines.runPath(_startPos + "_" + _intakePos) //else just go to intake position
+        ): //if preloaded
+        AutoRoutines.runPath(_startPos + "_" + _preloadShootPos) //go to shoot position, shoot, then go to intake position
           .andThen(dummyShoot())
           .andThen(AutoRoutines.runPath(_preloadShootPos + "_" + _intakePos)),
       
-      dummyIntake(),
+      dummyIntake(), //intake
 
-      (_intakePos.endsWith("n")) ?
-        AutoRoutines.runPath(_intakePos + "_" + _nzExit)
+      (_intakePos.endsWith("n")) ? //if in neutral zone
+        AutoRoutines.runPath(_intakePos + "_" + _nzExit) //go to the exit and then the final shoot position
           .andThen(AutoRoutines.runPath(_nzExit + "_" + _finalShootPos)) :
-        AutoRoutines.runPath(_intakePos + "_" + _finalShootPos),
-      dummyShoot(),
+        AutoRoutines.runPath(_intakePos + "_" + _finalShootPos), //else, just go to final shoot position
 
-      (_climbPos.equals("none")) ? 
+      dummyShoot(), //shoot
+
+      (_climbPos.equals("none")) ? //if climbing, go climb but if not do nothing
         Commands.none() : 
         AutoRoutines.runPath(_climbPos + "_climb")
           .andThen(dummyClimb())
