@@ -9,11 +9,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 
 public class AutoBuilder {
   private final SendableChooser<String> startPos = new SendableChooser<>();
-  private final SendableChooser<Boolean> shouldShoot = new SendableChooser<>();
   private final SendableChooser<String> preloadShootPos = new SendableChooser<>();
-  private final SendableChooser<String> intakeType = new SendableChooser<>();
+  private final SendableChooser<String> intakePos = new SendableChooser<>();
   private final SendableChooser<String> nzEntry = new SendableChooser<>();
-  private final SendableChooser<String> nzTarget = new SendableChooser<>();
   private final SendableChooser<String> nzExit = new SendableChooser<>();
   private final SendableChooser<String> finalShootPos = new SendableChooser<>();
   private final SendableChooser<String> climbPos = new SendableChooser<>();
@@ -25,32 +23,31 @@ public class AutoBuilder {
     startPos.addOption("Outpost Trench Start", "ots");
     startPos.addOption("Outpost Bump Start", "obs");
 
-    shouldShoot.setDefaultOption("Yes", true);
-    shouldShoot.addOption("No", false);
-
     preloadShootPos.setDefaultOption("Center Shot", "cs");
     preloadShootPos.addOption("Depot Far Shot", "dfs");
     preloadShootPos.addOption("Depot Near Shot", "dns");
     preloadShootPos.addOption("Outpost Far Shot", "ofs");
     preloadShootPos.addOption("Outpost Near Shot", "ons");
+    preloadShootPos.addOption("None", "none");
 
-    intakeType.setDefaultOption("Depot", "di");
-    intakeType.addOption("Outpost", "oi");
-    intakeType.addOption("Neutral Zone (None)", "none");
+    intakePos.setDefaultOption("Depot", "di");
+    intakePos.addOption("Outpost", "oi");
+    intakePos.setDefaultOption("Depot Close Neutral", "dcn");
+    intakePos.addOption("Outpost Close Neutral", "ocn");
+    intakePos.addOption("Depot Far Safe Neutral", "dfsn");
+    intakePos.addOption("Depot Near Safe Neutral", "dnsn");
+    intakePos.addOption("Outpost Far Safe Neutral", "ofsn");
+    intakePos.addOption("Outpost Near Safe Neutral", "onsn");
+    intakePos.addOption("Center Risky Neutral", "crn");
+    intakePos.addOption("Depot Far Risky Neutral", "dfrn");
+    intakePos.addOption("Depot Near Risky Neutral", "dnrn");
+    intakePos.addOption("Outpost Far Risky Neutral", "ofrn");
+    intakePos.addOption("Outpost Near Risky Neutral", "onrn");
 
     nzEntry.setDefaultOption("Depot Trench", "dt");
     nzEntry.addOption("Depot Bump", "db");
     nzEntry.addOption("Outpost Trench", "ot");
     nzEntry.addOption("Outpost Bump", "ob");
-
-    nzTarget.setDefaultOption("Depot Close Neutral", "dcn");
-    nzTarget.addOption("Outpost Close Neutral", "ocn");
-    nzTarget.addOption("Depot Mid Neutral", "dmn");
-    nzTarget.addOption("Outpost Mid Neutral", "omn");
-    nzTarget.addOption("Depot Far Neutral", "dfn");
-    nzTarget.addOption("Depot Near Neutral", "dnn");
-    nzTarget.addOption("Outpost Far Neutral", "ofn");
-    nzTarget.addOption("Outpost Near Neutral", "onn");
 
     nzExit.setDefaultOption("Depot Trench", "dt");
     nzExit.addOption("Depot Bump", "db");
@@ -67,50 +64,46 @@ public class AutoBuilder {
     climbPos.addOption("Depot Climb", "dc");
     climbPos.addOption("Outpost Climb", "oc");
 
-    SmartDashboard.putData("Auto/1. Start Pos", startPos);
-    SmartDashboard.putData("Auto/2. Preloaded", shouldShoot);
-    SmartDashboard.putData("Auto/3. Preload Shoot Pos", preloadShootPos);
-    SmartDashboard.putData("Auto/4. Intake Source", intakeType);
-    SmartDashboard.putData("Auto/5a. NZ Entry", nzEntry);
-    SmartDashboard.putData("Auto/5b. NZ Target", nzTarget);
-    SmartDashboard.putData("Auto/5c. NZ Exit", nzExit);
-    SmartDashboard.putData("Auto/6. Final Shoot Pos", finalShootPos);
-    SmartDashboard.putData("Auto/7. Climb Pos", climbPos);
+    SmartDashboard.putData("Auto/Start Pos", startPos);
+    SmartDashboard.putData("Auto/Preload Shoot Pos (if preloaded)", preloadShootPos);
+    SmartDashboard.putData("Auto/Intake Source (after shooting preload or starting not preloaded)", intakePos);
+    SmartDashboard.putData("Auto/NZ Entry (if at Hub Start or going to neutral zone after shooting preload)", nzEntry);
+    SmartDashboard.putData("Auto/NZ Exit (if entered neutral zone)", nzExit);
+    SmartDashboard.putData("Auto/Final Shoot Pos", finalShootPos);
+    SmartDashboard.putData("Auto/Climb Pos", climbPos);
   }
 
   public Command build() {
-    String start = startPos.getSelected();
-    boolean startShoot = shouldShoot.getSelected();
-    String pShoot = preloadShootPos.getSelected();
-    String intake = intakeType.getSelected();
-    String fShoot = finalShootPos.getSelected();
-    String climb = climbPos.getSelected();
+    String _startPos = startPos.getSelected();
+    String _preloadShootPos = preloadShootPos.getSelected();
+    String _intakePos = intakePos.getSelected();
+    String _nzEntry = nzEntry.getSelected();
+    String _nzExit = nzExit.getSelected();
+    String _finalShootPos = finalShootPos.getSelected();
+    String _climbPos = climbPos.getSelected();
 
-        return AutoRoutines.runPath(
-            startShoot ? //if it should shoot,
-                (start + "-" + pShoot) : //go to shooting position
-                (start + "-" + getIntakePoint()) //else go to intake point
-        ).andThen(
-            startShoot ? //shoot and go to intake if preloaded
-                dummyShoot().andThen(AutoRoutines.runPath(pShoot + "-" + getIntakePoint())) : 
-                Commands.none(),
-            intake.equals("none") ? //if no intake was selected,
-                AutoRoutines.runPath(nzEntry.getSelected() + "-" + nzTarget.getSelected()).andThen( //go to neutral zone target
-                    dummyIntake(), //intake
-                    AutoRoutines.runPath(nzTarget.getSelected() + "-" + nzExit.getSelected()), //go to exit
-                    AutoRoutines.runPath(nzExit.getSelected() + "-" + fShoot) //go to shoot
-                ) : 
-                dummyIntake().andThen(AutoRoutines.runPath(intake + "-" + fShoot)), //else go to shoot
-            dummyShoot(), //shoot
-            !climb.equals("none") ? //if climb selected,
-                AutoRoutines.runPath(fShoot + "-" + climb).andThen(dummyClimb()) : //go to climb positon and climb
-                Commands.none()
-        );
-    }
+    return Commands.sequence(
+      (_preloadShootPos.equals("none")) ?
+        ((_startPos.equals("hs")) ? AutoRoutines.runPath(_startPos + "_" + _nzEntry) : Commands.none())
+          .andThen(AutoRoutines.runPath(_startPos + "_" + _intakePos)) :
+        AutoRoutines.runPath(_startPos + "_" + _preloadShootPos)
+          .andThen(dummyShoot())
+          .andThen(AutoRoutines.runPath(_preloadShootPos + "_" + _intakePos)),
+      
+      dummyIntake(),
 
-    private String getIntakePoint() { //get intake point based on intake type (either neutral zone or depot/outpost)
-        return intakeType.getSelected().equals("none") ? nzEntry.getSelected() : intakeType.getSelected();
-    }
+      (_intakePos.endsWith("n")) ?
+        AutoRoutines.runPath(_intakePos + "_" + _nzExit)
+          .andThen(AutoRoutines.runPath(_nzExit + "_" + _finalShootPos)) :
+        AutoRoutines.runPath(_intakePos + "_" + _finalShootPos),
+      dummyShoot(),
+
+      (_climbPos.equals("none")) ? 
+        Commands.none() : 
+        AutoRoutines.runPath(_climbPos + "_climb")
+          .andThen(dummyClimb())
+    );
+  }
 
   // TODO: put actual commands here
   private Command dummyShoot() {

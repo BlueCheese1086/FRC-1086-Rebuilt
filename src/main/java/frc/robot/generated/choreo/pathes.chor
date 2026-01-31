@@ -4,7 +4,414 @@
  "type":"Swerve",
  "variables":{
   "expressions":{},
-  "poses":{}
+  "poses":{
+   "crn":{
+    "x":{
+     "exp":"8.7 m",
+     "val":8.7
+    },
+    "y":{
+     "exp":"4 m",
+     "val":4.0
+    },
+    "heading":{
+     "exp":"-0.79 rad",
+     "val":-0.79
+    }
+   },
+   "cs":{
+    "x":{
+     "exp":"1.8 m",
+     "val":1.8
+    },
+    "y":{
+     "exp":"4 m",
+     "val":4.0
+    },
+    "heading":{
+     "exp":"0 deg",
+     "val":0.0
+    }
+   },
+   "db":{
+    "x":{
+     "exp":"4.6 m",
+     "val":4.6
+    },
+    "y":{
+     "exp":"5.5 m",
+     "val":5.5
+    },
+    "heading":{
+     "exp":"-0.79 rad",
+     "val":-0.79
+    }
+   },
+   "dbs":{
+    "x":{
+     "exp":"3.4 m",
+     "val":3.4
+    },
+    "y":{
+     "exp":"5.5 m",
+     "val":5.5
+    },
+    "heading":{
+     "exp":"-0.79 rad",
+     "val":-0.79
+    }
+   },
+   "dc":{
+    "x":{
+     "exp":"0.8 m",
+     "val":0.8
+    },
+    "y":{
+     "exp":"4.7 m",
+     "val":4.7
+    },
+    "heading":{
+     "exp":"3.14 rad",
+     "val":3.14
+    }
+   },
+   "dcn":{
+    "x":{
+     "exp":"6 m",
+     "val":6.0
+    },
+    "y":{
+     "exp":"5.5 m",
+     "val":5.5
+    },
+    "heading":{
+     "exp":"3.14 rad",
+     "val":3.14
+    }
+   },
+   "dfrn":{
+    "x":{
+     "exp":"8.7 m",
+     "val":8.7
+    },
+    "y":{
+     "exp":"6.4 m",
+     "val":6.4
+    },
+    "heading":{
+     "exp":"-0.79 rad",
+     "val":-0.79
+    }
+   },
+   "dfs":{
+    "x":{
+     "exp":"2.9 m",
+     "val":2.9
+    },
+    "y":{
+     "exp":"6.5 m",
+     "val":6.5
+    },
+    "heading":{
+     "exp":"-0.97 rad",
+     "val":-0.97
+    }
+   },
+   "dfsn":{
+    "x":{
+     "exp":"7.7 m",
+     "val":7.7
+    },
+    "y":{
+     "exp":"6 m",
+     "val":6.0
+    },
+    "heading":{
+     "exp":"-0.4 rad",
+     "val":-0.4
+    }
+   },
+   "di":{
+    "x":{
+     "exp":"0.7 m",
+     "val":0.7
+    },
+    "y":{
+     "exp":"6 m",
+     "val":6.0
+    },
+    "heading":{
+     "exp":"3.14 rad",
+     "val":3.14
+    }
+   },
+   "dnrn":{
+    "x":{
+     "exp":"8.7 m",
+     "val":8.7
+    },
+    "y":{
+     "exp":"5.2 m",
+     "val":5.2
+    },
+    "heading":{
+     "exp":"-0.79 rad",
+     "val":-0.79
+    }
+   },
+   "dns":{
+    "x":{
+     "exp":"2 m",
+     "val":2.0
+    },
+    "y":{
+     "exp":"5.5 m",
+     "val":5.5
+    },
+    "heading":{
+     "exp":"-0.51 rad",
+     "val":-0.51
+    }
+   },
+   "dnsn":{
+    "x":{
+     "exp":"7.7 m",
+     "val":7.7
+    },
+    "y":{
+     "exp":"4.6 m",
+     "val":4.6
+    },
+    "heading":{
+     "exp":"-0.4 rad",
+     "val":-0.4
+    }
+   },
+   "dt":{
+    "x":{
+     "exp":"4.6 m",
+     "val":4.6
+    },
+    "y":{
+     "exp":"7.4 m",
+     "val":7.4
+    },
+    "heading":{
+     "exp":"0 deg",
+     "val":0.0
+    }
+   },
+   "dts":{
+    "x":{
+     "exp":"3.6 m",
+     "val":3.6
+    },
+    "y":{
+     "exp":"7.5 m",
+     "val":7.5
+    },
+    "heading":{
+     "exp":"0 deg",
+     "val":0.0
+    }
+   },
+   "hs":{
+    "x":{
+     "exp":"3.5 m",
+     "val":3.5
+    },
+    "y":{
+     "exp":"4 m",
+     "val":4.0
+    },
+    "heading":{
+     "exp":"0 deg",
+     "val":0.0
+    }
+   },
+   "ob":{
+    "x":{
+     "exp":"4.6 m",
+     "val":4.6
+    },
+    "y":{
+     "exp":"2.5 m",
+     "val":2.5
+    },
+    "heading":{
+     "exp":"0.79 rad",
+     "val":0.79
+    }
+   },
+   "obs":{
+    "x":{
+     "exp":"3.4 m",
+     "val":3.4
+    },
+    "y":{
+     "exp":"2.5 m",
+     "val":2.5
+    },
+    "heading":{
+     "exp":"0.79 rad",
+     "val":0.79
+    }
+   },
+   "oc":{
+    "x":{
+     "exp":"0.8 m",
+     "val":0.8
+    },
+    "y":{
+     "exp":"2.8 m",
+     "val":2.8
+    },
+    "heading":{
+     "exp":"3.14 rad",
+     "val":3.14
+    }
+   },
+   "ocn":{
+    "x":{
+     "exp":"6 m",
+     "val":6.0
+    },
+    "y":{
+     "exp":"2.5 m",
+     "val":2.5
+    },
+    "heading":{
+     "exp":"3.14 rad",
+     "val":3.14
+    }
+   },
+   "ofrn":{
+    "x":{
+     "exp":"8.7 m",
+     "val":8.7
+    },
+    "y":{
+     "exp":"1.6 m",
+     "val":1.6
+    },
+    "heading":{
+     "exp":"-0.79 rad",
+     "val":-0.79
+    }
+   },
+   "ofs":{
+    "x":{
+     "exp":"2.9 m",
+     "val":2.9
+    },
+    "y":{
+     "exp":"1.5 m",
+     "val":1.5
+    },
+    "heading":{
+     "exp":"0.97 rad",
+     "val":0.97
+    }
+   },
+   "ofsn":{
+    "x":{
+     "exp":"7.7 m",
+     "val":7.7
+    },
+    "y":{
+     "exp":"2 m",
+     "val":2.0
+    },
+    "heading":{
+     "exp":"0.4 rad",
+     "val":0.4
+    }
+   },
+   "oi":{
+    "x":{
+     "exp":"0.5 m",
+     "val":0.5
+    },
+    "y":{
+     "exp":"0.6 m",
+     "val":0.6
+    },
+    "heading":{
+     "exp":"3.14 rad",
+     "val":3.14
+    }
+   },
+   "onrn":{
+    "x":{
+     "exp":"8.7 m",
+     "val":8.7
+    },
+    "y":{
+     "exp":"2.8 m",
+     "val":2.8
+    },
+    "heading":{
+     "exp":"-0.79 rad",
+     "val":-0.79
+    }
+   },
+   "ons":{
+    "x":{
+     "exp":"2 m",
+     "val":2.0
+    },
+    "y":{
+     "exp":"2.5 m",
+     "val":2.5
+    },
+    "heading":{
+     "exp":"0.51 rad",
+     "val":0.51
+    }
+   },
+   "onsn":{
+    "x":{
+     "exp":"7.7 m",
+     "val":7.7
+    },
+    "y":{
+     "exp":"3.4 m",
+     "val":3.4
+    },
+    "heading":{
+     "exp":"0.4 rad",
+     "val":0.4
+    }
+   },
+   "ot":{
+    "x":{
+     "exp":"4.6 m",
+     "val":4.6
+    },
+    "y":{
+     "exp":"0.6 m",
+     "val":0.6
+    },
+    "heading":{
+     "exp":"0 deg",
+     "val":0.0
+    }
+   },
+   "ots":{
+    "x":{
+     "exp":"3.6 m",
+     "val":3.6
+    },
+    "y":{
+     "exp":"0.5 m",
+     "val":0.5
+    },
+    "heading":{
+     "exp":"0 deg",
+     "val":0.0
+    }
+   }
+  }
  },
  "config":{
   "frontLeft":{

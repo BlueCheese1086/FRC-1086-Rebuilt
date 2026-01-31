@@ -1,5 +1,5 @@
 {
- "name":"dts_db",
+ "name":"dbs_di",
  "version":3,
  "snapshot":{
   "waypoints":[],
@@ -8,8 +8,7 @@
  },
  "params":{
   "waypoints":[
-    {"x":{"exp":"3.6 m", "val":3.6}, "y":{"exp":"7.5 m", "val":7.5}, "heading":{"exp":"0 deg", "val":0.0}, "intervals":40, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
-    {"x":{"exp":"4.6 m", "val":4.6}, "y":{"exp":"5.5 m", "val":5.5}, "heading":{"exp":"-0.79 rad", "val":-0.79}, "intervals":34, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false}],
+    {"x":{"exp":"dbs.x", "val":3.4}, "y":{"exp":"dbs.y", "val":5.5}, "heading":{"exp":"dbs.heading", "val":-0.79}, "intervals":40, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false}],
   "constraints":[
     {"from":"first", "to":null, "data":{"type":"StopPoint", "props":{}}, "enabled":true},
     {"from":"last", "to":null, "data":{"type":"StopPoint", "props":{}}, "enabled":true},
