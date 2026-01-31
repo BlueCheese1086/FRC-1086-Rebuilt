@@ -82,13 +82,15 @@ public class AutoBuilder {
     String _finalShootPos = finalShootPos.getSelected();
     String _climbPos = climbPos.getSelected();
 
+    String _selectedEntry = _startPos.equals("hs") ? _nzEntry : _startPos.substring(0, _startPos.length() - 1); //if starting at hub, use selected nz entry, else use closest entry
+
     return Commands.sequence(
       (_preloadShootPos.equals("none")) ? //if not preloaded
         (
-          (_startPos.equals("hs") && _intakePos.endsWith("n")) ? //if starting at the hub and wants to go to neutral zone
-            AutoRoutines.runPath(_startPos + "_" + _nzEntry) //go to nz entry then intake position
-              .andThen(AutoRoutines.runPath(_nzEntry + "_" + _intakePos)) : 
-            AutoRoutines.runPath(_startPos + "_" + _intakePos) //else just go to intake position
+          (_intakePos.endsWith("i")) ? //if not going to neutral zone
+              AutoRoutines.runPath(_startPos + "_" + _intakePos) : //go directly to intake position
+              AutoRoutines.runPath(_startPos + "_" + _selectedEntry) //else go to closest entry, then intake
+                .andThen(AutoRoutines.runPath(_selectedEntry + "_" + _intakePos)) 
         ): //if preloaded
         AutoRoutines.runPath(_startPos + "_" + _preloadShootPos) //go to shoot position, shoot, then go to intake position
           .andThen(dummyShoot())
