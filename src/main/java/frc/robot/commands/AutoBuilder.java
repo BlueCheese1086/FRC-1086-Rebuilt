@@ -112,7 +112,7 @@ public class AutoBuilder {
 
       (_climbPos.equals("none")) ? //if climbing, go climb but if not do nothing
         Commands.none() : 
-        AutoRoutines.runPath(_climbPos + "_climb")
+        AutoRoutines.runPath(_finalShootPos + "_" + _climbPos)
           .andThen(dummyClimb())
     );
   }
