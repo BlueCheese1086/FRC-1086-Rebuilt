@@ -94,7 +94,12 @@ public class AutoBuilder {
         ): //if preloaded
         AutoRoutines.runPath(_startPos + "_" + _preloadShootPos) //go to shoot position, shoot, then go to intake position
           .andThen(dummyShoot())
-          .andThen(AutoRoutines.runPath(_preloadShootPos + "_" + _intakePos)),
+          .andThen(
+            (_intakePos.endsWith("i")) ? //if not going to neutral zone
+              AutoRoutines.runPath(_preloadShootPos + "_" + _intakePos) : //go directly to intake position
+              AutoRoutines.runPath(_preloadShootPos + "_" + _nzEntry) //else go to selected entry, then intake
+                .andThen(AutoRoutines.runPath(_nzEntry + "_" + _intakePos))
+          ),
       
       dummyIntake(), //intake
 
