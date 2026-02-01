@@ -104,8 +104,9 @@ public class AutoBuilder {
       dummyIntake(), //intake
 
       (_intakePos.endsWith("n")) ? //if in neutral zone
-        AutoRoutines.runPath(_intakePos + "_" + _nzExit) //go to the exit and then the final shoot position
-          .andThen(AutoRoutines.runPath(_nzExit + "_" + _finalShootPos)) :
+        AutoRoutines.runPath(_intakePos + "_" + _nzExit) //go to the exit
+          .andThen(AutoRoutines.runPath(_nzExit + "_" + _nzExit + "s")) //short go to closest start position
+          .andThen(AutoRoutines.runPath(_nzExit + "s_" + _finalShootPos)) : //use existing path to go to final shoot position
         AutoRoutines.runPath(_intakePos + "_" + _finalShootPos), //else, just go to final shoot position
 
       dummyShoot(), //shoot
