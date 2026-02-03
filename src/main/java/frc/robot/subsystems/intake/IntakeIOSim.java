@@ -44,7 +44,6 @@ public class IntakeIOSim implements IntakeIO {
 
   @Override
   public void updateInputs(IntakeInputs inputs) {
-    System.out.println("Testing");
     armSim.setInputVoltage(
         pid.calculate(armSim.getAngleRads()) + ff.calculate(pid.getSetpoint(), 0.0));
 

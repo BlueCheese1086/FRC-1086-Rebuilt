@@ -66,8 +66,10 @@ public class AutoBuilder {
 
     SmartDashboard.putData("Auto/Start Pos", startPos);
     SmartDashboard.putData("Auto/Preload Shoot Pos (if preloaded)", preloadShootPos);
-    SmartDashboard.putData("Auto/Intake Source (after shooting preload or starting not preloaded)", intakePos);
-    SmartDashboard.putData("Auto/NZ Entry (if at Hub Start or going to neutral zone after shooting preload)", nzEntry);
+    SmartDashboard.putData(
+        "Auto/Intake Source (after shooting preload or starting not preloaded)", intakePos);
+    SmartDashboard.putData(
+        "Auto/NZ Entry (if at Hub Start or going to neutral zone after shooting preload)", nzEntry);
     SmartDashboard.putData("Auto/NZ Exit (if entered neutral zone)", nzExit);
     SmartDashboard.putData("Auto/Final Shoot Pos", finalShootPos);
     SmartDashboard.putData("Auto/Climb Pos", climbPos);
