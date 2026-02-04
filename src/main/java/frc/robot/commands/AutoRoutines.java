@@ -85,17 +85,21 @@ public class AutoRoutines {
     };
   }
 
-  public static Command runPath(String trajectory) {
+  public static Command runPath(String trajectory, boolean resetPose) {
     return (Commands.runOnce(
                 () -> {
                   Logger.recordOutput(
                       "Autos/Selected Path", Choreo.loadTrajectory(trajectory).get().getPoses());
-                  kDrive.setPose(
-                      Choreo.loadTrajectory(trajectory)
-                          .get()
-                          .getInitialPose(
-                              DriverStation.getAlliance().orElse(Alliance.Red).equals(Alliance.Red))
-                          .get());
+                  if (resetPose) {
+                    kDrive.setPose(
+                        Choreo.loadTrajectory(trajectory)
+                            .get()
+                            .getInitialPose(
+                                DriverStation.getAlliance()
+                                    .orElse(Alliance.Red)
+                                    .equals(Alliance.Red))
+                            .get());
+                  }
                 })
             .andThen(factory.trajectoryCmd(trajectory)))
         .finallyDo(

@@ -105,46 +105,47 @@ public class AutoBuilder {
                   ? // if not preloaded
                   ((_intakePos.endsWith("i"))
                       ? // if not going to neutral zone
-                      AutoRoutines.runPath(_startPos + "_" + _intakePos)
+                      AutoRoutines.runPath(_startPos + "_" + _intakePos, true)
                       : // go directly to intake position
                       AutoRoutines.runPath(
-                              _startPos
-                                  + "_"
-                                  + _selectedEntry) // else go to closest entry, then intake
-                          .andThen(AutoRoutines.runPath(_selectedEntry + "_" + _intakePos)))
+                              _startPos + "_" + _selectedEntry,
+                              true) // else go to closest entry, then intake
+                          .andThen(AutoRoutines.runPath(_selectedEntry + "_" + _intakePos, false)))
                   : // if preloaded
                   AutoRoutines.runPath(
-                          _startPos
-                              + "_"
-                              + _preloadShootPos) // go to shoot position, shoot, then go to intake
+                          _startPos + "_" + _preloadShootPos,
+                          true) // go to shoot position, shoot, then go to intake
                       // position
                       .andThen(dummyShoot())
                       .andThen(
                           (_intakePos.endsWith("i"))
                               ? // if not going to neutral zone
-                              AutoRoutines.runPath(_preloadShootPos + "_" + _intakePos)
+                              AutoRoutines.runPath(_preloadShootPos + "_" + _intakePos, false)
                               : // go directly to intake position
                               AutoRoutines.runPath(
-                                      _preloadShootPos
-                                          + "_"
-                                          + _nzEntry) // else go to selected entry, then intake
-                                  .andThen(AutoRoutines.runPath(_nzEntry + "_" + _intakePos))),
+                                      _preloadShootPos + "_" + _nzEntry,
+                                      false) // else go to selected entry, then intake
+                                  .andThen(
+                                      AutoRoutines.runPath(_nzEntry + "_" + _intakePos, false))),
               dummyIntake(), // intake
               (_intakePos.endsWith("n"))
                   ? // if in neutral zone
-                  AutoRoutines.runPath(_intakePos + "_" + _nzExit) // go to the exit
+                  AutoRoutines.runPath(_intakePos + "_" + _nzExit, false) // go to the exit
                       .andThen(
                           AutoRoutines.runPath(
-                              _nzExit + "_" + _nzExit + "s")) // short go to closest start position
-                      .andThen(AutoRoutines.runPath(_nzExit + "s_" + _finalShootPos))
+                              _nzExit + "_" + _nzExit + "s",
+                              false)) // short go to closest start position
+                      .andThen(AutoRoutines.runPath(_nzExit + "s_" + _finalShootPos, false))
                   : // use existing path to go to final shoot position
                   AutoRoutines.runPath(
-                      _intakePos + "_" + _finalShootPos), // else, just go to final shoot position
+                      _intakePos + "_" + _finalShootPos,
+                      false), // else, just go to final shoot position
               dummyShoot(), // shoot
               (_climbPos.equals("none"))
                   ? // if climbing, go climb but if not do nothing
                   Commands.none()
-                  : AutoRoutines.runPath(_finalShootPos + "_" + _climbPos).andThen(dummyClimb()));
+                  : AutoRoutines.runPath(_finalShootPos + "_" + _climbPos, false)
+                      .andThen(dummyClimb()));
         },
         Set.of(drive));
   }
