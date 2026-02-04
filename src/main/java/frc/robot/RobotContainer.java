@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.AutoBuilder;
 import frc.robot.commands.AutoRoutines;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.SotmCalculator;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -53,6 +54,7 @@ import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOSim;
+import frc.robot.util.FieldConstants;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -234,9 +236,13 @@ public class RobotContainer {
         "Targetting/Estimated Angle",
         new Pose2d(
             drive.getPose().getTranslation(),
-            DriveCommands.getOrientationToTarget(
-                drive.getPose(),
-                new Pose2d(new Translation2d(11.863959, 7.411491399999999), Rotation2d.kZero))));
+            DriveCommands.getOrientationToTarget(drive.getPose(), FieldConstants.Hub.hubCenter)));
+
+    Logger.recordOutput(
+        "Targetting/SOTM Estimated Pose",
+        new Pose2d(
+            drive.getPose().getTranslation(),
+            SotmCalculator.getDesiredRotation(drive, FieldConstants.Hub.hubCenter)));
   }
 
   /**
