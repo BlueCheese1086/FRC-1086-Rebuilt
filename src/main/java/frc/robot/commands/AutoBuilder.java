@@ -6,8 +6,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.subsystems.drive.Drive;
+import java.util.Set;
 
 public class AutoBuilder {
+  private final Drive drive;
+
   private final SendableChooser<String> startPos = new SendableChooser<>();
   private final SendableChooser<String> preloadShootPos = new SendableChooser<>();
   private final SendableChooser<String> intakePos = new SendableChooser<>();
@@ -16,7 +20,9 @@ public class AutoBuilder {
   private final SendableChooser<String> finalShootPos = new SendableChooser<>();
   private final SendableChooser<String> climbPos = new SendableChooser<>();
 
-  public AutoBuilder() {
+  public AutoBuilder(Drive drive) {
+    this.drive = drive;
+
     startPos.setDefaultOption("Hub Start", "hs");
     startPos.addOption("Depot Trench Start", "dts");
     startPos.addOption("Depot Bump Start", "dbs");
@@ -66,56 +72,81 @@ public class AutoBuilder {
 
     SmartDashboard.putData("Auto/Start Pos", startPos);
     SmartDashboard.putData("Auto/Preload Shoot Pos (if preloaded)", preloadShootPos);
-    SmartDashboard.putData("Auto/Intake Source (after shooting preload or starting not preloaded)", intakePos);
-    SmartDashboard.putData("Auto/NZ Entry (if at Hub Start or going to neutral zone after shooting preload)", nzEntry);
+    SmartDashboard.putData(
+        "Auto/Intake Source (after shooting preload or starting not preloaded)", intakePos);
+    SmartDashboard.putData(
+        "Auto/NZ Entry (if at Hub Start or going to neutral zone after shooting preload)", nzEntry);
     SmartDashboard.putData("Auto/NZ Exit (if entered neutral zone)", nzExit);
     SmartDashboard.putData("Auto/Final Shoot Pos", finalShootPos);
     SmartDashboard.putData("Auto/Climb Pos", climbPos);
   }
 
   public Command build() {
-    String _startPos = startPos.getSelected();
-    String _preloadShootPos = preloadShootPos.getSelected();
-    String _intakePos = intakePos.getSelected();
-    String _nzEntry = nzEntry.getSelected();
-    String _nzExit = nzExit.getSelected();
-    String _finalShootPos = finalShootPos.getSelected();
-    String _climbPos = climbPos.getSelected();
+    return Commands.defer(
+        () -> {
+          String _startPos = startPos.getSelected();
+          String _preloadShootPos = preloadShootPos.getSelected();
+          String _intakePos = intakePos.getSelected();
+          String _nzEntry = nzEntry.getSelected();
+          String _nzExit = nzExit.getSelected();
+          String _finalShootPos = finalShootPos.getSelected();
+          String _climbPos = climbPos.getSelected();
 
-    String _selectedEntry = _startPos.equals("hs") ? _nzEntry : _startPos.substring(0, _startPos.length() - 1); //if starting at hub, use selected nz entry, else use closest entry
+          String _selectedEntry =
+              _startPos.equals("hs")
+                  ? _nzEntry
+                  : _startPos.substring(
+                      0,
+                      _startPos.length()
+                          - 1); // if starting at hub, use selected nz entry, else use closest entry
 
-    return Commands.sequence(
-      (_preloadShootPos.equals("none")) ? //if not preloaded
-        (
-          (_intakePos.endsWith("i")) ? //if not going to neutral zone
-              AutoRoutines.runPath(_startPos + "_" + _intakePos) : //go directly to intake position
-              AutoRoutines.runPath(_startPos + "_" + _selectedEntry) //else go to closest entry, then intake
-                .andThen(AutoRoutines.runPath(_selectedEntry + "_" + _intakePos)) 
-        ): //if preloaded
-        AutoRoutines.runPath(_startPos + "_" + _preloadShootPos) //go to shoot position, shoot, then go to intake position
-          .andThen(dummyShoot())
-          .andThen(
-            (_intakePos.endsWith("i")) ? //if not going to neutral zone
-              AutoRoutines.runPath(_preloadShootPos + "_" + _intakePos) : //go directly to intake position
-              AutoRoutines.runPath(_preloadShootPos + "_" + _nzEntry) //else go to selected entry, then intake
-                .andThen(AutoRoutines.runPath(_nzEntry + "_" + _intakePos))
-          ),
-      
-      dummyIntake(), //intake
-
-      (_intakePos.endsWith("n")) ? //if in neutral zone
-        AutoRoutines.runPath(_intakePos + "_" + _nzExit) //go to the exit
-          .andThen(AutoRoutines.runPath(_nzExit + "_" + _nzExit + "s")) //short go to closest start position
-          .andThen(AutoRoutines.runPath(_nzExit + "s_" + _finalShootPos)) : //use existing path to go to final shoot position
-        AutoRoutines.runPath(_intakePos + "_" + _finalShootPos), //else, just go to final shoot position
-
-      dummyShoot(), //shoot
-
-      (_climbPos.equals("none")) ? //if climbing, go climb but if not do nothing
-        Commands.none() : 
-        AutoRoutines.runPath(_finalShootPos + "_" + _climbPos)
-          .andThen(dummyClimb())
-    );
+          return Commands.sequence(
+              (_preloadShootPos.equals("none"))
+                  ? // if not preloaded
+                  ((_intakePos.endsWith("i"))
+                      ? // if not going to neutral zone
+                      AutoRoutines.runPath(_startPos + "_" + _intakePos)
+                      : // go directly to intake position
+                      AutoRoutines.runPath(
+                              _startPos
+                                  + "_"
+                                  + _selectedEntry) // else go to closest entry, then intake
+                          .andThen(AutoRoutines.runPath(_selectedEntry + "_" + _intakePos)))
+                  : // if preloaded
+                  AutoRoutines.runPath(
+                          _startPos
+                              + "_"
+                              + _preloadShootPos) // go to shoot position, shoot, then go to intake
+                      // position
+                      .andThen(dummyShoot())
+                      .andThen(
+                          (_intakePos.endsWith("i"))
+                              ? // if not going to neutral zone
+                              AutoRoutines.runPath(_preloadShootPos + "_" + _intakePos)
+                              : // go directly to intake position
+                              AutoRoutines.runPath(
+                                      _preloadShootPos
+                                          + "_"
+                                          + _nzEntry) // else go to selected entry, then intake
+                                  .andThen(AutoRoutines.runPath(_nzEntry + "_" + _intakePos))),
+              dummyIntake(), // intake
+              (_intakePos.endsWith("n"))
+                  ? // if in neutral zone
+                  AutoRoutines.runPath(_intakePos + "_" + _nzExit) // go to the exit
+                      .andThen(
+                          AutoRoutines.runPath(
+                              _nzExit + "_" + _nzExit + "s")) // short go to closest start position
+                      .andThen(AutoRoutines.runPath(_nzExit + "s_" + _finalShootPos))
+                  : // use existing path to go to final shoot position
+                  AutoRoutines.runPath(
+                      _intakePos + "_" + _finalShootPos), // else, just go to final shoot position
+              dummyShoot(), // shoot
+              (_climbPos.equals("none"))
+                  ? // if climbing, go climb but if not do nothing
+                  Commands.none()
+                  : AutoRoutines.runPath(_finalShootPos + "_" + _climbPos).andThen(dummyClimb()));
+        },
+        Set.of(drive));
   }
 
   // TODO: put actual commands here

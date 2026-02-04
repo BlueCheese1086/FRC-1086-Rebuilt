@@ -157,7 +157,7 @@ public class RobotContainer {
     }
 
     AutoRoutines.setup(drive);
-    AutoBuilder autoBuilder = new AutoBuilder();
+    AutoBuilder autoBuilder = new AutoBuilder(drive);
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices");
