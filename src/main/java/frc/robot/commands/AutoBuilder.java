@@ -1,5 +1,8 @@
 package frc.robot.commands;
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Volts;
 import static edu.wpi.first.wpilibj2.command.Commands.*;
 
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -7,10 +10,14 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.shooter.Shooter;
 import java.util.Set;
 
 public class AutoBuilder {
   private final Drive drive;
+  private final Shooter shooter;
+  private final Intake intake;
 
   private final SendableChooser<String> startPos = new SendableChooser<>();
   private final SendableChooser<String> preloadShootPos = new SendableChooser<>();
@@ -20,8 +27,10 @@ public class AutoBuilder {
   private final SendableChooser<String> finalShootPos = new SendableChooser<>();
   private final SendableChooser<String> climbPos = new SendableChooser<>();
 
-  public AutoBuilder(Drive drive) {
+  public AutoBuilder(Drive drive, Shooter shooter, Intake intake) {
     this.drive = drive;
+    this.shooter = shooter;
+    this.intake = intake;
 
     startPos.setDefaultOption("Hub Start", "hs");
     startPos.addOption("Depot Trench Start", "dts");
@@ -116,7 +125,7 @@ public class AutoBuilder {
                           _startPos + "_" + _preloadShootPos,
                           true) // go to shoot position, shoot, then go to intake
                       // position
-                      .andThen(dummyShoot())
+                      .andThen(shootCommand())
                       .andThen(
                           (_intakePos.endsWith("i"))
                               ? // if not going to neutral zone
@@ -127,7 +136,7 @@ public class AutoBuilder {
                                       false) // else go to selected entry, then intake
                                   .andThen(
                                       AutoRoutines.runPath(_nzEntry + "_" + _intakePos, false))),
-              dummyIntake(), // intake
+              intakeCommand(), // intake
               (_intakePos.endsWith("n"))
                   ? // if in neutral zone
                   AutoRoutines.runPath(_intakePos + "_" + _nzExit, false) // go to the exit
@@ -140,26 +149,34 @@ public class AutoBuilder {
                   AutoRoutines.runPath(
                       _intakePos + "_" + _finalShootPos,
                       false), // else, just go to final shoot position
-              dummyShoot(), // shoot
+              shootCommand(), // shoot
               (_climbPos.equals("none"))
                   ? // if climbing, go climb but if not do nothing
                   Commands.none()
                   : AutoRoutines.runPath(_finalShootPos + "_" + _climbPos, false)
-                      .andThen(dummyClimb()));
+                      .andThen(climbCommand()));
         },
         Set.of(drive));
   }
 
-  // TODO: put actual commands here
-  private Command dummyShoot() {
-    return print("shoot");
+  // TODO: update values
+  private Command shootCommand() {
+    return Commands.parallel(
+            shooter.runFeederVoltage(12), shooter.setVelocity(RadiansPerSecond.of(200)))
+        .withTimeout(3.0)
+        .andThen(
+            Commands.parallel(
+                shooter.runFeederVoltage(0), shooter.setVelocity(RadiansPerSecond.zero())));
   }
 
-  private Command dummyIntake() {
-    return print("intake");
+  private Command intakeCommand() {
+    return Commands.sequence(intake.setPosition(Degrees.of(90)), intake.setVoltage(Volts.of(12)))
+        .withTimeout(3.0)
+        .andThen(
+            Commands.parallel(intake.setPosition(Degrees.of(0)), intake.setVoltage(Volts.of(0))));
   }
 
-  private Command dummyClimb() {
+  private Command climbCommand() {
     return print("climb");
   }
 }

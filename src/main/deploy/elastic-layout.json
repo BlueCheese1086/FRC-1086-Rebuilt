@@ -1,0 +1,112 @@
+{
+  "version": 1.0,
+  "grid_size": 128,
+  "tabs": [
+    {
+      "name": "Teleoperated",
+      "grid_layout": {
+        "layouts": [],
+        "containers": []
+      }
+    },
+    {
+      "name": "Autonomous",
+      "grid_layout": {
+        "layouts": [],
+        "containers": [
+          {
+            "title": "Auto Choices",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "ComboBox Chooser",
+            "properties": {
+              "topic": "/SmartDashboard/Auto Choices",
+              "period": 0.06,
+              "sort_options": false
+            }
+          },
+          {
+            "title": "Climb Pos",
+            "x": 512.0,
+            "y": 128.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "ComboBox Chooser",
+            "properties": {
+              "topic": "/SmartDashboard/Auto/Climb Pos",
+              "period": 0.06,
+              "sort_options": false
+            }
+          },
+          {
+            "title": "Final Shoot Pos",
+            "x": 0.0,
+            "y": 384.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "ComboBox Chooser",
+            "properties": {
+              "topic": "/SmartDashboard/Auto/Final Shoot Pos",
+              "period": 0.06,
+              "sort_options": false
+            }
+          },
+          {
+            "title": "Intake Source (after shooting preload or starting not preloaded)",
+            "x": 0.0,
+            "y": 128.0,
+            "width": 512.0,
+            "height": 128.0,
+            "type": "ComboBox Chooser",
+            "properties": {
+              "topic": "/SmartDashboard/Auto/Intake Source (after shooting preload or starting not preloaded)",
+              "period": 0.06,
+              "sort_options": false
+            }
+          },
+          {
+            "title": "NZ Entry (if at Hub Start or going to neutral zone after shooting preload)",
+            "x": 0.0,
+            "y": 256.0,
+            "width": 512.0,
+            "height": 128.0,
+            "type": "ComboBox Chooser",
+            "properties": {
+              "topic": "/SmartDashboard/Auto/NZ Entry (if at Hub Start or going to neutral zone after shooting preload)",
+              "period": 0.06,
+              "sort_options": false
+            }
+          },
+          {
+            "title": "NZ Exit (if entered neutral zone)",
+            "x": 256.0,
+            "y": 384.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "ComboBox Chooser",
+            "properties": {
+              "topic": "/SmartDashboard/Auto/NZ Exit (if entered neutral zone)",
+              "period": 0.06,
+              "sort_options": false
+            }
+          },
+          {
+            "title": "Preload Shoot Pos (if preloaded)",
+            "x": 256.0,
+            "y": 0.0,
+            "width": 384.0,
+            "height": 128.0,
+            "type": "ComboBox Chooser",
+            "properties": {
+              "topic": "/SmartDashboard/Auto/Preload Shoot Pos (if preloaded)",
+              "period": 0.06,
+              "sort_options": false
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

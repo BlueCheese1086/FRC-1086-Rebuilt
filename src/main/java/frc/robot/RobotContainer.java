@@ -18,6 +18,8 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.net.WebServer;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -159,7 +161,7 @@ public class RobotContainer {
     }
 
     AutoRoutines.setup(drive);
-    AutoBuilder autoBuilder = new AutoBuilder(drive);
+    AutoBuilder autoBuilder = new AutoBuilder(drive, shooter, intake);
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices");
@@ -180,6 +182,8 @@ public class RobotContainer {
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     autoChooser.addOption("auto builder", autoBuilder.build());
+
+    WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
 
     // Configure the button bindings
     configureButtonBindings();
