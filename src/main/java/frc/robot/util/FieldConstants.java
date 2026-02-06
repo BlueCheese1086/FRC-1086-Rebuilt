@@ -48,6 +48,10 @@ public class FieldConstants {
     public static final double oppHubCenter =
         defaultAprilTagType.getTagPose(4).get().getX() + Hub.width / 2.0;
     public static final double oppAllianceZone = defaultAprilTagType.getTagPose(10).get().getX();
+
+    public static boolean inAllianceZone(Pose2d pose) {
+        return pose.getX() < allianceZone || pose.getX() > (fieldLength - allianceZone);
+    }
   }
 
   /**
