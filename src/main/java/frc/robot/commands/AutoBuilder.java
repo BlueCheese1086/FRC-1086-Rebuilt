@@ -1,6 +1,5 @@
 package frc.robot.commands;
 
-import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 import static edu.wpi.first.wpilibj2.command.Commands.*;
@@ -11,7 +10,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.IntakeConstants;
 import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterConstants;
 import java.util.Set;
 
 public class AutoBuilder {
@@ -161,19 +162,32 @@ public class AutoBuilder {
 
   // TODO: update values
   private Command shootCommand() {
-    return Commands.parallel(
-            shooter.runFeederVoltage(12), shooter.setVelocity(RadiansPerSecond.of(200)))
-        .withTimeout(3.0)
-        .andThen(
-            Commands.parallel(
-                shooter.runFeederVoltage(0), shooter.setVelocity(RadiansPerSecond.zero())));
+    return Commands.sequence(
+        shooter.setVelocity(RadiansPerSecond.of(ShooterConstants.PID.cruiseVelocity)),
+        Commands.waitSeconds(0.8),
+        shooter.runFeederVoltage(12).withTimeout(1.5),
+        Commands.runOnce(
+            () -> {
+              shooter.runFeederVoltage(0);
+              shooter.setVelocity(RadiansPerSecond.of(0));
+            },
+            shooter));
   }
 
   private Command intakeCommand() {
-    return Commands.sequence(intake.setPosition(Degrees.of(90)), intake.setVoltage(Volts.of(12)))
-        .withTimeout(3.0)
-        .andThen(
-            Commands.parallel(intake.setPosition(Degrees.of(0)), intake.setVoltage(Volts.of(0))));
+    return Commands.sequence(
+        Commands.sequence(
+                intake
+                    .setPosition(IntakeConstants.setpoints.deployed)
+                    .until(() -> intake.atSetpoint()),
+                intake.setVoltage(IntakeConstants.VoltageLimits.peakForwardVoltage))
+            .withTimeout(2.5),
+        Commands.sequence(
+                intake
+                    .setPosition(IntakeConstants.setpoints.stowed)
+                    .until(() -> intake.atSetpoint()),
+                intake.setVoltage(Volts.of(0)))
+            .withTimeout(1.0));
   }
 
   private Command climbCommand() {
