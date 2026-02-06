@@ -169,7 +169,19 @@ public class RobotContainer {
     }
 
     AutoRoutines.setup(drive);
-    AutoBuilder autoBuilder = new AutoBuilder(drive, shooter, intake);
+
+    Superstructure.ControllerLayout.scoreRequest = driver.rightTrigger();
+    Superstructure.ControllerLayout.cancelRequest = driver.povLeft().or(operator.povLeft());
+    Superstructure.ControllerLayout.climbRequest = driver.povRight();
+    Superstructure.ControllerLayout.disableTargeting = driver.povUp();
+    Superstructure.ControllerLayout.intakeRequest = driver.leftTrigger();
+    Superstructure.ControllerLayout.passingRequest = driver.povDown();
+    Superstructure.ControllerLayout.joystickX = () -> -driver.getLeftY();
+    Superstructure.ControllerLayout.joystickY = () -> -driver.getLeftX();
+
+    superstructure = new Superstructure(drive, intake, shooter, indexer, hood);
+
+    AutoBuilder autoBuilder = new AutoBuilder(superstructure);
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices");
@@ -192,18 +204,6 @@ public class RobotContainer {
     autoChooser.addOption("auto builder", autoBuilder.build());
 
     // WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
-
-    Superstructure.ControllerLayout.scoreRequest = driver.rightTrigger();
-    Superstructure.ControllerLayout.cancelRequest = driver.povLeft().or(operator.povLeft());
-    Superstructure.ControllerLayout.climbRequest = driver.povRight();
-    Superstructure.ControllerLayout.disableTargeting = driver.povUp();
-    Superstructure.ControllerLayout.intakeRequest = driver.leftTrigger();
-    Superstructure.ControllerLayout.passingRequest = driver.povDown();
-    Superstructure.ControllerLayout.joystickX = () -> -driver.getLeftY();
-    Superstructure.ControllerLayout.joystickY = () -> -driver.getLeftX();
-
-    superstructure = new Superstructure(drive, intake, shooter, indexer, hood);
-
     // Configure the button bindings
     configureButtonBindings();
   }
