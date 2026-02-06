@@ -18,8 +18,6 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.net.WebServer;
-import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -86,7 +84,8 @@ public class RobotContainer {
   private final Superstructure superstructure;
 
   // Controller
-  private final CommandXboxController controller = new CommandXboxController(0);
+  private final CommandXboxController driver = new CommandXboxController(0);
+  private final CommandXboxController operator = new CommandXboxController(1);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -192,6 +191,17 @@ public class RobotContainer {
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     autoChooser.addOption("auto builder", autoBuilder.build());
 
+    // WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
+
+    Superstructure.ControllerLayout.scoreRequest = driver.rightTrigger();
+    Superstructure.ControllerLayout.cancelRequest = driver.povLeft().or(operator.povLeft());
+    Superstructure.ControllerLayout.climbRequest = driver.povRight();
+    Superstructure.ControllerLayout.disableTargeting = driver.povUp();
+    Superstructure.ControllerLayout.intakeRequest = driver.leftTrigger();
+    Superstructure.ControllerLayout.passingRequest = driver.povDown();
+    Superstructure.ControllerLayout.joystickX = () -> -driver.getLeftY();
+    Superstructure.ControllerLayout.joystickY = () -> -driver.getLeftX();
+
     superstructure = new Superstructure(drive, intake, shooter, indexer, hood);
 
     // Configure the button bindings
@@ -208,19 +218,16 @@ public class RobotContainer {
     // Default command, normal field-relative drive
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
-            drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
+            drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
 
     // Lock to 0° when A button is held
-    controller
+    driver
         .a()
         .whileTrue(
             DriveCommands.joystickDriveAtAngle(
                 drive,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
+                () -> -driver.getLeftY(),
+                () -> -driver.getLeftX(),
                 () ->
                     (DriveCommands.getOrientationToTarget(
                         drive.getPose(),
@@ -228,10 +235,10 @@ public class RobotContainer {
                             new Translation2d(11.863959, 7.411491399999999), Rotation2d.kZero)))));
 
     // Switch to X pattern when X button is pressed
-    controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    driver.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
     // Reset gyro to 0° when B button is pressed
-    controller
+    driver
         .b()
         .onTrue(
             Commands.runOnce(
@@ -241,7 +248,7 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    controller.y().onTrue(shooter.setVelocity(RadiansPerSecond.of(400)));
+    driver.y().onTrue(shooter.setVelocity(RadiansPerSecond.of(400)));
   }
 
   public void periodic() {
