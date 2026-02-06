@@ -53,7 +53,7 @@ public class Intake extends SubsystemBase {
   }
 
   public Command setPosition(Angle newPos) {
-    return this.run(
+    return Commands.run(
             () -> {
               setpoint = newPos.in(Radians);
               io.setPosition(newPos);
@@ -62,7 +62,7 @@ public class Intake extends SubsystemBase {
   }
 
   public Command setVoltage(Voltage applied) {
-    return this.run(
+    return Commands.run(
             () -> {
               io.setVoltage(applied);
             })
@@ -73,7 +73,7 @@ public class Intake extends SubsystemBase {
   }
 
   public Command setCurrent(Current applied) {
-    return this.run(
+    return Commands.run(
             () -> {
               io.setCurrent(applied);
             })

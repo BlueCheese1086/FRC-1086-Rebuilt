@@ -40,7 +40,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public Command setVoltage(double volts) {
-    return this.run(
+    return Commands.run(
             () -> {
               for (int i = 0; i < io.length; i++) {
                 io[i].setVoltage(volts);
