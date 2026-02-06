@@ -183,8 +183,6 @@ public class RobotContainer {
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     autoChooser.addOption("auto builder", autoBuilder.build());
 
-    WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
-
     // Configure the button bindings
     configureButtonBindings();
   }
