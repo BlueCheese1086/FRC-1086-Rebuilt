@@ -93,13 +93,20 @@ public class Superstructure extends SubsystemBase {
     stateRequests.put(
         ControllerLayout.cancelRequest.and(stateTriggers.get(State.target)), State.holding);
     stateRequests.put(
+        ControllerLayout.cancelRequest.and(stateTriggers.get(State.climb)), State.holding);
+    stateRequests.put(
         ControllerLayout.intakeRequest.negate().and(stateTriggers.get(State.intake)),
         State.holding);
     stateRequests.put(
         ControllerLayout.passingRequest.negate().and(stateTriggers.get(State.prepass)),
         State.holding);
     stateRequests.put(
-        ControllerLayout.scoreRequest.negate().and(stateTriggers.get(State.score)),
+        stateTriggers
+            .get(State.target)
+            .and(
+                () -> {
+                  return !FieldConstants.LinesVertical.inAllianceZone(drive.getPose());
+                }),
         State.holding); // Save This one for later
     stateRequests.put(
         stateTriggers
@@ -110,9 +117,16 @@ public class Superstructure extends SubsystemBase {
                 }),
         State.target); // Save This one for later
     stateRequests.put(
+        ControllerLayout.scoreRequest.negate().and(stateTriggers.get(State.score)),
+        State.target); // Save This one for later
+    stateRequests.put(
+        ControllerLayout.intakeRequest.and(stateTriggers.get(State.holding)), State.intake);
+    stateRequests.put(
         ControllerLayout.scoreRequest.and(stateTriggers.get(State.target)), State.score);
     stateRequests.put(
         ControllerLayout.climbRequest.and(stateTriggers.get(State.score).negate()), State.climb);
+    stateRequests.put(
+        ControllerLayout.cancelRequest.and(stateTriggers.get(State.climb)), State.climb);
     stateRequests.put(
         ControllerLayout.scoreRequest.and(stateTriggers.get(State.climb)), State.climbscore);
     stateRequests.put(
