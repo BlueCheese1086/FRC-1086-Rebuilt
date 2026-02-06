@@ -153,7 +153,7 @@ public class Superstructure extends SubsystemBase {
     stateTriggers.get(State.climbscore).onTrue(Commands.none());
   }
 
-  private Command setState(State newState) {
+  public Command setState(State newState) {
     return Commands.run(
             () -> {
               state = newState;

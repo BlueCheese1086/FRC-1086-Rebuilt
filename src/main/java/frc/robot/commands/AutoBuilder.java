@@ -1,24 +1,16 @@
 package frc.robot.commands;
 
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.Volts;
 import static edu.wpi.first.wpilibj2.command.Commands.*;
 
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.intake.Intake;
-import frc.robot.subsystems.intake.IntakeConstants;
-import frc.robot.subsystems.shooter.Shooter;
-import frc.robot.subsystems.shooter.ShooterConstants;
+import frc.robot.subsystems.Superstructure;
 import java.util.Set;
 
 public class AutoBuilder {
-  private final Drive drive;
-  private final Shooter shooter;
-  private final Intake intake;
+  private final Superstructure superstructure;
 
   private final SendableChooser<String> startPos = new SendableChooser<>();
   private final SendableChooser<String> preloadShootPos = new SendableChooser<>();
@@ -28,10 +20,8 @@ public class AutoBuilder {
   private final SendableChooser<String> finalShootPos = new SendableChooser<>();
   private final SendableChooser<String> climbPos = new SendableChooser<>();
 
-  public AutoBuilder(Drive drive, Shooter shooter, Intake intake) {
-    this.drive = drive;
-    this.shooter = shooter;
-    this.intake = intake;
+  public AutoBuilder(Superstructure superstructure) {
+    this.superstructure = superstructure;
 
     startPos.setDefaultOption("Hub Start", "hs");
     startPos.addOption("Depot Trench Start", "dts");
@@ -157,37 +147,20 @@ public class AutoBuilder {
                   : AutoRoutines.runPath(_finalShootPos + "_" + _climbPos, false)
                       .andThen(climbCommand()));
         },
-        Set.of(drive));
+        Set.of(superstructure));
   }
 
   // TODO: update values
   private Command shootCommand() {
-    return Commands.sequence(
-        shooter.setVelocity(RadiansPerSecond.of(ShooterConstants.PID.cruiseVelocity)),
-        Commands.waitSeconds(0.8),
-        shooter.runFeederVoltage(12).withTimeout(1.5),
-        Commands.runOnce(
-            () -> {
-              shooter.runFeederVoltage(0);
-              shooter.setVelocity(RadiansPerSecond.of(0));
-            },
-            shooter));
+    return superstructure.setState(Superstructure.State.score)
+      .withTimeout(1.0)
+      .andThen(superstructure.setState(Superstructure.State.idle));
   }
 
   private Command intakeCommand() {
-    return Commands.sequence(
-        Commands.sequence(
-                intake
-                    .setPosition(IntakeConstants.setpoints.deployed)
-                    .until(() -> intake.atSetpoint()),
-                intake.setVoltage(IntakeConstants.VoltageLimits.peakForwardVoltage))
-            .withTimeout(2.5),
-        Commands.sequence(
-                intake
-                    .setPosition(IntakeConstants.setpoints.stowed)
-                    .until(() -> intake.atSetpoint()),
-                intake.setVoltage(Volts.of(0)))
-            .withTimeout(1.0));
+    return superstructure.setState(Superstructure.State.intake)
+      .withTimeout(1.0)
+      .andThen(superstructure.setState(Superstructure.State.idle));
   }
 
   private Command climbCommand() {
