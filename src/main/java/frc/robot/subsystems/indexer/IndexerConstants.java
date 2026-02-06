@@ -21,4 +21,9 @@ public class IndexerConstants {
     public static final Voltage peakForwardVoltage = Volts.of(12);
     public static final Voltage peakReverseVoltage = Volts.of(-12);
   }
+
+  public static class Setpoints {
+    public static final Voltage intake = Volts.of(6);
+    public static final Voltage feed = Volts.of(12);
+  }
 }

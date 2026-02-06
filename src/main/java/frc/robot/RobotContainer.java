@@ -31,12 +31,17 @@ import frc.robot.commands.AutoRoutines;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.SotmCalculator;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.hood.Hood;
+import frc.robot.subsystems.hood.HoodIO;
+import frc.robot.subsystems.hood.HoodIOServo;
+import frc.robot.subsystems.hood.HoodIOSim;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSim;
@@ -76,6 +81,9 @@ public class RobotContainer {
   private final Shooter shooter;
   private final Intake intake;
   private final Indexer indexer;
+  private final Hood hood;
+
+  private final Superstructure superstructure;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -113,7 +121,7 @@ public class RobotContainer {
                 new ShooterIOTalonFX(RobotMap.ShooterMap.left),
                 new ShooterIOTalonFX(RobotMap.ShooterMap.middle),
                 new ShooterIOTalonFX(RobotMap.ShooterMap.right));
-
+        hood = new Hood(new HoodIOServo());
         break;
 
       case SIM:
@@ -137,7 +145,7 @@ public class RobotContainer {
         shooter =
             new Shooter(
                 new FeederIO() {}, new ShooterIOSim(), new ShooterIOSim(), new ShooterIOSim());
-
+        hood = new Hood(new HoodIOSim());
         break;
 
       default:
@@ -157,6 +165,7 @@ public class RobotContainer {
         shooter = new Shooter(new FeederIO() {}, new ShooterIO() {});
         intake = new Intake(new IntakeIO() {});
         indexer = new Indexer(new IndexerIO() {});
+        hood = new Hood(new HoodIO() {});
         break;
     }
 
@@ -182,6 +191,8 @@ public class RobotContainer {
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     autoChooser.addOption("auto builder", autoBuilder.build());
+
+    superstructure = new Superstructure(drive, intake, shooter, indexer, hood);
 
     // Configure the button bindings
     configureButtonBindings();
