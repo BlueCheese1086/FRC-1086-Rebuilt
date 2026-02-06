@@ -85,6 +85,8 @@ public class RobotContainer {
 
   private final Superstructure superstructure;
 
+  private final AutoBuilder autobuilder;
+
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
 
@@ -170,7 +172,9 @@ public class RobotContainer {
     }
 
     AutoRoutines.setup(drive);
-    AutoBuilder autoBuilder = new AutoBuilder(drive, shooter, intake);
+    
+    superstructure = new Superstructure(drive, intake, shooter, indexer, hood);
+    autobuilder = new AutoBuilder(superstructure);
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices");
@@ -190,9 +194,7 @@ public class RobotContainer {
         "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption("auto builder", autoBuilder.build());
-
-    superstructure = new Superstructure(drive, intake, shooter, indexer, hood);
+    autoChooser.addOption("auto builder", autobuilder.build());
 
     // Configure the button bindings
     configureButtonBindings();

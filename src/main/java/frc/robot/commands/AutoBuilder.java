@@ -149,8 +149,7 @@ public class AutoBuilder {
         },
         Set.of(superstructure));
   }
-
-  // TODO: update values
+  
   private Command shootCommand() {
     return superstructure.setState(Superstructure.State.score)
       .withTimeout(1.0)
