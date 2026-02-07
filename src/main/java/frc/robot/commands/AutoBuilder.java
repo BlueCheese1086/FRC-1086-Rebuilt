@@ -149,9 +149,9 @@ public class AutoBuilder {
         },
         Set.of(superstructure));
   }
-  
+
   private Command shootCommand() {
-    return superstructure.setState(Superstructure.State.score);
+    return superstructure.setState(Superstructure.State.Score);
   }
 
   private Command intakeCommand() {

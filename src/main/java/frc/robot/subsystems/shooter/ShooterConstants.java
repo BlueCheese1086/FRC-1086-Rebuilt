@@ -10,13 +10,9 @@ import edu.wpi.first.units.measure.MomentOfInertia;
 
 /** Add your docs here. */
 public class ShooterConstants {
-  public static class PID {
-    public static final double kP = 0.0;
-    public static final double kI = 0.0;
-    public static final double kD = 0.0;
-
+  public static class Tuning {
     public static final double kS = 0.1;
-    public static final double kV = 12.0 / 600.0; // adjust later when i feel like it
+    public static final double kV = 12.0 / 100.0; // adjust later when i feel like it
     public static final double kA = 0.0;
 
     public static final double cruiseVelocity = 5729.58 / 60; // ~ 600 rad per sec;
