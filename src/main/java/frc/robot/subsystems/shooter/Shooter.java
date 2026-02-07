@@ -9,6 +9,8 @@ import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
+import java.util.function.Supplier;
+
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -33,11 +35,11 @@ public class Shooter extends SubsystemBase {
     }
   }
 
-  public Command setVelocity(AngularVelocity radPerSec) {
-    return this.runOnce(
+  public Command setVelocity(Supplier<AngularVelocity> radPerSec) {
+    return this.run(
         () -> {
           for (int i = 0; i < io.length; i++) {
-            io[i].setVelocity(radPerSec);
+            io[i].setVelocity(radPerSec.get());
           }
         });
   }
