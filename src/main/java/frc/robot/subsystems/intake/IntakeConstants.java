@@ -17,12 +17,12 @@ import edu.wpi.first.units.measure.Voltage;
 /** Add your docs here. */
 public class IntakeConstants {
   public static class PID {
-    public static final double kP = 300.0;
+    public static final double kP = 10.0;
     public static final double kI = 0.0;
     public static final double kD = 0.0;
     public static final double kS = 0.0;
     public static final double kG = 0.0;
-    public static final double kV = 0.0;
+    public static final double kV = 12.0 / 600.0;
     public static final double kA = 0.0;
   }
 

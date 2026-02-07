@@ -15,12 +15,18 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.RobotBase;
+
+import static edu.wpi.first.units.Units.RPM;
+
 import org.littletonrobotics.junction.AutoLogOutput;
 
 /**
- * This class defines the runtime mode used by AdvantageKit. The mode is always "real" when running
- * on a roboRIO. Change the value of "simMode" to switch between "sim" (physics sim) and "replay"
+ * This class defines the runtime mode used by AdvantageKit. The mode is always
+ * "real" when running
+ * on a roboRIO. Change the value of "simMode" to switch between "sim" (physics
+ * sim) and "replay"
  * (log replay from a file).
  */
 public final class Constants {
@@ -29,8 +35,9 @@ public final class Constants {
   @AutoLogOutput(key = "/Robot/Current Mode")
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
 
-  public static final boolean useEstimated = false;
-  public static final Pose2d initialPose = new Pose2d(1.5, 1.5, Rotation2d.kZero);
+  public static class KrakenX60 {
+    public static final AngularVelocity kFreeSpeed = RPM.of(6000);
+  }
 
   public static enum Mode {
     /** Running on a real robot. */
