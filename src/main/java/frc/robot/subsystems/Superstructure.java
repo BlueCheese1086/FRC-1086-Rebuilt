@@ -36,7 +36,6 @@ import java.util.HashMap;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.Logger;
 
 public class Superstructure extends SubsystemBase {
 
