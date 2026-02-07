@@ -151,10 +151,7 @@ public class AutoBuilder {
   }
   
   private Command shootCommand() {
-    return superstructure
-        .setState(Superstructure.State.Score)
-        .withTimeout(1.0)
-        .andThen(superstructure.setState(Superstructure.State.Idle));
+    return superstructure.setState(Superstructure.State.score);
   }
 
   private Command intakeCommand() {
