@@ -34,6 +34,9 @@ public class FieldConstants {
   public static final double fieldLength = defaultAprilTagType.getFieldLength();
   public static final double fieldWidth = defaultAprilTagType.getFieldWidth();
 
+  // Shooting related constants
+  public static final double gravitationalAcceleration = 9.80665;
+
   /**
    * Officially defined and relevant vertical lines found on the field (defined by X-axis offset)
    */

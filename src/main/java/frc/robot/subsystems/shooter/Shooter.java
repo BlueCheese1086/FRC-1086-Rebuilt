@@ -42,6 +42,12 @@ public class Shooter extends SubsystemBase {
         });
   }
 
+  public void setVelocitySetpoint(AngularVelocity radPerSec) {
+    for (int i = 0; i < io.length; i++) {
+      io[i].setVelocity(radPerSec);
+    }
+  }
+
   public Command runFeederVoltage(double volts) {
     return Commands.run(() -> feederIO.setFeedVoltage(volts), this);
   }

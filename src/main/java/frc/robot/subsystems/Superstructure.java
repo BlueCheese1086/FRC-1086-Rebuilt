@@ -1,10 +1,13 @@
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -15,11 +18,14 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShotCalc;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.hood.Hood;
+import frc.robot.subsystems.hood.HoodConstants;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerConstants;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeConstants;
 import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterConstants;
+import frc.robot.subsystems.shooter.shooterUtil.ShootingCalculator;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants;
 import java.util.HashMap;
@@ -210,8 +216,44 @@ public class Superstructure extends SubsystemBase {
         .and(() -> (FieldConstants.LinesVertical.inAllianceZone(drive.getPose())))
         .and(this::useTargeting)
         .whileTrue(
-            Commands
-                .parallel()); // TODO: Soham setup your shoot on the move and velocity thing here.
+            Commands.run(
+                () -> {
+                  var chassisSpeeds = drive.getChassisSpeeds();
+                  double speedMps =
+                      Math.hypot(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond);
+                  boolean isMoving = speedMps >= ShooterConstants.Targeting.movingSpeedThresholdMps;
+
+                  ShootingCalculator.ShootingSolution solution =
+                      isMoving
+                          ? ShootingCalculator.calculateMovingSolution(
+                              drive.getPose(),
+                              chassisSpeeds,
+                              Units.degreesToRadians(HoodConstants.Targeting.minAngleDeg),
+                              Units.degreesToRadians(HoodConstants.Targeting.maxAngleDeg),
+                              ShooterConstants.Targeting.minRpm,
+                              ShooterConstants.Targeting.maxRpm,
+                              ShooterConstants.Targeting.movingRpmChangeWeight,
+                              ShooterConstants.Targeting.movingHoodChangeWeight)
+                          : ShootingCalculator.calculateStationarySolution(
+                              drive.getPose(),
+                              Units.degreesToRadians(HoodConstants.Targeting.minAngleDeg),
+                              Units.degreesToRadians(HoodConstants.Targeting.maxAngleDeg),
+                              ShooterConstants.Targeting.stationaryRpm);
+
+                  hood.setAngle(Degrees.of(Math.toDegrees(solution.hoodAngleRad)));
+                  shooter.setVelocitySetpoint(
+                      RadiansPerSecond.of(
+                          Units.rotationsPerMinuteToRadiansPerSecond(solution.flywheelRpm)));
+
+                  Logger.recordOutput(
+                      "Superstructure/Target/HoodAngleDeg", Math.toDegrees(solution.hoodAngleRad));
+                  Logger.recordOutput("Superstructure/Target/FlywheelRpm", solution.flywheelRpm);
+                  Logger.recordOutput(
+                      "Superstructure/Target/DistanceMeters", solution.distanceMeters);
+                  Logger.recordOutput("Superstructure/Target/Valid", solution.valid);
+                  Logger.recordOutput("Superstructure/Target/SpeedMps", speedMps);
+                  Logger.recordOutput("Superstructure/Target/IsMoving", isMoving);
+                }));
     stateTriggers
         .get(State.shoot)
         .and(ControllerLayout.disableTargeting)
