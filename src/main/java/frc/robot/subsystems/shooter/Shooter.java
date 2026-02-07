@@ -52,9 +52,10 @@ public class Shooter extends SubsystemBase {
             });
   }
 
-  private void stopAll() {
+  public void stopAll() {
     for (int i = 0; i < io.length; i++) {
       io[i].setVoltage(0.0);
+      feederIO.setFeedVoltage(0.0);
     }
   }
 

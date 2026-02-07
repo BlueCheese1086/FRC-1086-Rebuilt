@@ -39,26 +39,26 @@ public class Superstructure extends SubsystemBase {
     public static DoubleSupplier joystickY = () -> (0.0);
   }
 
-  public enum State { // Ideas
-    idle,
-    holding,
-    target,
-    score,
-    intake,
-    climb,
-    climbscore,
-    prepass,
-    pass
+  public enum State {
+    Idle,
+    Holding,
+    Target,
+    Score,
+    Intake,
+    Climb,
+    ClimbScore,
+    PrePass,
+    Pass
   }
 
   private HashMap<Trigger, State> stateRequests = new HashMap<Trigger, State>();
   private HashMap<State, Trigger> stateTriggers = new HashMap<State, Trigger>();
 
   @AutoLogOutput(key = "Superstructure/State/CurrentState")
-  private State state = State.idle;
+  private State state = State.Idle;
 
   @AutoLogOutput(key = "Superstructure/State/PreviousState")
-  private State previousState = State.idle;
+  private State previousState = State.Idle;
 
   private final Drive drive;
   private final Intake intake;
@@ -86,55 +86,43 @@ public class Superstructure extends SubsystemBase {
       stateTriggers.put(state, new Trigger(() -> this.state == state && DriverStation.isEnabled()));
     }
 
-    stateRequests.put(
-        ControllerLayout.cancelRequest.and(stateTriggers.get(State.holding)), State.idle);
-    stateRequests.put(
-        ControllerLayout.intakeRequest.and(stateTriggers.get(State.idle)), State.holding);
-    stateRequests.put(
-        ControllerLayout.cancelRequest.and(stateTriggers.get(State.target)), State.holding);
-    stateRequests.put(
-        ControllerLayout.cancelRequest.and(stateTriggers.get(State.climb)), State.holding);
-    stateRequests.put(
-        ControllerLayout.intakeRequest.negate().and(stateTriggers.get(State.intake)),
-        State.holding);
-    stateRequests.put(
-        ControllerLayout.passingRequest.negate().and(stateTriggers.get(State.prepass)),
-        State.holding);
+    stateRequests.put(ControllerLayout.cancelRequest.and(stateTriggers.get(State.Holding)), State.Idle);
+    stateRequests.put(ControllerLayout.intakeRequest.and(stateTriggers.get(State.Idle)), State.Holding);
+    stateRequests.put(ControllerLayout.cancelRequest.and(stateTriggers.get(State.Target)), State.Holding);
+    stateRequests.put(ControllerLayout.cancelRequest.and(stateTriggers.get(State.Climb)), State.Holding);
+    stateRequests.put(ControllerLayout.intakeRequest.negate().and(stateTriggers.get(State.Intake)), State.Holding);
+    stateRequests.put(ControllerLayout.passingRequest.negate().and(stateTriggers.get(State.PrePass)), State.Holding);
     stateRequests.put(
         stateTriggers
-            .get(State.target)
+            .get(State.Target)
             .and(
                 () -> {
                   return !FieldConstants.LinesVertical.inAllianceZone(drive.getPose());
                 }),
-        State.holding); // Save This one for later
+        State.Holding); // Save This one for later
+
     stateRequests.put(
         stateTriggers
-            .get(State.holding)
+            .get(State.Holding)
             .and(
                 () -> {
                   return FieldConstants.LinesVertical.inAllianceZone(drive.getPose());
                 }),
-        State.target); // Save This one for later
-    stateRequests.put(
-        ControllerLayout.scoreRequest.negate().and(stateTriggers.get(State.score)),
-        State.target); // Save This one for later
-    stateRequests.put(
-        ControllerLayout.intakeRequest.and(stateTriggers.get(State.holding)), State.intake);
-    stateRequests.put(
-        ControllerLayout.scoreRequest.and(stateTriggers.get(State.target)), State.score);
-    stateRequests.put(
-        ControllerLayout.climbRequest.and(stateTriggers.get(State.score).negate()), State.climb);
-    stateRequests.put(
-        ControllerLayout.cancelRequest.and(stateTriggers.get(State.climb)), State.climb);
-    stateRequests.put(
-        ControllerLayout.scoreRequest.and(stateTriggers.get(State.climb)), State.climbscore);
-    stateRequests.put(
-        ControllerLayout.passingRequest.and(stateTriggers.get(State.holding)), State.prepass);
-    stateRequests.put(
-        ControllerLayout.scoreRequest.negate().and(stateTriggers.get(State.pass)), State.prepass);
-    stateRequests.put(
-        ControllerLayout.scoreRequest.and(stateTriggers.get(State.prepass)), State.pass);
+        State.Target); // Save This one for later
+
+    stateRequests.put(ControllerLayout.scoreRequest.negate().and(stateTriggers.get(State.Score)), State.Target); // Save
+                                                                                                                 // This
+                                                                                                                 // one
+                                                                                                                 // for
+                                                                                                                 // later
+    stateRequests.put(ControllerLayout.intakeRequest.and(stateTriggers.get(State.Holding)), State.Intake);
+    stateRequests.put(ControllerLayout.scoreRequest.and(stateTriggers.get(State.Target)), State.Score);
+    stateRequests.put(ControllerLayout.climbRequest.and(stateTriggers.get(State.Score).negate()), State.Climb);
+    stateRequests.put(ControllerLayout.cancelRequest.and(stateTriggers.get(State.Climb)), State.Climb);
+    stateRequests.put(ControllerLayout.scoreRequest.and(stateTriggers.get(State.Climb)), State.ClimbScore);
+    stateRequests.put(ControllerLayout.passingRequest.and(stateTriggers.get(State.Holding)), State.PrePass);
+    stateRequests.put(ControllerLayout.scoreRequest.negate().and(stateTriggers.get(State.Pass)), State.PrePass);
+    stateRequests.put(ControllerLayout.scoreRequest.and(stateTriggers.get(State.PrePass)), State.Pass);
 
     // State Trigger stuff here
     for (Trigger key : stateRequests.keySet()) {
@@ -151,14 +139,14 @@ public class Superstructure extends SubsystemBase {
 
   private void setupIdle() {
     stateTriggers
-        .get(State.idle)
+        .get(State.Idle)
         .onTrue(
             Commands.parallel(
                 intake.setPosition(
-                    IntakeConstants.setpoints
-                        .stowed))); // TODO: Soham add climb stuff with setpoints once done.
+                    IntakeConstants.setpoints.stowed),
+                Commands.runOnce(() -> shooter.stopAll()))); // TODO: Soham add climb stuff with setpoints once done.
     stateTriggers
-        .get(State.idle)
+        .get(State.Idle)
         .whileTrue(
             Commands.parallel(
                 shooter.setVoltage(0.0),
@@ -168,9 +156,9 @@ public class Superstructure extends SubsystemBase {
   }
 
   private void setupIntake() {
-    stateTriggers.get(State.holding).onTrue(intake.setPosition(IntakeConstants.setpoints.deployed));
+    stateTriggers.get(State.Holding).onTrue(intake.setPosition(IntakeConstants.setpoints.deployed));
     stateTriggers
-        .get(State.holding)
+        .get(State.Holding)
         .whileTrue(
             Commands.parallel(
                 shooter.setVoltage(0.0),
@@ -178,7 +166,7 @@ public class Superstructure extends SubsystemBase {
                 intake.setVoltage(Volts.of(0.0)),
                 shooter.runFeederVoltage(0.0)));
     stateTriggers
-        .get(State.intake)
+        .get(State.Intake)
         .whileTrue(
             Commands.parallel(
                 intake.setVoltage(Volts.of(12.0)),
@@ -187,7 +175,7 @@ public class Superstructure extends SubsystemBase {
 
   private void setupShoot() {
     stateTriggers
-        .get(State.score)
+        .get(State.Score)
         .whileTrue(
             Commands.parallel(
                 shooter.runFeederVoltage(12.0),
@@ -196,13 +184,13 @@ public class Superstructure extends SubsystemBase {
 
   private void setupTarget() {
     stateTriggers
-        .get(State.target)
+        .get(State.Target)
         .and(this::useTargeting)
         .whileTrue(
             Commands
                 .parallel()); // TODO: Soham setup your shoot on the move and velocity thing here.
     stateTriggers
-        .get(State.target)
+        .get(State.Target)
         .and(ControllerLayout.disableTargeting)
         .onTrue(
             Commands.runOnce(
@@ -213,7 +201,7 @@ public class Superstructure extends SubsystemBase {
 
   private void setupPass() {
     stateTriggers
-        .get(State.prepass)
+        .get(State.PrePass)
         .whileTrue(
             Commands.parallel(
                 DriveCommands.joystickDrive(
@@ -224,7 +212,7 @@ public class Superstructure extends SubsystemBase {
                       return AllianceFlipUtil.apply(Rotation2d.k180deg).getRadians();
                     }))); // TODO: Soham add the flywheel speed calculator & hood calculator
     stateTriggers
-        .get(State.pass)
+        .get(State.Pass)
         .whileTrue(
             Commands.parallel(
                 DriveCommands.joystickDrive(
@@ -240,16 +228,16 @@ public class Superstructure extends SubsystemBase {
 
   private void setupClimb() {
     stateTriggers
-        .get(State.climb)
+        .get(State.Climb)
         .onTrue(Commands.none()); // TODO: Soham add climb stuff with setpoints once done.
-    stateTriggers.get(State.climbscore).onTrue(Commands.none());
+    stateTriggers.get(State.ClimbScore).onTrue(Commands.none());
   }
 
   public Command setState(State newState) {
     return Commands.run(
-            () -> {
-              state = newState;
-            })
+        () -> {
+          state = newState;
+        })
         .withTimeout(0.01);
   }
 
