@@ -216,8 +216,14 @@ public class RobotContainer {
         DriveCommands.joystickDrive(
             drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
 
-    operator.a().whileTrue(Commands.sequence(shooter.sysid(8.0, 0, "left"), shooter.sysid(8.0, 1, "middle"), shooter.sysid(8.0, 2, "right")));
-    operator.b().whileTrue(shooter.setVelocity(RadiansPerSecond.of(200)));
+    operator
+        .a()
+        .whileTrue(
+            Commands.sequence(
+                shooter.sysid(8.0, 0, "left"),
+                shooter.sysid(8.0, 1, "middle"),
+                shooter.sysid(8.0, 2, "right")));
+    operator.b().whileTrue(shooter.setVelocity(() -> RadiansPerSecond.of(200)));
     // (
     // Commands.run(() -> shooter.sysid(8.0, 0, "left"), shooter));
 

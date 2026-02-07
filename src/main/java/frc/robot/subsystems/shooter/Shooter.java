@@ -4,12 +4,9 @@
 
 package frc.robot.subsystems.shooter;
 
-import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
-
-import java.util.function.Supplier;
 
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -17,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
@@ -80,7 +78,7 @@ public class Shooter extends SubsystemBase {
         Commands.waitUntil(() -> inputs[i].velocity <= 30.0),
         this.getShooterSysIdDynamic(Direction.kReverse, i, string).withTimeout(timeout),
         Commands.waitUntil(() -> inputs[i].velocity <= 30.0),
-        Commands.runOnce(()-> io[i].setVoltage(0.0)));
+        Commands.runOnce(() -> io[i].setVoltage(0.0)));
   }
 
   public Command getShooterSysIdQuasistatic(Direction direction, int index, String name) {

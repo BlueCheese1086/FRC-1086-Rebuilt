@@ -1,4 +1,3 @@
-
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Meters;
@@ -171,7 +170,7 @@ public class Superstructure extends SubsystemBase {
         .get(State.idle)
         .whileTrue(
             Commands.parallel(
-                shooter.setVoltage(0.0),
+                Commands.runOnce(() -> shooter.setVoltage(0.0)),
                 indexer.setVoltage(Volts.of(0.0)),
                 intake.setVoltage(Volts.of(0.0)),
                 shooter.runFeederVoltage(0.0)));
@@ -183,7 +182,7 @@ public class Superstructure extends SubsystemBase {
         .get(State.holding)
         .whileTrue(
             Commands.parallel(
-                shooter.setVoltage(0.0),
+                Commands.runOnce(() -> shooter.setVoltage(0.0)),
                 indexer.setVoltage(Volts.of(0.0)),
                 intake.setVoltage(Volts.of(0.0)),
                 shooter.runFeederVoltage(0.0)));
@@ -270,7 +269,7 @@ public class Superstructure extends SubsystemBase {
         .and(() -> (!FieldConstants.LinesVertical.inAllianceZone(drive.getPose())))
         .whileTrue(
             Commands.parallel(
-                shooter.setVoltage(9.0), // TODO: Tune this
+                Commands.runOnce(() -> shooter.setVoltage(9.0)), // TODO: Tune this
                 hood.setPosition(() -> (0.5)),
                 indexer.setVoltage(IndexerConstants.Setpoints.feed),
                 shooter.runFeederVoltage(12.0))); // Continue Targetting & Flywheel set speed.

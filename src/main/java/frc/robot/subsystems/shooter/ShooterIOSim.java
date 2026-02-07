@@ -39,8 +39,9 @@ public class ShooterIOSim implements ShooterIO {
     shooter.update(0.02);
 
     shooter.setInputVoltage(
-        bbController.calculate(shooter.getAngularVelocity().in(RotationsPerSecond)) * 12.0 + (shooterFF.calculate(shooter.getAngularVelocity().in(RotationsPerSecond))));
-        // +shooterFF.calculate(bbController.getSetpoint()));
+        bbController.calculate(shooter.getAngularVelocity().in(RotationsPerSecond)) * 12.0
+            + (shooterFF.calculate(shooter.getAngularVelocity().in(RotationsPerSecond))));
+    // +shooterFF.calculate(bbController.getSetpoint()));
 
     inputs.velocity = shooter.getAngularVelocity().in(RotationsPerSecond);
     inputs.appliedVoltage = shooter.getInputVoltage();
