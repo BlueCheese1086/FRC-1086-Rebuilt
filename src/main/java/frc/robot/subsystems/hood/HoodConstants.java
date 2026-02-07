@@ -23,4 +23,9 @@ public class HoodConstants {
     public static final double minPosition = 0.01;
     public static final double maxPosition = 0.77;
   }
+
+  public static class Targeting {
+    public static final double minAngleDeg = 54.0;
+    public static final double maxAngleDeg = 81.0;
+  }
 }

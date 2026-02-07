@@ -45,13 +45,13 @@ public class ShooterIOTalonFX implements ShooterIO {
     velocityTorqueCurrentFOC = new MotionMagicVelocityTorqueCurrentFOC(0.0);
 
     TalonFXConfiguration config = new TalonFXConfiguration();
-    config.Slot0.kS = ShooterConstants.PID.kS;
-    config.Slot0.kV = ShooterConstants.PID.kV;
-    config.Slot0.kA = ShooterConstants.PID.kA;
+    config.Slot0.kS = ShooterConstants.Tuning.kS;
+    config.Slot0.kV = ShooterConstants.Tuning.kV;
+    config.Slot0.kA = ShooterConstants.Tuning.kA;
 
     config.Audio.BeepOnBoot = true;
-    config.MotionMagic.MotionMagicAcceleration = ShooterConstants.PID.acceleration;
-    config.MotionMagic.MotionMagicCruiseVelocity = ShooterConstants.PID.cruiseVelocity;
+    config.MotionMagic.MotionMagicAcceleration = ShooterConstants.Tuning.acceleration;
+    config.MotionMagic.MotionMagicCruiseVelocity = ShooterConstants.Tuning.cruiseVelocity;
     config.Slot0.StaticFeedforwardSign = StaticFeedforwardSignValue.UseVelocitySign;
 
     config.CurrentLimits.StatorCurrentLimitEnable = true;

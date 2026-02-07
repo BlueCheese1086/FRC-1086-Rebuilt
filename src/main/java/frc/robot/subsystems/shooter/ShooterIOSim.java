@@ -26,11 +26,11 @@ public class ShooterIOSim implements ShooterIO {
             LinearSystemId.createFlywheelSystem(
                 DCMotor.getKrakenX60Foc(1),
                 ShooterConstants.Mechanical.J.in(KilogramSquareMeters),
-                ShooterConstants.Mechanical.gearing),
+                ShooterConstants.Mechanical.shooterWheelGearRatio),
             DCMotor.getKrakenX60Foc(1));
     shooterFF =
         new SimpleMotorFeedforward(
-            ShooterConstants.PID.kS, ShooterConstants.PID.kV, ShooterConstants.PID.kA);
+            ShooterConstants.Tuning.kS, ShooterConstants.Tuning.kV, ShooterConstants.Tuning.kA);
     bbController = new BangBangController(5.0);
   }
 
