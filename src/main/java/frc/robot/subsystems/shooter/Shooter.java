@@ -8,6 +8,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
@@ -26,11 +27,11 @@ public class Shooter extends SubsystemBase {
     }
   }
 
-  public Command setVelocity(AngularVelocity radPerSec) {
-    return this.runOnce(
+  public Command setVelocity(Supplier<AngularVelocity> radPerSec) {
+    return this.run(
         () -> {
           for (int i = 0; i < io.length; i++) {
-            io[i].setVelocity(radPerSec);
+            io[i].setVelocity(radPerSec.get());
           }
         });
   }
@@ -58,9 +59,10 @@ public class Shooter extends SubsystemBase {
             });
   }
 
-  private void stopAll() {
+  public void stopAll() {
     for (int i = 0; i < io.length; i++) {
       io[i].setVoltage(0.0);
+      feederIO.setFeedVoltage(0.0);
     }
   }
 
