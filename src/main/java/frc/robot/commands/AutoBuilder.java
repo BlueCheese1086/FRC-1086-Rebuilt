@@ -149,16 +149,16 @@ public class AutoBuilder {
         },
         Set.of(superstructure));
   }
-  
+
   private Command shootCommand() {
-    return superstructure.setState(Superstructure.State.score);
+    return superstructure.setState(Superstructure.State.shoot);
   }
 
   private Command intakeCommand() {
     return superstructure
-        .setState(Superstructure.State.Intake)
+        .setState(Superstructure.State.intake)
         .withTimeout(1.0)
-        .andThen(superstructure.setState(Superstructure.State.Idle));
+        .andThen(superstructure.setState(Superstructure.State.holding));
   }
 
   private Command climbCommand() {

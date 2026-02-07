@@ -4,15 +4,19 @@
 
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.ShotCalc;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.hood.Hood;
 import frc.robot.subsystems.indexer.Indexer;
@@ -25,6 +29,7 @@ import frc.robot.util.FieldConstants;
 import java.util.HashMap;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 
 public class Superstructure extends SubsystemBase {
 
@@ -39,26 +44,23 @@ public class Superstructure extends SubsystemBase {
     public static DoubleSupplier joystickY = () -> (0.0);
   }
 
-  public enum State {
-    Idle,
-    Holding,
-    Target,
-    Score,
-    Intake,
-    Climb,
-    ClimbScore,
-    PrePass,
-    Pass
+  public enum State { // Ideas
+    idle,
+    holding,
+    shoot,
+    intake,
+    climb,
+    climbscore,
   }
 
   private HashMap<Trigger, State> stateRequests = new HashMap<Trigger, State>();
   private HashMap<State, Trigger> stateTriggers = new HashMap<State, Trigger>();
 
   @AutoLogOutput(key = "Superstructure/State/CurrentState")
-  private State state = State.Idle;
+  private State state = State.idle;
 
   @AutoLogOutput(key = "Superstructure/State/PreviousState")
-  private State previousState = State.Idle;
+  private State previousState = State.idle;
 
   private final Drive drive;
   private final Intake intake;
@@ -68,6 +70,8 @@ public class Superstructure extends SubsystemBase {
 
   @AutoLogOutput(key = "Superstructure/Target/Use Targetting")
   private boolean useTargeting = true;
+
+  private Timer timer = new Timer();
 
   public Superstructure(
       final Drive drive,
@@ -86,43 +90,61 @@ public class Superstructure extends SubsystemBase {
       stateTriggers.put(state, new Trigger(() -> this.state == state && DriverStation.isEnabled()));
     }
 
-    stateRequests.put(ControllerLayout.cancelRequest.and(stateTriggers.get(State.Holding)), State.Idle);
-    stateRequests.put(ControllerLayout.intakeRequest.and(stateTriggers.get(State.Idle)), State.Holding);
-    stateRequests.put(ControllerLayout.cancelRequest.and(stateTriggers.get(State.Target)), State.Holding);
-    stateRequests.put(ControllerLayout.cancelRequest.and(stateTriggers.get(State.Climb)), State.Holding);
-    stateRequests.put(ControllerLayout.intakeRequest.negate().and(stateTriggers.get(State.Intake)), State.Holding);
-    stateRequests.put(ControllerLayout.passingRequest.negate().and(stateTriggers.get(State.PrePass)), State.Holding);
+    ControllerLayout.cancelRequest =
+        ControllerLayout.cancelRequest.and(
+            () -> {
+              return timer.hasElapsed(0.95);
+            });
+    ControllerLayout.cancelRequest.onTrue(
+        Commands.waitSeconds(0.02)
+            .andThen(
+                Commands.runOnce(
+                    () -> {
+                      timer.reset();
+                      timer.start();
+                    })));
+
+    stateRequests.put(
+        ControllerLayout.cancelRequest.and(stateTriggers.get(State.holding)), State.idle);
+    stateRequests.put(
+        ControllerLayout.intakeRequest.and(stateTriggers.get(State.idle)), State.holding);
+    stateRequests.put(
+        ControllerLayout.cancelRequest.and(stateTriggers.get(State.shoot)), State.holding);
+    stateRequests.put(
+        ControllerLayout.cancelRequest.and(stateTriggers.get(State.climb)), State.holding);
+    stateRequests.put(
+        ControllerLayout.intakeRequest.negate().and(stateTriggers.get(State.intake)),
+        State.holding);
+    stateRequests.put(
+        ControllerLayout.passingRequest.negate().and(stateTriggers.get(State.shoot)),
+        State.holding);
     stateRequests.put(
         stateTriggers
-            .get(State.Target)
+            .get(State.shoot)
             .and(
                 () -> {
                   return !FieldConstants.LinesVertical.inAllianceZone(drive.getPose());
                 }),
-        State.Holding); // Save This one for later
+        State.holding); // Save This one for later
 
     stateRequests.put(
         stateTriggers
-            .get(State.Holding)
+            .get(State.holding)
             .and(
                 () -> {
                   return FieldConstants.LinesVertical.inAllianceZone(drive.getPose());
                 }),
-        State.Target); // Save This one for later
-
-    stateRequests.put(ControllerLayout.scoreRequest.negate().and(stateTriggers.get(State.Score)), State.Target); // Save
-                                                                                                                 // This
-                                                                                                                 // one
-                                                                                                                 // for
-                                                                                                                 // later
-    stateRequests.put(ControllerLayout.intakeRequest.and(stateTriggers.get(State.Holding)), State.Intake);
-    stateRequests.put(ControllerLayout.scoreRequest.and(stateTriggers.get(State.Target)), State.Score);
-    stateRequests.put(ControllerLayout.climbRequest.and(stateTriggers.get(State.Score).negate()), State.Climb);
-    stateRequests.put(ControllerLayout.cancelRequest.and(stateTriggers.get(State.Climb)), State.Climb);
-    stateRequests.put(ControllerLayout.scoreRequest.and(stateTriggers.get(State.Climb)), State.ClimbScore);
-    stateRequests.put(ControllerLayout.passingRequest.and(stateTriggers.get(State.Holding)), State.PrePass);
-    stateRequests.put(ControllerLayout.scoreRequest.negate().and(stateTriggers.get(State.Pass)), State.PrePass);
-    stateRequests.put(ControllerLayout.scoreRequest.and(stateTriggers.get(State.PrePass)), State.Pass);
+        State.shoot); // Save This one for later
+    stateRequests.put(
+        ControllerLayout.intakeRequest.and(stateTriggers.get(State.holding)), State.intake);
+    stateRequests.put(
+        ControllerLayout.climbRequest, State.climb);
+    stateRequests.put(
+        ControllerLayout.cancelRequest.and(stateTriggers.get(State.climbscore)), State.climb);
+    stateRequests.put(
+        ControllerLayout.scoreRequest.and(stateTriggers.get(State.climb)), State.climbscore);
+    stateRequests.put(
+        ControllerLayout.passingRequest.and(stateTriggers.get(State.holding)), State.shoot);
 
     // State Trigger stuff here
     for (Trigger key : stateRequests.keySet()) {
@@ -135,18 +157,20 @@ public class Superstructure extends SubsystemBase {
     this.setupTarget();
     this.setupPass();
     this.setupClimb();
+
+    timer.start();
   }
 
   private void setupIdle() {
     stateTriggers
-        .get(State.Idle)
+        .get(State.idle)
         .onTrue(
             Commands.parallel(
                 intake.setPosition(
                     IntakeConstants.setpoints.stowed),
                 Commands.runOnce(() -> shooter.stopAll()))); // TODO: Soham add climb stuff with setpoints once done.
     stateTriggers
-        .get(State.Idle)
+        .get(State.idle)
         .whileTrue(
             Commands.parallel(
                 shooter.setVoltage(0.0),
@@ -156,9 +180,9 @@ public class Superstructure extends SubsystemBase {
   }
 
   private void setupIntake() {
-    stateTriggers.get(State.Holding).onTrue(intake.setPosition(IntakeConstants.setpoints.deployed));
+    stateTriggers.get(State.holding).onTrue(intake.setPosition(IntakeConstants.setpoints.deployed));
     stateTriggers
-        .get(State.Holding)
+        .get(State.holding)
         .whileTrue(
             Commands.parallel(
                 shooter.setVoltage(0.0),
@@ -166,7 +190,7 @@ public class Superstructure extends SubsystemBase {
                 intake.setVoltage(Volts.of(0.0)),
                 shooter.runFeederVoltage(0.0)));
     stateTriggers
-        .get(State.Intake)
+        .get(State.intake)
         .whileTrue(
             Commands.parallel(
                 intake.setVoltage(Volts.of(12.0)),
@@ -175,7 +199,8 @@ public class Superstructure extends SubsystemBase {
 
   private void setupShoot() {
     stateTriggers
-        .get(State.Score)
+        .get(State.shoot)
+        .and(ControllerLayout.scoreRequest)
         .whileTrue(
             Commands.parallel(
                 shooter.runFeederVoltage(12.0),
@@ -184,24 +209,54 @@ public class Superstructure extends SubsystemBase {
 
   private void setupTarget() {
     stateTriggers
-        .get(State.Target)
+        .get(State.shoot)
+        .and(() -> (FieldConstants.LinesVertical.inAllianceZone(drive.getPose())))
         .and(this::useTargeting)
         .whileTrue(
             Commands
                 .parallel()); // TODO: Soham setup your shoot on the move and velocity thing here.
     stateTriggers
-        .get(State.Target)
+        .get(State.shoot)
         .and(ControllerLayout.disableTargeting)
         .onTrue(
             Commands.runOnce(
                 () -> {
                   this.useTargeting = !this.useTargeting;
                 }));
+    stateTriggers
+        .get(State.shoot)
+        .and(() -> (FieldConstants.LinesVertical.inAllianceZone(drive.getPose())))
+        .whileTrue(
+            Commands.parallel(
+                hood.setPosition(
+                    () -> {
+                      return ShotCalc.getShot(
+                              Meters.of(
+                                  drive
+                                      .getPose()
+                                      .relativeTo(FieldConstants.Hub.hubCenter)
+                                      .getTranslation()
+                                      .getNorm()))
+                          .hoodPosition;
+                    }),
+                shooter.setVelocity(
+                    () -> {
+                      return RPM.of(
+                          ShotCalc.getShot(
+                                  Meters.of(
+                                      drive
+                                          .getPose()
+                                          .relativeTo(FieldConstants.Hub.hubCenter)
+                                          .getTranslation()
+                                          .getNorm()))
+                              .shooterRPM);
+                    })));
   }
 
   private void setupPass() {
     stateTriggers
-        .get(State.PrePass)
+        .get(State.shoot)
+        .and(() -> (!FieldConstants.LinesVertical.inAllianceZone(drive.getPose())))
         .whileTrue(
             Commands.parallel(
                 DriveCommands.joystickDrive(
@@ -212,25 +267,22 @@ public class Superstructure extends SubsystemBase {
                       return AllianceFlipUtil.apply(Rotation2d.k180deg).getRadians();
                     }))); // TODO: Soham add the flywheel speed calculator & hood calculator
     stateTriggers
-        .get(State.Pass)
+        .get(State.shoot)
+        .and(ControllerLayout.scoreRequest)
+        .and(() -> (!FieldConstants.LinesVertical.inAllianceZone(drive.getPose())))
         .whileTrue(
             Commands.parallel(
-                DriveCommands.joystickDrive(
-                    drive,
-                    ControllerLayout.joystickX,
-                    ControllerLayout.joystickY,
-                    () -> {
-                      return AllianceFlipUtil.apply(Rotation2d.k180deg).getRadians();
-                    }),
+                shooter.setVoltage(9.0), //TODO: Tune this
+                hood.setPosition(() -> (0.5)),
                 indexer.setVoltage(IndexerConstants.Setpoints.feed),
                 shooter.runFeederVoltage(12.0))); // Continue Targetting & Flywheel set speed.
   }
 
   private void setupClimb() {
     stateTriggers
-        .get(State.Climb)
+        .get(State.climb)
         .onTrue(Commands.none()); // TODO: Soham add climb stuff with setpoints once done.
-    stateTriggers.get(State.ClimbScore).onTrue(Commands.none());
+    stateTriggers.get(State.climbscore).onTrue(Commands.none());
   }
 
   public Command setState(State newState) {
@@ -248,5 +300,10 @@ public class Superstructure extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will only be used for logging and nothing else.
+    for (State key : stateTriggers.keySet()) {
+      Logger.recordOutput(
+          "Superstructure/States/" + key.toString(), stateTriggers.get(key).getAsBoolean());
+    }
+    Logger.recordOutput("Superstructure/Layout/Cancel", ControllerLayout.cancelRequest);
   }
 }

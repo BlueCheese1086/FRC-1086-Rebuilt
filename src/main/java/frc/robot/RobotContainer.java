@@ -248,7 +248,7 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    driver.y().onTrue(shooter.setVelocity(RadiansPerSecond.of(400)));
+    driver.y().onTrue(shooter.setVelocity(() -> RadiansPerSecond.of(400)));
   }
 
   public void periodic() {
