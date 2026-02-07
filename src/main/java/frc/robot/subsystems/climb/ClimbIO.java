@@ -4,27 +4,27 @@
 
 package frc.robot.subsystems.climb;
 
-import org.littletonrobotics.junction.AutoLog;
-
-import edu.wpi.first.units.measure.Distance;
 import frc.robot.subsystems.climb.ClimbConstants.Position;
+import org.littletonrobotics.junction.AutoLog;
 
 /** Add your docs here. */
 public interface ClimbIO {
 
-    @AutoLog
-    public static class ClimbIOInputs {
-        public double voltage = 0.0;
-        public double statorCurrent = 0.0;
-        public double supplyCurrent = 0.0;
-        public double position = 0.0;
-        public double velocity = 0.0;
-        public double temperature = 0.0;
-        public boolean isConnected = false;
-        public double setpoint = 0.0;
-    }
+  @AutoLog
+  public static class ClimbIOInputs {
+    public double voltage = 0.0;
+    public double statorCurrent = 0.0;
+    public double supplyCurrent = 0.0;
+    public double position = 0.0;
+    public double velocity = 0.0;
+    public double temperature = 0.0;
+    public boolean isConnected = false;
+    public double setpoint = 0.0;
+  }
 
-    public default void updateInputs(ClimbIOInputs inputs) {}
-    public default void setVoltage(double volts) {}
-    public default void setPosition(Position position) {}
-} 
+  public default void updateInputs(ClimbIOInputs inputs) {}
+
+  public default void setVoltage(double volts) {}
+
+  public default void setPosition(Position position) {}
+}

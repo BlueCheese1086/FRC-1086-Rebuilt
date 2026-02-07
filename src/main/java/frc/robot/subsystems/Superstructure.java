@@ -137,8 +137,7 @@ public class Superstructure extends SubsystemBase {
         State.shoot); // Save This one for later
     stateRequests.put(
         ControllerLayout.intakeRequest.and(stateTriggers.get(State.holding)), State.intake);
-    stateRequests.put(
-        ControllerLayout.climbRequest, State.climb);
+    stateRequests.put(ControllerLayout.climbRequest, State.climb);
     stateRequests.put(
         ControllerLayout.cancelRequest.and(stateTriggers.get(State.climbscore)), State.climb);
     stateRequests.put(
@@ -166,9 +165,11 @@ public class Superstructure extends SubsystemBase {
         .get(State.idle)
         .onTrue(
             Commands.parallel(
-                intake.setPosition(
-                    IntakeConstants.setpoints.stowed),
-                Commands.runOnce(() -> shooter.stopAll()))); // TODO: Soham add climb stuff with setpoints once done.
+                intake.setPosition(IntakeConstants.setpoints.stowed),
+                Commands.runOnce(
+                    () ->
+                        shooter
+                            .stopAll()))); // TODO: Soham add climb stuff with setpoints once done.
     stateTriggers
         .get(State.idle)
         .whileTrue(
@@ -272,7 +273,7 @@ public class Superstructure extends SubsystemBase {
         .and(() -> (!FieldConstants.LinesVertical.inAllianceZone(drive.getPose())))
         .whileTrue(
             Commands.parallel(
-                shooter.setVoltage(9.0), //TODO: Tune this
+                shooter.setVoltage(9.0), // TODO: Tune this
                 hood.setPosition(() -> (0.5)),
                 indexer.setVoltage(IndexerConstants.Setpoints.feed),
                 shooter.runFeederVoltage(12.0))); // Continue Targetting & Flywheel set speed.
@@ -287,9 +288,9 @@ public class Superstructure extends SubsystemBase {
 
   public Command setState(State newState) {
     return Commands.run(
-        () -> {
-          state = newState;
-        })
+            () -> {
+              state = newState;
+            })
         .withTimeout(0.01);
   }
 

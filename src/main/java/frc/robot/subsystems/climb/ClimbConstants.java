@@ -15,23 +15,25 @@ import edu.wpi.first.units.measure.Per;
 
 /** Add your docs here. */
 public class ClimbConstants {
-    public static final Per<DistanceUnit, AngleUnit> kHangerExtensionPerMotorAngle = Inches.of(6).div(Rotations.of(142));
+  public static final Per<DistanceUnit, AngleUnit> kHangerExtensionPerMotorAngle =
+      Inches.of(6).div(Rotations.of(142));
 
-    public enum Position {
-        HOMED(0),
-        EXTEND_HOPPER(2),
-        HANGING(6),
-        HUNG(0.2);
+  public enum Position {
+    HOMED(0),
+    EXTEND_HOPPER(2),
+    HANGING(6),
+    HUNG(0.2);
 
-        public final double inches;
+    public final double inches;
 
-        private Position(double inches) {
-            this.inches = inches;
-        }
-
-        public Angle motorAngle() {
-            final Measure<AngleUnit> angleMeasure = Inches.of(inches).divideRatio(kHangerExtensionPerMotorAngle);
-            return Rotations.of(angleMeasure.in(Rotations)); 
-        }
+    private Position(double inches) {
+      this.inches = inches;
     }
+
+    public Angle motorAngle() {
+      final Measure<AngleUnit> angleMeasure =
+          Inches.of(inches).divideRatio(kHangerExtensionPerMotorAngle);
+      return Rotations.of(angleMeasure.in(Rotations));
+    }
+  }
 }
