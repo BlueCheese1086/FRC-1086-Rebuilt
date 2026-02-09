@@ -64,9 +64,10 @@ public class Vision extends SubsystemBase {
       }
     }
     if (Robot.isReal()) {
-      // Pose2d average = PoseMath.average(poses);
-      // if (FieldConstants.inFieldBounds(average)) {
-      //   consumer.accept(average, Timer.getFPGATimestamp(), VecBuilder.fill(3, 3, 3));
+      // for (Pose2d pose : poses) {
+      //   if (FieldConstants.inFieldBounds(pose)) {
+      //     consumer.accept(pose, Timer.getFPGATimestamp(), VecBuilder.fill(3, 3, 3));
+      //   }
       // }
     } else {
       Logger.recordOutput("Vision/Estimated Pose", PoseMath.average(poses));

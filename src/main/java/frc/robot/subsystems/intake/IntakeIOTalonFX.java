@@ -90,13 +90,13 @@ public class IntakeIOTalonFX implements IntakeIO {
     pivotTemperature = pivot.getDeviceTemp();
 
     StatusSignal.setUpdateFrequencyForAll(
-        RobotMap.systemBus.isNetworkFD() ? 250.0 : 100.0,
-        rollerVelocity,
+        RobotMap.systemBus.isNetworkFD() ? 250.0 : 50.0,pivotAngle);
+    StatusSignal.setUpdateFrequencyForAll(50.0,
         rollerVoltage,
         rollerSupply,
         rollerStator,
         rollerTemperature,
-        pivotAngle,
+        rollerVelocity,
         pivotVelocity,
         pivotVoltage,
         pivotSupply,

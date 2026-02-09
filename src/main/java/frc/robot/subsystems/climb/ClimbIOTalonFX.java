@@ -23,6 +23,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
+import frc.robot.RobotMap;
 import frc.robot.Constants.KrakenX60;
 import frc.robot.subsystems.climb.ClimbConstants.Position;
 import org.littletonrobotics.junction.Logger;
@@ -42,7 +43,7 @@ public class ClimbIOTalonFX implements ClimbIO {
   private double setpoint = 0.0;
 
   public ClimbIOTalonFX(int id) {
-    climb = new TalonFX(id);
+    climb = new TalonFX(id, RobotMap.systemBus);
     config = new TalonFXConfiguration();
 
     config.Audio.BeepOnBoot = true;
@@ -78,7 +79,8 @@ public class ClimbIOTalonFX implements ClimbIO {
     voltageSignal = climb.getMotorVoltage();
 
     BaseStatusSignal.setUpdateFrequencyForAll(
-        50.0, temp, velocity, positionSignal, statorCurrent, supplyCurrent, voltageSignal);
+        50.0, temp, statorCurrent, supplyCurrent, voltageSignal);
+    BaseStatusSignal.setUpdateFrequencyForAll(RobotMap.systemBus.isNetworkFD() ? 250.0 : 50.0, velocity, positionSignal);
     climb.optimizeBusUtilization();
     Logger.recordOutput("Robot Map/Climb ID", climb.getDeviceID());
   }

@@ -119,8 +119,7 @@ public class Superstructure extends SubsystemBase {
         ControllerLayout.intakeRequest.negate().and(stateTriggers.get(State.intake)),
         State.holding);
     stateRequests.put(
-        ControllerLayout.passingRequest.negate().and(stateTriggers.get(State.pass)),
-        State.holding);
+        ControllerLayout.passingRequest.negate().and(stateTriggers.get(State.pass)), State.holding);
     stateRequests.put(
         stateTriggers
             .get(State.shoot)
@@ -305,8 +304,17 @@ public class Superstructure extends SubsystemBase {
                     () -> {
                       return AllianceFlipUtil.apply(Rotation2d.k180deg).getRadians();
                     }),
-                    Commands.run(() -> {shooter.setVoltage(9.0);}).finallyDo(() -> {shooter.setVoltage(0.0);}),
-                    hood.setPosition(() -> (0.5)))); // TODO: Soham add the flywheel speed calculator & hood calculator
+                Commands.run(
+                        () -> {
+                          shooter.setVoltage(9.0);
+                        })
+                    .finallyDo(
+                        () -> {
+                          shooter.setVoltage(0.0);
+                        }),
+                hood.setPosition(
+                    () ->
+                        (0.5)))); // TODO: Soham add the flywheel speed calculator & hood calculator
     stateTriggers
         .get(State.pass)
         .and(ControllerLayout.scoreRequest)

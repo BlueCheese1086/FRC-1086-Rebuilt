@@ -55,7 +55,7 @@ public class IndexerIOTalonFX implements IndexerIO {
     temp = talon.getDeviceTemp();
 
     StatusSignal.setUpdateFrequencyForAll(
-        RobotMap.systemBus.isNetworkFD() ? 250.0 : 100.0,
+        RobotMap.systemBus.isNetworkFD() ? 250.0 : 50.0,
         velocity,
         appliedVoltage,
         stator,
