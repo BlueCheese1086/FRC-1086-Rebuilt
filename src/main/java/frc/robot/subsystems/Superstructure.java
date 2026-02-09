@@ -50,6 +50,7 @@ public class Superstructure extends SubsystemBase {
     idle,
     holding,
     shoot,
+    pass,
     intake,
     climb,
     climbscore,
@@ -118,7 +119,7 @@ public class Superstructure extends SubsystemBase {
         ControllerLayout.intakeRequest.negate().and(stateTriggers.get(State.intake)),
         State.holding);
     stateRequests.put(
-        ControllerLayout.passingRequest.negate().and(stateTriggers.get(State.shoot)),
+        ControllerLayout.passingRequest.negate().and(stateTriggers.get(State.pass)),
         State.holding);
     stateRequests.put(
         stateTriggers
@@ -145,7 +146,7 @@ public class Superstructure extends SubsystemBase {
     stateRequests.put(
         ControllerLayout.scoreRequest.and(stateTriggers.get(State.climb)), State.climbscore);
     stateRequests.put(
-        ControllerLayout.passingRequest.and(stateTriggers.get(State.holding)), State.shoot);
+        ControllerLayout.passingRequest.and(stateTriggers.get(State.holding)), State.pass);
 
     // State Trigger stuff here
     for (Trigger key : stateRequests.keySet()) {
@@ -294,8 +295,7 @@ public class Superstructure extends SubsystemBase {
 
   private void setupPass() {
     stateTriggers
-        .get(State.shoot)
-        .and(() -> (!FieldConstants.LinesVertical.inAllianceZone(drive.getPose())))
+        .get(State.pass)
         .whileTrue(
             Commands.parallel(
                 DriveCommands.joystickDrive(
@@ -304,15 +304,15 @@ public class Superstructure extends SubsystemBase {
                     ControllerLayout.joystickY,
                     () -> {
                       return AllianceFlipUtil.apply(Rotation2d.k180deg).getRadians();
-                    }))); // TODO: Soham add the flywheel speed calculator & hood calculator
+                    }),
+                    Commands.run(() -> {shooter.setVoltage(9.0);}).finallyDo(() -> {shooter.setVoltage(0.0);}),
+                    hood.setPosition(() -> (0.5)))); // TODO: Soham add the flywheel speed calculator & hood calculator
     stateTriggers
-        .get(State.shoot)
+        .get(State.pass)
         .and(ControllerLayout.scoreRequest)
         .and(() -> (!FieldConstants.LinesVertical.inAllianceZone(drive.getPose())))
         .whileTrue(
             Commands.parallel(
-                Commands.runOnce(() -> shooter.setVoltage(9.0)), // TODO: Tune this
-                hood.setPosition(() -> (0.5)),
                 indexer.setVoltage(IndexerConstants.Setpoints.feed),
                 shooter.runFeederVoltage(12.0))); // Continue Targetting & Flywheel set speed.
   }
