@@ -18,6 +18,7 @@ public interface VisionIO {
     public int tagCount = 0;
     public double averageDistance = 0.0;
     public ObservationType type = ObservationType.Empty;
+    public int[] tagsUsed = new int[] {};
   }
 
   public static enum ObservationType {

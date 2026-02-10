@@ -55,6 +55,7 @@ import frc.robot.subsystems.shooter.ShooterIOTalonFX;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
+import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOSim;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -108,7 +109,8 @@ public class RobotContainer {
                 new VisionIOPhotonVision(
                     "left", VisionConstants.PhysicalConstants.cameraTransforms[0]),
                 new VisionIOPhotonVision(
-                    "right", VisionConstants.PhysicalConstants.cameraTransforms[1]));
+                    "right", VisionConstants.PhysicalConstants.cameraTransforms[1]),
+                new VisionIOLimelight("scoring"));
 
         intake = new Intake(new IntakeIOTalonFX());
         indexer = new Indexer(new IndexerIOTalonFX());
