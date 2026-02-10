@@ -4,10 +4,16 @@
 
 package frc.robot.subsystems.shooter;
 
+import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Volts;
+
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -36,21 +42,20 @@ public class Shooter extends SubsystemBase {
         });
   }
 
+  public void setVelocitySetpoint(AngularVelocity radPerSec) {
+    for (int i = 0; i < io.length; i++) {
+      io[i].setVelocity(radPerSec);
+    }
+  }
+
   public Command runFeederVoltage(double volts) {
     return Commands.run(() -> feederIO.setFeedVoltage(volts), this);
   }
 
-  public Command setVoltage(double volts) {
-    return Commands.run(
-            () -> {
-              for (int i = 0; i < io.length; i++) {
-                io[i].setVoltage(volts);
-              }
-            })
-        .finallyDo(
-            () -> {
-              this.stopAll();
-            });
+  public void setVoltage(double volts) {
+    for (int i = 0; i < io.length; i++) {
+      io[i].setVoltage(volts);
+    }
   }
 
   public void stopAll() {
@@ -67,5 +72,48 @@ public class Shooter extends SubsystemBase {
       Logger.processInputs("Shooter" + i, inputs[i]);
     }
     feederIO.updateInputs(feederIOInputsAutoLogged);
+  }
+
+  public Command sysid(double timeout, int i, String string) {
+    return Commands.sequence(
+        this.getShooterSysIdQuasistatic(Direction.kForward, i, string).withTimeout(timeout),
+        Commands.waitUntil(() -> inputs[i].velocity <= 30.0),
+        this.getShooterSysIdQuasistatic(Direction.kReverse, i, string).withTimeout(timeout),
+        Commands.waitUntil(() -> inputs[i].velocity <= 30.0),
+        this.getShooterSysIdDynamic(Direction.kForward, i, string).withTimeout(timeout),
+        Commands.waitUntil(() -> inputs[i].velocity <= 30.0),
+        this.getShooterSysIdDynamic(Direction.kReverse, i, string).withTimeout(timeout),
+        Commands.waitUntil(() -> inputs[i].velocity <= 30.0),
+        Commands.runOnce(() -> io[i].setVoltage(0.0)));
+  }
+
+  public Command getShooterSysIdQuasistatic(Direction direction, int index, String name) {
+    return new SysIdRoutine(
+            new SysIdRoutine.Config(null, Volts.of(4), null),
+            new SysIdRoutine.Mechanism(
+                volts -> io[index].setVoltage(volts.in(Volts)),
+                log -> {
+                  log.motor(name)
+                      .voltage(Volts.of(inputs[index].appliedVoltage))
+                      .angularPosition(Rotations.of(inputs[index].positionRadPerSec))
+                      .angularVelocity(RotationsPerSecond.of(inputs[index].velocity));
+                },
+                this))
+        .quasistatic(direction);
+  }
+
+  public Command getShooterSysIdDynamic(Direction direction, int index, String name) {
+    return new SysIdRoutine(
+            new SysIdRoutine.Config(null, Volts.of(4), null),
+            new SysIdRoutine.Mechanism(
+                volts -> io[index].setVoltage(volts.in(Volts)),
+                log -> {
+                  log.motor(name)
+                      .voltage(Volts.of(inputs[index].appliedVoltage))
+                      .angularPosition(Rotations.of(inputs[index].positionRadPerSec))
+                      .angularVelocity(RotationsPerSecond.of(inputs[index].velocity));
+                },
+                this))
+        .dynamic(direction);
   }
 }

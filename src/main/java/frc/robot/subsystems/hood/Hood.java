@@ -43,11 +43,20 @@ public class Hood extends SubsystemBase {
         });
   }
 
+  public void setAngle(Angle angle) {
+    setAngle = angle;
+    io.setPosition(AngleToPosition.get(angle.in(Degrees)));
+  }
+
   public Command setPosition(DoubleSupplier position) {
     return this.run(
         () -> {
           io.setPosition(position.getAsDouble());
         });
+  }
+
+  public void setPosition(double position) {
+    io.setPosition(position);
   }
 
   public boolean atSetpoint() {

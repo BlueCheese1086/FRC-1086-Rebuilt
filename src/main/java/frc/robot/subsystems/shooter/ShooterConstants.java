@@ -4,19 +4,20 @@
 
 package frc.robot.subsystems.shooter;
 
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
+import static edu.wpi.first.units.Units.Meters;
 
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.MomentOfInertia;
 
 /** Add your docs here. */
 public class ShooterConstants {
-  public static class PID {
-    public static final double kP = 0.0;
-    public static final double kI = 0.0;
-    public static final double kD = 0.0;
-
+  public static class Tuning {
     public static final double kS = 0.1;
-    public static final double kV = 12.0 / 600.0; // adjust later when i feel like it
+    public static final double kV = 12.0 / 100.0; // adjust later when i feel like it
     public static final double kA = 0.0;
 
     public static final double cruiseVelocity = 5729.58 / 60; // ~ 600 rad per sec;
@@ -26,8 +27,31 @@ public class ShooterConstants {
     // and high numbers more stable.
   }
 
+  public static class Targeting {
+    public static final double minRpm = 1500.0;
+    public static final double maxRpm = 6000.0;
+    public static final double stationaryRpm = 3200.0;
+    public static final double movingSpeedThresholdMps = 0.25;
+    public static final double movingRpmChangeWeight = 2.0;
+    public static final double movingHoodChangeWeight = 0.5;
+  }
+
   public static class Mechanical {
     public static final MomentOfInertia J = KilogramSquareMeters.of(0.001);
-    public static final double gearing = 1.0;
+
+    public static final Distance shooterHeight = Inches.of(24.5);
+    public static final Distance flywheelRadius = Inches.of(2.0);
+    public static final double shooterWheelGearRatio = 1.0;
+    public static final Distance shooterXOffset = Inches.of(-10.0);
+    public static final Distance shooterYOffset = Inches.of(0.0);
+
+    // The position of the shooter relative to the robot's center, used for
+    // calculating the distance to the hub.
+    public static final Transform3d shooterPose =
+        new Transform3d(
+            shooterXOffset.in(Meters),
+            shooterYOffset.in(Meters),
+            shooterHeight.in(Meters),
+            new Rotation3d());
   }
 }

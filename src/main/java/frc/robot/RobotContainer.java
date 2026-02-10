@@ -17,7 +17,6 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -27,7 +26,6 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.AutoBuilder;
 import frc.robot.commands.AutoRoutines;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.SotmCalculator;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.drive.Drive;
@@ -59,8 +57,6 @@ import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOSim;
-import frc.robot.util.FieldConstants;
-import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -220,22 +216,16 @@ public class RobotContainer {
         DriveCommands.joystickDrive(
             drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
 
-    // Lock to 0° when A button is held
-    driver
+    operator
         .a()
         .whileTrue(
-            DriveCommands.joystickDriveAtAngle(
-                drive,
-                () -> -driver.getLeftY(),
-                () -> -driver.getLeftX(),
-                () ->
-                    (DriveCommands.getOrientationToTarget(
-                        drive.getPose(),
-                        new Pose2d(
-                            new Translation2d(11.863959, 7.411491399999999), Rotation2d.kZero)))));
-
-    // Switch to X pattern when X button is pressed
-    driver.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+            Commands.sequence(
+                shooter.sysid(8.0, 0, "left"),
+                shooter.sysid(8.0, 1, "middle"),
+                shooter.sysid(8.0, 2, "right")));
+    operator.b().whileTrue(shooter.setVelocity(() -> RadiansPerSecond.of(200)));
+    // (
+    // Commands.run(() -> shooter.sysid(8.0, 0, "left"), shooter));
 
     // Reset gyro to 0° when B button is pressed
     driver
@@ -249,20 +239,6 @@ public class RobotContainer {
                 .ignoringDisable(true));
 
     driver.y().onTrue(shooter.setVelocity(() -> RadiansPerSecond.of(400)));
-  }
-
-  public void periodic() {
-    Logger.recordOutput(
-        "Targetting/Estimated Angle",
-        new Pose2d(
-            drive.getPose().getTranslation(),
-            DriveCommands.getOrientationToTarget(drive.getPose(), FieldConstants.Hub.hubCenter)));
-
-    Logger.recordOutput(
-        "Targetting/SOTM Estimated Pose",
-        new Pose2d(
-            drive.getPose().getTranslation(),
-            SotmCalculator.getDesiredRotation(drive, FieldConstants.Hub.hubCenter)));
   }
 
   /**

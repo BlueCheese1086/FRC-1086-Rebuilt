@@ -9,6 +9,7 @@ package frc.robot.subsystems.drive;
 
 import static edu.wpi.first.units.Units.*;
 
+import com.ctre.phoenix6.SignalLogger;
 import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
@@ -97,7 +98,10 @@ public class Drive extends SubsystemBase {
                 null,
                 null,
                 null,
-                (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
+                (state) ->
+                    SignalLogger.writeString(
+                        "state", state.toString())), // Logger.recordOutput("Drive/SysIdState",
+            // state.toString())),
             new SysIdRoutine.Mechanism(
                 (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
   }

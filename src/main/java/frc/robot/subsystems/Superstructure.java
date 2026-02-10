@@ -1,14 +1,13 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -19,11 +18,14 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShotCalc;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.hood.Hood;
+import frc.robot.subsystems.hood.HoodConstants;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerConstants;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeConstants;
 import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterConstants;
+import frc.robot.subsystems.shooter.shooterUtil.ShootingCalculator;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants;
 import java.util.HashMap;
@@ -48,6 +50,7 @@ public class Superstructure extends SubsystemBase {
     idle,
     holding,
     shoot,
+    pass,
     intake,
     climb,
     climbscore,
@@ -116,7 +119,7 @@ public class Superstructure extends SubsystemBase {
         ControllerLayout.intakeRequest.negate().and(stateTriggers.get(State.intake)),
         State.holding);
     stateRequests.put(
-        ControllerLayout.passingRequest.negate().and(stateTriggers.get(State.shoot)),
+        ControllerLayout.passingRequest.negate().and(stateTriggers.get(State.pass)),
         State.holding);
     stateRequests.put(
         stateTriggers
@@ -143,7 +146,7 @@ public class Superstructure extends SubsystemBase {
     stateRequests.put(
         ControllerLayout.scoreRequest.and(stateTriggers.get(State.climb)), State.climbscore);
     stateRequests.put(
-        ControllerLayout.passingRequest.and(stateTriggers.get(State.holding)), State.shoot);
+        ControllerLayout.passingRequest.and(stateTriggers.get(State.holding)), State.pass);
 
     // State Trigger stuff here
     for (Trigger key : stateRequests.keySet()) {
@@ -174,7 +177,7 @@ public class Superstructure extends SubsystemBase {
         .get(State.idle)
         .whileTrue(
             Commands.parallel(
-                shooter.setVoltage(0.0),
+                Commands.runOnce(() -> shooter.setVoltage(0.0)),
                 indexer.setVoltage(Volts.of(0.0)),
                 intake.setVoltage(Volts.of(0.0)),
                 shooter.runFeederVoltage(0.0)));
@@ -186,7 +189,7 @@ public class Superstructure extends SubsystemBase {
         .get(State.holding)
         .whileTrue(
             Commands.parallel(
-                shooter.setVoltage(0.0),
+                Commands.runOnce(() -> shooter.setVoltage(0.0)),
                 indexer.setVoltage(Volts.of(0.0)),
                 intake.setVoltage(Volts.of(0.0)),
                 shooter.runFeederVoltage(0.0)));
@@ -214,8 +217,44 @@ public class Superstructure extends SubsystemBase {
         .and(() -> (FieldConstants.LinesVertical.inAllianceZone(drive.getPose())))
         .and(this::useTargeting)
         .whileTrue(
-            Commands
-                .parallel()); // TODO: Soham setup your shoot on the move and velocity thing here.
+            Commands.run(
+                () -> {
+                  var chassisSpeeds = drive.getChassisSpeeds();
+                  double speedMps =
+                      Math.hypot(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond);
+                  boolean isMoving = speedMps >= ShooterConstants.Targeting.movingSpeedThresholdMps;
+
+                  ShootingCalculator.ShootingSolution solution =
+                      isMoving
+                          ? ShootingCalculator.calculateMovingSolution(
+                              drive.getPose(),
+                              chassisSpeeds,
+                              Units.degreesToRadians(HoodConstants.Targeting.minAngleDeg),
+                              Units.degreesToRadians(HoodConstants.Targeting.maxAngleDeg),
+                              ShooterConstants.Targeting.minRpm,
+                              ShooterConstants.Targeting.maxRpm,
+                              ShooterConstants.Targeting.movingRpmChangeWeight,
+                              ShooterConstants.Targeting.movingHoodChangeWeight)
+                          : ShootingCalculator.calculateStationarySolution(
+                              drive.getPose(),
+                              Units.degreesToRadians(HoodConstants.Targeting.minAngleDeg),
+                              Units.degreesToRadians(HoodConstants.Targeting.maxAngleDeg),
+                              ShooterConstants.Targeting.stationaryRpm);
+
+                  hood.setAngle(Degrees.of(Math.toDegrees(solution.hoodAngleRad)));
+                  shooter.setVelocitySetpoint(
+                      RadiansPerSecond.of(
+                          Units.rotationsPerMinuteToRadiansPerSecond(solution.flywheelRpm)));
+
+                  Logger.recordOutput(
+                      "Superstructure/Target/HoodAngleDeg", Math.toDegrees(solution.hoodAngleRad));
+                  Logger.recordOutput("Superstructure/Target/FlywheelRpm", solution.flywheelRpm);
+                  Logger.recordOutput(
+                      "Superstructure/Target/DistanceMeters", solution.distanceMeters);
+                  Logger.recordOutput("Superstructure/Target/Valid", solution.valid);
+                  Logger.recordOutput("Superstructure/Target/SpeedMps", speedMps);
+                  Logger.recordOutput("Superstructure/Target/IsMoving", isMoving);
+                }));
     stateTriggers
         .get(State.shoot)
         .and(ControllerLayout.disableTargeting)
@@ -256,8 +295,7 @@ public class Superstructure extends SubsystemBase {
 
   private void setupPass() {
     stateTriggers
-        .get(State.shoot)
-        .and(() -> (!FieldConstants.LinesVertical.inAllianceZone(drive.getPose())))
+        .get(State.pass)
         .whileTrue(
             Commands.parallel(
                 DriveCommands.joystickDrive(
@@ -266,15 +304,15 @@ public class Superstructure extends SubsystemBase {
                     ControllerLayout.joystickY,
                     () -> {
                       return AllianceFlipUtil.apply(Rotation2d.k180deg).getRadians();
-                    }))); // TODO: Soham add the flywheel speed calculator & hood calculator
+                    }),
+                    Commands.run(() -> {shooter.setVoltage(9.0);}).finallyDo(() -> {shooter.setVoltage(0.0);}),
+                    hood.setPosition(() -> (0.5)))); // TODO: Soham add the flywheel speed calculator & hood calculator
     stateTriggers
-        .get(State.shoot)
+        .get(State.pass)
         .and(ControllerLayout.scoreRequest)
         .and(() -> (!FieldConstants.LinesVertical.inAllianceZone(drive.getPose())))
         .whileTrue(
             Commands.parallel(
-                shooter.setVoltage(9.0), // TODO: Tune this
-                hood.setPosition(() -> (0.5)),
                 indexer.setVoltage(IndexerConstants.Setpoints.feed),
                 shooter.runFeederVoltage(12.0))); // Continue Targetting & Flywheel set speed.
   }
