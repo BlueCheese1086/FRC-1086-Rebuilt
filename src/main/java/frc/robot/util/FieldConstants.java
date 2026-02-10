@@ -302,4 +302,11 @@ public class FieldConstants {
     public static final Translation2d centerPoint =
         new Translation2d(0, defaultAprilTagType.getTagPose(29).get().getY());
   }
+
+  public static boolean inFieldBounds(Pose2d pose) {
+    return pose.getX() >= 0.0
+        && pose.getX() <= fieldLength
+        && pose.getY() >= 0.0
+        && pose.getY() <= fieldWidth;
+  }
 }
