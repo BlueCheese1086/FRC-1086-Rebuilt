@@ -2,12 +2,20 @@ package frc.robot.commands;
 
 import static edu.wpi.first.wpilibj2.command.Commands.*;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.Superstructure;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
+
+import choreo.Choreo;
 
 public class AutoBuilder {
   private final Superstructure superstructure;
@@ -19,6 +27,7 @@ public class AutoBuilder {
   private final SendableChooser<String> nzExit = new SendableChooser<>();
   private final SendableChooser<String> finalShootPos = new SendableChooser<>();
   private final SendableChooser<String> climbPos = new SendableChooser<>();
+  private final Field2d autoTraj = new Field2d();
 
   public AutoBuilder(Superstructure superstructure) {
     this.superstructure = superstructure;
@@ -79,7 +88,9 @@ public class AutoBuilder {
     SmartDashboard.putData("Auto/NZ Exit (if entered neutral zone)", nzExit);
     SmartDashboard.putData("Auto/Final Shoot Pos", finalShootPos);
     SmartDashboard.putData("Auto/Climb Pos", climbPos);
-  }
+
+    SmartDashboard.putData("Auto Path", autoTraj);
+}
 
   public Command build() {
     return Commands.defer(
@@ -167,5 +178,12 @@ public class AutoBuilder {
         .setState(Superstructure.State.climb)
         .withTimeout(1.0)
         .andThen(superstructure.setState(Superstructure.State.climbscore));*/
+  }
+
+  public static List<Pose2d> getPathPoses(String trajectory){
+    var traj = Choreo.loadTrajectory(trajectory);
+    if (traj.isPresent())
+        return Arrays.asList(traj.get().getPoses());
+    return new ArrayList<>();
   }
 }
