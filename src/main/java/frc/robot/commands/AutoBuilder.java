@@ -150,21 +150,22 @@ public class AutoBuilder {
         Set.of(superstructure));
   }
 
+  // TODO: Implement these commands when superstructure is ready (or once I figure out what's wrong)
   private Command shootCommand() {
-    return superstructure.setState(Superstructure.State.shoot);
+    return Commands.none(); // superstructure.setState(Superstructure.State.shoot);
   }
 
   private Command intakeCommand() {
-    return superstructure
+    return Commands.none(); /*superstructure
         .setState(Superstructure.State.intake)
         .withTimeout(1.0)
-        .andThen(superstructure.setState(Superstructure.State.holding));
+        .andThen(superstructure.setState(Superstructure.State.holding));*/
   }
 
   private Command climbCommand() {
-    return superstructure
+    return Commands.none(); /*superstructure
         .setState(Superstructure.State.climb)
         .withTimeout(1.0)
-        .andThen(superstructure.setState(Superstructure.State.climbscore));
+        .andThen(superstructure.setState(Superstructure.State.climbscore));*/
   }
 }
