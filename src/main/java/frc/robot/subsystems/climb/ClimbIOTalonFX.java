@@ -23,8 +23,8 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
-import frc.robot.RobotMap;
 import frc.robot.Constants.KrakenX60;
+import frc.robot.RobotMap;
 import frc.robot.subsystems.climb.ClimbConstants.Position;
 import org.littletonrobotics.junction.Logger;
 
@@ -80,7 +80,8 @@ public class ClimbIOTalonFX implements ClimbIO {
 
     BaseStatusSignal.setUpdateFrequencyForAll(
         50.0, temp, statorCurrent, supplyCurrent, voltageSignal);
-    BaseStatusSignal.setUpdateFrequencyForAll(RobotMap.systemBus.isNetworkFD() ? 250.0 : 50.0, velocity, positionSignal);
+    BaseStatusSignal.setUpdateFrequencyForAll(
+        RobotMap.systemBus.isNetworkFD() ? 250.0 : 50.0, velocity, positionSignal);
     climb.optimizeBusUtilization();
     Logger.recordOutput("Robot Map/Climb ID", climb.getDeviceID());
   }

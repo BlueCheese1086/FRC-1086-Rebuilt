@@ -6,11 +6,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.subsystems.Superstructure;
+import frc.robot.subsystems.drive.Drive;
 import java.util.Set;
 
 public class AutoBuilder {
-  private final Superstructure superstructure;
+  private final Drive drive;
 
   private final SendableChooser<String> startPos = new SendableChooser<>();
   private final SendableChooser<String> preloadShootPos = new SendableChooser<>();
@@ -20,8 +20,8 @@ public class AutoBuilder {
   private final SendableChooser<String> finalShootPos = new SendableChooser<>();
   private final SendableChooser<String> climbPos = new SendableChooser<>();
 
-  public AutoBuilder(Superstructure superstructure) {
-    this.superstructure = superstructure;
+  public AutoBuilder(Drive drive) { // TODO: take in superstructure instead of drive
+    this.drive = drive;
 
     startPos.setDefaultOption("Hub Start", "hs");
     startPos.addOption("Depot Trench Start", "dts");
@@ -147,23 +147,23 @@ public class AutoBuilder {
                   : AutoRoutines.runPath(_finalShootPos + "_" + _climbPos, false)
                       .andThen(climbCommand()));
         },
-        Set.of(superstructure));
+        Set.of(drive));
   }
 
   // TODO: Implement these commands when superstructure is ready (or once I figure out what's wrong)
   private Command shootCommand() {
-    return Commands.none(); // superstructure.setState(Superstructure.State.shoot);
+    return print(""); // superstructure.setState(Superstructure.State.shoot);
   }
 
   private Command intakeCommand() {
-    return Commands.none(); /*superstructure
+    return print(""); /*superstructure
         .setState(Superstructure.State.intake)
         .withTimeout(1.0)
         .andThen(superstructure.setState(Superstructure.State.holding));*/
   }
 
   private Command climbCommand() {
-    return Commands.none(); /*superstructure
+    return print(""); /*superstructure
         .setState(Superstructure.State.climb)
         .withTimeout(1.0)
         .andThen(superstructure.setState(Superstructure.State.climbscore));*/
