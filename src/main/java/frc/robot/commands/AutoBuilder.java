@@ -89,11 +89,16 @@ public class AutoBuilder {
     SmartDashboard.putData("Auto/Climb Pos", climbPos);
 
     SmartDashboard.putData("Auto Path", autoTraj);
+
+    SmartDashboard.putData(
+        "Auto/Rebuild Preview", Commands.runOnce(this::rebuildPreview).ignoringDisable(true));
   }
 
   public Command build() {
     return Commands.defer(
         () -> {
+          rebuildPreview();
+
           String _startPos = startPos.getSelected();
           String _preloadShootPos = preloadShootPos.getSelected();
           String _intakePos = intakePos.getSelected();
@@ -110,53 +115,38 @@ public class AutoBuilder {
                       _startPos.length()
                           - 1); // if starting at hub, use selected nz entry, else use closest entry
 
-          List<Pose2d> p = new ArrayList<Pose2d>();
           List<Command> c = new ArrayList<Command>();
 
           if (_preloadShootPos.equals("none")) {
             if (_intakePos.endsWith("i")) {
               c.add(AutoRoutines.runPath(_startPos + "_" + _intakePos, true));
-              p.addAll(getPathPoses(_startPos + "_" + _intakePos));
             } else {
               c.add(AutoRoutines.runPath(_startPos + "_" + _selectedEntry, true));
-              p.addAll(getPathPoses(_startPos + "_" + _selectedEntry));
               c.add(AutoRoutines.runPath(_selectedEntry + "_" + _intakePos, false));
-              p.addAll(getPathPoses(_selectedEntry + "_" + _intakePos));
             }
           } else {
             c.add(AutoRoutines.runPath(_startPos + "_" + _preloadShootPos, true));
-            p.addAll(getPathPoses(_startPos + "_" + _preloadShootPos));
             c.add(shootCommand());
             if (_intakePos.endsWith("i")) {
               c.add(AutoRoutines.runPath(_preloadShootPos + "_" + _intakePos, false));
-              p.addAll(getPathPoses(_preloadShootPos + "_" + _intakePos));
             } else {
               c.add(AutoRoutines.runPath(_preloadShootPos + "_" + _nzEntry, false));
-              p.addAll(getPathPoses(_preloadShootPos + "_" + _nzEntry));
               c.add(AutoRoutines.runPath(_nzEntry + "_" + _intakePos, false));
-              p.addAll(getPathPoses(_nzEntry + "_" + _intakePos));
             }
           }
           c.add(intakeCommand());
           if (_intakePos.endsWith("n")) {
             c.add(AutoRoutines.runPath(_intakePos + "_" + _nzExit, false));
-            p.addAll(getPathPoses(_intakePos + "_" + _nzExit));
             c.add(AutoRoutines.runPath(_nzExit + "_" + _nzExit + "s", false));
-            p.addAll(getPathPoses(_nzExit + "_" + _nzExit + "s"));
             c.add(AutoRoutines.runPath(_nzExit + "s_" + _finalShootPos, false));
-            p.addAll(getPathPoses(_nzExit + "s_" + _finalShootPos));
           } else {
             c.add(AutoRoutines.runPath(_intakePos + "_" + _finalShootPos, false));
-            p.addAll(getPathPoses(_intakePos + "_" + _finalShootPos));
           }
           c.add(shootCommand());
           if (!_climbPos.equals("none")) {
             c.add(AutoRoutines.runPath(_finalShootPos + "_" + _climbPos, false));
-            p.addAll(getPathPoses(_finalShootPos + "_" + _climbPos));
             c.add(climbCommand());
           }
-
-          autoTraj.getObject("traj").setPoses(p);
 
           return Commands.sequence(c.toArray(new Command[0]));
         },
@@ -196,5 +186,51 @@ public class AutoBuilder {
 
   public void updateField() {
     autoTraj.setRobotPose(drive.getPose());
+  }
+
+  private void rebuildPreview() {
+    String _startPos = startPos.getSelected();
+    String _preloadShootPos = preloadShootPos.getSelected();
+    String _intakePos = intakePos.getSelected();
+    String _nzEntry = nzEntry.getSelected();
+    String _nzExit = nzExit.getSelected();
+    String _finalShootPos = finalShootPos.getSelected();
+    String _climbPos = climbPos.getSelected();
+
+    String _selectedEntry =
+        _startPos.equals("hs") ? _nzEntry : _startPos.substring(0, _startPos.length() - 1);
+
+    List<Pose2d> p = new ArrayList<>();
+
+    if (_preloadShootPos.equals("none")) {
+      if (_intakePos.endsWith("i")) {
+        p.addAll(getPathPoses(_startPos + "_" + _intakePos));
+      } else {
+        p.addAll(getPathPoses(_startPos + "_" + _selectedEntry));
+        p.addAll(getPathPoses(_selectedEntry + "_" + _intakePos));
+      }
+    } else {
+      p.addAll(getPathPoses(_startPos + "_" + _preloadShootPos));
+      if (_intakePos.endsWith("i")) {
+        p.addAll(getPathPoses(_preloadShootPos + "_" + _intakePos));
+      } else {
+        p.addAll(getPathPoses(_preloadShootPos + "_" + _nzEntry));
+        p.addAll(getPathPoses(_nzEntry + "_" + _intakePos));
+      }
+    }
+
+    if (_intakePos.endsWith("n")) {
+      p.addAll(getPathPoses(_intakePos + "_" + _nzExit));
+      p.addAll(getPathPoses(_nzExit + "_" + _nzExit + "s"));
+      p.addAll(getPathPoses(_nzExit + "s_" + _finalShootPos));
+    } else {
+      p.addAll(getPathPoses(_intakePos + "_" + _finalShootPos));
+    }
+
+    if (!_climbPos.equals("none")) {
+      p.addAll(getPathPoses(_finalShootPos + "_" + _climbPos));
+    }
+
+    autoTraj.getObject("traj").setPoses(p.toArray(new Pose2d[0]));
   }
 }
