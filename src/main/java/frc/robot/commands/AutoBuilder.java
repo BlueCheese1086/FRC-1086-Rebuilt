@@ -2,20 +2,18 @@ package frc.robot.commands;
 
 import static edu.wpi.first.wpilibj2.command.Commands.*;
 
+import choreo.Choreo;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-
+import frc.robot.subsystems.drive.Drive;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import frc.robot.subsystems.drive.Drive;
 import java.util.Set;
-
-import choreo.Choreo;
 
 public class AutoBuilder {
   private final Drive drive;
@@ -90,7 +88,7 @@ public class AutoBuilder {
     SmartDashboard.putData("Auto/Climb Pos", climbPos);
 
     SmartDashboard.putData("Auto Path", autoTraj);
-}
+  }
 
   public Command build() {
     return Commands.defer(
@@ -111,52 +109,55 @@ public class AutoBuilder {
                       _startPos.length()
                           - 1); // if starting at hub, use selected nz entry, else use closest entry
 
-          return Commands.sequence(
-              (_preloadShootPos.equals("none"))
-                  ? // if not preloaded
-                  ((_intakePos.endsWith("i"))
-                      ? // if not going to neutral zone
-                      AutoRoutines.runPath(_startPos + "_" + _intakePos, true)
-                      : // go directly to intake position
-                      AutoRoutines.runPath(
-                              _startPos + "_" + _selectedEntry,
-                              true) // else go to closest entry, then intake
-                          .andThen(AutoRoutines.runPath(_selectedEntry + "_" + _intakePos, false)))
-                  : // if preloaded
-                  AutoRoutines.runPath(
-                          _startPos + "_" + _preloadShootPos,
-                          true) // go to shoot position, shoot, then go to intake
-                      // position
-                      .andThen(shootCommand())
-                      .andThen(
-                          (_intakePos.endsWith("i"))
-                              ? // if not going to neutral zone
-                              AutoRoutines.runPath(_preloadShootPos + "_" + _intakePos, false)
-                              : // go directly to intake position
-                              AutoRoutines.runPath(
-                                      _preloadShootPos + "_" + _nzEntry,
-                                      false) // else go to selected entry, then intake
-                                  .andThen(
-                                      AutoRoutines.runPath(_nzEntry + "_" + _intakePos, false))),
-              intakeCommand(), // intake
-              (_intakePos.endsWith("n"))
-                  ? // if in neutral zone
-                  AutoRoutines.runPath(_intakePos + "_" + _nzExit, false) // go to the exit
-                      .andThen(
-                          AutoRoutines.runPath(
-                              _nzExit + "_" + _nzExit + "s",
-                              false)) // short go to closest start position
-                      .andThen(AutoRoutines.runPath(_nzExit + "s_" + _finalShootPos, false))
-                  : // use existing path to go to final shoot position
-                  AutoRoutines.runPath(
-                      _intakePos + "_" + _finalShootPos,
-                      false), // else, just go to final shoot position
-              shootCommand(), // shoot
-              (_climbPos.equals("none"))
-                  ? // if climbing, go climb but if not do nothing
-                  Commands.none()
-                  : AutoRoutines.runPath(_finalShootPos + "_" + _climbPos, false)
-                      .andThen(climbCommand()));
+          List<Pose2d> p = new ArrayList<Pose2d>();
+          List<Command> c = new ArrayList<Command>();
+
+          if (_preloadShootPos.equals("none")) {
+            if (_intakePos.endsWith("i")) {
+              c.add(AutoRoutines.runPath(_startPos + "_" + _intakePos, true));
+              p.addAll(getPathPoses(_startPos + "_" + _intakePos));
+            } else {
+              c.add(AutoRoutines.runPath(_startPos + "_" + _selectedEntry, true));
+              p.addAll(getPathPoses(_startPos + "_" + _selectedEntry));
+              c.add(AutoRoutines.runPath(_selectedEntry + "_" + _intakePos, false));
+              p.addAll(getPathPoses(_selectedEntry + "_" + _intakePos));
+            }
+          } else {
+            c.add(AutoRoutines.runPath(_startPos + "_" + _preloadShootPos, true));
+            p.addAll(getPathPoses(_startPos + "_" + _preloadShootPos));
+            c.add(shootCommand());
+            if (_intakePos.endsWith("i")) {
+              c.add(AutoRoutines.runPath(_preloadShootPos + "_" + _intakePos, false));
+              p.addAll(getPathPoses(_preloadShootPos + "_" + _intakePos));
+            } else {
+              c.add(AutoRoutines.runPath(_preloadShootPos + "_" + _nzEntry, false));
+              p.addAll(getPathPoses(_preloadShootPos + "_" + _nzEntry));
+              c.add(AutoRoutines.runPath(_nzEntry + "_" + _intakePos, false));
+              p.addAll(getPathPoses(_nzEntry + "_" + _intakePos));
+            }
+          }
+          c.add(intakeCommand());
+          if (_intakePos.endsWith("n")) {
+            c.add(AutoRoutines.runPath(_intakePos + "_" + _nzExit, false));
+            p.addAll(getPathPoses(_intakePos + "_" + _nzExit));
+            c.add(AutoRoutines.runPath(_nzExit + "_" + _nzExit + "s", false));
+            p.addAll(getPathPoses(_nzExit + "_" + _nzExit + "s"));
+            c.add(AutoRoutines.runPath(_nzExit + "s_" + _finalShootPos, false));
+            p.addAll(getPathPoses(_nzExit + "s_" + _finalShootPos));
+          } else {
+            c.add(AutoRoutines.runPath(_intakePos + "_" + _finalShootPos, false));
+            p.addAll(getPathPoses(_intakePos + "_" + _finalShootPos));
+          }
+          c.add(shootCommand());
+          if (!_climbPos.equals("none")) {
+            c.add(AutoRoutines.runPath(_finalShootPos + "_" + _climbPos, false));
+            p.addAll(getPathPoses(_finalShootPos + "_" + _climbPos));
+            c.add(climbCommand());
+          }
+
+          autoTraj.getObject("traj").setPoses(p);
+
+          return Commands.sequence(c.toArray(new Command[0]));
         },
         Set.of(drive));
   }
@@ -180,10 +181,13 @@ public class AutoBuilder {
         .andThen(superstructure.setState(Superstructure.State.climbscore));*/
   }
 
-  public static List<Pose2d> getPathPoses(String trajectory){
+  public static List<Pose2d> getPathPoses(String trajectory) {
     var traj = Choreo.loadTrajectory(trajectory);
-    if (traj.isPresent())
-        return Arrays.asList(traj.get().getPoses());
+    if (traj.isPresent()) return Arrays.asList(traj.get().getPoses());
     return new ArrayList<>();
+  }
+
+  public void updateField() {
+    autoTraj.setRobotPose(drive.getPose());
   }
 }

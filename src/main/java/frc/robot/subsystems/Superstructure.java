@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.AutoBuilder;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShotCalc;
 import frc.robot.subsystems.drive.Drive;
@@ -70,6 +71,7 @@ public class Superstructure extends SubsystemBase {
   private final Shooter shooter;
   private final Indexer indexer;
   private final Hood hood;
+  private final AutoBuilder autobuilder;
 
   @AutoLogOutput(key = "Superstructure/Target/Use Targetting")
   private boolean useTargeting = true;
@@ -81,13 +83,15 @@ public class Superstructure extends SubsystemBase {
       final Intake intake,
       final Shooter shooter,
       final Indexer indexer,
-      final Hood hood) {
+      final Hood hood,
+      final AutoBuilder autobuilder) {
     // Assigning subsystems
     this.drive = drive;
     this.intake = intake;
     this.shooter = shooter;
     this.indexer = indexer;
     this.hood = hood;
+    this.autobuilder = autobuilder;
 
     for (State state : State.values()) {
       stateTriggers.put(state, new Trigger(() -> this.state == state && DriverStation.isEnabled()));
@@ -352,5 +356,7 @@ public class Superstructure extends SubsystemBase {
           "Superstructure/States/" + key.toString(), stateTriggers.get(key).getAsBoolean());
     }
     Logger.recordOutput("Superstructure/Layout/Cancel", ControllerLayout.cancelRequest);
+
+    autobuilder.updateField();
   }
 }
