@@ -145,12 +145,11 @@
             "y": 128.0,
             "width": 256.0,
             "height": 128.0,
-            "type": "Command",
+            "type": "Toggle Button",
             "properties": {
               "topic": "/SmartDashboard/Auto/Rebuild Preview",
               "period": 0.06,
-              "show_type": true,
-              "maximize_button_space": false
+              "data_type": "boolean"
             }
           }
         ]

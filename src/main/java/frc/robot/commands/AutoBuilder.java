@@ -28,6 +28,8 @@ public class AutoBuilder {
   private final SendableChooser<String> climbPos = new SendableChooser<>();
   private final Field2d autoTraj = new Field2d();
 
+  private Command commands;
+
   public AutoBuilder(Drive drive) { // TODO: take in superstructure instead of drive
     this.drive = drive;
 
@@ -46,7 +48,7 @@ public class AutoBuilder {
 
     intakePos.setDefaultOption("Depot", "di");
     intakePos.addOption("Outpost", "oi");
-    intakePos.setDefaultOption("Depot Close Neutral", "dcn");
+    intakePos.addOption("Depot Close Neutral", "dcn");
     intakePos.addOption("Outpost Close Neutral", "ocn");
     intakePos.addOption("Depot Far Safe Neutral", "dfsn");
     intakePos.addOption("Depot Near Safe Neutral", "dnsn");
@@ -90,60 +92,14 @@ public class AutoBuilder {
 
     SmartDashboard.putData("Auto Path", autoTraj);
 
-    SmartDashboard.putData(
-        "Auto/Rebuild Preview", Commands.runOnce(this::rebuildPreview).ignoringDisable(true));
+    SmartDashboard.putBoolean("Auto/Rebuild Preview", false);
   }
 
   public Command build() {
     return Commands.defer(
         () -> {
           rebuildPreview();
-
-          String _startPos = startPos.getSelected();
-          String _preloadShootPos = preloadShootPos.getSelected();
-          String _intakePos = intakePos.getSelected();
-          String _nzEntry = nzEntry.getSelected();
-          String _nzExit = nzExit.getSelected();
-          String _finalShootPos = finalShootPos.getSelected();
-          String _climbPos = climbPos.getSelected();
-
-          String _selectedEntry =
-              _startPos.equals("hs") ? _nzEntry : _startPos.substring(0, _startPos.length() - 1);
-              
-          List<Command> c = new ArrayList<Command>();
-
-          if (_preloadShootPos.equals("none")) {
-            if (_intakePos.endsWith("i")) {
-              c.add(AutoRoutines.runPath(_startPos + "_" + _intakePos, true));
-            } else {
-              c.add(AutoRoutines.runPath(_startPos + "_" + _selectedEntry, true));
-              c.add(AutoRoutines.runPath(_selectedEntry + "_" + _intakePos, false));
-            }
-          } else {
-            c.add(AutoRoutines.runPath(_startPos + "_" + _preloadShootPos, true));
-            c.add(shootCommand());
-            if (_intakePos.endsWith("i")) {
-              c.add(AutoRoutines.runPath(_preloadShootPos + "_" + _intakePos, false));
-            } else {
-              c.add(AutoRoutines.runPath(_preloadShootPos + "_" + _nzEntry, false));
-              c.add(AutoRoutines.runPath(_nzEntry + "_" + _intakePos, false));
-            }
-          }
-          c.add(intakeCommand());
-          if (_intakePos.endsWith("n")) {
-            c.add(AutoRoutines.runPath(_intakePos + "_" + _nzExit, false));
-            c.add(AutoRoutines.runPath(_nzExit + "_" + _nzExit + "s", false));
-            c.add(AutoRoutines.runPath(_nzExit + "s_" + _finalShootPos, false));
-          } else {
-            c.add(AutoRoutines.runPath(_intakePos + "_" + _finalShootPos, false));
-          }
-          c.add(shootCommand());
-          if (!_climbPos.equals("none")) {
-            c.add(AutoRoutines.runPath(_finalShootPos + "_" + _climbPos, false));
-            c.add(climbCommand());
-          }
-
-          return Commands.sequence(c.toArray(new Command[0]));
+          return commands;
         },
         Set.of(drive));
   }
@@ -181,6 +137,11 @@ public class AutoBuilder {
 
   public void updateField() {
     autoTraj.setRobotPose(drive.getPose());
+
+    if (SmartDashboard.getBoolean("Auto/Rebuild Preview", false)) {
+      SmartDashboard.putBoolean("Auto/Rebuild Preview", false);
+      rebuildPreview();
+    }
   }
 
   private void rebuildPreview() {
@@ -195,37 +156,54 @@ public class AutoBuilder {
     String _selectedEntry =
         _startPos.equals("hs") ? _nzEntry : _startPos.substring(0, _startPos.length() - 1);
 
-    List<Pose2d> p = new ArrayList<>();
+    List<Pose2d> p = new ArrayList<Pose2d>();
+    List<Command> c = new ArrayList<Command>();
 
     if (_preloadShootPos.equals("none")) {
       if (_intakePos.endsWith("i")) {
+        c.add(AutoRoutines.runPath(_startPos + "_" + _intakePos, true));
         p.addAll(getPathPoses(_startPos + "_" + _intakePos));
       } else {
+        c.add(AutoRoutines.runPath(_startPos + "_" + _selectedEntry, true));
         p.addAll(getPathPoses(_startPos + "_" + _selectedEntry));
+        c.add(AutoRoutines.runPath(_selectedEntry + "_" + _intakePos, false));
         p.addAll(getPathPoses(_selectedEntry + "_" + _intakePos));
       }
     } else {
+      c.add(AutoRoutines.runPath(_startPos + "_" + _preloadShootPos, true));
       p.addAll(getPathPoses(_startPos + "_" + _preloadShootPos));
+      c.add(shootCommand());
       if (_intakePos.endsWith("i")) {
+        c.add(AutoRoutines.runPath(_preloadShootPos + "_" + _intakePos, false));
         p.addAll(getPathPoses(_preloadShootPos + "_" + _intakePos));
       } else {
+        c.add(AutoRoutines.runPath(_preloadShootPos + "_" + _nzEntry, false));
         p.addAll(getPathPoses(_preloadShootPos + "_" + _nzEntry));
+        c.add(AutoRoutines.runPath(_nzEntry + "_" + _intakePos, false));
         p.addAll(getPathPoses(_nzEntry + "_" + _intakePos));
       }
     }
-
+    c.add(intakeCommand());
     if (_intakePos.endsWith("n")) {
+      c.add(AutoRoutines.runPath(_intakePos + "_" + _nzExit, false));
       p.addAll(getPathPoses(_intakePos + "_" + _nzExit));
+      c.add(AutoRoutines.runPath(_nzExit + "_" + _nzExit + "s", false));
       p.addAll(getPathPoses(_nzExit + "_" + _nzExit + "s"));
+      c.add(AutoRoutines.runPath(_nzExit + "s_" + _finalShootPos, false));
       p.addAll(getPathPoses(_nzExit + "s_" + _finalShootPos));
     } else {
+      c.add(AutoRoutines.runPath(_intakePos + "_" + _finalShootPos, false));
       p.addAll(getPathPoses(_intakePos + "_" + _finalShootPos));
     }
-
+    c.add(shootCommand());
     if (!_climbPos.equals("none")) {
+      c.add(AutoRoutines.runPath(_finalShootPos + "_" + _climbPos, false));
       p.addAll(getPathPoses(_finalShootPos + "_" + _climbPos));
+      c.add(climbCommand());
     }
 
-    autoTraj.getObject("traj").setPoses(p.toArray(new Pose2d[0]));
+    autoTraj.getObject("traj").setPoses(p);
+
+    commands = Commands.sequence(c.toArray(new Command[0]));
   }
 }
