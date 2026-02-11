@@ -113,6 +113,7 @@ public class AutoRoutines {
 
   private static boolean hasWarned = false;
 
+  @SuppressWarnings("unused")
   public static void periodic() {
     if (!DriverStation.isFMSAttached()) {
       boolean updateX = false;

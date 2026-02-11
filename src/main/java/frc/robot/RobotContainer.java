@@ -78,7 +78,8 @@ public class RobotContainer {
   private final Indexer indexer;
   private final Hood hood;
 
-  private final Superstructure superstructure;
+  @SuppressWarnings("unused")
+private final Superstructure superstructure;
 
   private final AutoBuilder autobuilder;
 

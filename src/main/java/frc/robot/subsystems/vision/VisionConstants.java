@@ -7,13 +7,11 @@ package frc.robot.subsystems.vision;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
-import frc.robot.subsystems.vision.VisionIO.ObservationType;
 import frc.robot.util.FieldConstants;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
@@ -52,23 +50,5 @@ public class VisionConstants {
   public static class StandardDevs {
     public static final Matrix<N3, N1> multiTagDevs = VecBuilder.fill(1, 1, 1);
     public static final Matrix<N3, N1> trigDevs = VecBuilder.fill(1, 1, Double.MAX_VALUE);
-
-    public static Matrix<N3, N1> getStdDevs(ObservationType type) {
-      switch (type) {
-        case PhotonPnP:
-          return multiTagDevs;
-        case PhotonTrig:
-          return trigDevs;
-        default:
-          return multiTagDevs;
-      }
-    }
-  }
-
-  public static boolean inFieldBounds(Pose2d pose) {
-    return pose.getX() >= 0
-        && pose.getX() <= FieldConstants.defaultAprilTagType.getFieldLength()
-        && pose.getY() >= 0
-        && pose.getY() <= FieldConstants.defaultAprilTagType.getFieldWidth();
   }
 }

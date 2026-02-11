@@ -59,7 +59,7 @@ public class VisionIOPhotonVision implements VisionIO {
               : poseEstimator.estimatePnpDistanceTrigSolvePose(result);
       vPoseEstimated.ifPresent(
           (poseEstimated) -> {
-            if (VisionConstants.inFieldBounds(poseEstimated.estimatedPose.toPose2d())
+            if (VisionUtil.inFieldBounds(poseEstimated.estimatedPose.toPose2d())
                 && MathUtil.applyDeadband(poseEstimated.estimatedPose.getZ(), 0.1) == 0.0) {
               latestPose = poseEstimated.estimatedPose;
               inputs.estimatedPose = poseEstimated.estimatedPose;
