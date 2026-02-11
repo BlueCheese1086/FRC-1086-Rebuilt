@@ -108,13 +108,8 @@ public class AutoBuilder {
           String _climbPos = climbPos.getSelected();
 
           String _selectedEntry =
-              _startPos.equals("hs")
-                  ? _nzEntry
-                  : _startPos.substring(
-                      0,
-                      _startPos.length()
-                          - 1); // if starting at hub, use selected nz entry, else use closest entry
-
+              _startPos.equals("hs") ? _nzEntry : _startPos.substring(0, _startPos.length() - 1);
+              
           List<Command> c = new ArrayList<Command>();
 
           if (_preloadShootPos.equals("none")) {
