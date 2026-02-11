@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.util.AllianceFlipUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -183,7 +184,13 @@ public class AutoBuilder {
 
   public static List<Pose2d> getPathPoses(String trajectory) {
     var traj = Choreo.loadTrajectory(trajectory);
-    if (traj.isPresent()) return Arrays.asList(traj.get().getPoses());
+    if (traj.isPresent()) {
+      Pose2d[] poses = traj.get().getPoses();
+      for (int i = 0; i < poses.length; i++) {
+        poses[i] = AllianceFlipUtil.apply(poses[i]);
+      }
+      return Arrays.asList(poses);
+    }
     return new ArrayList<>();
   }
 
