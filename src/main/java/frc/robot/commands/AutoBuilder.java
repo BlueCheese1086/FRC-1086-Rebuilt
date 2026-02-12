@@ -38,6 +38,12 @@ public class AutoBuilder {
     startPos.addOption("Depot Bump Start", "dbs");
     startPos.addOption("Outpost Trench Start", "ots");
     startPos.addOption("Outpost Bump Start", "obs");
+    startPos.addOption("Hub Start Reverse", "hsr");
+    startPos.addOption("Depot Trench Start Reverse", "dtsr");
+    startPos.addOption("Depot Bump Start Reverse", "dbsr");
+    startPos.addOption("Outpost Trench Start Reverse", "otsr");
+    startPos.addOption("Outpost Bump Start Reverse", "obsr");
+
 
     preloadShootPos.setDefaultOption("Center Shot", "cs");
     preloadShootPos.addOption("Depot Far Shot", "dfs");
@@ -81,11 +87,11 @@ public class AutoBuilder {
     climbPos.addOption("Outpost Climb", "oc");
 
     SmartDashboard.putData("Auto/Start Pos", startPos);
-    SmartDashboard.putData("Auto/Preload Shoot Pos (if preloaded)", preloadShootPos);
+    SmartDashboard.putData("Auto/Preload Shoot Pos (if preloaded and not a reverse starting position)", preloadShootPos);
     SmartDashboard.putData(
         "Auto/Intake Source (after shooting preload or starting not preloaded)", intakePos);
     SmartDashboard.putData(
-        "Auto/NZ Entry (if at Hub Start or going to neutral zone after shooting preload)", nzEntry);
+        "Auto/NZ Entry (if starting or going to neutral zone after shooting preload)", nzEntry);
     SmartDashboard.putData("Auto/NZ Exit (if entered neutral zone)", nzExit);
     SmartDashboard.putData("Auto/Final Shoot Pos", finalShootPos);
     SmartDashboard.putData("Auto/Climb Pos", climbPos);
@@ -153,21 +159,21 @@ public class AutoBuilder {
     String _finalShootPos = finalShootPos.getSelected();
     String _climbPos = climbPos.getSelected();
 
-    String _selectedEntry =
-        _startPos.equals("hs") ? _nzEntry : _startPos.substring(0, _startPos.length() - 1);
-
     List<Pose2d> p = new ArrayList<Pose2d>();
     List<Command> c = new ArrayList<Command>();
 
+    if (_startPos.endsWith("r")) {
+       c.add(shootCommand());
+    }
     if (_preloadShootPos.equals("none")) {
       if (_intakePos.endsWith("i")) {
         c.add(AutoRoutines.runPath(_startPos + "_" + _intakePos, true));
         p.addAll(getPathPoses(_startPos + "_" + _intakePos));
       } else {
-        c.add(AutoRoutines.runPath(_startPos + "_" + _selectedEntry, true));
-        p.addAll(getPathPoses(_startPos + "_" + _selectedEntry));
-        c.add(AutoRoutines.runPath(_selectedEntry + "_" + _intakePos, false));
-        p.addAll(getPathPoses(_selectedEntry + "_" + _intakePos));
+        c.add(AutoRoutines.runPath(_startPos + "_" + _nzEntry, true));
+        p.addAll(getPathPoses(_startPos + "_" + _nzEntry));
+        c.add(AutoRoutines.runPath(_nzEntry + "_" + _intakePos, false));
+        p.addAll(getPathPoses(_nzEntry + "_" + _intakePos));
       }
     } else {
       c.add(AutoRoutines.runPath(_startPos + "_" + _preloadShootPos, true));
