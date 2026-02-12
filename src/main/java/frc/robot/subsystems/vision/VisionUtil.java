@@ -15,20 +15,20 @@ import frc.robot.util.FieldConstants;
 
 /** Add your docs here. */
 public class VisionUtil {
-    public static Matrix<N3, N1> getStdDevs(ObservationType type) {
-        switch (type) {
-        case PhotonPnP:
-            return VisionConstants.StandardDevs.multiTagDevs;
-        case PhotonTrig:
-            return VisionConstants.StandardDevs.trigDevs;
-        case LimeLightMegatag2:
-            return VisionConstants.StandardDevs.trigDevs;
-        case LimeLightMegatag1:
-            return VisionConstants.StandardDevs.multiTagDevs;
-        default:
-            return VisionConstants.StandardDevs.multiTagDevs;
-        }
+  public static Matrix<N3, N1> getStdDevs(ObservationType type) {
+    switch (type) {
+      case PhotonPnP:
+        return VisionConstants.StandardDevs.multiTagDevs;
+      case PhotonTrig:
+        return VisionConstants.StandardDevs.trigDevs;
+      case LimeLightMegatag2:
+        return VisionConstants.StandardDevs.trigDevs;
+      case LimeLightMegatag1:
+        return VisionConstants.StandardDevs.multiTagDevs;
+      default:
+        return VisionConstants.StandardDevs.multiTagDevs;
     }
+  }
 
   public static boolean inFieldBounds(Pose2d pose) {
     return pose.getX() >= 0
@@ -40,13 +40,14 @@ public class VisionUtil {
   public static boolean checkForInverseRead(Pose2d pose, int[] usedIds) {
     Rotation2d poseRotation = pose.getRotation();
     boolean isBad = false;
-    for (int i=0; i<usedIds.length; i++) {
-        if (usedIds[i] > 0) {
-            Pose2d tagPose = FieldConstants.defaultAprilTagType.getTagPose(i).get().toPose2d();
-            if (MathUtil.isNear(tagPose.getRotation().getRadians(),poseRotation.getRadians(),Math.PI)) {
-                isBad = true;
-            }
+    for (int i = 0; i < usedIds.length; i++) {
+      if (usedIds[i] > 0) {
+        Pose2d tagPose = FieldConstants.defaultAprilTagType.getTagPose(i).get().toPose2d();
+        if (MathUtil.isNear(
+            tagPose.getRotation().getRadians(), poseRotation.getRadians(), Math.PI)) {
+          isBad = true;
         }
+      }
     }
     return isBad;
   }

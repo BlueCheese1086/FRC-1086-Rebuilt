@@ -57,8 +57,8 @@ public class Vision extends SubsystemBase {
       Logger.processInputs("Vision/Camera " + i, inputs[i]);
       if (Robot.isReal()) {
         if (VisionUtil.inFieldBounds(inputs[i].pose)
-            && (MathUtil.applyDeadband(Timer.getFPGATimestamp() - inputs[i].timestamp, 2.5)
-                == 0.0) && !VisionUtil.checkForInverseRead(inputs[i].pose, inputs[i].tagsUsed)) {
+            && (MathUtil.applyDeadband(Timer.getFPGATimestamp() - inputs[i].timestamp, 2.5) == 0.0)
+            && !VisionUtil.checkForInverseRead(inputs[i].pose, inputs[i].tagsUsed)) {
           consumer.accept(inputs[i].pose, inputs[i].timestamp, calculateSTDDevs(inputs[i]));
         }
       }
