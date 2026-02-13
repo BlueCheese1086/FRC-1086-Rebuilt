@@ -44,7 +44,6 @@ public class AutoBuilder {
     startPos.addOption("Outpost Trench Start Reverse", "otsr");
     startPos.addOption("Outpost Bump Start Reverse", "obsr");
 
-
     preloadShootPos.setDefaultOption("Center Shot", "cs");
     preloadShootPos.addOption("Depot Far Shot", "dfs");
     preloadShootPos.addOption("Depot Near Shot", "dns");
@@ -87,7 +86,9 @@ public class AutoBuilder {
     climbPos.addOption("Outpost Climb", "oc");
 
     SmartDashboard.putData("Auto/Start Pos", startPos);
-    SmartDashboard.putData("Auto/Preload Shoot Pos (if preloaded and not a reverse starting position)", preloadShootPos);
+    SmartDashboard.putData(
+        "Auto/Preload Shoot Pos (if preloaded and not a reverse starting position)",
+        preloadShootPos);
     SmartDashboard.putData(
         "Auto/Intake Source (after shooting preload or starting not preloaded)", intakePos);
     SmartDashboard.putData(
@@ -163,7 +164,7 @@ public class AutoBuilder {
     List<Command> c = new ArrayList<Command>();
 
     if (_startPos.endsWith("r")) {
-       c.add(shootCommand());
+      c.add(shootCommand());
     }
     if (_preloadShootPos.equals("none")) {
       if (_intakePos.endsWith("i")) {

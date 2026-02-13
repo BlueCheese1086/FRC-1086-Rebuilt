@@ -12,118 +12,127 @@
     {
       "name": "Autonomous",
       "grid_layout": {
-        "layouts": [],
+        "layouts": [
+          {
+            "title": "Auto",
+            "x": 0.0,
+            "y": 128.0,
+            "width": 768.0,
+            "height": 768.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "Start Pos",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "ComboBox Chooser",
+                "properties": {
+                  "topic": "/SmartDashboard/Auto/Start Pos",
+                  "period": 0.06,
+                  "sort_options": false
+                }
+              },
+              {
+                "title": "Preload Shoot Pos (if preloaded and not a reverse starting position)",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Split Button Chooser",
+                "properties": {
+                  "topic": "/SmartDashboard/Auto/Preload Shoot Pos (if preloaded and not a reverse starting position)",
+                  "period": 0.06
+                }
+              },
+              {
+                "title": "NZ Entry (if starting or going to neutral zone after shooting preload)",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Split Button Chooser",
+                "properties": {
+                  "topic": "/SmartDashboard/Auto/NZ Entry (if starting or going to neutral zone after shooting preload)",
+                  "period": 0.06
+                }
+              },
+              {
+                "title": "Intake Source (after shooting preload or starting not preloaded)",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "ComboBox Chooser",
+                "properties": {
+                  "topic": "/SmartDashboard/Auto/Intake Source (after shooting preload or starting not preloaded)",
+                  "period": 0.06,
+                  "sort_options": false
+                }
+              },
+              {
+                "title": "NZ Exit (if entered neutral zone)",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Split Button Chooser",
+                "properties": {
+                  "topic": "/SmartDashboard/Auto/NZ Exit (if entered neutral zone)",
+                  "period": 0.06
+                }
+              },
+              {
+                "title": "Final Shoot Pos",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Split Button Chooser",
+                "properties": {
+                  "topic": "/SmartDashboard/Auto/Final Shoot Pos",
+                  "period": 0.06
+                }
+              },
+              {
+                "title": "Climb Pos",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Split Button Chooser",
+                "properties": {
+                  "topic": "/SmartDashboard/Auto/Climb Pos",
+                  "period": 0.06
+                }
+              },
+              {
+                "title": "Rebuild Preview",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Toggle Button",
+                "properties": {
+                  "topic": "/SmartDashboard/Auto/Rebuild Preview",
+                  "period": 0.06,
+                  "data_type": "boolean"
+                }
+              }
+            ]
+          }
+        ],
         "containers": [
           {
-            "title": "Auto Choices",
-            "x": 0.0,
-            "y": 0.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "ComboBox Chooser",
-            "properties": {
-              "topic": "/SmartDashboard/Auto Choices",
-              "period": 0.06,
-              "sort_options": false
-            }
-          },
-          {
-            "title": "Climb Pos",
-            "x": 512.0,
-            "y": 128.0,
-            "width": 128.0,
-            "height": 128.0,
-            "type": "ComboBox Chooser",
-            "properties": {
-              "topic": "/SmartDashboard/Auto/Climb Pos",
-              "period": 0.06,
-              "sort_options": false
-            }
-          },
-          {
-            "title": "Final Shoot Pos",
-            "x": 0.0,
-            "y": 384.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "ComboBox Chooser",
-            "properties": {
-              "topic": "/SmartDashboard/Auto/Final Shoot Pos",
-              "period": 0.06,
-              "sort_options": false
-            }
-          },
-          {
-            "title": "Intake Source (after shooting preload or starting not preloaded)",
-            "x": 0.0,
-            "y": 128.0,
-            "width": 512.0,
-            "height": 128.0,
-            "type": "ComboBox Chooser",
-            "properties": {
-              "topic": "/SmartDashboard/Auto/Intake Source (after shooting preload or starting not preloaded)",
-              "period": 0.06,
-              "sort_options": false
-            }
-          },
-          {
-            "title": "NZ Entry (if at Hub Start or going to neutral zone after shooting preload)",
-            "x": 0.0,
-            "y": 256.0,
-            "width": 512.0,
-            "height": 128.0,
-            "type": "ComboBox Chooser",
-            "properties": {
-              "topic": "/SmartDashboard/Auto/NZ Entry (if at Hub Start or going to neutral zone after shooting preload)",
-              "period": 0.06,
-              "sort_options": false
-            }
-          },
-          {
-            "title": "NZ Exit (if entered neutral zone)",
-            "x": 256.0,
-            "y": 384.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "ComboBox Chooser",
-            "properties": {
-              "topic": "/SmartDashboard/Auto/NZ Exit (if entered neutral zone)",
-              "period": 0.06,
-              "sort_options": false
-            }
-          },
-          {
-            "title": "Preload Shoot Pos (if preloaded)",
-            "x": 256.0,
-            "y": 0.0,
-            "width": 384.0,
-            "height": 128.0,
-            "type": "ComboBox Chooser",
-            "properties": {
-              "topic": "/SmartDashboard/Auto/Preload Shoot Pos (if preloaded)",
-              "period": 0.06,
-              "sort_options": false
-            }
-          },
-          {
-            "title": "Start Pos",
-            "x": 640.0,
-            "y": 0.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "ComboBox Chooser",
-            "properties": {
-              "topic": "/SmartDashboard/Auto/Start Pos",
-              "period": 0.06,
-              "sort_options": false
-            }
-          },
-          {
             "title": "Auto Path",
-            "x": 512.0,
-            "y": 256.0,
-            "width": 640.0,
-            "height": 256.0,
+            "x": 768.0,
+            "y": 128.0,
+            "width": 1024.0,
+            "height": 768.0,
             "type": "Field",
             "properties": {
               "topic": "/SmartDashboard/Auto Path",
@@ -133,23 +142,23 @@
               "robot_length": 0.85,
               "show_other_objects": true,
               "show_trajectories": true,
-              "field_rotation": 180.0,
+              "field_rotation": 0.0,
               "robot_color": 4294198070,
               "trajectory_color": 4294967295,
               "show_robot_outside_widget": true
             }
           },
           {
-            "title": "Rebuild Preview",
-            "x": 640.0,
-            "y": 128.0,
-            "width": 256.0,
+            "title": "Auto Choices",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 768.0,
             "height": 128.0,
-            "type": "Toggle Button",
+            "type": "ComboBox Chooser",
             "properties": {
-              "topic": "/SmartDashboard/Auto/Rebuild Preview",
+              "topic": "/SmartDashboard/Auto Choices",
               "period": 0.06,
-              "data_type": "boolean"
+              "sort_options": false
             }
           }
         ]
