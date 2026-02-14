@@ -40,9 +40,7 @@ public class Shooter extends SubsystemBase {
             io[i].setVelocity(radPerSec.get());
           }
         }).finallyDo(() -> {
-          for (int i=0; i<io.length; i++) {
-            io[i].setVoltage(0.0);
-          }
+          setVoltage(0.0);
         });
   }
 
