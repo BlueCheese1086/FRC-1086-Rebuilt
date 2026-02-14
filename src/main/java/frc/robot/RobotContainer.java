@@ -78,7 +78,6 @@ public class RobotContainer {
   private final Intake intake;
   private final Indexer indexer;
   private final Hood hood;
-  private final Climb climb;
 
   @SuppressWarnings("unused")
   private final Superstructure superstructure;
@@ -124,7 +123,6 @@ public class RobotContainer {
                 new ShooterIOTalonFX(RobotMap.ShooterMap.middle),
                 new ShooterIOTalonFX(RobotMap.ShooterMap.right));
         hood = new Hood(new HoodIOServo());
-        climb = new Climb();
         break;
 
       case SIM:
