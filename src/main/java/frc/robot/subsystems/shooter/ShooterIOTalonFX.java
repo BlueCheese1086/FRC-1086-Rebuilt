@@ -49,7 +49,8 @@ public class ShooterIOTalonFX implements ShooterIO {
     config.Slot0.kS = ShooterConstants.Tuning.kS;
     config.Slot0.kV = ShooterConstants.Tuning.kV;
     config.Slot0.kA = ShooterConstants.Tuning.kA;
-    config.MotorOutput.Inverted = inverted ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
+    config.MotorOutput.Inverted =
+        inverted ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
     config.Audio.BeepOnBoot = true;
     config.MotionMagic.MotionMagicAcceleration = ShooterConstants.Tuning.acceleration;
     config.MotionMagic.MotionMagicCruiseVelocity = ShooterConstants.Tuning.cruiseVelocity;
