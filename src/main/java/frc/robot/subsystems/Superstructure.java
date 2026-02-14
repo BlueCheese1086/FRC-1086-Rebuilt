@@ -76,6 +76,9 @@ public class Superstructure extends SubsystemBase {
   @AutoLogOutput(key = "Superstructure/Target/Use Targetting")
   private boolean useTargeting = true;
 
+  private boolean redStart = false;
+  private boolean hubActive = true;
+
   private Timer timer = new Timer();
 
   public Superstructure(
@@ -339,6 +342,7 @@ public class Superstructure extends SubsystemBase {
   public Command setState(State newState) {
     return Commands.run(
             () -> {
+              previousState = state;
               state = newState;
             })
         .withTimeout(0.01);
@@ -356,7 +360,10 @@ public class Superstructure extends SubsystemBase {
           "Superstructure/States/" + key.toString(), stateTriggers.get(key).getAsBoolean());
     }
     Logger.recordOutput("Superstructure/Layout/Cancel", ControllerLayout.cancelRequest);
-
+    String gameData = DriverStation.getGameSpecificMessage();
+    if (gameData.length() > 0) {
+      redStart = gameData.charAt(0) == 'R';
+    }
     autobuilder.updateField();
   }
 }

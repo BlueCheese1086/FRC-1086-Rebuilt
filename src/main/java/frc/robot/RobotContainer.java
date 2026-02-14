@@ -28,6 +28,7 @@ import frc.robot.commands.AutoRoutines;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Superstructure;
+import frc.robot.subsystems.climb.Climb;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -77,6 +78,7 @@ public class RobotContainer {
   private final Intake intake;
   private final Indexer indexer;
   private final Hood hood;
+  private final Climb climb;
 
   @SuppressWarnings("unused")
   private final Superstructure superstructure;
@@ -122,6 +124,7 @@ public class RobotContainer {
                 new ShooterIOTalonFX(RobotMap.ShooterMap.middle),
                 new ShooterIOTalonFX(RobotMap.ShooterMap.right));
         hood = new Hood(new HoodIOServo());
+        climb = new Climb();
         break;
 
       case SIM:
