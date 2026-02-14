@@ -7,6 +7,8 @@
 
 package frc.robot.util;
 
+import org.littletonrobotics.junction.AutoLogOutput;
+
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -135,6 +137,7 @@ public class FieldConstants {
     public static final Pose2d rightFace = defaultAprilTagType.getTagPose(18).get().toPose2d();
     public static final Pose2d leftFace = defaultAprilTagType.getTagPose(21).get().toPose2d();
 
+    @AutoLogOutput(key = "Field/Hub Active")
     public static boolean isHubActive(Alliance startingAlliance) {
       boolean redStart = startingAlliance.equals(Alliance.Red);
       if (DriverStation.isTeleop()) {

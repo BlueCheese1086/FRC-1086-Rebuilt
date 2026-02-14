@@ -54,7 +54,7 @@ public class SotmCalculator {
       Shooter shooter,
       Supplier<Pose2d> current,
       Supplier<Pose2d> target,
-      Supplier<ChassisSpeeds> speeds) {
+       Supplier<ChassisSpeeds> speeds) {
     return () -> {
       Pose2d currentPose = current.get();
       Pose2d targetPose = target.get();

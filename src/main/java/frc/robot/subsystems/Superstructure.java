@@ -273,6 +273,7 @@ public class Superstructure extends SubsystemBase {
     stateTriggers
         .get(State.shoot)
         .and(() -> (FieldConstants.LinesVertical.inAllianceZone(drive.getPose())))
+        .and(() -> !useTargeting)
         .whileTrue(
             Commands.parallel(
                 hood.setPosition(
