@@ -7,8 +7,6 @@
 
 package frc.robot.util;
 
-import org.littletonrobotics.junction.AutoLogOutput;
-
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -20,6 +18,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
+import org.littletonrobotics.junction.AutoLogOutput;
 
 /**
  * Contains information for location of field element and other useful reference points.

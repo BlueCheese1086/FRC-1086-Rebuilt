@@ -6,10 +6,6 @@ package frc.robot.commands;
 
 import static edu.wpi.first.units.Units.Meters;
 
-import java.util.function.Supplier;
-
-import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -22,6 +18,8 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterConstants;
 import frc.robot.subsystems.shooter.shooterUtil.ShootingCalculator;
 import frc.robot.util.LoggedTunableNumber;
+import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 public class SotmCalculator {
   private SotmCalculator() {}
@@ -49,12 +47,14 @@ public class SotmCalculator {
         new Pose2d(virtualTarget.getTranslation().toTranslation2d(), Rotation2d.kZero);
     return DriveCommands.getOrientationToTarget(drive.getPose(), virtualTarget2d);
   }
+
   private static LoggedTunableNumber adjust = new LoggedTunableNumber("SOTM/Adjust", 0.0);
+
   public static Supplier<Rotation2d> getTargetOrientationOnMove(
       Shooter shooter,
       Supplier<Pose2d> current,
       Supplier<Pose2d> target,
-       Supplier<ChassisSpeeds> speeds) {
+      Supplier<ChassisSpeeds> speeds) {
     return () -> {
       Pose2d currentPose = current.get();
       Pose2d targetPose = target.get();

@@ -29,6 +29,7 @@ public final class Constants {
 
   @AutoLogOutput(key = "/Robot/Current Mode")
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
+
   public static final boolean tuningMode = true;
 
   public static class KrakenX60 {

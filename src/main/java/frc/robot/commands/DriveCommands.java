@@ -33,10 +33,13 @@ public class DriveCommands {
   private static final double DEADBAND = 0.1;
   private static final double ANGLE_KP = 10.0;
   private static final double ANGLE_KD = 0.4;
+
   @SuppressWarnings("unused")
   private static final double ANGLE_MAX_VELOCITY = 8.0;
+
   @SuppressWarnings("unused")
   private static final double ANGLE_MAX_ACCELERATION = 20.0;
+
   private static final double FF_START_DELAY = 2.0; // Secs
   private static final double FF_RAMP_RATE = 0.1; // Volts/Sec
   private static final double WHEEL_RADIUS_MAX_VELOCITY = 0.25; // Rad/Sec
@@ -110,11 +113,7 @@ public class DriveCommands {
       Supplier<Rotation2d> rotationSupplier) {
 
     // Create PID controller
-    PIDController angleController =
-        new PIDController(
-            ANGLE_KP,
-            0.0,
-            ANGLE_KD);
+    PIDController angleController = new PIDController(ANGLE_KP, 0.0, ANGLE_KD);
     angleController.enableContinuousInput(-Math.PI, Math.PI);
 
     // Construct command

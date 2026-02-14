@@ -54,7 +54,9 @@ public class ShotCalc {
     }
 
     public double getMPS() {
-      return Rotation2d.fromDegrees(Hood.AngleToPosition.get(hoodPosition)).getCos() * (Units.rotationsToRadians(shooterRPM/60)*ShooterConstants.Mechanical.flywheelRadius.in(Meters));
+      return Rotation2d.fromDegrees(Hood.AngleToPosition.get(hoodPosition)).getCos()
+          * (Units.rotationsToRadians(shooterRPM / 60)
+              * ShooterConstants.Mechanical.flywheelRadius.in(Meters));
     }
   }
 }

@@ -118,9 +118,9 @@ public class RobotContainer {
         shooter =
             new Shooter(
                 new FeederIOTalonFX(1),
-                new ShooterIOTalonFX(RobotMap.ShooterMap.left),
-                new ShooterIOTalonFX(RobotMap.ShooterMap.middle),
-                new ShooterIOTalonFX(RobotMap.ShooterMap.right));
+                new ShooterIOTalonFX(RobotMap.ShooterMap.left, false),
+                new ShooterIOTalonFX(RobotMap.ShooterMap.middle, false),
+                new ShooterIOTalonFX(RobotMap.ShooterMap.right,true));
         hood = new Hood(new HoodIOServo());
         break;
 

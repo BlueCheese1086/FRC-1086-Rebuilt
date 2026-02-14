@@ -12,15 +12,13 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
-
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class Hood extends SubsystemBase {
   /** Creates a new Hood. */
-  public static final InterpolatingDoubleTreeMap AngleToPosition =
-      new InterpolatingDoubleTreeMap();
+  public static final InterpolatingDoubleTreeMap AngleToPosition = new InterpolatingDoubleTreeMap();
 
   private Angle setAngle = Radians.zero();
   private final HoodInputsAutoLogged inputs = new HoodInputsAutoLogged();

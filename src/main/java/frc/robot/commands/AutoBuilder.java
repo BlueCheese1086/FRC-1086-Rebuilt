@@ -30,7 +30,8 @@ public class AutoBuilder {
 
   private Command commands;
 
-  public AutoBuilder(Drive drive) { // TODO: take in superstructure instead of drive - no need - Martin
+  public AutoBuilder(
+      Drive drive) { // TODO: take in superstructure instead of drive - no need - Martin
     this.drive = drive;
 
     startPos.setDefaultOption("Hub Start", "hs");
