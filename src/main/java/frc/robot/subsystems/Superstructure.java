@@ -34,6 +34,7 @@ import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
+@SuppressWarnings("unused")
 public class Superstructure extends SubsystemBase {
 
   public static class ControllerLayout {

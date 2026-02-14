@@ -12,13 +12,14 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
+
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class Hood extends SubsystemBase {
   /** Creates a new Hood. */
-  private static final InterpolatingDoubleTreeMap AngleToPosition =
+  public static final InterpolatingDoubleTreeMap AngleToPosition =
       new InterpolatingDoubleTreeMap();
 
   private Angle setAngle = Radians.zero();
@@ -67,8 +68,12 @@ public class Hood extends SubsystemBase {
     if (Robot.isSimulation()) {
       return setAngle;
     } else {
-      return setAngle;
+      return getAngleFromHoodPos(this.inputs.leftPosition);
     }
+  }
+
+  public static Angle getAngleFromHoodPos(double hoodpos) {
+    return Degrees.of(AngleToPosition.get(hoodpos));
   }
 
   @Override
