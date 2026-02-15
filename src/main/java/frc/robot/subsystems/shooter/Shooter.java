@@ -35,13 +35,15 @@ public class Shooter extends SubsystemBase {
 
   public Command setVelocity(Supplier<AngularVelocity> radPerSec) {
     return this.run(
-        () -> {
-          for (int i = 0; i < io.length; i++) {
-            io[i].setVelocity(radPerSec.get());
-          }
-        }).finallyDo(() -> {
-          setVoltage(0.0);
-        });
+            () -> {
+              for (int i = 0; i < io.length; i++) {
+                io[i].setVelocity(radPerSec.get());
+              }
+            })
+        .finallyDo(
+            () -> {
+              setVoltage(0.0);
+            });
   }
 
   public void setVelocitySetpoint(AngularVelocity radPerSec) {
@@ -51,7 +53,11 @@ public class Shooter extends SubsystemBase {
   }
 
   public Command runFeederVoltage(double volts) {
-    return Commands.run(() -> feederIO.setFeedVoltage(volts), this).finallyDo(() -> {feederIO.setFeedVoltage(0.0);});
+    return Commands.run(() -> feederIO.setFeedVoltage(volts), this)
+        .finallyDo(
+            () -> {
+              feederIO.setFeedVoltage(0.0);
+            });
   }
 
   public void setVoltage(double volts) {
@@ -71,7 +77,7 @@ public class Shooter extends SubsystemBase {
   public void periodic() {
     for (int i = 0; i < io.length; i++) {
       io[i].updateInputs(inputs[i]);
-      Logger.processInputs("Shooter/Flywheel" + (i+1), inputs[i]);
+      Logger.processInputs("Shooter/Flywheel" + (i + 1), inputs[i]);
     }
     feederIO.updateInputs(feederIOInputsAutoLogged);
     Logger.processInputs("Shooter/Feeder", feederIOInputsAutoLogged);

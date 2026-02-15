@@ -322,8 +322,7 @@ public class Superstructure extends SubsystemBase {
                           shooter.setVoltage(0.0);
                         }),
                 hood.setPosition(
-                    () ->
-                        (0.5)))); // TODO: add the flywheel speed calculator & hood calculator
+                    () -> (0.5)))); // TODO: add the flywheel speed calculator & hood calculator
     stateTriggers
         .get(State.pass)
         .and(ControllerLayout.scoreRequest)
