@@ -204,12 +204,6 @@ public class RobotContainer {
     configureButtonBindings();
   }
 
-  /**
-   * Use this method to define your button->command mappings. Buttons can be created by
-   * instantiating a {@link GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
-   * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
-   */
   private void configureButtonBindings() {
     // Default command, normal field-relative drive
     drive.setDefaultCommand(
@@ -223,10 +217,7 @@ public class RobotContainer {
                 shooter.sysid(8.0, 0, "left"),
                 shooter.sysid(8.0, 1, "middle"),
                 shooter.sysid(8.0, 2, "right")));
-    operator.b().whileTrue(shooter.setVelocity(() -> RadiansPerSecond.of(200)));
-    // (
-    // Commands.run(() -> shooter.sysid(8.0, 0, "left"), shooter));
-
+                
     // Reset gyro to 0° when B button is pressed
     driver
         .b()
@@ -237,8 +228,6 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                     drive)
                 .ignoringDisable(true));
-
-    driver.y().onTrue(shooter.setVelocity(() -> RadiansPerSecond.of(400)));
   }
 
   /**
