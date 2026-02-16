@@ -18,8 +18,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class Hood extends SubsystemBase {
   /** Creates a new Hood. */
-  private static final InterpolatingDoubleTreeMap AngleToPosition =
-      new InterpolatingDoubleTreeMap();
+  public static final InterpolatingDoubleTreeMap AngleToPosition = new InterpolatingDoubleTreeMap();
 
   private Angle setAngle = Radians.zero();
   private final HoodInputsAutoLogged inputs = new HoodInputsAutoLogged();
@@ -67,8 +66,12 @@ public class Hood extends SubsystemBase {
     if (Robot.isSimulation()) {
       return setAngle;
     } else {
-      return setAngle;
+      return getAngleFromHoodPos(this.inputs.leftPosition);
     }
+  }
+
+  public static Angle getAngleFromHoodPos(double hoodpos) {
+    return Degrees.of(AngleToPosition.get(hoodpos));
   }
 
   @Override

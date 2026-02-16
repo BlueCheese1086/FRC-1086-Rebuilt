@@ -55,6 +55,7 @@ import frc.robot.subsystems.shooter.ShooterIOTalonFX;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
+import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOSim;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -77,6 +78,7 @@ public class RobotContainer {
   private final Indexer indexer;
   private final Hood hood;
 
+  @SuppressWarnings("unused")
   private final Superstructure superstructure;
 
   private final AutoBuilder autobuilder;
@@ -108,16 +110,17 @@ public class RobotContainer {
                 new VisionIOPhotonVision(
                     "left", VisionConstants.PhysicalConstants.cameraTransforms[0]),
                 new VisionIOPhotonVision(
-                    "right", VisionConstants.PhysicalConstants.cameraTransforms[1]));
+                    "right", VisionConstants.PhysicalConstants.cameraTransforms[1]),
+                new VisionIOLimelight("scoring"));
 
         intake = new Intake(new IntakeIOTalonFX());
         indexer = new Indexer(new IndexerIOTalonFX());
         shooter =
             new Shooter(
                 new FeederIOTalonFX(1),
-                new ShooterIOTalonFX(RobotMap.ShooterMap.left),
-                new ShooterIOTalonFX(RobotMap.ShooterMap.middle),
-                new ShooterIOTalonFX(RobotMap.ShooterMap.right));
+                new ShooterIOTalonFX(RobotMap.ShooterMap.left, false),
+                new ShooterIOTalonFX(RobotMap.ShooterMap.middle, false),
+                new ShooterIOTalonFX(RobotMap.ShooterMap.right, true));
         hood = new Hood(new HoodIOServo());
         break;
 
@@ -177,8 +180,8 @@ public class RobotContainer {
     Superstructure.ControllerLayout.joystickX = () -> -driver.getLeftY();
     Superstructure.ControllerLayout.joystickY = () -> -driver.getLeftX();
 
-    superstructure = new Superstructure(drive, intake, shooter, indexer, hood);
-    autobuilder = new AutoBuilder(superstructure);
+    autobuilder = new AutoBuilder(drive); // TODO: pass superstructure when ready
+    superstructure = new Superstructure(drive, intake, shooter, indexer, hood, autobuilder);
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices");

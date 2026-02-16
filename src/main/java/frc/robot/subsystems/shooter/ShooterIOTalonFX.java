@@ -12,6 +12,7 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.units.measure.Angle;
@@ -38,7 +39,7 @@ public class ShooterIOTalonFX implements ShooterIO {
   private double setpoint = 0.0;
   private double bangBangVoltage = 0.0;
 
-  public ShooterIOTalonFX(int id) {
+  public ShooterIOTalonFX(int id, boolean inverted) {
     shooter = new TalonFX(id);
     bbController = new BangBangController();
 
@@ -48,7 +49,8 @@ public class ShooterIOTalonFX implements ShooterIO {
     config.Slot0.kS = ShooterConstants.Tuning.kS;
     config.Slot0.kV = ShooterConstants.Tuning.kV;
     config.Slot0.kA = ShooterConstants.Tuning.kA;
-
+    config.MotorOutput.Inverted =
+        inverted ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
     config.Audio.BeepOnBoot = true;
     config.MotionMagic.MotionMagicAcceleration = ShooterConstants.Tuning.acceleration;
     config.MotionMagic.MotionMagicCruiseVelocity = ShooterConstants.Tuning.cruiseVelocity;

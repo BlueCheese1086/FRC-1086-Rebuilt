@@ -61,6 +61,20 @@
      "val":-0.79
     }
    },
+   "dbsr":{
+    "x":{
+     "exp":"3.4 m",
+     "val":3.4
+    },
+    "y":{
+     "exp":"5.5 m",
+     "val":5.5
+    },
+    "heading":{
+     "exp":"180 deg",
+     "val":3.141592653589793
+    }
+   },
    "dc":{
     "x":{
      "exp":"0.8 m",
@@ -215,6 +229,20 @@
      "val":0.0
     }
    },
+   "dtsr":{
+    "x":{
+     "exp":"3.6 m",
+     "val":3.6
+    },
+    "y":{
+     "exp":"7.5 m",
+     "val":7.5
+    },
+    "heading":{
+     "exp":"180 deg",
+     "val":3.141592653589793
+    }
+   },
    "hs":{
     "x":{
      "exp":"3.5 m",
@@ -227,6 +255,20 @@
     "heading":{
      "exp":"0 deg",
      "val":0.0
+    }
+   },
+   "hsr":{
+    "x":{
+     "exp":"3.5 m",
+     "val":3.5
+    },
+    "y":{
+     "exp":"4 m",
+     "val":4.0
+    },
+    "heading":{
+     "exp":"180 deg",
+     "val":3.141592653589793
     }
    },
    "ob":{
@@ -255,6 +297,20 @@
     "heading":{
      "exp":"0.79 rad",
      "val":0.79
+    }
+   },
+   "obsr":{
+    "x":{
+     "exp":"3.4 m",
+     "val":3.4
+    },
+    "y":{
+     "exp":"2.5 m",
+     "val":2.5
+    },
+    "heading":{
+     "exp":"180 deg",
+     "val":3.141592653589793
     }
    },
    "oc":{
@@ -410,6 +466,20 @@
      "exp":"0 deg",
      "val":0.0
     }
+   },
+   "otsr":{
+    "x":{
+     "exp":"3.6 m",
+     "val":3.6
+    },
+    "y":{
+     "exp":"0.5 m",
+     "val":0.5
+    },
+    "heading":{
+     "exp":"180 deg",
+     "val":3.141592653589793
+    }
    }
   }
  },
@@ -435,8 +505,8 @@
    }
   },
   "mass":{
-   "exp":"150 lbs",
-   "val":68.0388555
+   "exp":"145 lbs",
+   "val":65.77089365
   },
   "inertia":{
    "exp":"6 kg m ^ 2",
@@ -447,8 +517,8 @@
    "val":6.5
   },
   "radius":{
-   "exp":"2 in",
-   "val":0.0508
+   "exp":"1.75 in",
+   "val":0.04445
   },
   "vmax":{
    "exp":"6000 RPM",
@@ -483,7 +553,7 @@
  },
  "generationFeatures":[],
  "codegen":{
-  "root":"..\\..\\..\\..\\..\\deploy\\choreo",
+  "root":"..\\..\\java\\frc\\robot\\generated\\choreo",
   "genVars":true,
   "genTrajData":true,
   "useChoreoLib":true

@@ -14,23 +14,23 @@ public class RobotMap {
 
   // TODO: Replace all these with the actual ids
   public static class IntakeMap {
-    public static final int pivot = 0;
-    public static final int roller = 0;
+    public static final int pivot = 41;
+    public static final int roller = 42;
   }
 
-  public static final int indexer = 0;
+  public static final int indexer = 11;
 
   public static class ShooterMap {
-    public static final int left = 0;
-    public static final int middle = 0;
-    public static final int right = 0;
-    public static final int feeder = 0;
+    public static final int left = 22;
+    public static final int middle = 23;
+    public static final int right = 24;
+    public static final int feeder = 21;
   }
 
   public static class HoodMap {
-    public static final int left = 0;
+    public static final int left = 0; // tbd
     public static final int right = 0;
   }
 
-  public static final int climber = 0;
+  public static final int climber = 31;
 }
