@@ -13,12 +13,12 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -35,6 +35,7 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.hood.Hood;
+import frc.robot.subsystems.hood.HoodConstants;
 import frc.robot.subsystems.hood.HoodIO;
 import frc.robot.subsystems.hood.HoodIOServo;
 import frc.robot.subsystems.hood.HoodIOSim;
@@ -49,15 +50,19 @@ import frc.robot.subsystems.intake.IntakeIOTalonFX;
 import frc.robot.subsystems.shooter.FeederIO;
 import frc.robot.subsystems.shooter.FeederIOTalonFX;
 import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterConstants;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.shooter.ShooterIOTalonFX;
+import frc.robot.subsystems.shooter.shooterUtil.ShootingCalculator;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOSim;
+import frc.robot.util.FieldConstants;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -220,8 +225,57 @@ public class RobotContainer {
                 shooter.sysid(8.0, 0, "left"),
                 shooter.sysid(8.0, 1, "middle"),
                 shooter.sysid(8.0, 2, "right")));
-                
+
     // Reset gyro to 0° when B button is pressed
+    driver
+        .y()
+        .whileTrue(
+            DriveCommands.joystickDriveAtVirtualTarget(
+                drive,
+                () -> -driver.getLeftY(),
+                () -> -driver.getLeftX(),
+                () -> FieldConstants.Hub.hubCenter));
+    driver
+        .y()
+        .whileTrue(
+            Commands.run(
+                () -> {
+                  var chassisSpeeds = drive.getChassisSpeeds();
+                  double speedMps =
+                      Math.hypot(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond);
+                  boolean isMoving = speedMps >= ShooterConstants.Targeting.movingSpeedThresholdMps;
+
+                  ShootingCalculator.ShootingSolution solution =
+                      isMoving
+                          ? ShootingCalculator.calculateMovingSolution(
+                              drive.getPose(),
+                              chassisSpeeds,
+                              Units.degreesToRadians(HoodConstants.Targeting.minAngleDeg),
+                              Units.degreesToRadians(HoodConstants.Targeting.maxAngleDeg),
+                              ShooterConstants.Targeting.minRpm,
+                              ShooterConstants.Targeting.maxRpm,
+                              ShooterConstants.Targeting.movingRpmChangeWeight,
+                              ShooterConstants.Targeting.movingHoodChangeWeight)
+                          : ShootingCalculator.calculateStationarySolution(
+                              drive.getPose(),
+                              Units.degreesToRadians(HoodConstants.Targeting.minAngleDeg),
+                              Units.degreesToRadians(HoodConstants.Targeting.maxAngleDeg),
+                              ShooterConstants.Targeting.stationaryRpm);
+
+                  hood.setAngle(Degrees.of(Math.toDegrees(solution.hoodAngleRad)));
+                  shooter.setVelocitySetpoint(
+                      RadiansPerSecond.of(
+                          Units.rotationsPerMinuteToRadiansPerSecond(solution.flywheelRpm)));
+
+                  Logger.recordOutput(
+                      "Superstructure/Target/HoodAngleDeg", Math.toDegrees(solution.hoodAngleRad));
+                  Logger.recordOutput("Superstructure/Target/FlywheelRpm", solution.flywheelRpm);
+                  Logger.recordOutput(
+                      "Superstructure/Target/DistanceMeters", solution.distanceMeters);
+                  Logger.recordOutput("Superstructure/Target/Valid", solution.valid);
+                  Logger.recordOutput("Superstructure/Target/SpeedMps", speedMps);
+                  Logger.recordOutput("Superstructure/Target/IsMoving", isMoving);
+                }));
     driver
         .b()
         .onTrue(
