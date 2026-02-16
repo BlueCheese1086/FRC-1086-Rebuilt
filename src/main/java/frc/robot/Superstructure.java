@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
@@ -34,7 +34,6 @@ import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-@SuppressWarnings("unused")
 public class Superstructure extends SubsystemBase {
 
   public static class ControllerLayout {
@@ -48,7 +47,7 @@ public class Superstructure extends SubsystemBase {
     public static DoubleSupplier joystickY = () -> (0.0);
   }
 
-  public enum State { // Ideas
+  public enum State {
     idle,
     holding,
     shoot,

@@ -21,6 +21,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
+import frc.robot.subsystems.shooter.ShooterConstants.Mechanical;
 
 public class ShooterIOTalonFX implements ShooterIO {
   private final TalonFX shooter;
@@ -39,7 +40,7 @@ public class ShooterIOTalonFX implements ShooterIO {
   private double setpoint = 0.0;
   private double bangBangVoltage = 0.0;
 
-  public ShooterIOTalonFX(int id, boolean inverted) {
+  public ShooterIOTalonFX(int id) {
     shooter = new TalonFX(id);
     bbController = new BangBangController();
 
@@ -51,7 +52,7 @@ public class ShooterIOTalonFX implements ShooterIO {
     config.Slot0.kA = ShooterConstants.Tuning.kA;
 
     config.MotorOutput.Inverted =
-        inverted ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
+        Mechanical.inverted ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
     config.Audio.BeepOnBoot = true;
     config.MotionMagic.MotionMagicAcceleration = ShooterConstants.Tuning.acceleration;
     config.MotionMagic.MotionMagicCruiseVelocity = ShooterConstants.Tuning.cruiseVelocity;

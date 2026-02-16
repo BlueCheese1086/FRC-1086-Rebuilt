@@ -7,6 +7,8 @@ package frc.robot.subsystems.shooter;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -48,6 +50,7 @@ public class ShooterIOSim implements ShooterIO {
     inputs.statorCurrent = shooter.getCurrentDrawAmps();
     inputs.positionRadPerSec = 0.0;
     inputs.setpoint = bbController.getSetpoint();
+    Logger.recordOutput("SOTM/Rad Per Sec", shooter.getAngularVelocityRadPerSec());
   }
 
   @Override

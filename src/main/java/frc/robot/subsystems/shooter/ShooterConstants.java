@@ -17,7 +17,7 @@ import edu.wpi.first.units.measure.MomentOfInertia;
 public class ShooterConstants {
   public static class Tuning {
     public static final double kS = 0.1;
-    public static final double kV = 12.0 / 113.067; 
+    public static final double kV = 12.0 / 113.067;
     public static final double kA = 0.0;
 
     public static final double cruiseVelocity = 6271.0 / 60.0; // ~ 600 rad per sec;
@@ -38,12 +38,12 @@ public class ShooterConstants {
 
   public static class Mechanical {
     public static final MomentOfInertia J = KilogramSquareMeters.of(0.001);
-
     public static final Distance shooterHeight = Inches.of(24.5);
     public static final Distance flywheelRadius = Inches.of(2.0);
     public static final double shooterWheelGearRatio = 1.0;
     public static final Distance shooterXOffset = Inches.of(-10.0);
     public static final Distance shooterYOffset = Inches.of(0.0);
+    public static final boolean inverted = false;
 
     // The position of the shooter relative to the robot's center, used for
     // calculating the distance to the hub.
