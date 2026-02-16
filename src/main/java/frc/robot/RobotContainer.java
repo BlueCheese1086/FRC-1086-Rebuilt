@@ -60,6 +60,7 @@ import frc.robot.subsystems.shooter.shooterUtil.ShootingCalculator;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
+import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOSim;
 import frc.robot.util.FieldConstants;
@@ -84,6 +85,7 @@ public class RobotContainer {
   private final Indexer indexer;
   private final Hood hood;
 
+  @SuppressWarnings("unused")
   private final Superstructure superstructure;
 
   private final AutoBuilder autobuilder;
@@ -115,16 +117,17 @@ public class RobotContainer {
                 new VisionIOPhotonVision(
                     "left", VisionConstants.PhysicalConstants.cameraTransforms[0]),
                 new VisionIOPhotonVision(
-                    "right", VisionConstants.PhysicalConstants.cameraTransforms[1]));
+                    "right", VisionConstants.PhysicalConstants.cameraTransforms[1]),
+                new VisionIOLimelight("scoring"));
 
         intake = new Intake(new IntakeIOTalonFX());
         indexer = new Indexer(new IndexerIOTalonFX());
         shooter =
             new Shooter(
                 new FeederIOTalonFX(1),
-                new ShooterIOTalonFX(RobotMap.ShooterMap.left),
-                new ShooterIOTalonFX(RobotMap.ShooterMap.middle),
-                new ShooterIOTalonFX(RobotMap.ShooterMap.right));
+                new ShooterIOTalonFX(RobotMap.ShooterMap.left, false),
+                new ShooterIOTalonFX(RobotMap.ShooterMap.middle, false),
+                new ShooterIOTalonFX(RobotMap.ShooterMap.right, true));
         hood = new Hood(new HoodIOServo());
         break;
 
@@ -184,8 +187,8 @@ public class RobotContainer {
     Superstructure.ControllerLayout.joystickX = () -> -driver.getLeftY();
     Superstructure.ControllerLayout.joystickY = () -> -driver.getLeftX();
 
-    superstructure = new Superstructure(drive, intake, shooter, indexer, hood);
-    autobuilder = new AutoBuilder(superstructure);
+    autobuilder = new AutoBuilder(drive); // TODO: pass superstructure when ready
+    superstructure = new Superstructure(drive, intake, shooter, indexer, hood, autobuilder);
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices");
@@ -211,12 +214,6 @@ public class RobotContainer {
     configureButtonBindings();
   }
 
-  /**
-   * Use this method to define your button->command mappings. Buttons can be created by
-   * instantiating a {@link GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
-   * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
-   */
   private void configureButtonBindings() {
     // Default command, normal field-relative drive
     drive.setDefaultCommand(
@@ -230,10 +227,7 @@ public class RobotContainer {
                 shooter.sysid(8.0, 0, "left"),
                 shooter.sysid(8.0, 1, "middle"),
                 shooter.sysid(8.0, 2, "right")));
-    operator.b().whileTrue(shooter.setVelocity(() -> RadiansPerSecond.of(200)));
-    // (
-    // Commands.run(() -> shooter.sysid(8.0, 0, "left"), shooter));
-
+                
     // Reset gyro to 0° when B button is pressed
     driver
         .y()
@@ -293,8 +287,6 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                     drive)
                 .ignoringDisable(true));
-
-    driver.y().onTrue(shooter.setVelocity(() -> RadiansPerSecond.of(400)));
   }
 
   /**

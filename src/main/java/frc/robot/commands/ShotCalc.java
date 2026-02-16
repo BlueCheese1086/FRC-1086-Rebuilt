@@ -7,10 +7,14 @@ package frc.robot.commands;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.math.interpolation.Interpolator;
 import edu.wpi.first.math.interpolation.InverseInterpolator;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Distance;
+import frc.robot.subsystems.hood.Hood;
+import frc.robot.subsystems.shooter.ShooterConstants;
 
 /** Add your docs here. */
 public class ShotCalc {
@@ -36,6 +40,10 @@ public class ShotCalc {
     return distanceToShotMap.get(distance);
   }
 
+  public static double getShotMPS(Distance distance) {
+    return distanceToShotMap.get(distance).getMPS();
+  }
+
   public static class Shot {
     public final double shooterRPM;
     public final double hoodPosition;
@@ -43,6 +51,12 @@ public class ShotCalc {
     public Shot(double shooterRPM, double hoodPosition) {
       this.shooterRPM = shooterRPM;
       this.hoodPosition = hoodPosition;
+    }
+
+    public double getMPS() {
+      return Rotation2d.fromDegrees(Hood.AngleToPosition.get(hoodPosition)).getCos()
+          * (Units.rotationsToRadians(shooterRPM / 60)
+              * ShooterConstants.Mechanical.flywheelRadius.in(Meters));
     }
   }
 }

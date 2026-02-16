@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.AutoBuilder;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShotCalc;
 import frc.robot.subsystems.drive.Drive;
@@ -33,6 +34,7 @@ import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
+@SuppressWarnings("unused")
 public class Superstructure extends SubsystemBase {
 
   public static class ControllerLayout {
@@ -50,6 +52,7 @@ public class Superstructure extends SubsystemBase {
     idle,
     holding,
     shoot,
+    pass,
     intake,
     climb,
     climbscore,
@@ -69,9 +72,13 @@ public class Superstructure extends SubsystemBase {
   private final Shooter shooter;
   private final Indexer indexer;
   private final Hood hood;
+  private final AutoBuilder autobuilder;
 
   @AutoLogOutput(key = "Superstructure/Target/Use Targetting")
   private boolean useTargeting = true;
+
+  private boolean redStart = false;
+  private boolean hubActive = true;
 
   private Timer timer = new Timer();
 
@@ -80,13 +87,15 @@ public class Superstructure extends SubsystemBase {
       final Intake intake,
       final Shooter shooter,
       final Indexer indexer,
-      final Hood hood) {
+      final Hood hood,
+      final AutoBuilder autobuilder) {
     // Assigning subsystems
     this.drive = drive;
     this.intake = intake;
     this.shooter = shooter;
     this.indexer = indexer;
     this.hood = hood;
+    this.autobuilder = autobuilder;
 
     for (State state : State.values()) {
       stateTriggers.put(state, new Trigger(() -> this.state == state && DriverStation.isEnabled()));
@@ -118,8 +127,7 @@ public class Superstructure extends SubsystemBase {
         ControllerLayout.intakeRequest.negate().and(stateTriggers.get(State.intake)),
         State.holding);
     stateRequests.put(
-        ControllerLayout.passingRequest.negate().and(stateTriggers.get(State.shoot)),
-        State.holding);
+        ControllerLayout.passingRequest.negate().and(stateTriggers.get(State.pass)), State.holding);
     stateRequests.put(
         stateTriggers
             .get(State.shoot)
@@ -145,7 +153,7 @@ public class Superstructure extends SubsystemBase {
     stateRequests.put(
         ControllerLayout.scoreRequest.and(stateTriggers.get(State.climb)), State.climbscore);
     stateRequests.put(
-        ControllerLayout.passingRequest.and(stateTriggers.get(State.holding)), State.shoot);
+        ControllerLayout.passingRequest.and(stateTriggers.get(State.holding)), State.pass);
 
     // State Trigger stuff here
     for (Trigger key : stateRequests.keySet()) {
@@ -265,6 +273,7 @@ public class Superstructure extends SubsystemBase {
     stateTriggers
         .get(State.shoot)
         .and(() -> (FieldConstants.LinesVertical.inAllianceZone(drive.getPose())))
+        .and(() -> !useTargeting)
         .whileTrue(
             Commands.parallel(
                 hood.setPosition(
@@ -294,8 +303,7 @@ public class Superstructure extends SubsystemBase {
 
   private void setupPass() {
     stateTriggers
-        .get(State.shoot)
-        .and(() -> (!FieldConstants.LinesVertical.inAllianceZone(drive.getPose())))
+        .get(State.pass)
         .whileTrue(
             Commands.parallel(
                 DriveCommands.joystickDrive(
@@ -304,15 +312,23 @@ public class Superstructure extends SubsystemBase {
                     ControllerLayout.joystickY,
                     () -> {
                       return AllianceFlipUtil.apply(Rotation2d.k180deg).getRadians();
-                    }))); // TODO: Soham add the flywheel speed calculator & hood calculator
+                    }),
+                Commands.run(
+                        () -> {
+                          shooter.setVoltage(9.0);
+                        })
+                    .finallyDo(
+                        () -> {
+                          shooter.setVoltage(0.0);
+                        }),
+                hood.setPosition(
+                    () -> (0.5)))); // TODO: add the flywheel speed calculator & hood calculator
     stateTriggers
-        .get(State.shoot)
+        .get(State.pass)
         .and(ControllerLayout.scoreRequest)
         .and(() -> (!FieldConstants.LinesVertical.inAllianceZone(drive.getPose())))
         .whileTrue(
             Commands.parallel(
-                Commands.runOnce(() -> shooter.setVoltage(9.0)), // TODO: Tune this
-                hood.setPosition(() -> (0.5)),
                 indexer.setVoltage(IndexerConstants.Setpoints.feed),
                 shooter.runFeederVoltage(12.0))); // Continue Targetting & Flywheel set speed.
   }
@@ -327,6 +343,7 @@ public class Superstructure extends SubsystemBase {
   public Command setState(State newState) {
     return Commands.run(
             () -> {
+              previousState = state;
               state = newState;
             })
         .withTimeout(0.01);
@@ -344,5 +361,10 @@ public class Superstructure extends SubsystemBase {
           "Superstructure/States/" + key.toString(), stateTriggers.get(key).getAsBoolean());
     }
     Logger.recordOutput("Superstructure/Layout/Cancel", ControllerLayout.cancelRequest);
+    String gameData = DriverStation.getGameSpecificMessage();
+    if (gameData.length() > 0) {
+      redStart = gameData.charAt(0) == 'R';
+    }
+    autobuilder.updateField();
   }
 }
