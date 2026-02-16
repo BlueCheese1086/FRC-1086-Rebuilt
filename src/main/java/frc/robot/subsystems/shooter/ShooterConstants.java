@@ -17,10 +17,10 @@ import edu.wpi.first.units.measure.MomentOfInertia;
 public class ShooterConstants {
   public static class Tuning {
     public static final double kS = 0.1;
-    public static final double kV = 12.0 / 100.0; // adjust later when i feel like it
+    public static final double kV = 12.0 / 113.067; 
     public static final double kA = 0.0;
 
-    public static final double cruiseVelocity = 5729.58 / 60; // ~ 600 rad per sec;
+    public static final double cruiseVelocity = 6271.0 / 60.0; // ~ 600 rad per sec;
     public static final double acceleration =
         cruiseVelocity
             / 0.23; // Cruise velocity / spin up time estimated, low numbers equal more brownouts,
