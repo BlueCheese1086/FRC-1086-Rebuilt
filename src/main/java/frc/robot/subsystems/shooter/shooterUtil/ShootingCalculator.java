@@ -183,8 +183,12 @@ public class ShootingCalculator {
       double flywheelMinRpm,
       double flywheelMaxRpm) {
     Pose3d robotPose3d = new Pose3d(robotPose);
+    Pose3d shooterPose = robotPose3d.plus(Mechanical.shooterPose);
     double distanceMeters =
-        robotPose.getTranslation().getDistance(Hub.topCenterPoint.toTranslation2d());
+        shooterPose
+            .getTranslation()
+            .toTranslation2d()
+            .getDistance(Hub.topCenterPoint.toTranslation2d());
     double exitVelocityMps = 0.0;
 
     for (int i = 0; i < MOVING_SOLUTION_ITERATIONS; i++) {
@@ -196,7 +200,10 @@ public class ShootingCalculator {
           virtualHub.getVirtualTargetWithExitVelocity(
               robotPose3d, robotSpeeds, hoodAngleRad, exitVelocityMps);
       distanceMeters =
-          robotPose.getTranslation().getDistance(virtualTarget.getTranslation().toTranslation2d());
+          shooterPose
+              .getTranslation()
+              .toTranslation2d()
+              .getDistance(virtualTarget.getTranslation().toTranslation2d());
       if (!Double.isFinite(distanceMeters)) {
         return new ShootingSolution(hoodAngleRad, 0.0, 0.0, distanceMeters, false);
       }
@@ -275,18 +282,28 @@ public class ShootingCalculator {
   public static class virtualHub {
     public static Pose3d getVirtualTargetWithExitVelocity(
         Pose3d robotPose, ChassisSpeeds robotSpeeds, double hoodAngleRad, double exitVelocityMps) {
+      return getVirtualTargetWithExitVelocity(
+          robotPose, robotSpeeds, Hub.topCenterPoint, hoodAngleRad, exitVelocityMps);
+    }
 
-      double vx = robotSpeeds.vxMetersPerSecond;
-      double vy = robotSpeeds.vyMetersPerSecond;
+    public static Pose3d getVirtualTargetWithExitVelocity(
+        Pose3d robotPose,
+        ChassisSpeeds robotSpeeds,
+        Translation3d actualGoal,
+        double hoodAngleRad,
+        double exitVelocityMps) {
 
-      Translation3d robotVelVec = new Translation3d(vx, vy, 0.0);
+      Pose3d shooterPose = robotPose.plus(Mechanical.shooterPose);
+      Translation3d shooterPos = shooterPose.getTranslation();
 
-      Translation3d robotPos = robotPose.getTranslation();
-      robotPose = robotPose.plus(Mechanical.shooterPose);
+      ChassisSpeeds fieldRelativeSpeeds =
+          ChassisSpeeds.fromRobotRelativeSpeeds(robotSpeeds, shooterPose.toPose2d().getRotation());
+      Translation3d robotVelVec =
+          new Translation3d(
+              fieldRelativeSpeeds.vxMetersPerSecond, fieldRelativeSpeeds.vyMetersPerSecond, 0.0);
 
-      Translation3d actualGoal = Hub.topCenterPoint;
-
-      double distanceToReal = robotPos.toTranslation2d().getDistance(actualGoal.toTranslation2d());
+      double distanceToReal =
+          shooterPos.toTranslation2d().getDistance(actualGoal.toTranslation2d());
 
       double tof =
           ShootingCalculator.calculateTimeOfFlight(distanceToReal, hoodAngleRad, exitVelocityMps);
@@ -296,7 +313,7 @@ public class ShootingCalculator {
       for (int i = 0; i < 4; i++) {
         virtualTarget = actualGoal.minus(robotVelVec.times(tof));
         double virtualDist =
-            robotPos.toTranslation2d().getDistance(virtualTarget.toTranslation2d());
+            shooterPos.toTranslation2d().getDistance(virtualTarget.toTranslation2d());
         if (virtualDist < 0.0) {
           virtualDist = 0.0;
         }

@@ -7,6 +7,7 @@ package frc.robot.commands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.hood.HoodConstants;
@@ -28,12 +29,20 @@ public class SotmCalculator {
             ShooterConstants.Targeting.movingRpmChangeWeight,
             ShooterConstants.Targeting.movingHoodChangeWeight);
 
+    double leadExitVelocityMps =
+        ShootingCalculator.calculateExitVelocityMetersPerSecondFromRpm(
+            ShooterConstants.Targeting.stationaryRpm);
+
     Pose3d virtualTarget =
         ShootingCalculator.virtualHub.getVirtualTargetWithExitVelocity(
             new Pose3d(drive.getPose()),
             drive.getChassisSpeeds(),
+            new Translation3d(
+                targetPose.getX(),
+                targetPose.getY(),
+                frc.robot.util.FieldConstants.Hub.topCenterPoint.getZ()),
             solution.hoodAngleRad,
-            solution.exitVelocityMps);
+            leadExitVelocityMps);
 
     Pose2d virtualTarget2d =
         new Pose2d(virtualTarget.getTranslation().toTranslation2d(), Rotation2d.kZero);
