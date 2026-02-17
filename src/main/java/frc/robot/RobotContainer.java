@@ -199,7 +199,7 @@ public class RobotContainer {
         Superstructure.ControllerLayout.joystickY = () -> -driver.getLeftX();
 
         autobuilder = new AutoBuilder(drive); // TODO: pass superstructure when ready
-        superstructure = new Superstructure(drive, intake, shooter, indexer, hood, autobuilder);
+        superstructure = new Superstructure(drive, intake, shooter, indexer, hood, autobuilder, drive::getPose, drive::getChassisSpeeds, drive::getRotation);
 
         // Set up auto routines
         autoChooser = new LoggedDashboardChooser<>("Auto Choices");

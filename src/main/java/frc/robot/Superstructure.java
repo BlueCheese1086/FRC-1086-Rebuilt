@@ -3,10 +3,14 @@ package frc.robot;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
@@ -29,8 +33,13 @@ import frc.robot.subsystems.shooter.ShooterConstants;
 import frc.robot.subsystems.shooter.shooterUtil.ShootingCalculator;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants;
+import frc.robot.util.shooter.LauncherCalculator;
+import frc.robot.util.shooter.LauncherCalculator.LaunchingParameters;
+
 import java.util.HashMap;
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
+
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -72,6 +81,9 @@ public class Superstructure extends SubsystemBase {
   private final Indexer indexer;
   private final Hood hood;
   private final AutoBuilder autobuilder;
+  private final Supplier<Pose2d> drivePose;
+  private final Supplier<ChassisSpeeds> robotRelativeSpeeds;
+  private final Supplier<Rotation2d> driveHeading;
 
   @AutoLogOutput(key = "Superstructure/Target/Use Targetting")
   private boolean useTargeting = true;
@@ -87,7 +99,10 @@ public class Superstructure extends SubsystemBase {
       final Shooter shooter,
       final Indexer indexer,
       final Hood hood,
-      final AutoBuilder autobuilder) {
+      final AutoBuilder autobuilder,
+      Supplier<Pose2d> drivePose,
+      Supplier<ChassisSpeeds> robotRelativeSpeeds,
+      Supplier<Rotation2d> headingSupplier) {
     // Assigning subsystems
     this.drive = drive;
     this.intake = intake;
@@ -95,16 +110,17 @@ public class Superstructure extends SubsystemBase {
     this.indexer = indexer;
     this.hood = hood;
     this.autobuilder = autobuilder;
-
+    this.drivePose = drivePose;
+    this.robotRelativeSpeeds = robotRelativeSpeeds;
+    this.driveHeading = headingSupplier;
     for (State state : State.values()) {
       stateTriggers.put(state, new Trigger(() -> this.state == state && DriverStation.isEnabled()));
     }
 
-    ControllerLayout.cancelRequest =
-        ControllerLayout.cancelRequest.and(
-            () -> {
-              return timer.hasElapsed(0.95);
-            });
+    ControllerLayout.cancelRequest = ControllerLayout.cancelRequest.and(
+        () -> {
+          return timer.hasElapsed(0.95);
+        });
     ControllerLayout.cancelRequest.onTrue(
         Commands.waitSeconds(0.02)
             .andThen(
@@ -176,9 +192,8 @@ public class Superstructure extends SubsystemBase {
             Commands.parallel(
                 intake.setPosition(IntakeConstants.setpoints.stowed),
                 Commands.runOnce(
-                    () ->
-                        shooter
-                            .stopAll()))); // TODO: Soham add climb stuff with setpoints once done.
+                    () -> shooter
+                        .stopAll()))); // TODO: Soham add climb stuff with setpoints once done.
     stateTriggers
         .get(State.idle)
         .whileTrue(
@@ -226,26 +241,24 @@ public class Superstructure extends SubsystemBase {
             Commands.run(
                 () -> {
                   var chassisSpeeds = drive.getChassisSpeeds();
-                  double speedMps =
-                      Math.hypot(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond);
+                  double speedMps = Math.hypot(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond);
                   boolean isMoving = speedMps >= ShooterConstants.Targeting.movingSpeedThresholdMps;
 
-                  ShootingCalculator.ShootingSolution solution =
-                      isMoving
-                          ? ShootingCalculator.calculateMovingSolution(
-                              drive.getPose(),
-                              chassisSpeeds,
-                              Units.degreesToRadians(HoodConstants.Targeting.minAngleDeg),
-                              Units.degreesToRadians(HoodConstants.Targeting.maxAngleDeg),
-                              ShooterConstants.Targeting.minRpm,
-                              ShooterConstants.Targeting.maxRpm,
-                              ShooterConstants.Targeting.movingRpmChangeWeight,
-                              ShooterConstants.Targeting.movingHoodChangeWeight)
-                          : ShootingCalculator.calculateStationarySolution(
-                              drive.getPose(),
-                              Units.degreesToRadians(HoodConstants.Targeting.minAngleDeg),
-                              Units.degreesToRadians(HoodConstants.Targeting.maxAngleDeg),
-                              ShooterConstants.Targeting.stationaryRpm);
+                  ShootingCalculator.ShootingSolution solution = isMoving
+                      ? ShootingCalculator.calculateMovingSolution(
+                          drive.getPose(),
+                          chassisSpeeds,
+                          Units.degreesToRadians(HoodConstants.Targeting.minAngleDeg),
+                          Units.degreesToRadians(HoodConstants.Targeting.maxAngleDeg),
+                          ShooterConstants.Targeting.minRpm,
+                          ShooterConstants.Targeting.maxRpm,
+                          ShooterConstants.Targeting.movingRpmChangeWeight,
+                          ShooterConstants.Targeting.movingHoodChangeWeight)
+                      : ShootingCalculator.calculateStationarySolution(
+                          drive.getPose(),
+                          Units.degreesToRadians(HoodConstants.Targeting.minAngleDeg),
+                          Units.degreesToRadians(HoodConstants.Targeting.maxAngleDeg),
+                          ShooterConstants.Targeting.stationaryRpm);
 
                   hood.setAngle(Degrees.of(Math.toDegrees(solution.hoodAngleRad)));
                   shooter.setVelocitySetpoint(
@@ -269,35 +282,23 @@ public class Superstructure extends SubsystemBase {
                 () -> {
                   this.useTargeting = !this.useTargeting;
                 }));
+
     stateTriggers
         .get(State.shoot)
-        .and(() -> (FieldConstants.LinesVertical.inAllianceZone(drive.getPose())))
+        .and(() -> (FieldConstants.LinesVertical.inAllianceZone(drivePose.get())))
         .and(() -> !useTargeting)
         .whileTrue(
-            Commands.parallel(
-                hood.setPosition(
-                    () -> {
-                      return ShotCalc.getShot(
-                              Meters.of(
-                                  drive
-                                      .getPose()
-                                      .relativeTo(FieldConstants.Hub.hubCenter)
-                                      .getTranslation()
-                                      .getNorm()))
-                          .hoodPosition;
-                    }),
-                shooter.setVelocity(
-                    () -> {
-                      return RPM.of(
-                          ShotCalc.getShot(
-                                  Meters.of(
-                                      drive
-                                          .getPose()
-                                          .relativeTo(FieldConstants.Hub.hubCenter)
-                                          .getTranslation()
-                                          .getNorm()))
-                              .shooterRPM);
-                    })));
+            Commands.run(
+                () -> {
+                  LaunchingParameters parms = LauncherCalculator.getInstance().getParameters(drivePose,
+                      robotRelativeSpeeds, driveHeading);
+                  shooter.setVelocitySetpoint(RadiansPerSecond.of(parms.flywheelSpeed()));
+                  hood.setAngle(Radians.of(parms.hoodAngle()));
+                  Logger.recordOutput("SOTM/Flywheel Speed", parms.flywheelSpeed());
+                  Logger.recordOutput("SOTM/Hood Angle", parms.hoodAngle());
+                  Logger.recordOutput("SOTM/TOF", parms.timeOfFlight());
+                }));
+
   }
 
   private void setupPass() {
@@ -313,9 +314,9 @@ public class Superstructure extends SubsystemBase {
                       return AllianceFlipUtil.apply(Rotation2d.k180deg).getRadians();
                     }),
                 Commands.run(
-                        () -> {
-                          shooter.setVoltage(9.0);
-                        })
+                    () -> {
+                      shooter.setVoltage(9.0);
+                    })
                     .finallyDo(
                         () -> {
                           shooter.setVoltage(0.0);
@@ -341,10 +342,10 @@ public class Superstructure extends SubsystemBase {
 
   public Command setState(State newState) {
     return Commands.run(
-            () -> {
-              previousState = state;
-              state = newState;
-            })
+        () -> {
+          previousState = state;
+          state = newState;
+        })
         .withTimeout(0.01);
   }
 
