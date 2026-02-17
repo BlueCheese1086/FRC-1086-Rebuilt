@@ -4,27 +4,47 @@
 
 package frc.robot.subsystems.climb;
 
-import frc.robot.subsystems.climb.ClimbConstants.Position;
+import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Celsius;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Volts;
+
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Temperature;
+import edu.wpi.first.units.measure.Voltage;
 import org.littletonrobotics.junction.AutoLog;
 
 /** Add your docs here. */
 public interface ClimbIO {
-
   @AutoLog
   public static class ClimbIOInputs {
-    public double voltage = 0.0;
-    public double statorCurrent = 0.0;
-    public double supplyCurrent = 0.0;
-    public double position = 0.0;
-    public double velocity = 0.0;
-    public double temperature = 0.0;
-    public boolean isConnected = false;
-    public double setpoint = 0.0;
+    public double targetPosition = 0.0;
+    public boolean motorConnected = false;
+    public Voltage volts = Volts.zero();
+    public Angle angle = Radians.zero();
+    public Distance linearPosition = Meters.zero();
+    public AngularVelocity velocity = RadiansPerSecond.zero();
+    public LinearVelocity linearVelocity = MetersPerSecond.zero();
+    public Temperature temp = Celsius.zero();
+    public Current statorCurrent = Amps.zero();
+    public Current supplyCurrent = Amps.zero();
+    public double climbPosition = 0.0;
   }
 
-  public default void updateInputs(ClimbIOInputs inputs) {}
+  public default void setPosition(double position) {}
+
+  public default void updateInputs(ClimbIOInputsAutoLogged inputs) {}
+
+  public default void resetEncoder() {}
 
   public default void setVoltage(double volts) {}
 
-  public default void setPosition(Position position) {}
+  public default void setVelocity(double velocity) {}
 }

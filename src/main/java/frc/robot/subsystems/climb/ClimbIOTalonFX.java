@@ -4,116 +4,126 @@
 
 package frc.robot.subsystems.climb;
 
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Second;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.NeutralModeValue;
-import edu.wpi.first.units.DistanceUnit;
-import edu.wpi.first.units.Measure;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
-import frc.robot.Constants.KrakenX60;
 import frc.robot.RobotMap;
-import frc.robot.subsystems.climb.ClimbConstants.Position;
-import org.littletonrobotics.junction.Logger;
 
+/** Add your docs here. */
 public class ClimbIOTalonFX implements ClimbIO {
-
-  private final MotionMagicVoltage motionMagicRequest =
-      new MotionMagicVoltage(0).withEnableFOC(true);
-  private TalonFX climb;
-  private TalonFXConfiguration config;
+  private final TalonFX climbTalon;
+  private final TalonFXConfiguration config = new TalonFXConfiguration();
+  private StatusSignal<Angle> angle;
+  private StatusSignal<AngularVelocity> angularVelocity;
+  private StatusSignal<Voltage> volts;
   private StatusSignal<Temperature> temp;
-  private StatusSignal<AngularVelocity> velocity;
-  private StatusSignal<Angle> positionSignal;
   private StatusSignal<Current> statorCurrent;
   private StatusSignal<Current> supplyCurrent;
-  private StatusSignal<Voltage> voltageSignal;
-  private double setpoint = 0.0;
+  private MotionMagicVoltage motionMagic = new MotionMagicVoltage(0.0); // fix
+  private VoltageOut voltagething = new VoltageOut(0);
 
-  public ClimbIOTalonFX(int id) {
-    climb = new TalonFX(id, RobotMap.systemBus);
-    config = new TalonFXConfiguration();
+  private final Debouncer connected = new Debouncer(1.0); // What does this do?
 
-    config.Audio.BeepOnBoot = true;
-    config.Audio.BeepOnConfig = true;
+  private double targetPosition;
 
-    config.CurrentLimits.StatorCurrentLimitEnable = true;
-    config.CurrentLimits.SupplyCurrentLimitEnable = true;
+  public ClimbIOTalonFX() {
+    this.climbTalon = new TalonFX(RobotMap.climber, RobotMap.systemBus);
 
-    config.CurrentLimits.StatorCurrentLimit = 80.0;
-    config.CurrentLimits.SupplyCurrentLimit = 80.0;
+    config.MotorOutput.Inverted = ClimbConstants.invertedValue;
+    config.MotorOutput.NeutralMode = ClimbConstants.neutralMode;
+    config.MotorOutput.PeakForwardDutyCycle = 1.0;
+    config.MotorOutput.PeakReverseDutyCycle = -1.0;
+    config.Feedback.SensorToMechanismRatio = ClimbConstants.gearing/ClimbConstants.radius; // This will all make sense because Kraken does 1/Ratio for you.
 
-    config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-    config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    config.MotorOutput.PeakForwardDutyCycle = 0.8;
-    config.MotorOutput.PeakReverseDutyCycle = 0.8;
+    CurrentLimitsConfigs limitConfig = config.CurrentLimits;
 
-    config.MotionMagic.withMotionMagicAcceleration(KrakenX60.kFreeSpeed.per(Second));
-    config.MotionMagic.withMotionMagicCruiseVelocity(KrakenX60.kFreeSpeed);
+    limitConfig.withStatorCurrentLimit(Amps.of(60)); // Replace with a value pls
+    limitConfig.withStatorCurrentLimitEnable(true);
+    limitConfig.withSupplyCurrentLimit(Amps.of(60)); // also this onee
+    limitConfig.withSupplyCurrentLimitEnable(true);
 
-    config.Slot0.kP = 0.0;
-    config.Slot0.kI = 0.0;
-    config.Slot0.kD = 0.0;
-    config.Slot0.kV = 12.0 / KrakenX60.kFreeSpeed.in(RotationsPerSecond);
-    config.Slot0.kS = 0.0;
+    Slot0Configs slotConfig = config.Slot0;
 
-    climb.getConfigurator().apply(config);
+    slotConfig.kG = ClimbConstants.kG; // gravity gains
+    slotConfig.kS = ClimbConstants.kS; // static friction gains
 
-    temp = climb.getDeviceTemp();
-    velocity = climb.getVelocity();
-    positionSignal = climb.getPosition();
-    statorCurrent = climb.getStatorCurrent();
-    supplyCurrent = climb.getSupplyCurrent();
-    voltageSignal = climb.getMotorVoltage();
+    slotConfig.kV = ClimbConstants.kV; // output velocity
+    slotConfig.kA = ClimbConstants.kA; // acceleration
+    slotConfig.kP = ClimbConstants.kP;
+    slotConfig.kI = ClimbConstants.kI;
+    slotConfig.kD = ClimbConstants.kD;
+
+    MotionMagicConfigs magic = config.MotionMagic;
+
+    magic.withMotionMagicAcceleration(ClimbConstants.krakenFreeSpeed.per(Second));
+    magic.withMotionMagicCruiseVelocity(ClimbConstants.krakenFreeSpeed);
+    magic.MotionMagicJerk = 0.0; // fix
+
+    climbTalon.getConfigurator().apply(config);
+
+    this.angle = climbTalon.getPosition();
+    this.angularVelocity = climbTalon.getVelocity();
+    this.volts = climbTalon.getMotorVoltage();
+    this.temp = climbTalon.getDeviceTemp();
+    this.statorCurrent = climbTalon.getStatorCurrent();
+    this.supplyCurrent = climbTalon.getSupplyCurrent();
 
     BaseStatusSignal.setUpdateFrequencyForAll(
-        50.0, temp, statorCurrent, supplyCurrent, voltageSignal);
-    BaseStatusSignal.setUpdateFrequencyForAll(
-        RobotMap.systemBus.isNetworkFD() ? 250.0 : 50.0, velocity, positionSignal);
-    climb.optimizeBusUtilization();
-    Logger.recordOutput("Robot Map/Climb ID", climb.getDeviceID());
+        50.0, angle, angularVelocity, volts, temp, statorCurrent, supplyCurrent);    
+    climbTalon.optimizeBusUtilization();
+
+    // Stator, supply,vel, accl, temp
+    // Stator: torque? 
+    // supply: how much $ getting, how much giving to torque?
   }
 
   @Override
-  public void updateInputs(ClimbIOInputs inputs) {
-    BaseStatusSignal.refreshAll(
-        temp, velocity, positionSignal, statorCurrent, supplyCurrent, voltageSignal);
-    inputs.isConnected =
-        BaseStatusSignal.isAllGood(
-            temp, velocity, positionSignal, statorCurrent, supplyCurrent, voltageSignal);
-
-    inputs.position = positionSignal.getValueAsDouble();
-    inputs.statorCurrent = statorCurrent.getValueAsDouble();
-    inputs.supplyCurrent = supplyCurrent.getValueAsDouble();
-    inputs.velocity = velocity.getValueAsDouble();
-    inputs.voltage = voltageSignal.getValueAsDouble();
-    inputs.setpoint = this.setpoint;
+  public void setPosition(double position) {
+    this.targetPosition = position;
+    climbTalon.setControl(motionMagic.withPosition(position)); // is this right?
   }
 
   @Override
-  public void setVoltage(double volts) {}
+  public void updateInputs(ClimbIOInputsAutoLogged inputs) {
+    StatusCode status = BaseStatusSignal.refreshAll(angle, angularVelocity, volts, temp, statorCurrent, supplyCurrent);
 
-  @Override
-  public void setPosition(Position position) {
-    this.setpoint = this.motorAngleToExtension(position.motorAngle()).in(Inches);
-    climb.setControl(motionMagicRequest.withPosition(position.motorAngle()));
+    inputs.motorConnected = connected.calculate(status.isOK());
+
+    inputs.targetPosition = this.targetPosition;
+    inputs.angle = angle.getValue();
+    inputs.velocity = angularVelocity.getValue();
+    inputs.volts = volts.getValue();
+    inputs.temp = temp.getValue();
+    inputs.statorCurrent = statorCurrent.getValue();
+    inputs.supplyCurrent = supplyCurrent.getValue();
+    inputs.climbPosition = angle.getValueAsDouble();
   }
 
-  private Distance motorAngleToExtension(Angle motorAngle) {
-    final Measure<DistanceUnit> extensionMeasure =
-        motorAngle.timesRatio(ClimbConstants.kHangerExtensionPerMotorAngle);
-    return Inches.of(extensionMeasure.in(Inches));
+  @Override
+  public void resetEncoder() {
+    climbTalon.setPosition(0.0); // is this double or angle? either works because it is 0 - Martin
+  }
+
+  @Override
+  public void setVoltage(double volts) {
+    climbTalon.setControl(voltagething.withOutput(volts));
+    // I am pretty sure this is how you make it move
+    // I just don't know what to put in off the top of my head without copying it from somewhere
   }
 }
