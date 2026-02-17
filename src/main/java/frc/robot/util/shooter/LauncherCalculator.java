@@ -21,7 +21,6 @@ import frc.robot.util.FieldConstants;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
-/** Add your docs here. */
 public class LauncherCalculator {
   private static LauncherCalculator instance;
 
@@ -32,8 +31,7 @@ public class LauncherCalculator {
   private Rotation2d lastDriveAngle;
 
   public static LauncherCalculator getInstance() {
-    if (instance == null)
-      instance = new LauncherCalculator();
+    if (instance == null) instance = new LauncherCalculator();
     return instance;
   }
 
@@ -47,8 +45,7 @@ public class LauncherCalculator {
       double flywheelSpeed,
       double distance,
       double distanceNoLookahead,
-      double timeOfFlight) {
-  }
+      double timeOfFlight) {}
 
   // Cache parameters
   private LaunchingParameters latestParameters = null;
@@ -56,10 +53,12 @@ public class LauncherCalculator {
   private static double minDistance;
   private static double maxDistance;
   private static double phaseDelay;
-  private static final InterpolatingTreeMap<Double, Rotation2d> hoodAngleMap = new InterpolatingTreeMap<>(
-      InverseInterpolator.forDouble(), Rotation2d::interpolate);
-  private static final InterpolatingDoubleTreeMap flywheelSpeedMap = new InterpolatingDoubleTreeMap();
-  private static final InterpolatingDoubleTreeMap timeOfFlightMap = new InterpolatingDoubleTreeMap();
+  private static final InterpolatingTreeMap<Double, Rotation2d> hoodAngleMap =
+      new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Rotation2d::interpolate);
+  private static final InterpolatingDoubleTreeMap flywheelSpeedMap =
+      new InterpolatingDoubleTreeMap();
+  private static final InterpolatingDoubleTreeMap timeOfFlightMap =
+      new InterpolatingDoubleTreeMap();
 
   static {
     minDistance = 1.34;
@@ -114,24 +113,28 @@ public class LauncherCalculator {
     // Calculate estimated pose while accounting for phase delay
     Pose2d estimatedPose = drivePose.get();
     ChassisSpeeds robotRelativeVelocity = robotRelativeSpeeds.get();
-    estimatedPose = estimatedPose.exp(
-        new Twist2d(
-            robotRelativeVelocity.vxMetersPerSecond * phaseDelay,
-            robotRelativeVelocity.vyMetersPerSecond * phaseDelay,
-            robotRelativeVelocity.omegaRadiansPerSecond * phaseDelay));
+    estimatedPose =
+        estimatedPose.exp(
+            new Twist2d(
+                robotRelativeVelocity.vxMetersPerSecond * phaseDelay,
+                robotRelativeVelocity.vyMetersPerSecond * phaseDelay,
+                robotRelativeVelocity.omegaRadiansPerSecond * phaseDelay));
 
     // Calculate distance from launcher to target
-    Translation2d target = AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d());
-    Pose2d launcherPosition = estimatedPose.transformBy(
-        new Transform2d(
-            new Translation2d(shooterPose.getX(), shooterPose.getY()),
-            drivePose.get().getRotation()));
+    Translation2d target =
+        AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d());
+    Pose2d launcherPosition =
+        estimatedPose.transformBy(
+            new Transform2d(
+                new Translation2d(shooterPose.getX(), shooterPose.getY()),
+                drivePose.get().getRotation()));
     double launcherToTargetDistance = target.getDistance(launcherPosition.getTranslation());
 
     // Calculate field relative launcher velocity
     // This isn't actually the launcherVelocity given it won't account for angular
     // velocity of robot
-    ChassisSpeeds fieldRelative = ChassisSpeeds.fromRobotRelativeSpeeds(robotRelativeVelocity, heading.get());
+    ChassisSpeeds fieldRelative =
+        ChassisSpeeds.fromRobotRelativeSpeeds(robotRelativeVelocity, heading.get());
     double launcherVelocityX = fieldRelative.vxMetersPerSecond;
     double launcherVelocityY = fieldRelative.vyMetersPerSecond;
 
@@ -144,48 +147,58 @@ public class LauncherCalculator {
       timeOfFlight = timeOfFlightMap.get(lookaheadLauncherToTargetDistance);
       double offsetX = launcherVelocityX * timeOfFlight;
       double offsetY = launcherVelocityY * timeOfFlight;
-      lookaheadPose = new Pose2d(
-          launcherPosition.getTranslation().plus(new Translation2d(offsetX, offsetY)),
-          launcherPosition.getRotation());
+      lookaheadPose =
+          new Pose2d(
+              launcherPosition.getTranslation().plus(new Translation2d(offsetX, offsetY)),
+              launcherPosition.getRotation());
       lookaheadLauncherToTargetDistance = target.getDistance(lookaheadPose.getTranslation());
     }
 
     // Calculate parameters accounted for imparted velocity
-    Rotation2d driveAngleNoLookahead = target.minus(launcherPosition.getTranslation()).getAngle().plus(Rotation2d.kPi);
-    Rotation2d driveAngle = target.minus(new Translation2d(launcherVelocityX * timeOfFlight,
-        launcherVelocityY * timeOfFlight)).minus(launcherPosition.getTranslation()).getAngle();
+    Rotation2d driveAngleNoLookahead =
+        target.minus(launcherPosition.getTranslation()).getAngle().plus(Rotation2d.kPi);
+    Rotation2d driveAngle =
+        target
+            .minus(
+                new Translation2d(
+                    launcherVelocityX * timeOfFlight, launcherVelocityY * timeOfFlight))
+            .minus(launcherPosition.getTranslation())
+            .getAngle();
     // target.minus(lookaheadPose.getTranslation()).getAngle().plus(Rotation2d.kPi);
     double hoodAngle = hoodAngleMap.get(lookaheadLauncherToTargetDistance).getRadians();
 
-    if (lastDriveAngle == null)
-      lastDriveAngle = driveAngle;
-    if (Double.isNaN(lastHoodAngle))
-      lastHoodAngle = hoodAngle;
+    if (lastDriveAngle == null) lastDriveAngle = driveAngle;
+    if (Double.isNaN(lastHoodAngle)) lastHoodAngle = hoodAngle;
     double hoodVelocity = hoodAngleFilter.calculate((hoodAngle - lastHoodAngle) / 0.02);
     lastHoodAngle = hoodAngle;
-    double driveVelocity = driveAngleFilter.calculate(driveAngle.minus(lastDriveAngle).getRadians() / 0.02);
+    double driveVelocity =
+        driveAngleFilter.calculate(driveAngle.minus(lastDriveAngle).getRadians() / 0.02);
     lastDriveAngle = driveAngle;
-    latestParameters = new LaunchingParameters(
-        lookaheadLauncherToTargetDistance >= minDistance
-            && lookaheadLauncherToTargetDistance <= maxDistance,
-        driveAngle,
-        driveAngleNoLookahead,
-        driveVelocity,
-        hoodAngle,
-        hoodVelocity,
-        flywheelSpeedMap.get(lookaheadLauncherToTargetDistance),
-        lookaheadLauncherToTargetDistance,
-        launcherToTargetDistance,
-        timeOfFlight);
+    latestParameters =
+        new LaunchingParameters(
+            lookaheadLauncherToTargetDistance >= minDistance
+                && lookaheadLauncherToTargetDistance <= maxDistance,
+            driveAngle,
+            driveAngleNoLookahead,
+            driveVelocity,
+            hoodAngle,
+            hoodVelocity,
+            flywheelSpeedMap.get(lookaheadLauncherToTargetDistance),
+            lookaheadLauncherToTargetDistance,
+            launcherToTargetDistance,
+            timeOfFlight);
 
     // Log calculated values
     Logger.recordOutput("LaunchCalculator/LookaheadPose", lookaheadPose);
     Logger.recordOutput(
         "LaunchCalculator/LauncherToTargetDistance", lookaheadLauncherToTargetDistance);
-    Logger.recordOutput("SOTM/Virtual Hub", new Pose2d(
-        target.minus(new Translation2d(launcherVelocityX * timeOfFlight,
-            launcherVelocityY * timeOfFlight)),
-        new Rotation2d()));
+    Logger.recordOutput(
+        "SOTM/Virtual Hub",
+        new Pose2d(
+            target.minus(
+                new Translation2d(
+                    launcherVelocityX * timeOfFlight, launcherVelocityY * timeOfFlight)),
+            new Rotation2d()));
 
     return latestParameters;
   }

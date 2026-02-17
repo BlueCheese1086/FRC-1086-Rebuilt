@@ -28,11 +28,16 @@ public class ClimbIOSim implements ClimbIO {
   // private static final double kV = 1.3; // max battery voltage / max motor rpm
   private static final LoggedNetworkNumber KV = new LoggedNetworkNumber("Climb/KV", 1.3);
 
-  private static final double radius = 0.5/2; // Pretended like it is a half inch hex shaft which it really is. the nominal diameter of this hex shaft is stupid so I put 0.5 inches as the diameter.
+  private static final double radius =
+      0.5 / 2; // Pretended like it is a half inch hex shaft which it really is. the nominal
+  // diameter of this hex shaft is stupid so I put 0.5 inches as the diameter.
   public static final double gearing = 10.0;
-  private static final LoggedNetworkNumber KP = new LoggedNetworkNumber("Climb/KP", ClimbConstants.kP);
-  private static final LoggedNetworkNumber KI = new LoggedNetworkNumber("Climb/KI", ClimbConstants.kD);
-  private static final LoggedNetworkNumber KD = new LoggedNetworkNumber("Climb/KD", ClimbConstants.kD);
+  private static final LoggedNetworkNumber KP =
+      new LoggedNetworkNumber("Climb/KP", ClimbConstants.kP);
+  private static final LoggedNetworkNumber KI =
+      new LoggedNetworkNumber("Climb/KI", ClimbConstants.kD);
+  private static final LoggedNetworkNumber KD =
+      new LoggedNetworkNumber("Climb/KD", ClimbConstants.kD);
   private double position = 0.0;
   private ElevatorFeedforward feedforward;
 
@@ -81,7 +86,7 @@ public class ClimbIOSim implements ClimbIO {
   public void updateInputs(ClimbIOInputsAutoLogged inputs) {
 
     if (closedLoop) {
-      controller.setPID(KP.get(),KI.get(),KD.get());
+      controller.setPID(KP.get(), KI.get(), KD.get());
       feedforward.setKg(KG.get());
       feedforward.setKv(KV.get());
       feedforward.setKs(KS.get());

@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.shooter;
 
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static frc.robot.util.PhoenixUtil.tryUntilOk;
 
@@ -52,7 +53,9 @@ public class ShooterIOTalonFX implements ShooterIO {
     config.Slot0.kA = ShooterConstants.Tuning.kA;
 
     config.MotorOutput.Inverted =
-        Mechanical.inverted ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
+        Mechanical.inverted
+            ? InvertedValue.Clockwise_Positive
+            : InvertedValue.CounterClockwise_Positive;
     config.Audio.BeepOnBoot = true;
     config.MotionMagic.MotionMagicAcceleration = ShooterConstants.Tuning.acceleration;
     config.MotionMagic.MotionMagicCruiseVelocity = ShooterConstants.Tuning.cruiseVelocity;
@@ -86,7 +89,7 @@ public class ShooterIOTalonFX implements ShooterIO {
     BaseStatusSignal.refreshAll(
         acceleration, position, statorCurrent, supplyCurrent, temp, velocity, volts);
 
-    inputs.velocity = velocity.getValueAsDouble();
+    inputs.velocity = velocity.getValue().in(RadiansPerSecond);
     inputs.appliedVoltage = volts.getValueAsDouble();
     inputs.statorCurrent = statorCurrent.getValueAsDouble();
     inputs.supplyCurrent = supplyCurrent.getValueAsDouble();
@@ -98,7 +101,7 @@ public class ShooterIOTalonFX implements ShooterIO {
 
   @Override
   public void setVelocity(AngularVelocity velocityRadPerSec) {
-    this.setpoint = velocityRadPerSec.in(RotationsPerSecond);
+    this.setpoint = velocityRadPerSec.in(RadiansPerSecond);
     bbController.setSetpoint(setpoint);
     shooter.setControl(
         velocityTorqueCurrentFOC

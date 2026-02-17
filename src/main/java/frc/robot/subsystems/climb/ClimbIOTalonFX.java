@@ -49,7 +49,10 @@ public class ClimbIOTalonFX implements ClimbIO {
     config.MotorOutput.NeutralMode = ClimbConstants.neutralMode;
     config.MotorOutput.PeakForwardDutyCycle = 1.0;
     config.MotorOutput.PeakReverseDutyCycle = -1.0;
-    config.Feedback.SensorToMechanismRatio = ClimbConstants.gearing/ClimbConstants.radius; // This will all make sense because Kraken does 1/Ratio for you.
+    config.Feedback.SensorToMechanismRatio =
+        ClimbConstants.gearing
+            / ClimbConstants
+                .radius; // This will all make sense because Kraken does 1/Ratio for you.
 
     CurrentLimitsConfigs limitConfig = config.CurrentLimits;
 
@@ -85,23 +88,19 @@ public class ClimbIOTalonFX implements ClimbIO {
     this.supplyCurrent = climbTalon.getSupplyCurrent();
 
     BaseStatusSignal.setUpdateFrequencyForAll(
-        50.0, angle, angularVelocity, volts, temp, statorCurrent, supplyCurrent);    
+        50.0, angle, angularVelocity, volts, temp, statorCurrent, supplyCurrent);
     climbTalon.optimizeBusUtilization();
 
     // Stator, supply,vel, accl, temp
-    // Stator: torque? 
+    // Stator: torque?
     // supply: how much $ getting, how much giving to torque?
   }
 
   @Override
-  public void setPosition(double position) {
-    this.targetPosition = position;
-    climbTalon.setControl(motionMagic.withPosition(position)); // is this right?
-  }
-
-  @Override
   public void updateInputs(ClimbIOInputsAutoLogged inputs) {
-    StatusCode status = BaseStatusSignal.refreshAll(angle, angularVelocity, volts, temp, statorCurrent, supplyCurrent);
+    StatusCode status =
+        BaseStatusSignal.refreshAll(
+            angle, angularVelocity, volts, temp, statorCurrent, supplyCurrent);
 
     inputs.motorConnected = connected.calculate(status.isOK());
 
@@ -125,5 +124,11 @@ public class ClimbIOTalonFX implements ClimbIO {
     climbTalon.setControl(voltagething.withOutput(volts));
     // I am pretty sure this is how you make it move
     // I just don't know what to put in off the top of my head without copying it from somewhere
+  }
+
+  @Override
+  public void setPosition(double position) {
+    this.targetPosition = position;
+    climbTalon.setControl(motionMagic.withPosition(position)); // is this right?
   }
 }

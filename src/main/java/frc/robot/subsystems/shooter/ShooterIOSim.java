@@ -5,9 +5,8 @@
 package frc.robot.subsystems.shooter;
 
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
-
-import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
@@ -15,6 +14,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
+import org.littletonrobotics.junction.Logger;
 
 public class ShooterIOSim implements ShooterIO {
   private final FlywheelSim shooter;
@@ -41,16 +41,14 @@ public class ShooterIOSim implements ShooterIO {
     shooter.update(0.02);
 
     shooter.setInputVoltage(
-        bbController.calculate(shooter.getAngularVelocity().in(RotationsPerSecond)) * 12.0
-            + (shooterFF.calculate(shooter.getAngularVelocity().in(RotationsPerSecond))));
-    // +shooterFF.calculate(bbController.getSetpoint()));
+        bbController.calculate(shooter.getAngularVelocityRadPerSec()) * 12.0
+            + (shooterFF.calculate(shooter.getAngularVelocityRadPerSec())));
 
-    inputs.velocity = shooter.getAngularVelocity().in(RotationsPerSecond);
+    inputs.velocity = shooter.getAngularVelocityRadPerSec();
     inputs.appliedVoltage = shooter.getInputVoltage();
     inputs.statorCurrent = shooter.getCurrentDrawAmps();
     inputs.positionRadPerSec = 0.0;
     inputs.setpoint = bbController.getSetpoint();
-    Logger.recordOutput("SOTM/Rad Per Sec", shooter.getAngularVelocityRadPerSec());
   }
 
   @Override
@@ -60,6 +58,6 @@ public class ShooterIOSim implements ShooterIO {
 
   @Override
   public void setVelocity(AngularVelocity velocityRadPerSec) {
-    bbController.setSetpoint(velocityRadPerSec.in(RotationsPerSecond));
+    bbController.setSetpoint(velocityRadPerSec.in(RadiansPerSecond));
   }
 }

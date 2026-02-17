@@ -16,7 +16,7 @@ import edu.wpi.first.units.measure.MomentOfInertia;
 /** Add your docs here. */
 public class ShooterConstants {
   public static class Tuning {
-    public static final double kS = 0.1;
+    public static final double kS = 0.0;
     public static final double kV = 12.0 / 113.067;
     public static final double kA = 0.0;
 
