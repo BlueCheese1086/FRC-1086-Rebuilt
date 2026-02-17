@@ -24,6 +24,9 @@ public class ClimbConstants {
   public static final double kD = 0.5;
 
   public static class Setpoints {
+    public static final double raised = 10.0; // The point where the 
+    public static final double holding = 2.0; // Find the Raised point where the climber can lift high enough 
+    public static final double score = 2.0; // Find the Raised point where the climber can score
   }
 
   public static final double gearing =
