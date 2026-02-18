@@ -113,8 +113,6 @@ public class ClimbIOSim implements ClimbIO {
 
     inputs.climbPosition = Units.metersToInches(climbSim.getPositionMeters());
 
-    // appliedVolts = feedforward.calculate(armVel, armAccel);
-
     inputs.motorConnected = true;
     inputs.targetPosition = this.position;
     inputs.angle = Rotation2d.kZero.getMeasure();
