@@ -37,6 +37,13 @@ public class ClimbConstants {
   public static final double extendedHeight = maxHeight;
   public static final double retractedHeight = 0.0;
 
+  public static class Setpoints {
+    public static final double climbExtend = 10.0;
+    public static final double hopperRelease = 10.0;
+    public static final double climbScore = 10.0;
+
+  }
+
   public static final double thesamethingasthevalueinthefeedback = 2 * Math.PI * radius * gearing;
 
   public static final AngularVelocity krackenFreeSpeed = RotationsPerSecond.of(6000.0 * 60);

@@ -67,6 +67,7 @@ public class Superstructure extends SubsystemBase {
   @AutoLogOutput(key = "Superstructure/State/PreviousState")
   private State previousState = State.idle;
 
+  @SuppressWarnings("unused")
   private final Drive drive;
   private final Intake intake;
   private final Shooter shooter;
@@ -171,7 +172,8 @@ public class Superstructure extends SubsystemBase {
   }
 
   private void setupIntake() {
-    stateTriggers.get(State.holding).onTrue(intake.setPosition(IntakeConstants.setpoints.deployed));
+    stateTriggers.get(State.holding).onTrue(
+      Commands.sequence(climb.setPosition(ClimbConstants.Setpoints.hopperRelease),intake.setPosition(IntakeConstants.setpoints.deployed)));
     stateTriggers
         .get(State.holding)
         .whileTrue(
@@ -302,11 +304,11 @@ public class Superstructure extends SubsystemBase {
   }
 
   private void setupClimb() {
-    stateTriggers.get(State.climb).whileTrue(climb.setPosition(ClimbConstants.extendedHeight));
+    stateTriggers.get(State.climb).onTrue(climb.setPosition(ClimbConstants.Setpoints.climbExtend));
 
     stateTriggers
         .get(State.climbscore)
-        .whileTrue(climb.setPosition(ClimbConstants.retractedHeight));
+        .onTrue(climb.setPosition(ClimbConstants.Setpoints.climbScore));
   }
 
   public Command setState(State newState) {
