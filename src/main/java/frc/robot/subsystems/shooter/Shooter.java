@@ -53,11 +53,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public Command runFeederVoltage(double volts) {
-    return Commands.run(() -> feederIO.setFeedVoltage(volts), this)
-        .finallyDo(
-            () -> {
-              feederIO.setFeedVoltage(0.0);
-            });
+    return Commands.run(() -> feederIO.setFeedVoltage(volts), this);
   }
 
   public void setVoltage(double volts) {

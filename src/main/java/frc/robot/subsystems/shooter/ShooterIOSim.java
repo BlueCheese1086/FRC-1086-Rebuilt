@@ -6,13 +6,14 @@ package frc.robot.subsystems.shooter;
 
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import org.littletonrobotics.junction.Logger;
 
@@ -20,6 +21,7 @@ public class ShooterIOSim implements ShooterIO {
   private final FlywheelSim shooter;
   private final SimpleMotorFeedforward shooterFF;
   private final BangBangController bbController;
+  private double appliedVoltage = 0.0;
 
   public ShooterIOSim() {
 
@@ -40,10 +42,13 @@ public class ShooterIOSim implements ShooterIO {
   public void updateInputs(ShooterInputs inputs) {
     shooter.update(0.02);
 
-    shooter.setInputVoltage(
-        bbController.calculate(shooter.getAngularVelocityRadPerSec()) * 12.0
-            + (shooterFF.calculate(shooter.getAngularVelocityRadPerSec())));
+    appliedVoltage =
+        bbController.calculate(shooter.getAngularVelocityRadPerSec())
+                * RobotController.getBatteryVoltage()
+            + (shooterFF.calculate(shooter.getAngularVelocityRadPerSec()));
 
+    shooter.setInputVoltage(MathUtil.clamp(appliedVoltage, -12.0, 12.0));
+    Logger.recordOutput("DEBUG/AppliedVoltage", appliedVoltage);
     inputs.velocity = shooter.getAngularVelocityRadPerSec();
     inputs.appliedVoltage = shooter.getInputVoltage();
     inputs.statorCurrent = shooter.getCurrentDrawAmps();

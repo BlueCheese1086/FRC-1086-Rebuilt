@@ -28,8 +28,8 @@ public class RobotMap {
   }
 
   public static class HoodMap {
-    public static final int left = 0; // tbd
-    public static final int right = 0;
+    public static final int left = 0; // james said its this
+    public static final int right = 6;
   }
 
   public static final int climber = 31;

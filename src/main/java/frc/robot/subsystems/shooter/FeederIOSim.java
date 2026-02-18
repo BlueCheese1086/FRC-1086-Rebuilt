@@ -22,7 +22,6 @@ public class FeederIOSim implements FeederIO {
   @Override
   public void updateInputs(FeederIOInputs inputs) {
     feeder.update(0.02);
-
     inputs.feedAppliedVoltage = feeder.getInputVoltage();
     inputs.feedStatorCurrent = feeder.getCurrentDrawAmps();
   }

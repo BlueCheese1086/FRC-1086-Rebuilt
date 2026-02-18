@@ -14,6 +14,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.units.measure.Angle;
@@ -52,6 +53,7 @@ public class ShooterIOTalonFX implements ShooterIO {
     config.Slot0.kV = ShooterConstants.Tuning.kV;
     config.Slot0.kA = ShooterConstants.Tuning.kA;
 
+    config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     config.MotorOutput.Inverted =
         Mechanical.inverted
             ? InvertedValue.Clockwise_Positive

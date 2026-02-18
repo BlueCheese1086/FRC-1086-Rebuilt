@@ -39,6 +39,7 @@ public class Superstructure extends SubsystemBase {
     public static Trigger scoreRequest = new Trigger(() -> false);
     public static Trigger intakeRequest = new Trigger(() -> false);
     public static Trigger cancelRequest = new Trigger(() -> false);
+    public static Trigger cancel = new Trigger(() -> false);
     public static Trigger disableTargeting = new Trigger(() -> false);
     public static Trigger passingRequest = new Trigger(() -> false);
     public static Trigger climbRequest = new Trigger(() -> false);
@@ -111,28 +112,8 @@ public class Superstructure extends SubsystemBase {
       stateTriggers.put(state, new Trigger(() -> this.state == state && DriverStation.isEnabled()));
     }
 
-    ControllerLayout.cancelRequest =
-        ControllerLayout.cancelRequest.and(
-            () -> {
-              return timer.hasElapsed(0.95);
-            });
-    ControllerLayout.cancelRequest.onTrue(
-        Commands.waitSeconds(0.02)
-            .andThen(
-                Commands.runOnce(
-                    () -> {
-                      timer.reset();
-                      timer.start();
-                    })));
-
-    stateRequests.put(
-        ControllerLayout.cancelRequest.and(stateTriggers.get(State.holding)), State.idle);
     stateRequests.put(
         ControllerLayout.intakeRequest.and(stateTriggers.get(State.idle)), State.holding);
-    stateRequests.put(
-        ControllerLayout.cancelRequest.and(stateTriggers.get(State.shoot)), State.holding);
-    stateRequests.put(
-        ControllerLayout.cancelRequest.and(stateTriggers.get(State.climb)), State.holding);
     stateRequests.put(
         ControllerLayout.intakeRequest.negate().and(stateTriggers.get(State.intake)),
         State.holding);
@@ -141,25 +122,17 @@ public class Superstructure extends SubsystemBase {
     stateRequests.put(
         stateTriggers
             .get(State.shoot)
-            .and(
-                () -> {
-                  return !FieldConstants.LinesVertical.inAllianceZone(drive.getPose());
-                }),
+            .and(() -> !FieldConstants.LinesVertical.inAllianceZone(drive.getPose())),
         State.holding); // Save This one for later
 
     stateRequests.put(
         stateTriggers
             .get(State.holding)
-            .and(
-                () -> {
-                  return FieldConstants.LinesVertical.inAllianceZone(drive.getPose());
-                }),
+            .and(() -> FieldConstants.LinesVertical.inAllianceZone(drive.getPose())),
         State.shoot); // Save This one for later
     stateRequests.put(
         ControllerLayout.intakeRequest.and(stateTriggers.get(State.holding)), State.intake);
     stateRequests.put(ControllerLayout.climbRequest, State.climb);
-    stateRequests.put(
-        ControllerLayout.cancelRequest.and(stateTriggers.get(State.climbscore)), State.climb);
     stateRequests.put(
         ControllerLayout.scoreRequest.and(stateTriggers.get(State.climb)), State.climbscore);
     stateRequests.put(
@@ -176,23 +149,25 @@ public class Superstructure extends SubsystemBase {
     this.setupTarget();
     this.setupPass();
     this.setupClimb();
+    this.setupCancel();
 
     timer.start();
+  }
+
+  private void setupCancel() {
+    ControllerLayout.cancelRequest.onTrue(setState(State.holding));
+    ControllerLayout.cancelRequest.multiPress(2, 1.5).onTrue(setState(State.idle));
   }
 
   private void setupIdle() {
     stateTriggers
         .get(State.idle)
-        .onTrue(
-            Commands.parallel(
-                intake.setPosition(IntakeConstants.setpoints.stowed),
-                Commands.runOnce(() -> shooter.stopAll()),
-                climb.setPosition(ClimbConstants.retractedHeight)));
-
-    stateTriggers
-        .get(State.idle)
         .whileTrue(
-            Commands.parallel(indexer.setVoltage(Volts.of(0.0)), intake.setVoltage(Volts.of(0.0))));
+            Commands.parallel(
+                indexer.setVoltage(Volts.of(0.0)),
+                intake.setVoltage(Volts.of(0.0)),
+                Commands.runOnce(() -> shooter.setVelocitySetpoint(RadiansPerSecond.of(0.0))),
+                intake.setPosition(IntakeConstants.setpoints.stowed)));
   }
 
   private void setupIntake() {
@@ -327,18 +302,19 @@ public class Superstructure extends SubsystemBase {
   }
 
   private void setupClimb() {
-    stateTriggers.get(State.climb).onTrue(climb.setPosition(ClimbConstants.extendedHeight));
+    stateTriggers.get(State.climb).whileTrue(climb.setPosition(ClimbConstants.extendendHeight));
 
-    stateTriggers.get(State.climbscore).onTrue(climb.setPosition(ClimbConstants.retractedHeight));
+    stateTriggers
+        .get(State.climbscore)
+        .whileTrue(climb.setPosition(ClimbConstants.retractedHeight));
   }
 
   public Command setState(State newState) {
-    return Commands.run(
-            () -> {
-              previousState = state;
-              state = newState;
-            })
-        .withTimeout(0.01);
+    return Commands.runOnce(
+        () -> {
+          previousState = state;
+          state = newState;
+        });
   }
 
   private boolean useTargeting() {
