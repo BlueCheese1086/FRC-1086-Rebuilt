@@ -196,18 +196,7 @@ public class RobotContainer {
     Superstructure.ControllerLayout.joystickY = () -> -driver.getLeftX();
 
     autobuilder = new AutoBuilder(drive); // TODO: pass superstructure when ready
-    superstructure =
-        new Superstructure(
-            drive,
-            intake,
-            shooter,
-            indexer,
-            hood,
-            climb,
-            autobuilder,
-            drive::getPose,
-            drive::getChassisSpeeds,
-            drive::getRotation);
+    superstructure = new Superstructure(drive, intake, shooter, indexer, hood, climb, autobuilder, drive::getPose,drive::getChassisSpeeds,drive::getRotation);
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices");
@@ -234,7 +223,6 @@ public class RobotContainer {
   }
 
   private void configureButtonBindings() {
-    
     // Default command, normal field-relative drive
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
@@ -247,7 +235,95 @@ public class RobotContainer {
                 shooter.sysid(8.0, 0, "left"),
                 shooter.sysid(8.0, 1, "middle"),
                 shooter.sysid(8.0, 2, "right")));
-                
+
+    // Reset gyro to 0° when B button is pressed
+    driver
+        .y()
+        .whileTrue(
+            DriveCommands.joystickDriveAtVirtualTarget(
+                drive,
+                () -> -driver.getLeftY(),
+                () -> -driver.getLeftX(),
+                () -> FieldConstants.Hub.hubCenter));
+
+    driver // Sohams way of SOTM using akit temp
+        .leftBumper()
+        .whileTrue(
+            Commands.run(
+                    () -> {
+                      LaunchingParameters parms =
+                          LauncherCalculator.getInstance()
+                              .getParameters(
+                                  drive::getPose, drive::getChassisSpeeds, drive::getRotation);
+                      Logger.recordOutput("SOTM/Distance", parms.distance());
+                      Logger.recordOutput(
+                          "SOTM/Distance No Lookahead", parms.distanceNoLookahead());
+                      Logger.recordOutput("SOTM/Drive Velocity", parms.driveVelocity());
+                      Logger.recordOutput("SOTM/Flywheel Speed", parms.flywheelSpeed());
+                      Logger.recordOutput("SOTM/Hood Angle", parms.hoodAngle());
+                      Logger.recordOutput("SOTM/Is Valid", parms.isValid());
+                      Logger.recordOutput("SOTM/Drive Angle", parms.driveAngle());
+                      Logger.recordOutput(
+                          "SOTM/Drive Angle No Lookahead", parms.driveAngleNoLookahead());
+                      Logger.recordOutput("SOTM/Time of Flight", parms.timeOfFlight());
+
+                      if (parms.isValid()) {
+                        shooter.setVelocitySetpoint(RadiansPerSecond.of(parms.flywheelSpeed()));
+                        hood.setAngle(Radians.of(parms.hoodAngle()));
+                      }
+                    })
+                .alongWith(
+                    DriveCommands.joystickDriveAtAngle(
+                        drive,
+                        () -> -driver.getLeftY() * 0.5,
+                        () -> -driver.getLeftX() * 0.5,
+                        () ->
+                            LauncherCalculator.getInstance()
+                                .getParameters(
+                                    drive::getPose, drive::getChassisSpeeds, drive::getRotation)
+                                .driveAngle())));
+
+    driver
+        .y()
+        .whileTrue(
+            Commands.run(
+                () -> {
+                  var chassisSpeeds = drive.getChassisSpeeds();
+                  double speedMps =
+                      Math.hypot(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond);
+                  boolean isMoving = speedMps >= ShooterConstants.Targeting.movingSpeedThresholdMps;
+
+                  ShootingCalculator.ShootingSolution solution =
+                      isMoving
+                          ? ShootingCalculator.calculateMovingSolution(
+                              drive.getPose(),
+                              chassisSpeeds,
+                              Units.degreesToRadians(HoodConstants.Targeting.minAngleDeg),
+                              Units.degreesToRadians(HoodConstants.Targeting.maxAngleDeg),
+                              ShooterConstants.Targeting.minRpm,
+                              ShooterConstants.Targeting.maxRpm,
+                              ShooterConstants.Targeting.movingRpmChangeWeight,
+                              ShooterConstants.Targeting.movingHoodChangeWeight)
+                          : ShootingCalculator.calculateStationarySolution(
+                              drive.getPose(),
+                              Units.degreesToRadians(HoodConstants.Targeting.minAngleDeg),
+                              Units.degreesToRadians(HoodConstants.Targeting.maxAngleDeg),
+                              ShooterConstants.Targeting.stationaryRpm);
+
+                  hood.setAngle(Degrees.of(Math.toDegrees(solution.hoodAngleRad)));
+                  shooter.setVelocitySetpoint(
+                      RadiansPerSecond.of(
+                          Units.rotationsPerMinuteToRadiansPerSecond(solution.flywheelRpm)));
+
+                  Logger.recordOutput(
+                      "Superstructure/Target/HoodAngleDeg", Math.toDegrees(solution.hoodAngleRad));
+                  Logger.recordOutput("Superstructure/Target/FlywheelRpm", solution.flywheelRpm);
+                  Logger.recordOutput(
+                      "Superstructure/Target/DistanceMeters", solution.distanceMeters);
+                  Logger.recordOutput("Superstructure/Target/Valid", solution.valid);
+                  Logger.recordOutput("Superstructure/Target/SpeedMps", speedMps);
+                  Logger.recordOutput("Superstructure/Target/IsMoving", isMoving);
+                }));
     driver
         .b()
         .onTrue(

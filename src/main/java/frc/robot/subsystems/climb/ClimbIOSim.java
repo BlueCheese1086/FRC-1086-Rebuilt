@@ -92,7 +92,7 @@ public class ClimbIOSim implements ClimbIO {
       feedforward.setKs(KS.get());
 
       double pidOutput = controller.calculate(climbSim.getPositionMeters());
-      double feedforwardOutput = feedforward.calculate(controller.getSetpoint());
+      double feedforwardOutput = feedforward.calculate(0.0);
       double side = (pidOutput + feedforwardOutput);
       appliedVolts = side;
     }
