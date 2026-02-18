@@ -20,14 +20,9 @@ public interface ClimbIO {
     public double temp;
     public double statorCurrent;
     public double supplyCurrent;
-    public double test1;
     public double climbPosition = 0.0;
 
     public double velocity = 0.0;
-
-    public double[] climbOdometryTimestamps = new double[] {};
-    public double[] climbOdometryDrivePositionsRad = new double[] {};
-    public double[] climbOdometryTurnPositions = new double[] {};
   }
 
   public default void setPosition(double position) {}

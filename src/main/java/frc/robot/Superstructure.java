@@ -302,7 +302,7 @@ public class Superstructure extends SubsystemBase {
   }
 
   private void setupClimb() {
-    stateTriggers.get(State.climb).whileTrue(climb.setPosition(ClimbConstants.extendendHeight));
+    stateTriggers.get(State.climb).whileTrue(climb.setPosition(ClimbConstants.extendedHeight));
 
     stateTriggers
         .get(State.climbscore)

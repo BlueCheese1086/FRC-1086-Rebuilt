@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.climb;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -30,7 +31,9 @@ public class Climb extends SubsystemBase {
     return this.run(
         () -> {
           inputs.targetPosition = position;
-          io.setPosition(position);
+          io.setPosition(
+              MathUtil.clamp(
+                  position, ClimbConstants.retractedHeight, ClimbConstants.extendedHeight));
         });
   }
 
@@ -38,7 +41,11 @@ public class Climb extends SubsystemBase {
     return this.run(
         () -> {
           inputs.targetPosition = position.getAsDouble();
-          io.setPosition(position.getAsDouble());
+          io.setPosition(
+              MathUtil.clamp(
+                  position.getAsDouble(),
+                  ClimbConstants.retractedHeight,
+                  ClimbConstants.extendedHeight));
         });
   }
 

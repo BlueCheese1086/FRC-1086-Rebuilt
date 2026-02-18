@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems.climb;
 
-import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
@@ -23,28 +22,12 @@ public class ClimbIOSim implements ClimbIO {
   private static final LoggedNetworkNumber KG = new LoggedNetworkNumber("Climb/KG", 4.0);
   // private static final double kV = 1.3; // max battery voltage / max motor rpm
   private static final LoggedNetworkNumber KV = new LoggedNetworkNumber("Climb/KV", 1.3);
-  private static final LoggedNetworkNumber div = new LoggedNetworkNumber("Climb/div", 5.655);
 
-  private static final double armVel = 6.7;
-  private static final double armAccel = 6.7;
-
-  private static final double yes = 6.7;
-  private double kFF = 0.0;
-
-  private static final double kA = 0.0;
-  private static final double radius = 2.0;
-  public static final double gearing = 1.0 / 10.0;
-  private static final double thesamethingasthevalueinthefeedback = 2 * Math.PI * radius * gearing;
   private static final LoggedNetworkNumber KP = new LoggedNetworkNumber("Climb/KP", 0.39551);
   private static final LoggedNetworkNumber KI = new LoggedNetworkNumber("Climb/KI", 0.0);
   private static final LoggedNetworkNumber KD = new LoggedNetworkNumber("Climb/KD", 1.1);
-  private static final double kP = 0.43556;
-  private static final double kI = 0.0;
   private double position = 0.0;
-  private static final double kD = 1.0;
   private ElevatorFeedforward feedforward;
-
-  private MotionMagicVoltage ICastFireball = new MotionMagicVoltage(position);
 
   private static final DCMotor gearbox = DCMotor.getKrakenX60(1);
 
@@ -63,7 +46,7 @@ public class ClimbIOSim implements ClimbIO {
                 ClimbConstants.gearing),
             gearbox,
             Units.inchesToMeters(ClimbConstants.retractedHeight),
-            Units.inchesToMeters(ClimbConstants.extendendHeight),
+            Units.inchesToMeters(ClimbConstants.extendedHeight),
             true,
             0.0);
     this.feedforward = new ElevatorFeedforward(KS.get(), KG.get(), KV.get());
@@ -71,9 +54,9 @@ public class ClimbIOSim implements ClimbIO {
 
   @Override
   public void setPosition(double position) {
-    double pos = position * thesamethingasthevalueinthefeedback;
-    if (pos > 10) {
-      pos = 10;
+    double pos = position;
+    if (pos > ClimbConstants.extendedHeight) {
+      pos = ClimbConstants.extendedHeight;
     }
     closedLoop = true;
     controller.setSetpoint(pos);
@@ -103,8 +86,8 @@ public class ClimbIOSim implements ClimbIO {
       feedforward.setKs(KS.get());
 
       double pidOutput = controller.calculate(climbSim.getPositionMeters());
-      double feedforwardOutput = feedforward.calculate(controller.getSetpoint());
-      double side = (pidOutput + feedforwardOutput) - this.position;
+      double feedforwardOutput = feedforward.calculate(0.0);
+      double side = (pidOutput + feedforwardOutput);
       appliedVolts = side + 0;
     }
 
@@ -117,7 +100,6 @@ public class ClimbIOSim implements ClimbIO {
     inputs.targetPosition = this.position;
     inputs.angle = Rotation2d.kZero.getMeasure();
     inputs.volts = MathUtil.clamp(appliedVolts, -12.0, 12.0);
-    inputs.temp = yes;
     inputs.velocity =
         (climbSim.getVelocityMetersPerSecond() * 60) / (2 * Math.PI * Units.inchesToMeters(0.5));
     inputs.statorCurrent = Math.abs(climbSim.getCurrentDrawAmps());

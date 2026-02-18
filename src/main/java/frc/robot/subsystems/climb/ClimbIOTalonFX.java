@@ -30,7 +30,6 @@ public class ClimbIOTalonFX implements ClimbIO {
   private StatusSignal<Current> supplyCurrent;
   private MotionMagicVoltage motionMagic = new MotionMagicVoltage(0.0); // fix
   private VoltageOut voltagething;
-  private final StatusSignal<Angle> climbPosition;
 
   private final Debouncer connected = new Debouncer(1.0); // What does this do?
 
@@ -45,7 +44,7 @@ public class ClimbIOTalonFX implements ClimbIO {
     config.MotorOutput.NeutralMode = ClimbConstants.neutralMode;
     config.MotorOutput.PeakForwardDutyCycle = 0.8;
     config.MotorOutput.PeakReverseDutyCycle = 0.8;
-    config.Feedback.SensorToMechanismRatio = ClimbConstants.thesamethingasthevalueinthefeedback;
+    config.Feedback.SensorToMechanismRatio = ClimbConstants.gearing / ClimbConstants.radius;
 
     var limitConfig = config.CurrentLimits;
 
@@ -83,8 +82,6 @@ public class ClimbIOTalonFX implements ClimbIO {
         50.0, angle, volts, temp, statorCurrent, supplyCurrent);
 
     climbTalon.optimizeBusUtilization();
-    climbPosition = climbTalon.getPosition();
-
     // Stator, supply,vel, accl, temp
     // Stator: torque?
     // supply: how much $ getting, how much giving to torque?
@@ -109,7 +106,6 @@ public class ClimbIOTalonFX implements ClimbIO {
     inputs.temp = temp.getValueAsDouble();
     inputs.statorCurrent = statorCurrent.getValueAsDouble();
     inputs.supplyCurrent = supplyCurrent.getValueAsDouble();
-    inputs.climbPosition = climbPosition.getValueAsDouble();
   }
 
   @Override
