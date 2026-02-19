@@ -31,10 +31,10 @@ public class IntakeIOSim implements IntakeIO {
           IntakeConstants.Mechanical.gearing,
           0.04,
           IntakeConstants.Mechanical.intakeLength.in(Meters),
-          IntakeConstants.setpoints.deployed.in(Radians),
-          IntakeConstants.setpoints.stowed.in(Radians),
+          IntakeConstants.Setpoints.deployed.in(Radians),
+          IntakeConstants.Setpoints.stowed.in(Radians),
           false,
-          IntakeConstants.setpoints.stowed.in(Radians));
+          IntakeConstants.Setpoints.stowed.in(Radians));
   private final DCMotorSim simRoller =
       new DCMotorSim(
           LinearSystemId.createDCMotorSystem(DCMotor.getKrakenX60Foc(1), 0.04, 1.0),

@@ -36,7 +36,7 @@ public class IntakeConstants {
     public static final Voltage peakReverseVoltage = Volts.of(-12);
   }
 
-  public static class setpoints {
+  public static class Setpoints {
     public static final Angle stowed = Degrees.of(100);
     public static final Angle homed = Degrees.of(110);
     public static final Angle agitate = Degrees.of(20);

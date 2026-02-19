@@ -27,6 +27,7 @@ import frc.robot.commands.AutoRoutines;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.climb.Climb;
+import frc.robot.subsystems.climb.ClimbConstants;
 import frc.robot.subsystems.climb.ClimbIO;
 import frc.robot.subsystems.climb.ClimbIOSim;
 import frc.robot.subsystems.climb.ClimbIOTalonFX;
@@ -247,7 +248,6 @@ public class RobotContainer {
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     autoChooser.addOption("auto builder", autobuilder.build());
-
     // Configure the button bindings
     configureButtonBindings();
   }
@@ -375,6 +375,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return autoChooser.get();
+    return Commands.parallel(climb.setPosition(ClimbConstants.Setpoints.hopperRelease),autoChooser.get());
   }
 }
