@@ -15,6 +15,9 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -52,12 +55,16 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.shooter.ShooterIOTalonFX;
+import frc.robot.subsystems.shooter.ShootingManager;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOSim;
+import frc.robot.util.FieldConstants;
+import frc.robot.util.LoggedTunableNumber;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -78,6 +85,7 @@ public class RobotContainer {
   private final Indexer indexer;
   private final Hood hood;
   private final Climb climb;
+  private final ShootingManager shootingManager;
 
   @SuppressWarnings("unused")
   private final Superstructure superstructure;
@@ -90,6 +98,11 @@ public class RobotContainer {
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
+
+  private final LoggedTunableNumber calibRpm =
+      new LoggedTunableNumber("Shooting/Calib/Rpm", 3200.0);
+  private final LoggedTunableNumber calibAngleDeg =
+      new LoggedTunableNumber("Shooting/Calib/AngleDeg", 65.0);
 
   /** The container for the robot. Contains subsystems, IO devices, and commands. */
   public RobotContainer() {
@@ -104,9 +117,15 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
 
+        shootingManager =
+            new ShootingManager(drive::getPose, drive::getChassisSpeeds, drive::getRotation);
+
         vision =
             new Vision(
-                drive::addVisionMeasurement,
+                (pose, timestamp, stdDevs) -> {
+                  drive.addVisionMeasurement(pose, timestamp, stdDevs);
+                  shootingManager.addVisionMeasurement(pose, timestamp);
+                },
                 drive::getPose,
                 new VisionIOPhotonVision(
                     "left", VisionConstants.PhysicalConstants.cameraTransforms[0]),
@@ -136,9 +155,15 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
 
+        shootingManager =
+            new ShootingManager(drive::getPose, drive::getChassisSpeeds, drive::getRotation);
+
         vision =
             new Vision(
-                drive::addVisionMeasurement,
+                (pose, timestamp, stdDevs) -> {
+                  drive.addVisionMeasurement(pose, timestamp, stdDevs);
+                  shootingManager.addVisionMeasurement(pose, timestamp);
+                },
                 drive::getPose,
                 new VisionIOSim("left", VisionConstants.PhysicalConstants.cameraTransforms[0]),
                 new VisionIOSim("right", VisionConstants.PhysicalConstants.cameraTransforms[1]));
@@ -161,9 +186,14 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {});
 
+        shootingManager = new ShootingManager();
+
         vision =
             new Vision(
-                drive::addVisionMeasurement, drive::getPose, new VisionIO() {}, new VisionIO() {});
+                (pose, timestamp, stdDevs) -> drive.addVisionMeasurement(pose, timestamp, stdDevs),
+                drive::getPose,
+                new VisionIO() {},
+                new VisionIO() {});
 
         shooter = new Shooter(new FeederIO() {}, new ShooterIO() {});
         intake = new Intake(new IntakeIO() {});
@@ -246,6 +276,97 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                     drive)
                 .ignoringDisable(true));
+
+    driver
+        .x()
+        .onTrue(
+            Commands.runOnce(
+                    () -> {
+                      Pose2d pose = drive.getPose();
+                      Pose2d stepped =
+                          pose.transformBy(new Transform2d(-0.25, 0.0, Rotation2d.kZero));
+                      drive.setPose(stepped);
+                      Logger.recordOutput("Shooting/Calib/StepBackPose", stepped);
+                    },
+                    drive)
+                .ignoringDisable(true));
+
+    operator
+        .x()
+        .whileTrue(
+            Commands.run(
+                () -> {
+                  double rpm = calibRpm.get();
+                  double angleDeg = calibAngleDeg.get();
+                  double distance =
+                      drive
+                          .getPose()
+                          .getTranslation()
+                          .getDistance(FieldConstants.Hub.hubCenter.getTranslation());
+                  hood.setAngle(edu.wpi.first.units.Units.Degrees.of(angleDeg));
+                  shooter.setVelocitySetpoint(
+                      edu.wpi.first.units.Units.RadiansPerSecond.of(
+                          Units.rotationsPerMinuteToRadiansPerSecond(rpm)));
+                  Logger.recordOutput("Shooting/Calib/DistanceMeters", distance);
+                  Logger.recordOutput("Shooting/Calib/Rpm", rpm);
+                  Logger.recordOutput("Shooting/Calib/AngleDeg", angleDeg);
+                },
+                hood,
+                shooter));
+
+    driver
+        .y()
+        .whileTrue(
+            Commands.parallel(
+                DriveCommands.joystickDriveAtAngle(
+                    drive,
+                    () -> -driver.getLeftY(),
+                    () -> -driver.getLeftX(),
+                    () -> {
+                      ShootingManager.ShotSolution solution =
+                          shootingManager.calculateShotSolution(
+                              drive.getPose(),
+                              drive.getChassisSpeeds(),
+                              FieldConstants.Hub.topCenterPoint,
+                              0.1,
+                              0.1);
+                      Logger.recordOutput(
+                          "ShootingManager/Sim/HeadingDeg",
+                          solution.drivetrainHeading.getDegrees());
+                      return solution.drivetrainHeading;
+                    }),
+                Commands.run(
+                    () -> {
+                      shootingManager.updateFromSuppliers();
+                      ShootingManager.ShotSolution solution =
+                          shootingManager.calculateShotSolution(
+                              drive.getPose(),
+                              drive.getChassisSpeeds(),
+                              FieldConstants.Hub.topCenterPoint,
+                              0.1,
+                              0.1);
+                      Translation3d[] trajectory =
+                          shootingManager.calculateTrajectory(
+                              drive.getPose(),
+                              solution,
+                              FieldConstants.Hub.topCenterPoint,
+                              0.02,
+                              2.0);
+                      Logger.recordOutput("ShootingManager/Sim/Trajectory", trajectory);
+                      Logger.recordOutput(
+                          "ShootingManager/Sim/HoodAngleDeg",
+                          Units.radiansToDegrees(solution.hoodPitchRad));
+                      Logger.recordOutput("ShootingManager/Sim/Rpm", solution.flywheelRpm);
+                      Logger.recordOutput(
+                          "ShootingManager/Sim/HeadingDeg",
+                          solution.drivetrainHeading.getDegrees());
+                      hood.setAngle(edu.wpi.first.units.Units.Radians.of(solution.hoodPitchRad));
+                      shooter.setVelocitySetpoint(
+                          edu.wpi.first.units.Units.RadiansPerSecond.of(
+                              Units.rotationsPerMinuteToRadiansPerSecond(solution.flywheelRpm)));
+                    },
+                    hood,
+                    shooter)));
   }
 
   /**

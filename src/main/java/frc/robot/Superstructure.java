@@ -69,6 +69,7 @@ public class Superstructure extends SubsystemBase {
 
   @SuppressWarnings("unused")
   private final Drive drive;
+
   private final Intake intake;
   private final Shooter shooter;
   private final Indexer indexer;
@@ -172,8 +173,12 @@ public class Superstructure extends SubsystemBase {
   }
 
   private void setupIntake() {
-    stateTriggers.get(State.holding).onTrue(
-      Commands.sequence(climb.setPosition(ClimbConstants.Setpoints.hopperRelease),intake.setPosition(IntakeConstants.setpoints.deployed)));
+    stateTriggers
+        .get(State.holding)
+        .onTrue(
+            Commands.sequence(
+                climb.setPosition(ClimbConstants.Setpoints.hopperRelease),
+                intake.setPosition(IntakeConstants.setpoints.deployed)));
     stateTriggers
         .get(State.holding)
         .whileTrue(

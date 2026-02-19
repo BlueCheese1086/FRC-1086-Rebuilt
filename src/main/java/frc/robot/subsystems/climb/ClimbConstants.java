@@ -41,7 +41,6 @@ public class ClimbConstants {
     public static final double climbExtend = 10.0;
     public static final double hopperRelease = 10.0;
     public static final double climbScore = 10.0;
-
   }
 
   public static final double thesamethingasthevalueinthefeedback = 2 * Math.PI * radius * gearing;

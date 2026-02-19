@@ -29,7 +29,7 @@ public class ShooterConstants {
 
   public static class Targeting {
     public static final double minRpm = 1500.0;
-    public static final double maxRpm = 6000.0;
+    public static final double maxRpm = 6271.0;
     public static final double stationaryRpm = 3200.0;
     public static final double movingSpeedThresholdMps = 0.25;
     public static final double movingRpmChangeWeight = 2.0;
