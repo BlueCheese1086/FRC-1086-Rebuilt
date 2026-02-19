@@ -20,7 +20,7 @@ public class ShooterConstants {
     public static final double kV = 12.0 / 620.0; // 113.067;
     public static final double kA = 0.0;
 
-    public static final double cruiseVelocity = 6271.0 / 60.0; // ~ 600 rad per sec;
+    public static final double cruiseVelocity = 6000.0 / 60.0; // ~ 600 rad per sec;
     public static final double acceleration =
         cruiseVelocity
             / 0.23; // Cruise velocity / spin up time estimated, low numbers equal more brownouts,
@@ -29,7 +29,7 @@ public class ShooterConstants {
 
   public static class Targeting {
     public static final double minRpm = 1500.0;
-    public static final double maxRpm = 6271.0;
+    public static final double maxRpm = 6000.0;
     public static final double stationaryRpm = 3200.0;
     public static final double movingSpeedThresholdMps = 0.25;
     public static final double movingRpmChangeWeight = 2.0;
@@ -53,5 +53,11 @@ public class ShooterConstants {
             shooterYOffset.in(Meters),
             shooterHeight.in(Meters),
             new Rotation3d());
+  }
+
+  public static class ShooterTransforms {
+    public static final Transform3d leftShooter = new Transform3d();
+    public static final Transform3d centerShooter = new Transform3d();
+    public static final Transform3d rightShooter = new Transform3d();
   }
 }

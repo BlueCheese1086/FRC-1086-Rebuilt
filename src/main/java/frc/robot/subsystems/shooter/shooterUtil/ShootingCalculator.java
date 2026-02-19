@@ -22,7 +22,7 @@ public class ShootingCalculator {
   private static final int HOOD_ANGLE_SAMPLES = 25;
   private static final double STATIONARY_EXIT_VELOCITY_TOLERANCE_MPS = 0.25;
 
-  private static double lastHoodAngleRad = Units.degreesToRadians(67.0);
+  private static double lastHoodAngleRad = Units.degreesToRadians(89.0);
   private static double lastFlywheelRpm = 0.0;
 
   public static class ShootingSolution {
