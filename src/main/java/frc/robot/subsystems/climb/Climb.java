@@ -93,9 +93,23 @@ public class Climb extends SubsystemBase {
         .until(
             () -> {
               return direction.equals(Direction.kForward)
-                  ? MathUtil.isNear(ClimbConstants.extendedHeight, inputs.climbPosition, 0.01)
-                  : MathUtil.isNear(ClimbConstants.retractedHeight, inputs.climbPosition, 0.01);
+                  ? MathUtil.isNear(
+                      ClimbConstants.extendedHeight,
+                      inputs.climbPosition,
+                      ClimbConstants.SysIdTolerance)
+                  : MathUtil.isNear(
+                      ClimbConstants.retractedHeight,
+                      inputs.climbPosition,
+                      ClimbConstants.SysIdTolerance);
             });
+  }
+
+  public Command sysId() {
+    return Commands.sequence(
+        routine.dynamic(Direction.kForward).withTimeout(2.0),
+            routine.dynamic(Direction.kReverse).withTimeout(2.0),
+        routine.quasistatic(Direction.kForward).withTimeout(2.0),
+            routine.quasistatic(Direction.kReverse).withTimeout(2.0));
   }
 
   public Command sysIdQuasistic(SysIdRoutine.Direction direction) {
@@ -104,8 +118,14 @@ public class Climb extends SubsystemBase {
         .until(
             () -> {
               return direction.equals(Direction.kForward)
-                  ? MathUtil.isNear(ClimbConstants.extendedHeight, inputs.climbPosition, 0.01)
-                  : MathUtil.isNear(ClimbConstants.retractedHeight, inputs.climbPosition, 0.01);
+                  ? MathUtil.isNear(
+                      ClimbConstants.extendedHeight,
+                      inputs.climbPosition,
+                      ClimbConstants.SysIdTolerance)
+                  : MathUtil.isNear(
+                      ClimbConstants.retractedHeight,
+                      inputs.climbPosition,
+                      ClimbConstants.SysIdTolerance);
             });
   }
 }

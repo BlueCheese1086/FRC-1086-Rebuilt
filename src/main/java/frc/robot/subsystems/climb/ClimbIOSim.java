@@ -12,20 +12,21 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
-import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
+import frc.robot.util.LoggedTunableNumber;
+import org.littletonrobotics.junction.Logger;
 
 public class ClimbIOSim implements ClimbIO {
 
   // private static final double kS = 0; // 1.0;
-  private static final LoggedNetworkNumber KS = new LoggedNetworkNumber("Climb/KS", 0.0);
+  private static final LoggedTunableNumber KS = new LoggedTunableNumber("Climb/KS", 0.0);
   // private static final double kG = 4.0;
-  private static final LoggedNetworkNumber KG = new LoggedNetworkNumber("Climb/KG", 4.0);
+  private static final LoggedTunableNumber KG = new LoggedTunableNumber("Climb/KG", 0.0);
   // private static final double kV = 1.3; // max battery voltage / max motor rpm
-  private static final LoggedNetworkNumber KV = new LoggedNetworkNumber("Climb/KV", 1.3);
+  private static final LoggedTunableNumber KV = new LoggedTunableNumber("Climb/KV", 0.0);
 
-  private static final LoggedNetworkNumber KP = new LoggedNetworkNumber("Climb/KP", 0.39551);
-  private static final LoggedNetworkNumber KI = new LoggedNetworkNumber("Climb/KI", 0.0);
-  private static final LoggedNetworkNumber KD = new LoggedNetworkNumber("Climb/KD", 1.1);
+  private static final LoggedTunableNumber KP = new LoggedTunableNumber("Climb/KP", 0.0);
+  private static final LoggedTunableNumber KI = new LoggedTunableNumber("Climb/KI", 0.0);
+  private static final LoggedTunableNumber KD = new LoggedTunableNumber("Climb/KD", 0.0);
   private double position = 0.0;
   private ElevatorFeedforward feedforward;
 
@@ -40,13 +41,10 @@ public class ClimbIOSim implements ClimbIO {
     climbSim =
         new ElevatorSim(
             LinearSystemId.createElevatorSystem(
-                gearbox,
-                Units.lbsToKilograms(5.67),
-                Units.inchesToMeters(1),
-                ClimbConstants.gearing),
+                gearbox, Units.lbsToKilograms(1.0), ClimbConstants.radius, ClimbConstants.gearing),
             gearbox,
-            Units.inchesToMeters(ClimbConstants.retractedHeight),
-            Units.inchesToMeters(ClimbConstants.extendedHeight),
+            ClimbConstants.retractedHeight,
+            ClimbConstants.extendedHeight,
             true,
             0.0);
     this.feedforward = new ElevatorFeedforward(KS.get(), KG.get(), KV.get());
@@ -67,6 +65,8 @@ public class ClimbIOSim implements ClimbIO {
   public void setVoltage(double volts) {
     closedLoop = false;
     appliedVolts = volts;
+    Logger.recordOutput("Climb/Input Voltage", volts);
+    climbSim.setInputVoltage(volts);
   }
 
   @Override
@@ -91,17 +91,15 @@ public class ClimbIOSim implements ClimbIO {
       appliedVolts = side + 0;
     }
 
-    climbSim.setInputVoltage(MathUtil.clamp((appliedVolts), -12.0, 12.0));
     climbSim.update(0.02);
+    climbSim.setInputVoltage(MathUtil.clamp((appliedVolts), -12.0, 12.0));
 
-    inputs.climbPosition = Units.metersToInches(climbSim.getPositionMeters());
+    inputs.climbPosition = climbSim.getPositionMeters();
 
     inputs.motorConnected = true;
     inputs.targetPosition = this.position;
-    inputs.angle = Rotation2d.kZero.getMeasure();
-    inputs.volts = MathUtil.clamp(appliedVolts, -12.0, 12.0);
-    inputs.velocity =
-        (climbSim.getVelocityMetersPerSecond() * 60) / (2 * Math.PI * Units.inchesToMeters(0.5));
+    inputs.volts = appliedVolts;
+    inputs.velocity = climbSim.getVelocityMetersPerSecond();
     inputs.statorCurrent = Math.abs(climbSim.getCurrentDrawAmps());
     inputs.supplyCurrent = Math.abs(climbSim.getCurrentDrawAmps());
   }

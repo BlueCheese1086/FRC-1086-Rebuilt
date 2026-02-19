@@ -170,13 +170,17 @@ public class Superstructure extends SubsystemBase {
                 indexer.setVoltage(Volts.of(0.0)),
                 intake.setVoltage(Volts.of(0.0)),
                 Commands.runOnce(() -> shooter.setVelocitySetpoint(RadiansPerSecond.of(0.0)))));
-    
+
     stateTriggers.get(State.idle).onTrue(intake.setPosition(IntakeConstants.Setpoints.stowed));
   }
 
   private void setupIntake() {
-    stateTriggers.get(State.holding).onTrue(
-      Commands.sequence(climb.setPosition(ClimbConstants.Setpoints.hopperRelease),intake.setPosition(IntakeConstants.Setpoints.deployed)));
+    stateTriggers
+        .get(State.holding)
+        .onTrue(
+            Commands.sequence(
+                climb.setPosition(ClimbConstants.Setpoints.hopperRelease),
+                intake.setPosition(IntakeConstants.Setpoints.deployed)));
     stateTriggers
         .get(State.holding)
         .whileTrue(
@@ -205,9 +209,9 @@ public class Superstructure extends SubsystemBase {
 
   private void setupTarget() {
     stateTriggers
-      .get(State.shoot)
-      .and(ControllerLayout.agitate)
-      .onTrue(intake.setPosition(IntakeConstants.Setpoints.agitate));
+        .get(State.shoot)
+        .and(ControllerLayout.agitate)
+        .onTrue(intake.setPosition(IntakeConstants.Setpoints.agitate));
     stateTriggers
         .get(State.shoot)
         .and(() -> (FieldConstants.LinesVertical.inAllianceZone(drivePose.get())))
@@ -292,10 +296,10 @@ public class Superstructure extends SubsystemBase {
 
   private void setupPass() {
     stateTriggers
-      .get(State.pass)
-      .and(ControllerLayout.agitate)
-      .onTrue(intake.setPosition(IntakeConstants.Setpoints.agitate));
-    
+        .get(State.pass)
+        .and(ControllerLayout.agitate)
+        .onTrue(intake.setPosition(IntakeConstants.Setpoints.agitate));
+
     stateTriggers
         .get(State.pass)
         .whileTrue(

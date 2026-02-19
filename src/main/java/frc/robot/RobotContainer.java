@@ -27,7 +27,6 @@ import frc.robot.commands.AutoRoutines;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.climb.Climb;
-import frc.robot.subsystems.climb.ClimbConstants;
 import frc.robot.subsystems.climb.ClimbIO;
 import frc.robot.subsystems.climb.ClimbIOSim;
 import frc.robot.subsystems.climb.ClimbIOTalonFX;
@@ -89,7 +88,7 @@ public class RobotContainer {
   private final ShootingManager shootingManager;
 
   @SuppressWarnings("unused")
-  private final Superstructure superstructure;
+  //   private final Superstructure superstructure;
 
   private final AutoBuilder autobuilder;
 
@@ -216,18 +215,18 @@ public class RobotContainer {
     Superstructure.ControllerLayout.joystickY = () -> -driver.getLeftX();
 
     autobuilder = new AutoBuilder(drive);
-    superstructure =
-        new Superstructure(
-            drive,
-            intake,
-            shooter,
-            indexer,
-            hood,
-            climb,
-            autobuilder,
-            drive::getPose,
-            drive::getChassisSpeeds,
-            drive::getRotation);
+    // superstructure =
+    //     new Superstructure(
+    //         drive,
+    //         intake,
+    //         shooter,
+    //         indexer,
+    //         hood,
+    //         climb,
+    //         autobuilder,
+    //         drive::getPose,
+    //         drive::getChassisSpeeds,
+    //         drive::getRotation);
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices");
@@ -247,6 +246,7 @@ public class RobotContainer {
         "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    autoChooser.addOption("Climb/SysId", climb.sysId());
     autoChooser.addOption("auto builder", autobuilder.build());
     // Configure the button bindings
     configureButtonBindings();
@@ -367,6 +367,9 @@ public class RobotContainer {
                     },
                     hood,
                     shooter)));
+
+    LoggedTunableNumber climbPosition = new LoggedTunableNumber("CLimb/Desired Position", 0.0);
+    driver.povLeft().whileTrue(climb.setPositionDynamic(climbPosition));
   }
 
   /**
@@ -375,6 +378,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return Commands.parallel(climb.setPosition(ClimbConstants.Setpoints.hopperRelease),autoChooser.get());
+    return autoChooser.get();
   }
 }

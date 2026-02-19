@@ -36,6 +36,7 @@ public class ClimbConstants {
 
   public static final double extendedHeight = maxHeight;
   public static final double retractedHeight = 0.0;
+  public static final double SysIdTolerance = 0.01;
 
   public static class Setpoints {
     public static final double climbExtend = 10.0;
