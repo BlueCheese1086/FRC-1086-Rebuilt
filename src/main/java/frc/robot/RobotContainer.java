@@ -130,21 +130,10 @@ public class RobotContainer {
                         new FeederIOTalonFX(1),
                         new ShooterIOTalonFX(RobotMap.ShooterMap.left, true),
                         new ShooterIOTalonFX(RobotMap.ShooterMap.middle, true),
-                        new ShooterIOTalonFX(RobotMap.ShooterMap.right, true));
+                        new ShooterIOTalonFX(RobotMap.ShooterMap.right, false));
                 hood = new Hood(new HoodIOServo());
                 climb = new Climb(new ClimbIOTalonFX());
                 break;
-        intake = new Intake(new IntakeIOTalonFX());
-        indexer = new Indexer(new IndexerIOTalonFX());
-        shooter =
-            new Shooter(
-                new FeederIOTalonFX(RobotMap.ShooterMap.feeder),
-                new ShooterIOTalonFX(RobotMap.ShooterMap.left, true),
-                new ShooterIOTalonFX(RobotMap.ShooterMap.middle, true),
-                new ShooterIOTalonFX(RobotMap.ShooterMap.right, false));
-        hood = new Hood(new HoodIOServo());
-        climb = new Climb(new ClimbIOTalonFX());
-        break;
 
             case SIM:
                 // Sim robot, instantiate physics sim IO implementations
