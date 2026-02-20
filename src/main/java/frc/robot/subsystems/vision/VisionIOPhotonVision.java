@@ -74,7 +74,10 @@ public class VisionIOPhotonVision implements VisionIO {
               int[] tagsUsed = new int[inputs.tagCount];
               for (int i = 0; i < inputs.tagCount; i++) {
                 tagsUsed[i] = poseEstimated.targetsUsed.get(i).getFiducialId();
-                tagPoses[i] = VisionConstants.PhysicalConstants.fieldLayout.getTagPose(tagsUsed[i]).orElse(Pose3d.kZero);
+                tagPoses[i] =
+                    VisionConstants.PhysicalConstants.fieldLayout
+                        .getTagPose(tagsUsed[i])
+                        .orElse(Pose3d.kZero);
               }
               inputs.usedTagPoses = tagPoses;
               inputs.tagsUsed = tagsUsed;
