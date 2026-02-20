@@ -59,4 +59,8 @@ public class ShotCalc {
               * ShooterConstants.Mechanical.flywheelRadius.in(Meters));
     }
   }
+
+  public static double[] getTargetVelocities(double positionMeters) {
+    return new double[] {};
+  }
 }

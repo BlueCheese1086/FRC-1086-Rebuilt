@@ -10,6 +10,8 @@ import static edu.wpi.first.units.Units.Meters;
 
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.MomentOfInertia;
 
@@ -56,7 +58,8 @@ public class ShooterConstants {
   }
 
   public static class ShooterTransforms {
-    public static final Transform3d leftShooter = new Transform3d();
+    public static final Transform3d leftShooter =
+        new Transform3d(new Translation3d(Units.inchesToMeters(0), 0, 0), Rotation3d.kZero);
     public static final Transform3d centerShooter = new Transform3d();
     public static final Transform3d rightShooter = new Transform3d();
   }

@@ -86,11 +86,38 @@ public class Intake extends SubsystemBase {
   public Command sysId() {
     return Commands.sequence(
         routine
+            .quasistatic(Direction.kReverse)
+            .until(
+                () ->
+                    (MathUtil.isNear(
+                        -4,
+                        inputs.pivotAngle.in(Degrees),
+                        IntakeConstants.Mechanical.kPositionTolerance.in(
+                            Degrees)))), // TODO: Double Check This
+        routine
             .quasistatic(Direction.kForward)
-            .until(() -> (inputs.pivotAngle.in(Degrees) == -4)), // TODO: Double Check This
-        routine.quasistatic(Direction.kReverse).until(() -> (inputs.pivotAngle.in(Degrees) == 110)),
-        routine.dynamic(Direction.kForward).until(() -> (inputs.pivotAngle.in(Degrees) == -4)),
-        routine.dynamic(Direction.kReverse).until(() -> (inputs.pivotAngle.in(Degrees) == 110)));
+            .until(
+                () ->
+                    (MathUtil.isNear(
+                        110,
+                        inputs.pivotAngle.in(Degrees),
+                        IntakeConstants.Mechanical.kPositionTolerance.in(Degrees)))),
+        routine
+            .dynamic(Direction.kReverse)
+            .until(
+                () ->
+                    (MathUtil.isNear(
+                        -4,
+                        inputs.pivotAngle.in(Degrees),
+                        IntakeConstants.Mechanical.kPositionTolerance.in(Degrees)))),
+        routine
+            .dynamic(Direction.kForward)
+            .until(
+                () ->
+                    (MathUtil.isNear(
+                        110,
+                        inputs.pivotAngle.in(Degrees),
+                        IntakeConstants.Mechanical.kPositionTolerance.in(Degrees)))));
   }
 
   @AutoLogOutput(key = "Intake/Near Setpoint")

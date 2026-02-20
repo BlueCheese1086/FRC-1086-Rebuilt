@@ -70,24 +70,21 @@ public class VisionIOPhotonVision implements VisionIO {
                           poseEstimated.estimatedPose.toPose2d().getTranslation(),
                           currentPose.getRotation());
               inputs.tagCount = poseEstimated.targetsUsed.size();
-              Pose2d[] tagPoses = new Pose2d[inputs.tagCount];
+              Pose3d[] tagPoses = new Pose3d[inputs.tagCount];
               int[] tagsUsed = new int[inputs.tagCount];
               for (int i = 0; i < inputs.tagCount; i++) {
                 tagsUsed[i] = poseEstimated.targetsUsed.get(i).getFiducialId();
-                if (poseEstimated.targetsUsed.get(i).getFiducialId() != -1) {
-                  tagPoses[i] =
-                      VisionConstants.PhysicalConstants.fieldLayout
-                          .getTagPose(poseEstimated.targetsUsed.get(i).getFiducialId())
-                          .get()
-                          .toPose2d();
-                } else {
-                  tagPoses[i] = new Pose2d();
-                }
+                tagPoses[i] =
+                    VisionConstants.PhysicalConstants.fieldLayout
+                        .getTagPose(tagsUsed[i])
+                        .orElse(Pose3d.kZero);
               }
+              inputs.usedTagPoses = tagPoses;
+              inputs.tagsUsed = tagsUsed;
               inputs.timestamp = poseEstimated.timestampSeconds;
+              inputs.averageDistance = getAverageDist(result);
             }
           });
-      inputs.averageDistance = getAverageDist(result);
     }
   }
 

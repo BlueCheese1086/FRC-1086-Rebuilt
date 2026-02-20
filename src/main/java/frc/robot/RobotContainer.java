@@ -60,7 +60,6 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
-import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOSim;
 import frc.robot.util.FieldConstants;
 import frc.robot.util.LoggedTunableNumber;
@@ -127,17 +126,17 @@ public class RobotContainer {
                   shootingManager.addVisionMeasurement(pose, timestamp);
                 },
                 drive::getPose,
-                new VisionIOPhotonVision(
-                    "left", VisionConstants.PhysicalConstants.cameraTransforms[0]),
-                new VisionIOPhotonVision(
-                    "right", VisionConstants.PhysicalConstants.cameraTransforms[1]),
+                // new VisionIOPhotonVision(
+                //     "left", VisionConstants.PhysicalConstants.cameraTransforms[0]),
+                // new VisionIOPhotonVision(
+                //     "right", VisionConstants.PhysicalConstants.cameraTransforms[1]),
                 new VisionIOLimelight("scoring"));
 
         intake = new Intake(new IntakeIOTalonFX());
         indexer = new Indexer(new IndexerIOTalonFX());
         shooter =
             new Shooter(
-                new FeederIOTalonFX(1),
+                new FeederIOTalonFX(RobotMap.ShooterMap.feeder),
                 new ShooterIOTalonFX(RobotMap.ShooterMap.left),
                 new ShooterIOTalonFX(RobotMap.ShooterMap.middle),
                 new ShooterIOTalonFX(RobotMap.ShooterMap.right));
@@ -246,7 +245,8 @@ public class RobotContainer {
         "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-
+    autoChooser.addOption("Climb/SysId", climb.sysId());
+    autoChooser.addOption("Intake/SysId", intake.sysId());
     autoChooser.addOption("auto builder", autobuilder.build());
     // Configure the button bindings
     configureButtonBindings();
@@ -367,6 +367,9 @@ public class RobotContainer {
                     },
                     hood,
                     shooter)));
+
+    LoggedTunableNumber climbPosition = new LoggedTunableNumber("CLimb/Desired Position", 0.0);
+    driver.povLeft().whileTrue(climb.setPositionDynamic(climbPosition));
   }
 
   /**

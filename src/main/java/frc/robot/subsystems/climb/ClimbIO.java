@@ -15,9 +15,9 @@ public interface ClimbIO {
   public static class ClimbIOInputs {
     public double targetPosition = 0.0;
     public boolean motorConnected = false;
-    public double volts;
+    public double volts = 0.0;
     public Angle angle = Radians.zero();
-    public double temp;
+    public double temp = 0.0;
     public double statorCurrent;
     public double supplyCurrent;
     public double climbPosition = 0.0;

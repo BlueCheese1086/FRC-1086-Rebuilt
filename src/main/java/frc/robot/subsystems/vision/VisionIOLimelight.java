@@ -67,8 +67,11 @@ public class VisionIOLimelight implements VisionIO {
       inputs.averageDistance = estimatedPose.avgTagDist;
       inputs.tagCount = estimatedPose.rawFiducials.length;
       int[] usedTags = new int[estimatedPose.rawFiducials.length];
+      inputs.usedTagPoses = new Pose3d[estimatedPose.rawFiducials.length];
       for (int i = 0; i < usedTags.length; i++) {
         usedTags[i] = estimatedPose.rawFiducials[i].id;
+        inputs.usedTagPoses[i] =
+            VisionConstants.PhysicalConstants.fieldLayout.getTagPose(i).orElse(Pose3d.kZero);
       }
       inputs.tagsUsed = usedTags;
     }

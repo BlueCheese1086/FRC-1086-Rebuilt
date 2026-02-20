@@ -17,13 +17,14 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+import org.littletonrobotics.junction.Logger;
 
 /** Add your docs here. */
 public class IntakeIOSim implements IntakeIO {
   private final PIDController pid =
       new PIDController(IntakeConstants.PID.kP, IntakeConstants.PID.kI, IntakeConstants.PID.kD);
   private final ArmFeedforward ff =
-      new ArmFeedforward(IntakeConstants.PID.kS, IntakeConstants.PID.kG, IntakeConstants.PID.kV);
+      new ArmFeedforward(IntakeConstants.PID.kS, 0.0, IntakeConstants.PID.kV);
 
   private final SingleJointedArmSim armSim =
       new SingleJointedArmSim(
@@ -39,13 +40,22 @@ public class IntakeIOSim implements IntakeIO {
       new DCMotorSim(
           LinearSystemId.createDCMotorSystem(DCMotor.getKrakenX60Foc(1), 0.04, 1.0),
           DCMotor.getKrakenX60Foc(1));
+  private boolean useClosedLoop = true;
+  private double armInputVolts = 0.0;
 
-  public IntakeIOSim() {}
+  public IntakeIOSim() {
+    pid.setSetpoint(armInputVolts);
+  }
 
   @Override
   public void updateInputs(IntakeInputs inputs) {
-    armSim.setInputVoltage(
-        pid.calculate(armSim.getAngleRads()) + ff.calculate(pid.getSetpoint(), 0.0));
+    if (useClosedLoop) {
+      armSim.setInputVoltage(
+          pid.calculate(armSim.getAngleRads()) + ff.calculate(pid.getSetpoint(), 0.0));
+    } else {
+      Logger.recordOutput("Intake/Pivot Volts", armInputVolts);
+      armSim.setInputVoltage(armInputVolts);
+    }
 
     armSim.update(0.02);
     simRoller.update(0.02);
@@ -60,6 +70,7 @@ public class IntakeIOSim implements IntakeIO {
 
   @Override
   public void setPosition(Angle angle) {
+    useClosedLoop = true;
     pid.setSetpoint(angle.in(Radians));
   }
 
