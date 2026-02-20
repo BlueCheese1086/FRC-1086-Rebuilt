@@ -7,7 +7,6 @@ package frc.robot.subsystems.climb;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.util.Units;
@@ -20,13 +19,13 @@ public class ClimbIOSim implements ClimbIO {
   // private static final double kS = 0; // 1.0;
   private static final LoggedTunableNumber KS = new LoggedTunableNumber("Climb/KS", 0.0);
   // private static final double kG = 4.0;
-  private static final LoggedTunableNumber KG = new LoggedTunableNumber("Climb/KG", 0.0);
+  private static final LoggedTunableNumber KG = new LoggedTunableNumber("Climb/KG", 0.46747);
   // private static final double kV = 1.3; // max battery voltage / max motor rpm
   private static final LoggedTunableNumber KV = new LoggedTunableNumber("Climb/KV", 0.0);
 
-  private static final LoggedTunableNumber KP = new LoggedTunableNumber("Climb/KP", 0.0);
+  private static final LoggedTunableNumber KP = new LoggedTunableNumber("Climb/KP", 5.8321);
   private static final LoggedTunableNumber KI = new LoggedTunableNumber("Climb/KI", 0.0);
-  private static final LoggedTunableNumber KD = new LoggedTunableNumber("Climb/KD", 0.0);
+  private static final LoggedTunableNumber KD = new LoggedTunableNumber("Climb/KD", 0.93424);
   private double position = 0.0;
   private ElevatorFeedforward feedforward;
 

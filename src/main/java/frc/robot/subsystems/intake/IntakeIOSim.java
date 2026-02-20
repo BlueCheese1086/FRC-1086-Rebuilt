@@ -33,19 +33,25 @@ public class IntakeIOSim implements IntakeIO {
           IntakeConstants.Mechanical.intakeLength.in(Meters),
           IntakeConstants.Setpoints.deployed.in(Radians),
           IntakeConstants.Setpoints.stowed.in(Radians),
-          false,
+          true,
           IntakeConstants.Setpoints.stowed.in(Radians));
   private final DCMotorSim simRoller =
       new DCMotorSim(
           LinearSystemId.createDCMotorSystem(DCMotor.getKrakenX60Foc(1), 0.04, 1.0),
           DCMotor.getKrakenX60Foc(1));
+  private boolean useClosedLoop = false;
+  private double armInputVolts = 0.0;
 
   public IntakeIOSim() {}
 
   @Override
   public void updateInputs(IntakeInputs inputs) {
-    armSim.setInputVoltage(
-        pid.calculate(armSim.getAngleRads()) + ff.calculate(pid.getSetpoint(), 0.0));
+    if (useClosedLoop) {
+      armSim.setInputVoltage(
+          pid.calculate(armSim.getAngleRads()) + ff.calculate(pid.getSetpoint(), 0.0));
+    } else {
+      armSim.setInputVoltage(armInputVolts);
+    }
 
     armSim.update(0.02);
     simRoller.update(0.02);
@@ -60,7 +66,14 @@ public class IntakeIOSim implements IntakeIO {
 
   @Override
   public void setPosition(Angle angle) {
+    useClosedLoop = true;
     pid.setSetpoint(angle.in(Radians));
+  }
+
+  @Override
+  public void setPivotVoltage(Voltage applied) {
+    useClosedLoop = false;
+    armInputVolts = applied.in(Volts);
   }
 
   @Override

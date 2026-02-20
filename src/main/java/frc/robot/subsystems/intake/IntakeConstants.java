@@ -7,6 +7,7 @@ package frc.robot.subsystems.intake;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.units.measure.Angle;
@@ -17,11 +18,11 @@ import edu.wpi.first.units.measure.Voltage;
 /** Add your docs here. */
 public class IntakeConstants {
   public static class PID {
-    public static final double kP = 10.0;
+    public static final double kP = 42.154;
     public static final double kI = 0.0;
-    public static final double kD = 0.0;
+    public static final double kD = 6.4383;
     public static final double kS = 0.0;
-    public static final double kG = 0.0;
+    public static final double kG = 0.47163;
     public static final double kV = 12.0 / 600.0;
     public static final double kA = 0.0;
   }
@@ -48,6 +49,6 @@ public class IntakeConstants {
   public static class Mechanical { // TODO: Update all of these with the actual values
     public static final Distance intakeLength = Inches.of(14);
     public static final double gearing = 50.0;
-    public static final Angle kPositionTolerance = Degrees.of(5);
+    public static final Angle kPositionTolerance = Radians.of(0.1);
   }
 }

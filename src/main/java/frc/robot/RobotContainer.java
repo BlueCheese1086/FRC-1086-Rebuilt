@@ -247,6 +247,7 @@ public class RobotContainer {
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     autoChooser.addOption("Climb/SysId", climb.sysId());
+    autoChooser.addOption("Intake/SysId", intake.sysId());
     autoChooser.addOption("auto builder", autobuilder.build());
     // Configure the button bindings
     configureButtonBindings();

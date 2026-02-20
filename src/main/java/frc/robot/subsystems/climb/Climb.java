@@ -6,8 +6,6 @@ package frc.robot.subsystems.climb;
 
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -29,17 +27,16 @@ public class Climb extends SubsystemBase {
   public Climb(ClimbIO io) {
     this.io = io;
     io.resetEncoder();
-    this.inputs = new ClimbIOInputsAutoLogged();
     routine =
         new SysIdRoutine(
-            new SysIdRoutine.Config(Volts.of(1.0).per(Second), Volts.of(4.0), Seconds.of(5.0)),
+            new SysIdRoutine.Config(null, Volts.of(4.0), Seconds.of(1.25)),
             new SysIdRoutine.Mechanism(
                 (applied) -> {
                   io.setVoltage(applied.in(Volts));
                 },
                 (log) -> {
                   log.motor("Climber")
-                      .linearPosition(Meters.of(inputs.angle.in(Radians)))
+                      .linearPosition(Meters.of(inputs.climbPosition))
                       .linearVelocity(MetersPerSecond.of(inputs.velocity))
                       .voltage(Volts.of(inputs.volts));
                 },
