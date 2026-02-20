@@ -8,6 +8,8 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Meters;
 
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
+
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -27,6 +29,7 @@ public class ShooterConstants {
         cruiseVelocity
             / 0.23; // Cruise velocity / spin up time estimated, low numbers equal more brownouts,
     // and high numbers more stable.
+    public static final LoggedNetworkNumber velocitySetpoint = new LoggedNetworkNumber("/Tuning/Velocity Setpoint", 100.0);
   }
 
   public static class Targeting {
