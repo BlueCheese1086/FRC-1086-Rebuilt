@@ -9,11 +9,14 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.climb.Climb;
 import frc.robot.subsystems.climb.ClimbConstants;
 import frc.robot.subsystems.drive.Drive;
@@ -46,6 +49,7 @@ public class Superstructure extends SubsystemBase {
     public static Trigger agitate = new Trigger(() -> false);
     public static DoubleSupplier joystickX = () -> (0.0);
     public static DoubleSupplier joystickY = () -> (0.0);
+    public static Supplier<GenericHID> driverHid = () -> null;
   }
 
   public enum State {
@@ -151,8 +155,43 @@ public class Superstructure extends SubsystemBase {
     this.setupCancel();
 
     timer.start();
+
+    Trigger enabled = new Trigger(DriverStation::isEnabled);
+    enabled
+        .and(() -> ControllerLayout.driverHid.get() != null)
+        .whileTrue(rumbleBeforePeriodEnd(ControllerLayout.driverHid.get(), 4.0, 1.0));
   }
 
+  // Driver awareness: rumble 4s before end of each period.
+  // Put this in Superstructure so it always runs when the robot is enabled.
+  /**
+   * Rumbles a controller starting {@code secondsBeforeEnd} seconds before the end of the current
+   * DriverStation period (teleop/auto).
+   *
+   * <p>Stops rumbling whenever the command ends and when the robot becomes disabled.
+   */
+  public static Command rumbleBeforePeriodEnd(
+      GenericHID controller, double secondsBeforeEnd, double rumbleStrength) {
+    return Commands.run(
+            () -> {
+              // If match time is not available, DriverStation.getMatchTime() returns -1.
+              double matchTime = DriverStation.getMatchTime();
+              boolean shouldRumble =
+                  DriverStation.isEnabled() && matchTime > 0.0 && matchTime <= secondsBeforeEnd;
+
+              double strength = shouldRumble ? rumbleStrength : 0.0;
+              controller.setRumble(RumbleType.kLeftRumble, strength);
+              controller.setRumble(RumbleType.kRightRumble, strength);
+            })
+        .finallyDo(
+            () -> {
+              controller.setRumble(RumbleType.kLeftRumble, 0.0);
+              controller.setRumble(RumbleType.kRightRumble, 0.0);
+            })
+        .ignoringDisable(true);
+  }
+
+  
   private void setupCancel() {
     ControllerLayout.cancelRequest.onTrue(setState(State.holding));
     ControllerLayout.cancelRequest.multiPress(2, 1.5).onTrue(setState(State.idle));
@@ -186,6 +225,14 @@ public class Superstructure extends SubsystemBase {
             Commands.parallel(
                 intake.setVoltage(Volts.of(12.0)),
                 indexer.setVoltage(IndexerConstants.Setpoints.intake)));
+
+    // While intaking, override turning control so robot yaw faces direction of travel (SYOM).
+    // This makes lining the intake up with balls much easier.
+    stateTriggers
+        .get(State.intake)
+        .whileTrue(
+            DriveCommands.joystickDriveSyom(
+                drive, ControllerLayout.joystickX, ControllerLayout.joystickY));
   }
 
   private void setupShoot() {

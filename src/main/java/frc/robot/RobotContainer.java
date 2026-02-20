@@ -137,8 +137,8 @@ public class RobotContainer {
         shooter =
             new Shooter(
                 new FeederIOTalonFX(RobotMap.ShooterMap.feeder),
-                new ShooterIOTalonFX(RobotMap.ShooterMap.left,true),
-                new ShooterIOTalonFX(RobotMap.ShooterMap.middle,true),
+                new ShooterIOTalonFX(RobotMap.ShooterMap.left, true),
+                new ShooterIOTalonFX(RobotMap.ShooterMap.middle, true),
                 new ShooterIOTalonFX(RobotMap.ShooterMap.right, false));
         hood = new Hood(new HoodIOServo());
         climb = new Climb(new ClimbIOTalonFX());
@@ -212,6 +212,7 @@ public class RobotContainer {
     Superstructure.ControllerLayout.passingRequest = driver.povDown();
     Superstructure.ControllerLayout.joystickX = () -> -driver.getLeftY();
     Superstructure.ControllerLayout.joystickY = () -> -driver.getLeftX();
+    Superstructure.ControllerLayout.driverHid = driver::getHID;
 
     superstructure =
         new Superstructure(

@@ -188,7 +188,9 @@ public class AutoBuilder extends SubsystemBase {
     }
     if (_preloadShootPos.equals("none")) {
       if (_intakePos.endsWith("i")) {
-        c.add(AutoRoutines.runPath(_startPos + "_" + _intakePos, true)); //TODO: repetetive logic, put in a function
+        c.add(
+            AutoRoutines.runPath(
+                _startPos + "_" + _intakePos, true)); // TODO: repetetive logic, put in a function
         p.addAll(getPathPoses(_startPos + "_" + _intakePos));
         fulltime += getTime(_startPos + "_" + _intakePos);
       } else {

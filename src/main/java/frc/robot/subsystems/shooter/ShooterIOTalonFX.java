@@ -23,7 +23,6 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
-import frc.robot.subsystems.shooter.ShooterConstants.Mechanical;
 
 public class ShooterIOTalonFX implements ShooterIO {
   private final TalonFX shooter;
@@ -55,9 +54,7 @@ public class ShooterIOTalonFX implements ShooterIO {
 
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     config.MotorOutput.Inverted =
-        inverted
-            ? InvertedValue.CounterClockwise_Positive
-            : InvertedValue.Clockwise_Positive;
+        inverted ? InvertedValue.CounterClockwise_Positive : InvertedValue.Clockwise_Positive;
     config.Audio.BeepOnBoot = true;
     config.MotionMagic.MotionMagicAcceleration = ShooterConstants.Tuning.acceleration;
     config.MotionMagic.MotionMagicCruiseVelocity = ShooterConstants.Tuning.cruiseVelocity;
