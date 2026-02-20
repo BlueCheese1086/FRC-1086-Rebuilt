@@ -175,9 +175,7 @@ public class Superstructure extends SubsystemBase {
   }
 
   private void setupIntake() {
-    stateTriggers
-        .get(State.holding)
-        .onTrue(intake.setPosition(IntakeConstants.Setpoints.deployed));
+    stateTriggers.get(State.holding).onTrue(intake.setPosition(IntakeConstants.Setpoints.deployed));
     stateTriggers
         .get(State.holding)
         .whileTrue(

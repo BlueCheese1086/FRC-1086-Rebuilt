@@ -40,7 +40,6 @@ public class ClimbConstants {
 
   public static class Setpoints {
     public static final double climbExtend = 10.0;
-    public static final double hopperRelease = 10.0;
     public static final double climbScore = 10.0;
     public static final double retracted = 10.0;
   }
