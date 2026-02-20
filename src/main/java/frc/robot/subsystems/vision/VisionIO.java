@@ -16,6 +16,7 @@ public interface VisionIO {
     public Pose3d estimatedPose = Pose3d.kZero;
     public double timestamp = 0.0;
     public int tagCount = 0;
+    public Pose3d[] usedTagPoses = new Pose3d[] {};
     public double averageDistance = 0.0;
     public ObservationType type = ObservationType.Empty;
     public int[] tagsUsed = new int[] {};
