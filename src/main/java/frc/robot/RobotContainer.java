@@ -137,7 +137,7 @@ public class RobotContainer {
         indexer = new Indexer(new IndexerIOTalonFX());
         shooter =
             new Shooter(
-                new FeederIOTalonFX(1),
+                new FeederIOTalonFX(RobotMap.ShooterMap.feeder),
                 new ShooterIOTalonFX(RobotMap.ShooterMap.left),
                 new ShooterIOTalonFX(RobotMap.ShooterMap.middle),
                 new ShooterIOTalonFX(RobotMap.ShooterMap.right));
