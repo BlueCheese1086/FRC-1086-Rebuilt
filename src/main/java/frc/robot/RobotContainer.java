@@ -88,7 +88,7 @@ public class RobotContainer {
   private final ShootingManager shootingManager;
 
   @SuppressWarnings("unused")
-  //   private final Superstructure superstructure;
+  private final Superstructure superstructure;
 
   private final AutoBuilder autobuilder;
 
@@ -127,10 +127,10 @@ public class RobotContainer {
                   shootingManager.addVisionMeasurement(pose, timestamp);
                 },
                 drive::getPose,
-                new VisionIOPhotonVision(
-                    "left", VisionConstants.PhysicalConstants.cameraTransforms[0]),
-                new VisionIOPhotonVision(
-                    "right", VisionConstants.PhysicalConstants.cameraTransforms[1]),
+                // new VisionIOPhotonVision(
+                //     "left", VisionConstants.PhysicalConstants.cameraTransforms[0]),
+                // new VisionIOPhotonVision(
+                //     "right", VisionConstants.PhysicalConstants.cameraTransforms[1]),
                 new VisionIOLimelight("scoring"));
 
         intake = new Intake(new IntakeIOTalonFX());
@@ -215,18 +215,18 @@ public class RobotContainer {
     Superstructure.ControllerLayout.joystickY = () -> -driver.getLeftX();
 
     autobuilder = new AutoBuilder(drive);
-    // superstructure =
-    //     new Superstructure(
-    //         drive,
-    //         intake,
-    //         shooter,
-    //         indexer,
-    //         hood,
-    //         climb,
-    //         autobuilder,
-    //         drive::getPose,
-    //         drive::getChassisSpeeds,
-    //         drive::getRotation);
+    superstructure =
+        new Superstructure(
+            drive,
+            intake,
+            shooter,
+            indexer,
+            hood,
+            climb,
+            autobuilder,
+            drive::getPose,
+            drive::getChassisSpeeds,
+            drive::getRotation);
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices");

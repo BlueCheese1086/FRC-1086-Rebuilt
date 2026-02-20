@@ -23,6 +23,7 @@ public interface IntakeIO {
   public class IntakeInputs {
     public boolean pivotConnected = false;
     public Angle pivotAngle = Radians.zero();
+    public Angle pivotSetpoint = Radians.zero();
     public AngularVelocity pivotVelocity = RadiansPerSecond.zero();
     public boolean nearSetpoint = false;
     public Current pivotSupply = Amps.zero();
