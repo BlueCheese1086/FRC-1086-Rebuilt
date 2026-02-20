@@ -42,7 +42,7 @@ public class ShooterIOTalonFX implements ShooterIO {
   private double setpoint = 0.0;
   private double bangBangVoltage = 0.0;
 
-  public ShooterIOTalonFX(int id) {
+  public ShooterIOTalonFX(int id, boolean inverted) {
     shooter = new TalonFX(id);
     bbController = new BangBangController();
 
@@ -55,9 +55,9 @@ public class ShooterIOTalonFX implements ShooterIO {
 
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     config.MotorOutput.Inverted =
-        Mechanical.inverted
-            ? InvertedValue.Clockwise_Positive
-            : InvertedValue.CounterClockwise_Positive;
+        inverted
+            ? InvertedValue.CounterClockwise_Positive
+            : InvertedValue.Clockwise_Positive;
     config.Audio.BeepOnBoot = true;
     config.MotionMagic.MotionMagicAcceleration = ShooterConstants.Tuning.acceleration;
     config.MotionMagic.MotionMagicCruiseVelocity = ShooterConstants.Tuning.cruiseVelocity;

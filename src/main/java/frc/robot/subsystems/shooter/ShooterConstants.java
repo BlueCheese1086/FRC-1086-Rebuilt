@@ -45,7 +45,6 @@ public class ShooterConstants {
     public static final double shooterWheelGearRatio = 1.0;
     public static final Distance shooterXOffset = Inches.of(-10.0);
     public static final Distance shooterYOffset = Inches.of(0.0);
-    public static final boolean inverted = false;
 
     // The position of the shooter relative to the robot's center, used for
     // calculating the distance to the hub.
