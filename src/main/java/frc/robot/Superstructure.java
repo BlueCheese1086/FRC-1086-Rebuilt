@@ -14,7 +14,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.commands.AutoBuilder;
 import frc.robot.subsystems.climb.Climb;
 import frc.robot.subsystems.climb.ClimbConstants;
 import frc.robot.subsystems.drive.Drive;
@@ -76,7 +75,6 @@ public class Superstructure extends SubsystemBase {
   private final Indexer indexer;
   private final Hood hood;
   private final Climb climb;
-  private final AutoBuilder autobuilder;
   private final Supplier<Pose2d> drivePose;
   private final Supplier<ChassisSpeeds> robotRelativeSpeeds;
   private final Supplier<Rotation2d> driveHeading;
@@ -95,7 +93,6 @@ public class Superstructure extends SubsystemBase {
       final Indexer indexer,
       final Hood hood,
       final Climb climb,
-      final AutoBuilder autobuilder,
       final Supplier<Pose2d> drivePose,
       final Supplier<ChassisSpeeds> robotRelativeSpeeds,
       final Supplier<Rotation2d> headingSupplier) {
@@ -106,7 +103,6 @@ public class Superstructure extends SubsystemBase {
     this.indexer = indexer;
     this.hood = hood;
     this.climb = climb;
-    this.autobuilder = autobuilder;
     this.drivePose = drivePose;
     this.robotRelativeSpeeds = robotRelativeSpeeds;
     this.driveHeading = headingSupplier;
@@ -170,13 +166,17 @@ public class Superstructure extends SubsystemBase {
                 indexer.setVoltage(Volts.of(0.0)),
                 intake.setVoltage(Volts.of(0.0)),
                 Commands.runOnce(() -> shooter.setVelocitySetpoint(RadiansPerSecond.of(0.0)))));
-    
+
     stateTriggers.get(State.idle).onTrue(intake.setPosition(IntakeConstants.Setpoints.stowed));
   }
 
   private void setupIntake() {
-    stateTriggers.get(State.holding).onTrue(
-      Commands.sequence(climb.setPosition(ClimbConstants.Setpoints.hopperRelease),intake.setPosition(IntakeConstants.Setpoints.deployed)));
+    stateTriggers
+        .get(State.holding)
+        .onTrue(
+            Commands.sequence(
+                climb.setPosition(ClimbConstants.Setpoints.hopperRelease),
+                intake.setPosition(IntakeConstants.Setpoints.deployed)));
     stateTriggers
         .get(State.holding)
         .whileTrue(
@@ -205,9 +205,9 @@ public class Superstructure extends SubsystemBase {
 
   private void setupTarget() {
     stateTriggers
-      .get(State.shoot)
-      .and(ControllerLayout.agitate)
-      .onTrue(intake.setPosition(IntakeConstants.Setpoints.agitate));
+        .get(State.shoot)
+        .and(ControllerLayout.agitate)
+        .onTrue(intake.setPosition(IntakeConstants.Setpoints.agitate));
     stateTriggers
         .get(State.shoot)
         .and(() -> (FieldConstants.LinesVertical.inAllianceZone(drivePose.get())))
@@ -292,10 +292,10 @@ public class Superstructure extends SubsystemBase {
 
   private void setupPass() {
     stateTriggers
-      .get(State.pass)
-      .and(ControllerLayout.agitate)
-      .onTrue(intake.setPosition(IntakeConstants.Setpoints.agitate));
-    
+        .get(State.pass)
+        .and(ControllerLayout.agitate)
+        .onTrue(intake.setPosition(IntakeConstants.Setpoints.agitate));
+
     stateTriggers
         .get(State.pass)
         .whileTrue(
@@ -350,6 +350,5 @@ public class Superstructure extends SubsystemBase {
     Logger.recordOutput(
         "Superstructure/Hub Active",
         FieldConstants.Hub.isHubActive(redStart ? Alliance.Red : Alliance.Blue));
-    autobuilder.updateField();
   }
 }

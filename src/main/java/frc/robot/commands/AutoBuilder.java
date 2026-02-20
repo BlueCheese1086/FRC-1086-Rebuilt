@@ -1,7 +1,5 @@
 package frc.robot.commands;
 
-import static edu.wpi.first.wpilibj2.command.Commands.*;
-
 import choreo.Choreo;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -9,14 +7,19 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Superstructure;
+import frc.robot.generated.choreo.ChoreoTraj;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.util.AllianceFlipUtil;
+import frc.robot.util.LoggedTunableNumber;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-public class AutoBuilder {
+public class AutoBuilder extends SubsystemBase {
+  private final Superstructure superstructure;
   private final Drive drive;
 
   private final SendableChooser<String> startPos = new SendableChooser<>();
@@ -26,12 +29,19 @@ public class AutoBuilder {
   private final SendableChooser<String> nzExit = new SendableChooser<>();
   private final SendableChooser<String> finalShootPos = new SendableChooser<>();
   private final SendableChooser<String> climbPos = new SendableChooser<>();
+
+  private final LoggedTunableNumber shootTime = new LoggedTunableNumber("Auto/ShootTime", 1.0);
+
+  private Double fulltime = 0.0;
+
   private final Field2d autoTraj = new Field2d();
 
   private Command commands;
 
   public AutoBuilder(
+      Superstructure superstructure,
       Drive drive) { // TODO: take in superstructure instead of drive - no need - Martin
+    this.superstructure = superstructure;
     this.drive = drive;
 
     startPos.setDefaultOption("Hub Start", "hs");
@@ -101,6 +111,8 @@ public class AutoBuilder {
     SmartDashboard.putData("Auto Path", autoTraj);
 
     SmartDashboard.putBoolean("Auto/Rebuild Preview", false);
+
+    SmartDashboard.putNumber("Auto/Full Time", fulltime);
   }
 
   public Command build() {
@@ -114,21 +126,24 @@ public class AutoBuilder {
 
   // TODO: Implement these commands when superstructure is ready (or once I figure out what's wrong)
   private Command shootCommand() {
-    return print(""); // superstructure.setState(Superstructure.State.shoot);
+    return Commands.sequence(
+        superstructure.setState(Superstructure.State.shoot),
+        Commands.waitSeconds(shootTime.get()),
+        superstructure.setState(Superstructure.State.idle));
   }
 
   private Command intakeCommand() {
-    return print(""); /*superstructure
-        .setState(Superstructure.State.intake)
-        .withTimeout(1.0)
-        .andThen(superstructure.setState(Superstructure.State.holding));*/
+    return Commands.sequence(
+        superstructure.setState(Superstructure.State.intake),
+        Commands.waitSeconds(1.0),
+        superstructure.setState(Superstructure.State.holding));
   }
 
   private Command climbCommand() {
-    return print(""); /*superstructure
-        .setState(Superstructure.State.climb)
-        .withTimeout(1.0)
-        .andThen(superstructure.setState(Superstructure.State.climbscore));*/
+    return Commands.sequence(
+        superstructure.setState(Superstructure.State.climb),
+        Commands.waitSeconds(1.0),
+        superstructure.setState(Superstructure.State.climbscore));
   }
 
   public static List<Pose2d> getPathPoses(String trajectory) {
@@ -163,6 +178,7 @@ public class AutoBuilder {
 
     List<Pose2d> p = new ArrayList<Pose2d>();
     List<Command> c = new ArrayList<Command>();
+    Double timetodoallthepathes = 0.00;
 
     if (_startPos.endsWith("r")) {
       c.add(shootCommand());
@@ -171,47 +187,75 @@ public class AutoBuilder {
       if (_intakePos.endsWith("i")) {
         c.add(AutoRoutines.runPath(_startPos + "_" + _intakePos, true));
         p.addAll(getPathPoses(_startPos + "_" + _intakePos));
+        timetodoallthepathes = getTime(_startPos + "_" + _intakePos);
       } else {
         c.add(AutoRoutines.runPath(_startPos + "_" + _nzEntry, true));
         p.addAll(getPathPoses(_startPos + "_" + _nzEntry));
+        timetodoallthepathes = getTime(_startPos + "_" + _nzEntry);
         c.add(AutoRoutines.runPath(_nzEntry + "_" + _intakePos, false));
         p.addAll(getPathPoses(_nzEntry + "_" + _intakePos));
+        timetodoallthepathes = getTime(_nzEntry + "_" + _intakePos);
       }
     } else {
       c.add(AutoRoutines.runPath(_startPos + "_" + _preloadShootPos, true));
       p.addAll(getPathPoses(_startPos + "_" + _preloadShootPos));
+      timetodoallthepathes = getTime(_startPos + "_" + _preloadShootPos);
       c.add(shootCommand());
       if (_intakePos.endsWith("i")) {
         c.add(AutoRoutines.runPath(_preloadShootPos + "_" + _intakePos, false));
         p.addAll(getPathPoses(_preloadShootPos + "_" + _intakePos));
+        timetodoallthepathes = getTime(_preloadShootPos + "_" + _intakePos);
       } else {
         c.add(AutoRoutines.runPath(_preloadShootPos + "_" + _nzEntry, false));
         p.addAll(getPathPoses(_preloadShootPos + "_" + _nzEntry));
+        timetodoallthepathes = getTime(_preloadShootPos + "_" + _nzEntry);
         c.add(AutoRoutines.runPath(_nzEntry + "_" + _intakePos, false));
         p.addAll(getPathPoses(_nzEntry + "_" + _intakePos));
+        timetodoallthepathes = getTime(_nzEntry + "_" + _intakePos);
       }
     }
     c.add(intakeCommand());
     if (_intakePos.endsWith("n")) {
       c.add(AutoRoutines.runPath(_intakePos + "_" + _nzExit, false));
       p.addAll(getPathPoses(_intakePos + "_" + _nzExit));
+      timetodoallthepathes = getTime(_intakePos + "_" + _nzExit);
       c.add(AutoRoutines.runPath(_nzExit + "_" + _nzExit + "s", false));
       p.addAll(getPathPoses(_nzExit + "_" + _nzExit + "s"));
+      timetodoallthepathes = getTime(_nzExit + "_" + _nzExit + "s");
       c.add(AutoRoutines.runPath(_nzExit + "s_" + _finalShootPos, false));
       p.addAll(getPathPoses(_nzExit + "s_" + _finalShootPos));
+      timetodoallthepathes = getTime(_nzExit + "s_" + _finalShootPos);
     } else {
       c.add(AutoRoutines.runPath(_intakePos + "_" + _finalShootPos, false));
       p.addAll(getPathPoses(_intakePos + "_" + _finalShootPos));
+      timetodoallthepathes = getTime(_intakePos + "_" + _finalShootPos);
     }
     c.add(shootCommand());
     if (!_climbPos.equals("none")) {
       c.add(AutoRoutines.runPath(_finalShootPos + "_" + _climbPos, false));
       p.addAll(getPathPoses(_finalShootPos + "_" + _climbPos));
+      timetodoallthepathes = getTime(_finalShootPos + "_" + _climbPos);
       c.add(climbCommand());
     }
 
     autoTraj.getObject("traj").setPoses(p);
 
+    fulltime = timetodoallthepathes;
     commands = Commands.sequence(c.toArray(new Command[0]));
+  }
+
+  public double getTime(String name) {
+    try {
+      var field = ChoreoTraj.class.getField(name);
+      ChoreoTraj traj = (ChoreoTraj) field.get(null);
+      return traj.totalTimeSecs();
+    } catch (Exception e) {
+      return 0.0;
+    }
+  }
+
+  @Override
+  public void periodic() {
+    this.updateField();
   }
 }
