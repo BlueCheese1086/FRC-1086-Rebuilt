@@ -46,6 +46,7 @@ public class IndexerIOTalonFX implements IndexerIO {
     config.Voltage.PeakReverseVoltage = IndexerConstants.VoltageLimits.peakForwardVoltage.in(Volts);
 
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
     PhoenixUtil.tryUntilOk(5, () -> (talon.getConfigurator().apply(config)));
 
@@ -79,7 +80,8 @@ public class IndexerIOTalonFX implements IndexerIO {
 
   public void setVoltage(Voltage applied) {
     talon.setControl(applyVoltage.withOutput(applied));
-    if (applied.magnitude() == 0.0) {
+
+    if (applied.magnitude() == 0) {
       talon.stopMotor();
     }
   }

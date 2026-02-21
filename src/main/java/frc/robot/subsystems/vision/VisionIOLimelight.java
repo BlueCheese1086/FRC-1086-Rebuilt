@@ -37,7 +37,7 @@ public class VisionIOLimelight implements VisionIO {
   public Pose3d getPose() {
     Optional<LimelightResults> results = limelight.getLatestResults();
     if (results.isPresent()) {
-      double[] poses = results.get().botpose;
+      double[] poses = limelight.getLatestResults().get().botpose;
       return new Pose3d(poses[0], poses[1], poses[2], new Rotation3d(poses[3], poses[4], poses[5]));
     } else {
       return Pose3d.kZero;

@@ -80,7 +80,6 @@ public class ShooterIOTalonFX implements ShooterIO {
 
     BaseStatusSignal.setUpdateFrequencyForAll(
         50.0, acceleration, position, statorCurrent, supplyCurrent, temp, velocity, volts);
-
     shooter.optimizeBusUtilization();
   }
 
@@ -112,5 +111,9 @@ public class ShooterIOTalonFX implements ShooterIO {
   @Override
   public void setVoltage(double volts) {
     shooter.setVoltage(volts);
+
+    if (volts == 0) {
+      shooter.stopMotor();
+    }
   }
 }

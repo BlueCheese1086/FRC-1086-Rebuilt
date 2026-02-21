@@ -13,14 +13,8 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.Volts;
-
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -39,7 +33,6 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.hood.Hood;
-import frc.robot.subsystems.hood.HoodConstants;
 import frc.robot.subsystems.hood.HoodIO;
 import frc.robot.subsystems.hood.HoodIOServo;
 import frc.robot.subsystems.hood.HoodIOSim;
@@ -56,8 +49,6 @@ import frc.robot.subsystems.shooter.FeederIO.FeederIO;
 import frc.robot.subsystems.shooter.FeederIO.FeederIOSim;
 import frc.robot.subsystems.shooter.FeederIO.FeederIOTalonFX;
 import frc.robot.subsystems.shooter.Shooter;
-import frc.robot.subsystems.shooter.ShooterConstants;
-import frc.robot.subsystems.shooter.ShooterConstants.Tuning;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.shooter.ShooterIOTalonFX;
@@ -77,6 +68,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  * the robot (including
  * subsystems, commands, and button mappings) should be declared here.
  */
+@SuppressWarnings("unused")
 public class RobotContainer {
     // Subsystems
     private final Drive drive;
@@ -95,15 +87,14 @@ public class RobotContainer {
     @SuppressWarnings("unused")
     private final Climb climb;
 
-    @SuppressWarnings("unused")
-    // private final Superstructure superstructure;
+  @SuppressWarnings("unused")
+  // private final Superstructure superstructure;
 
-    // private final AutoBuilder autobuilder;
-    private final Timer time = new Timer();
+  // private final AutoBuilder autobuilder;
+  // Controller
+  private final CommandXboxController driver = new CommandXboxController(0);
 
-    // Controller
-    private final CommandXboxController driver = new CommandXboxController(0);
-    private final CommandXboxController operator = new CommandXboxController(1);
+  private final CommandXboxController operator = new CommandXboxController(1);
 
     // Dashboard inputs
     private final LoggedDashboardChooser<Command> autoChooser;
@@ -122,25 +113,27 @@ public class RobotContainer {
                         new ModuleIOTalonFX(TunerConstants.BackLeft),
                         new ModuleIOTalonFX(TunerConstants.BackRight));
 
-                vision = new Vision(
-                        drive::addVisionMeasurement,
-                        drive::getPose,
-                        // new VisionIOPhotonVision(
-                        // "left", VisionConstants.PhysicalConstants.cameraTransforms[0]),
-                        // new VisionIOPhotonVision(
-                        // "right", VisionConstants.PhysicalConstants.cameraTransforms[1]),
-                        new VisionIOLimelight("marble"));
+        vision =
+            new Vision(
+                drive::addVisionMeasurement,
+                drive::getPose,
+                // new VisionIOPhotonVision(
+                //     "left", VisionConstants.PhysicalConstants.cameraTransforms[0]),
+                // new VisionIOPhotonVision(
+                //     "right", VisionConstants.PhysicalConstants.cameraTransforms[1]),
+                new VisionIOLimelight("marble"));
 
-                intake = new Intake(new IntakeIOTalonFX());
-                indexer = new Indexer(new IndexerIOTalonFX());
-                shooter = new Shooter(
-                        new FeederIOTalonFX(RobotMap.ShooterMap.feeder),
-                        new ShooterIOTalonFX(RobotMap.ShooterMap.left, true),
-                        new ShooterIOTalonFX(RobotMap.ShooterMap.middle, true),
-                        new ShooterIOTalonFX(RobotMap.ShooterMap.right, true));
-                hood = new Hood(new HoodIOServo());
-                climb = new Climb(new ClimbIOTalonFX());
-                break;
+        intake = new Intake(new IntakeIOTalonFX());
+        indexer = new Indexer(new IndexerIOTalonFX());
+        shooter =
+            new Shooter(
+                new FeederIOTalonFX(RobotMap.ShooterMap.feeder),
+                new ShooterIOTalonFX(RobotMap.ShooterMap.left, true),
+                new ShooterIOTalonFX(RobotMap.ShooterMap.middle, true),
+                new ShooterIOTalonFX(RobotMap.ShooterMap.right, false));
+        hood = new Hood(new HoodIOServo());
+        climb = new Climb(new ClimbIOTalonFX());
+        break;
 
             case SIM:
                 // Sim robot, instantiate physics sim IO implementations
@@ -200,47 +193,48 @@ public class RobotContainer {
 
         AutoRoutines.setup(drive);
 
-        Superstructure.ControllerLayout.scoreRequest = driver.rightTrigger();
-        Superstructure.ControllerLayout.cancelRequest = driver.povLeft().or(operator.povLeft());
-        Superstructure.ControllerLayout.climbRequest = driver.povRight();
-        Superstructure.ControllerLayout.disableTargeting = driver.povUp();
-        Superstructure.ControllerLayout.intakeRequest = driver.leftTrigger();
-        Superstructure.ControllerLayout.passingRequest = driver.povDown();
-        Superstructure.ControllerLayout.joystickX = () -> -driver.getLeftY();
-        Superstructure.ControllerLayout.joystickY = () -> -driver.getLeftX();
+    Superstructure.ControllerLayout.scoreRequest = driver.rightTrigger();
+    Superstructure.ControllerLayout.cancelRequest = driver.povLeft().or(operator.povLeft());
+    Superstructure.ControllerLayout.climbRequest = driver.povRight();
+    Superstructure.ControllerLayout.disableTargeting = driver.povUp();
+    Superstructure.ControllerLayout.intakeRequest = driver.leftTrigger();
+    Superstructure.ControllerLayout.passingRequest = driver.povDown();
+    Superstructure.ControllerLayout.joystickX = () -> -driver.getLeftY();
+    Superstructure.ControllerLayout.joystickY = () -> -driver.getLeftX();
+    Superstructure.ControllerLayout.driverHid = driver::getHID;
 
-        // superstructure =
-        // new Superstructure(
-        // drive,
-        // intake,
-        // shooter,
-        // indexer,
-        // hood,
-        // climb,
-        // drive::getPose,
-        // drive::getChassisSpeeds,
-        // drive::getRotation);
-        // autobuilder = new AutoBuilder(superstructure, drive);
+    // superstructure =
+    // new Superstructure(
+    // drive,
+    // intake,
+    // shooter,
+    // indexer,
+    // hood,
+    // climb,
+    // drive::getPose,
+    // drive::getChassisSpeeds,
+    // drive::getRotation);
+    // autobuilder = new AutoBuilder(superstructure, drive);
 
         // Set up auto routines
         autoChooser = new LoggedDashboardChooser<>("Auto Choices");
 
-        // Set up SysId routines
-        autoChooser.addOption(
-                "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
-        autoChooser.addOption(
-                "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
-        autoChooser.addOption(
-                "Drive SysId (Quasistatic Forward)",
-                drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-        autoChooser.addOption(
-                "Drive SysId (Quasistatic Reverse)",
-                drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-        autoChooser.addOption(
-                "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
-        autoChooser.addOption(
-                "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-        // autoChooser.addOption("auto builder", autobuilder.build());
+    // Set up SysId routines
+    autoChooser.addOption(
+        "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
+    autoChooser.addOption(
+        "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
+    autoChooser.addOption(
+        "Drive SysId (Quasistatic Forward)",
+        drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+    autoChooser.addOption(
+        "Drive SysId (Quasistatic Reverse)",
+        drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+    autoChooser.addOption(
+        "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
+    autoChooser.addOption(
+        "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    // autoChooser.addOption("auto builder", autobuilder.build());
 
         // Configure the button bindings
         configureButtonBindings();
@@ -262,46 +256,32 @@ public class RobotContainer {
                                 drive)
                                 .ignoringDisable(true));
 
-        operator
-                .y()
-                .whileTrue(
-                        Commands.run(
-                                () -> shooter.setVelocitySetpoint(
-                                        RadiansPerSecond.of(
-                                                ShooterConstants.Tuning.velocitySetpoint.getAsDouble())),
-                                shooter))
-                .onFalse(Commands.runOnce(shooter::stopAll));
+    operator
+        .povLeft()
+        .whileTrue(
+            Commands.parallel(
+                intake.setVoltage(IntakeConstants.Setpoints.run),
+                indexer.setVoltage(IndexerConstants.Setpoints.feed),
+                shooter.runFeederVoltage(12.0).finallyDo(shooter.runFeederVoltage(0.0)::execute)));
 
-        operator.leftTrigger().whileTrue(Commands.parallel(
-            intake.setVoltage(IntakeConstants.Setpoints.run),
-            Commands.run(() -> shooter.runFeederVoltage(3.0)).finallyDo(() -> shooter.runFeederVoltage(0.0)),
-            indexer.setVoltage(Volts.of(3.0))));
-
-        operator
-                .rightTrigger()
-                .whileTrue(shooter.runFeederVoltage(8.0))
-                .onFalse(shooter.runFeederVoltage(0.0));
-
-        operator.povDown().whileTrue(
-                intake.sysId()).onFalse(intake.setVoltage(Volts.zero()));
-
-        operator
-                .back()
-                .onTrue(
-                        Commands.runEnd(
-                                () -> {
-                                    shooter.setVelocitySetpoint(
-                                            RadiansPerSecond.of(Tuning.velocitySetpoint.getAsDouble()));
-                                    hood.setAngle(Degrees.of(HoodConstants.Targeting.hoodAngle.getAsDouble()));
-                                    time.start();
-                                },
-                                () -> {
-                                    shooter.recordShot(new Pose3d(drive.getPose()), hood.getAngle(), time.get());
-                                    time.stop();
-                                    time.reset();
-                                },
-                                shooter));
-    }
+    operator
+        .povDown()
+        .whileTrue(
+            Commands.parallel(
+                shooter.runFeederVoltage(-12.0).finallyDo(shooter.runFeederVoltage(0.0)::execute)));
+    operator
+        .y()
+        .whileTrue(
+            Commands.run(
+                    () -> {
+                      shooter.setVoltage(4.25);
+                    })
+                .finallyDo(
+                    () -> {
+                      shooter.setVoltage(0.0);
+                    }));
+    operator.povRight().whileTrue(intake.setVoltage(IntakeConstants.Setpoints.run));
+  }
 
     /**
      * Use this to pass the autonomous command to the main {@link Robot} class.

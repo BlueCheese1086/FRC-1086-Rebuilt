@@ -16,7 +16,7 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 /** Add your docs here. */
 public class HoodConstants {
   public static class Mechanical {
-    public static final Distance kServoLength = Millimeters.of(138);
+    public static final Distance kServoLength = Millimeters.of(100);
     public static final Distance kDesiredLength = Millimeters.of(100);
     public static final double scaledDist =
         MathUtil.clamp(kDesiredLength.in(Millimeters) / kServoLength.in(Millimeters), 0, 1.0);
