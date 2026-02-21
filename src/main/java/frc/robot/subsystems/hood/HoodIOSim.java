@@ -4,17 +4,31 @@
 
 package frc.robot.subsystems.hood;
 
+import static edu.wpi.first.units.Units.Millimeters;
+import static edu.wpi.first.units.Units.Second;
+
+import edu.wpi.first.wpilibj.Timer;
+
 /** Add your docs here. */
 public class HoodIOSim implements HoodIO {
+  private double prevDelta = 0.0;
   private double setpoint = 0.0;
 
   public HoodIOSim() {}
 
   @Override
   public void updateInputs(HoodInputs inputs) {
+    double deltaTime = Timer.getFPGATimestamp() - prevDelta;
+    prevDelta = Timer.getFPGATimestamp();
     inputs.setPosition = setpoint;
-    inputs.leftPosition = setpoint;
-    inputs.rightPosition = setpoint;
+    inputs.leftPosition +=
+        HoodConstants.Mechanical.kMaxServoSpeed.in(Millimeters.per(Second))
+            * deltaTime
+            * Math.signum(setpoint - inputs.leftPosition);
+    inputs.rightPosition +=
+        HoodConstants.Mechanical.kMaxServoSpeed.in(Millimeters.per(Second))
+            * deltaTime
+            * Math.signum(setpoint - inputs.rightPosition);
   }
 
   @Override
