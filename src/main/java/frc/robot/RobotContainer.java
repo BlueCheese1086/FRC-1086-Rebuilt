@@ -13,12 +13,10 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -40,7 +38,6 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.hood.Hood;
-import frc.robot.subsystems.hood.HoodConstants;
 import frc.robot.subsystems.hood.HoodIO;
 import frc.robot.subsystems.hood.HoodIOServo;
 import frc.robot.subsystems.hood.HoodIOSim;
@@ -59,7 +56,6 @@ import frc.robot.subsystems.shooter.FeederIO.FeederIOSim;
 import frc.robot.subsystems.shooter.FeederIO.FeederIOTalonFX;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterConstants;
-import frc.robot.subsystems.shooter.ShooterConstants.Tuning;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.shooter.ShooterIOTalonFX;
@@ -77,6 +73,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
  * subsystems, commands, and button mappings) should be declared here.
  */
+@SuppressWarnings("unused")
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
@@ -91,11 +88,9 @@ public class RobotContainer {
   private final Climb climb;
 
   @SuppressWarnings("unused")
-  private final Superstructure superstructure;
+//   private final Superstructure superstructure;
 
-  private final AutoBuilder autobuilder;
-  private final Timer time = new Timer();
-
+//   private final AutoBuilder autobuilder;
   // Controller
   private final CommandXboxController driver = new CommandXboxController(0);
   private final CommandXboxController operator = new CommandXboxController(1);
@@ -197,18 +192,18 @@ public class RobotContainer {
     Superstructure.ControllerLayout.joystickY = () -> -driver.getLeftX();
     Superstructure.ControllerLayout.driverHid = driver::getHID;
 
-    superstructure =
-        new Superstructure(
-            drive,
-            intake,
-            shooter,
-            indexer,
-            hood,
-            climb,
-            drive::getPose,
-            drive::getChassisSpeeds,
-            drive::getRotation);
-    autobuilder = new AutoBuilder(superstructure, drive);
+    // superstructure =
+    //     new Superstructure(
+    //         drive,
+    //         intake,
+    //         shooter,
+    //         indexer,
+    //         hood,
+    //         climb,
+    //         drive::getPose,
+    //         drive::getChassisSpeeds,
+    //         drive::getRotation);
+    // autobuilder = new AutoBuilder(superstructure, drive);
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices");
@@ -228,7 +223,7 @@ public class RobotContainer {
         "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption("auto builder", autobuilder.build());
+    // autoChooser.addOption("auto builder", autobuilder.build());
 
     // Configure the button bindings
     configureButtonBindings();

@@ -27,13 +27,13 @@ public class HoodIOSim implements HoodIO {
       inputs.rightPosition = setpoint;
     } else {
       inputs.leftPosition +=
-        HoodConstants.Mechanical.kMaxServoSpeed.in(Millimeters.per(Second))
-            * deltaTime
-            * Math.signum(setpoint - inputs.leftPosition);
-    inputs.rightPosition +=
-        HoodConstants.Mechanical.kMaxServoSpeed.in(Millimeters.per(Second))
-            * deltaTime
-            * Math.signum(setpoint - inputs.rightPosition);
+          HoodConstants.Mechanical.kMaxServoSpeed.in(Millimeters.per(Second))
+              * deltaTime
+              * Math.signum(setpoint - inputs.leftPosition);
+      inputs.rightPosition +=
+          HoodConstants.Mechanical.kMaxServoSpeed.in(Millimeters.per(Second))
+              * deltaTime
+              * Math.signum(setpoint - inputs.rightPosition);
     }
   }
 
