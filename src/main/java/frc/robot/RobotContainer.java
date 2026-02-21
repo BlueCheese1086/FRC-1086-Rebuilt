@@ -206,7 +206,7 @@ public class RobotContainer {
     //         drive::getRotation);
     // autobuilder = new AutoBuilder(superstructure, drive);
 
-    automanager = new AutosManager(drive, shooter, indexer, intake, () -> false);
+    automanager = new AutosManager(drive, shooter, indexer, intake);
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices");

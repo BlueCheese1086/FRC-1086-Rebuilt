@@ -20,34 +20,29 @@ import frc.robot.subsystems.shooter.ShooterConstants;
 import frc.robot.util.AllianceFlipUtil;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BooleanSupplier;
 
 public class AutoStateMachine {
   private final Drive drive;
   private final Shooter shooter;
   private final Indexer indexer;
   private final Intake intake;
-  private final BooleanSupplier isRed;
 
   public final Field2d autoPreviewField = new Field2d();
 
-  public AutoStateMachine(
-      Drive drive, Shooter shooter, Indexer indexer, Intake intake, BooleanSupplier isRed) {
+  public AutoStateMachine(Drive drive, Shooter shooter, Indexer indexer, Intake intake) {
     this.drive = drive;
     this.shooter = shooter;
     this.indexer = indexer;
     this.intake = intake;
-    this.isRed = isRed;
   }
 
   private double addPathToPreview(String trajName, List<Pose2d> previewPoses) {
     var traj = Choreo.loadTrajectory(trajName);
     if (traj.isPresent()) {
       Pose2d[] poses = traj.get().getPoses();
-      boolean flip = isRed.getAsBoolean();
 
       for (Pose2d pose : poses) {
-        previewPoses.add(flip ? AllianceFlipUtil.apply(pose) : pose);
+        previewPoses.add(AllianceFlipUtil.shouldFlip() ? AllianceFlipUtil.apply(pose) : pose);
       }
 
       return traj.get().getTotalTime();
@@ -80,13 +75,9 @@ public class AutoStateMachine {
 
       autoCommands =
           autoCommands.andThen(
-              Commands.deadline(
-                  AutoRoutines.runPath(path, true), // Reset odometry on the first path
-                  stopIntake() // Prep while moving
-                  ),
+              Commands.deadline(AutoRoutines.runPath(path, true), stopIntake()),
               startShoot(),
-              Commands.waitSeconds(shootTime) // Wait for piece to leave
-              );
+              Commands.waitSeconds(shootTime));
       estimatedTime += shootTime;
       currentLocation = preloadShootPos;
     }
@@ -98,11 +89,7 @@ public class AutoStateMachine {
       estimatedTime += addPathToPreview(path, previewPoses);
       autoCommands =
           autoCommands.andThen(
-              Commands.deadline(
-                  AutoRoutines.runPath(path, isFirstPath),
-                  startIntake() // Intake drops while driving
-                  ),
-              // Path is done but keep intake down until sensor detects a piece
+              Commands.deadline(AutoRoutines.runPath(path, isFirstPath), startIntake()),
               Commands.waitSeconds(intakeTime));
       estimatedTime += intakeTime;
       currentLocation = intakePos;
@@ -115,10 +102,7 @@ public class AutoStateMachine {
       autoCommands =
           autoCommands.andThen(
               AutoRoutines.runPath(entryPath, isFirstPath),
-              Commands.deadline(
-                  AutoRoutines.runPath(intakePath, false),
-                  startIntake() // Drop intake going into zone
-                  ),
+              Commands.deadline(AutoRoutines.runPath(intakePath, false), startIntake()),
               Commands.waitSeconds(intakeTime));
       estimatedTime += intakeTime;
       currentLocation = intakePos;
@@ -135,9 +119,7 @@ public class AutoStateMachine {
 
       autoCommands =
           autoCommands.andThen(
-              Commands.deadline(
-                  AutoRoutines.runPath(exitPath, false), stopIntake() // Stow intake while leaving
-                  ),
+              Commands.deadline(AutoRoutines.runPath(exitPath, false), stopIntake()),
               AutoRoutines.runPath(safePath, false),
               AutoRoutines.runPath(shootPath, false),
               startShoot(),
@@ -150,9 +132,7 @@ public class AutoStateMachine {
 
       autoCommands =
           autoCommands.andThen(
-              Commands.deadline(
-                  AutoRoutines.runPath(shootPath, false), stopIntake() // Stow intake
-                  ),
+              Commands.deadline(AutoRoutines.runPath(shootPath, false), stopIntake()),
               startShoot(),
               Commands.waitSeconds(shootTime));
       estimatedTime += shootTime;
@@ -176,7 +156,6 @@ public class AutoStateMachine {
 
     SmartDashboard.putNumber("Auto time", estimatedTime);
 
-    // Ensure everything stops and stows when auto ends
     return autoCommands.finallyDo(
         () -> {
           drive.stop();

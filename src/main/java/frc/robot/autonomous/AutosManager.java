@@ -16,7 +16,6 @@ import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import java.util.Set;
-import java.util.function.BooleanSupplier;
 
 /** Add your docs here. */
 public class AutosManager extends SubsystemBase {
@@ -31,16 +30,13 @@ public class AutosManager extends SubsystemBase {
   private final Field2d autoPreviewField = new Field2d();
 
   private final Drive drive;
-  private final BooleanSupplier isRed;
   private final AutoStateMachine machine;
 
   public record Auto(String name, Command command, Pose2d initPose) {}
 
-  public AutosManager(
-      Drive drive, Shooter shooter, Indexer indexer, Intake intake, BooleanSupplier isRed) {
+  public AutosManager(Drive drive, Shooter shooter, Indexer indexer, Intake intake) {
     this.drive = drive;
-    this.isRed = isRed;
-    this.machine = new AutoStateMachine(drive, shooter, indexer, intake, isRed);
+    this.machine = new AutoStateMachine(drive, shooter, indexer, intake);
 
     initUI();
   }
@@ -117,8 +113,9 @@ public class AutosManager extends SubsystemBase {
 
   public Command getSelectedAuto() {
     return Commands.defer(
-        () ->
-            machine.buildAutoSequence(
+        () -> {
+            updatePreview();
+            return machine.buildAutoSequence(
                 startPos.getSelected(),
                 preloadShootPos.getSelected(),
                 intakePos.getSelected(),
@@ -127,7 +124,7 @@ public class AutosManager extends SubsystemBase {
                 finalShootPos.getSelected(),
                 climbPos.getSelected(),
                 1.0,
-                1.0),
+                1.0); },
         Set.of(drive));
   }
 
