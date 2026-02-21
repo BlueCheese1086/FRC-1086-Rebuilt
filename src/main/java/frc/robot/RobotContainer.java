@@ -258,7 +258,7 @@ public class RobotContainer {
         .whileTrue(
             Commands.run(
                     () -> {
-                      shooter.setVoltage(4.8);
+                      shooter.setVoltage(4.25);
                     })
                 .finallyDo(
                     () -> {

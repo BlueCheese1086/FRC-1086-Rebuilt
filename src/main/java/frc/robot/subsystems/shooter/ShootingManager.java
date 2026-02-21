@@ -53,9 +53,9 @@ public class ShootingManager {
   // TODO: Replace with tuned polynomial coefficients for hood angle deg = a + b*x + c*x^2 + d*x^3
   private static final double[] LOOKUP_TABLE_HOOD_POLYNOMIAL = new double[] {0.0, 0.0, 0.0, 0.0};
   private static final double POLY_RPM_WEIGHT =
-    0.5; // 0 = use map only, 1 = use poly only, 0.5 = blend both
+      0.5; // 0 = use map only, 1 = use poly only, 0.5 = blend both
   private static final double POLY_HOOD_WEIGHT =
-    0.5; // 0 = use map only, 1 = use poly only, 0.5 = blend both
+      0.5; // 0 = use map only, 1 = use poly only, 0.5 = blend both
 
   public static final double MAX_ACCEL = 8.0;
   public static final double MAX_VELOCITY = 8.0;
@@ -203,16 +203,16 @@ public class ShootingManager {
     double rpm = 0.0;
     double mapRpm = params != null ? params.flywheelRpm : Double.NaN;
     double polyRpm = evaluatePolynomial(LOOKUP_TABLE_POLYNOMIAL, distanceMeters);
-  boolean mapValid = Double.isFinite(mapRpm) && mapRpm > 0.0;
-  boolean polyValid = Double.isFinite(polyRpm) && polyRpm > 0.0;
-  double hoodAngleRad;
-  double minHoodRad = Units.degreesToRadians(HoodConstants.Targeting.minAngleDeg);
-  double maxHoodRad = Units.degreesToRadians(HoodConstants.Targeting.maxAngleDeg);
+    boolean mapValid = Double.isFinite(mapRpm) && mapRpm > 0.0;
+    boolean polyValid = Double.isFinite(polyRpm) && polyRpm > 0.0;
+    double hoodAngleRad;
+    double minHoodRad = Units.degreesToRadians(HoodConstants.Targeting.minAngleDeg);
+    double maxHoodRad = Units.degreesToRadians(HoodConstants.Targeting.maxAngleDeg);
     double mapHoodRad = params != null ? params.hoodAngleRad : Double.NaN;
     double polyHoodDeg = evaluatePolynomial(LOOKUP_TABLE_HOOD_POLYNOMIAL, distanceMeters);
     double polyHoodRad = Units.degreesToRadians(polyHoodDeg);
-  boolean mapHoodValid = Double.isFinite(mapHoodRad);
-  boolean polyHoodValid = Double.isFinite(polyHoodRad);
+    boolean mapHoodValid = Double.isFinite(mapHoodRad);
+    boolean polyHoodValid = Double.isFinite(polyHoodRad);
     if (mapHoodValid && polyHoodValid) {
       hoodAngleRad = blend(mapHoodRad, polyHoodRad, POLY_HOOD_WEIGHT);
     } else if (mapHoodValid) {
@@ -223,8 +223,8 @@ public class ShootingManager {
       double fallbackDeg =
           (HoodConstants.Targeting.minAngleDeg + HoodConstants.Targeting.maxAngleDeg) * 0.5;
       hoodAngleRad = Units.degreesToRadians(fallbackDeg);
-  }
-  hoodAngleRad = MathUtil.clamp(hoodAngleRad, minHoodRad, maxHoodRad);
+    }
+    hoodAngleRad = MathUtil.clamp(hoodAngleRad, minHoodRad, maxHoodRad);
 
     if (mapValid && polyValid) {
       rpm = blend(mapRpm, polyRpm, POLY_RPM_WEIGHT);
