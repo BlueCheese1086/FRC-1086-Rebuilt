@@ -35,11 +35,7 @@ public class Hood extends SubsystemBase {
   }
 
   public Command setAngle(Supplier<Angle> angle) {
-    return this.run(
-        () -> {
-          setAngle = angle.get();
-          io.setPosition(AngleToPosition.get(angle.get().in(Degrees)));
-        });
+    return setPosition(() -> (AngleToPosition.get(angle.get().in(Degrees))));
   }
 
   public void setAngle(Angle angle) {

@@ -359,9 +359,7 @@ public class Superstructure extends SubsystemBase {
   private void setupClimb() {
     stateTriggers.get(State.climb).onTrue(climb.setPosition(ClimbConstants.Setpoints.climbExtend));
 
-    stateTriggers
-        .get(State.climbscore)
-        .onTrue(climb.setPosition(ClimbConstants.Setpoints.climbScore));
+    stateTriggers.get(State.climbscore).onTrue(climb.setPosition(0.0));
   }
 
   public Command setState(State newState) {

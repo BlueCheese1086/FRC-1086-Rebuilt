@@ -39,6 +39,7 @@ public class ShooterConstants {
     public static final double movingSpeedThresholdMps = 0.25;
     public static final double movingRpmChangeWeight = 2.0;
     public static final double movingHoodChangeWeight = 0.5;
+    public static final String FileName = "Shot.csv";
   }
 
   public static class Mechanical {

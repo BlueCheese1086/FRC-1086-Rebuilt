@@ -23,6 +23,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
+import frc.robot.RobotMap;
 
 public class ShooterIOTalonFX implements ShooterIO {
   private final TalonFX shooter;
@@ -42,7 +43,7 @@ public class ShooterIOTalonFX implements ShooterIO {
   private double bangBangVoltage = 0.0;
 
   public ShooterIOTalonFX(int id, boolean inverted) {
-    shooter = new TalonFX(id);
+    shooter = new TalonFX(id,RobotMap.systemBus);
     bbController = new BangBangController();
 
     velocityTorqueCurrentFOC = new MotionMagicVelocityTorqueCurrentFOC(0.0);
