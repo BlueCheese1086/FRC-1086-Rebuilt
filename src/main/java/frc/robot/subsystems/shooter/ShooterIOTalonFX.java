@@ -23,6 +23,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
+import frc.robot.RobotMap;
 
 public class ShooterIOTalonFX implements ShooterIO {
   private final TalonFX shooter;
@@ -42,7 +43,7 @@ public class ShooterIOTalonFX implements ShooterIO {
   private double bangBangVoltage = 0.0;
 
   public ShooterIOTalonFX(int id, boolean inverted) {
-    shooter = new TalonFX(id);
+    shooter = new TalonFX(id, RobotMap.systemBus);
     bbController = new BangBangController();
 
     velocityTorqueCurrentFOC = new MotionMagicVelocityTorqueCurrentFOC(0.0);
@@ -52,7 +53,7 @@ public class ShooterIOTalonFX implements ShooterIO {
     config.Slot0.kV = ShooterConstants.Tuning.kV;
     config.Slot0.kA = ShooterConstants.Tuning.kA;
 
-    config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
     config.MotorOutput.Inverted =
         inverted ? InvertedValue.CounterClockwise_Positive : InvertedValue.Clockwise_Positive;
     config.Audio.BeepOnBoot = true;
@@ -69,9 +70,6 @@ public class ShooterIOTalonFX implements ShooterIO {
 
     tryUntilOk(5, () -> shooter.getConfigurator().apply(config));
 
-    BaseStatusSignal.setUpdateFrequencyForAll(
-        50.0, acceleration, position, statorCurrent, supplyCurrent, temp, velocity, volts);
-
     acceleration = shooter.getAcceleration();
     position = shooter.getPosition();
     statorCurrent = shooter.getStatorCurrent();
@@ -79,6 +77,9 @@ public class ShooterIOTalonFX implements ShooterIO {
     temp = shooter.getDeviceTemp();
     velocity = shooter.getVelocity();
     volts = shooter.getMotorVoltage();
+
+    BaseStatusSignal.setUpdateFrequencyForAll(
+        50.0, acceleration, position, statorCurrent, supplyCurrent, temp, velocity, volts);
 
     shooter.optimizeBusUtilization();
   }

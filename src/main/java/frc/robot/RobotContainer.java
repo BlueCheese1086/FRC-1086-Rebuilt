@@ -25,7 +25,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.commands.AutoBuilder;
 import frc.robot.commands.AutoRoutines;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
@@ -45,7 +44,6 @@ import frc.robot.subsystems.hood.HoodIO;
 import frc.robot.subsystems.hood.HoodIOServo;
 import frc.robot.subsystems.hood.HoodIOSim;
 import frc.robot.subsystems.indexer.Indexer;
-import frc.robot.subsystems.indexer.IndexerConstants;
 import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSim;
 import frc.robot.subsystems.indexer.IndexerIOTalonFX;
@@ -67,242 +65,250 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
-import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOSim;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
- * This class is where the bulk of the robot should be declared. Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
+ * This class is where the bulk of the robot should be declared. Since
+ * Command-based is a
+ * "declarative" paradigm, very little robot logic should actually be handled in
+ * the {@link Robot}
+ * periodic methods (other than the scheduler calls). Instead, the structure of
+ * the robot (including
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
-  // Subsystems
-  private final Drive drive;
+    // Subsystems
+    private final Drive drive;
 
-  @SuppressWarnings("unused")
-  private final Vision vision;
+    @SuppressWarnings("unused")
+    private final Vision vision;
 
-  private final Shooter shooter;
-  private final Intake intake;
-  private final Indexer indexer;
-  private final Hood hood;
-  private final Climb climb;
+    private final Shooter shooter;
+    private final Intake intake;
 
-  @SuppressWarnings("unused")
-  private final Superstructure superstructure;
+    @SuppressWarnings("unused")
+    private final Indexer indexer;
 
-  private final AutoBuilder autobuilder;
-  private final Timer time = new Timer();
+    private final Hood hood;
 
-  // Controller
-  private final CommandXboxController driver = new CommandXboxController(0);
-  private final CommandXboxController operator = new CommandXboxController(1);
+    @SuppressWarnings("unused")
+    private final Climb climb;
 
-  // Dashboard inputs
-  private final LoggedDashboardChooser<Command> autoChooser;
+    @SuppressWarnings("unused")
+    // private final Superstructure superstructure;
 
-  /** The container for the robot. Contains subsystems, IO devices, and commands. */
-  public RobotContainer() {
-    switch (Constants.currentMode) {
-      case REAL:
-        // Real robot, instantiate hardware IO implementations
-        drive =
-            new Drive(
-                new GyroIOPigeon2(),
-                new ModuleIOTalonFX(TunerConstants.FrontLeft),
-                new ModuleIOTalonFX(TunerConstants.FrontRight),
-                new ModuleIOTalonFX(TunerConstants.BackLeft),
-                new ModuleIOTalonFX(TunerConstants.BackRight));
+    // private final AutoBuilder autobuilder;
+    private final Timer time = new Timer();
 
-        vision =
-            new Vision(
-                drive::addVisionMeasurement,
-                drive::getPose,
-                new VisionIOPhotonVision(
-                    "left", VisionConstants.PhysicalConstants.cameraTransforms[0]),
-                new VisionIOPhotonVision(
-                    "right", VisionConstants.PhysicalConstants.cameraTransforms[1]),
-                new VisionIOLimelight("scoring"));
+    // Controller
+    private final CommandXboxController driver = new CommandXboxController(0);
+    private final CommandXboxController operator = new CommandXboxController(1);
 
-        intake = new Intake(new IntakeIOTalonFX());
-        indexer = new Indexer(new IndexerIOTalonFX());
-        shooter =
-            new Shooter(
-                new FeederIOTalonFX(1),
-                new ShooterIOTalonFX(RobotMap.ShooterMap.left, true),
-                new ShooterIOTalonFX(RobotMap.ShooterMap.middle, true),
-                new ShooterIOTalonFX(RobotMap.ShooterMap.right, true));
-        hood = new Hood(new HoodIOServo());
-        climb = new Climb(new ClimbIOTalonFX());
-        break;
+    // Dashboard inputs
+    private final LoggedDashboardChooser<Command> autoChooser;
 
-      case SIM:
-        // Sim robot, instantiate physics sim IO implementations
-        drive =
-            new Drive(
-                new GyroIO() {},
-                new ModuleIOSim(TunerConstants.FrontLeft),
-                new ModuleIOSim(TunerConstants.FrontRight),
-                new ModuleIOSim(TunerConstants.BackLeft),
-                new ModuleIOSim(TunerConstants.BackRight));
+    /**
+     * The container for the robot. Contains subsystems, IO devices, and commands.
+     */
+    public RobotContainer() {
+        switch (Constants.currentMode) {
+            case REAL:
+                // Real robot, instantiate hardware IO implementations
+                drive = new Drive(
+                        new GyroIOPigeon2(),
+                        new ModuleIOTalonFX(TunerConstants.FrontLeft),
+                        new ModuleIOTalonFX(TunerConstants.FrontRight),
+                        new ModuleIOTalonFX(TunerConstants.BackLeft),
+                        new ModuleIOTalonFX(TunerConstants.BackRight));
 
-        vision =
-            new Vision(
-                drive::addVisionMeasurement,
-                drive::getPose,
-                new VisionIOSim("left", VisionConstants.PhysicalConstants.cameraTransforms[0]),
-                new VisionIOSim("right", VisionConstants.PhysicalConstants.cameraTransforms[1]));
-        indexer = new Indexer(new IndexerIOSim());
-        intake = new Intake(new IntakeIOSim());
-        shooter =
-            new Shooter(
-                new FeederIOSim(), new ShooterIOSim(), new ShooterIOSim(), new ShooterIOSim());
-        hood = new Hood(new HoodIOSim());
-        climb = new Climb(new ClimbIOSim());
-        break;
+                vision = new Vision(
+                        drive::addVisionMeasurement,
+                        drive::getPose,
+                        // new VisionIOPhotonVision(
+                        // "left", VisionConstants.PhysicalConstants.cameraTransforms[0]),
+                        // new VisionIOPhotonVision(
+                        // "right", VisionConstants.PhysicalConstants.cameraTransforms[1]),
+                        new VisionIOLimelight("marble"));
 
-      default:
-        // Replayed robot, disable IO implementations
-        drive =
-            new Drive(
-                new GyroIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {});
+                intake = new Intake(new IntakeIOTalonFX());
+                indexer = new Indexer(new IndexerIOTalonFX());
+                shooter = new Shooter(
+                        new FeederIOTalonFX(RobotMap.ShooterMap.feeder),
+                        new ShooterIOTalonFX(RobotMap.ShooterMap.left, true),
+                        new ShooterIOTalonFX(RobotMap.ShooterMap.middle, true),
+                        new ShooterIOTalonFX(RobotMap.ShooterMap.right, true));
+                hood = new Hood(new HoodIOServo());
+                climb = new Climb(new ClimbIOTalonFX());
+                break;
 
-        vision =
-            new Vision(
-                drive::addVisionMeasurement, drive::getPose, new VisionIO() {}, new VisionIO() {});
+            case SIM:
+                // Sim robot, instantiate physics sim IO implementations
+                drive = new Drive(
+                        new GyroIO() {
+                        },
+                        new ModuleIOSim(TunerConstants.FrontLeft),
+                        new ModuleIOSim(TunerConstants.FrontRight),
+                        new ModuleIOSim(TunerConstants.BackLeft),
+                        new ModuleIOSim(TunerConstants.BackRight));
 
-        shooter = new Shooter(new FeederIO() {}, new ShooterIO() {});
-        intake = new Intake(new IntakeIO() {});
-        indexer = new Indexer(new IndexerIO() {});
-        hood = new Hood(new HoodIO() {});
-        climb = new Climb(new ClimbIO() {});
-        break;
+                vision = new Vision(
+                        drive::addVisionMeasurement,
+                        drive::getPose,
+                        new VisionIOSim("left", VisionConstants.PhysicalConstants.cameraTransforms[0]),
+                        new VisionIOSim("right", VisionConstants.PhysicalConstants.cameraTransforms[1]));
+                indexer = new Indexer(new IndexerIOSim());
+                intake = new Intake(new IntakeIOSim());
+                shooter = new Shooter(
+                        new FeederIOSim(), new ShooterIOSim(), new ShooterIOSim(), new ShooterIOSim());
+                hood = new Hood(new HoodIOSim());
+                climb = new Climb(new ClimbIOSim());
+                break;
+
+            default:
+                // Replayed robot, disable IO implementations
+                drive = new Drive(
+                        new GyroIO() {
+                        },
+                        new ModuleIO() {
+                        },
+                        new ModuleIO() {
+                        },
+                        new ModuleIO() {
+                        },
+                        new ModuleIO() {
+                        });
+
+                vision = new Vision(
+                        drive::addVisionMeasurement, drive::getPose, new VisionIO() {
+                        }, new VisionIO() {
+                        });
+
+                shooter = new Shooter(new FeederIO() {
+                }, new ShooterIO() {
+                });
+                intake = new Intake(new IntakeIO() {
+                });
+                indexer = new Indexer(new IndexerIO() {
+                });
+                hood = new Hood(new HoodIO() {
+                });
+                climb = new Climb(new ClimbIO() {
+                });
+                break;
+        }
+
+        AutoRoutines.setup(drive);
+
+        Superstructure.ControllerLayout.scoreRequest = driver.rightTrigger();
+        Superstructure.ControllerLayout.cancelRequest = driver.povLeft().or(operator.povLeft());
+        Superstructure.ControllerLayout.climbRequest = driver.povRight();
+        Superstructure.ControllerLayout.disableTargeting = driver.povUp();
+        Superstructure.ControllerLayout.intakeRequest = driver.leftTrigger();
+        Superstructure.ControllerLayout.passingRequest = driver.povDown();
+        Superstructure.ControllerLayout.joystickX = () -> -driver.getLeftY();
+        Superstructure.ControllerLayout.joystickY = () -> -driver.getLeftX();
+
+        // superstructure =
+        // new Superstructure(
+        // drive,
+        // intake,
+        // shooter,
+        // indexer,
+        // hood,
+        // climb,
+        // drive::getPose,
+        // drive::getChassisSpeeds,
+        // drive::getRotation);
+        // autobuilder = new AutoBuilder(superstructure, drive);
+
+        // Set up auto routines
+        autoChooser = new LoggedDashboardChooser<>("Auto Choices");
+
+        // Set up SysId routines
+        autoChooser.addOption(
+                "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
+        autoChooser.addOption(
+                "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
+        autoChooser.addOption(
+                "Drive SysId (Quasistatic Forward)",
+                drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+        autoChooser.addOption(
+                "Drive SysId (Quasistatic Reverse)",
+                drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+        autoChooser.addOption(
+                "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
+        autoChooser.addOption(
+                "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+        // autoChooser.addOption("auto builder", autobuilder.build());
+
+        // Configure the button bindings
+        configureButtonBindings();
     }
 
-    AutoRoutines.setup(drive);
+    private void configureButtonBindings() {
 
-    Superstructure.ControllerLayout.scoreRequest = driver.rightTrigger();
-    Superstructure.ControllerLayout.cancelRequest = driver.povLeft().or(operator.povLeft());
-    Superstructure.ControllerLayout.climbRequest = driver.povRight();
-    Superstructure.ControllerLayout.disableTargeting = driver.povUp();
-    Superstructure.ControllerLayout.intakeRequest = driver.leftTrigger();
-    Superstructure.ControllerLayout.passingRequest = driver.povDown();
-    Superstructure.ControllerLayout.joystickX = () -> -driver.getLeftY();
-    Superstructure.ControllerLayout.joystickY = () -> -driver.getLeftX();
+        // Default command, normal field-relative drive
+        drive.setDefaultCommand(
+                DriveCommands.joystickDrive(
+                        drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
 
-    superstructure =
-        new Superstructure(
-            drive,
-            intake,
-            shooter,
-            indexer,
-            hood,
-            climb,
-            drive::getPose,
-            drive::getChassisSpeeds,
-            drive::getRotation);
-    autobuilder = new AutoBuilder(superstructure, drive);
+        driver
+                .b()
+                .onTrue(
+                        Commands.runOnce(
+                                () -> drive.setPose(
+                                        new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
+                                drive)
+                                .ignoringDisable(true));
 
-    // Set up auto routines
-    autoChooser = new LoggedDashboardChooser<>("Auto Choices");
+        operator
+                .y()
+                .whileTrue(
+                        Commands.run(
+                                () -> shooter.setVelocitySetpoint(
+                                        RadiansPerSecond.of(
+                                                ShooterConstants.Tuning.velocitySetpoint.getAsDouble())),
+                                shooter))
+                .onFalse(Commands.runOnce(shooter::stopAll));
 
-    // Set up SysId routines
-    autoChooser.addOption(
-        "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
-    autoChooser.addOption(
-        "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
-    autoChooser.addOption(
-        "Drive SysId (Quasistatic Forward)",
-        drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Drive SysId (Quasistatic Reverse)",
-        drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-        "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption("auto builder", autobuilder.build());
+        operator.leftTrigger().whileTrue(Commands.parallel(
+            intake.setVoltage(IntakeConstants.Setpoints.run),
+            Commands.run(() -> shooter.runFeederVoltage(3.0)).finallyDo(() -> shooter.runFeederVoltage(0.0)),
+            indexer.setVoltage(Volts.of(3.0))));
 
-    // Configure the button bindings
-    configureButtonBindings();
-  }
+        operator
+                .rightTrigger()
+                .whileTrue(shooter.runFeederVoltage(8.0))
+                .onFalse(shooter.runFeederVoltage(0.0));
 
-  private void configureButtonBindings() {
+        operator.povDown().whileTrue(
+                intake.sysId()).onFalse(intake.setVoltage(Volts.zero()));
 
-    // Default command, normal field-relative drive
-    drive.setDefaultCommand(
-        DriveCommands.joystickDrive(
-            drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
+        operator
+                .back()
+                .onTrue(
+                        Commands.runEnd(
+                                () -> {
+                                    shooter.setVelocitySetpoint(
+                                            RadiansPerSecond.of(Tuning.velocitySetpoint.getAsDouble()));
+                                    hood.setAngle(Degrees.of(HoodConstants.Targeting.hoodAngle.getAsDouble()));
+                                    time.start();
+                                },
+                                () -> {
+                                    shooter.recordShot(new Pose3d(drive.getPose()), hood.getAngle(), time.get());
+                                    time.stop();
+                                    time.reset();
+                                },
+                                shooter));
+    }
 
-    driver
-        .b()
-        .onTrue(
-            Commands.runOnce(
-                    () ->
-                        drive.setPose(
-                            new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
-                    drive)
-                .ignoringDisable(true));
-
-    operator
-        .y()
-        .whileTrue(
-            Commands.run(
-                () ->
-                    shooter.setVelocitySetpoint(
-                        RadiansPerSecond.of(
-                            ShooterConstants.Tuning.velocitySetpoint.getAsDouble())),
-                shooter))
-        .onFalse(Commands.runOnce(shooter::stopAll));
-
-    operator
-        .leftTrigger()
-        .whileTrue(
-            Commands.parallel(
-                intake.setPosition(IntakeConstants.Setpoints.deployed),
-                indexer.setVoltage(IndexerConstants.Setpoints.feed),
-                intake.setVoltage(IntakeConstants.Setpoints.run)))
-        .onFalse(
-            Commands.parallel(
-                intake.setPosition(IntakeConstants.Setpoints.stowed),
-                indexer.setVoltage(Volts.zero()),
-                intake.setVoltage(Volts.zero())));
-
-    operator
-        .rightTrigger()
-        .whileTrue(shooter.runFeederVoltage(8.0))
-        .onFalse(shooter.runFeederVoltage(0.0));
-
-    operator
-        .back()
-        .onTrue(
-            Commands.runEnd(
-                () -> {
-                  shooter.setVelocitySetpoint(
-                      RadiansPerSecond.of(Tuning.velocitySetpoint.getAsDouble()));
-                  hood.setAngle(Degrees.of(HoodConstants.Targeting.hoodAngle.getAsDouble()));
-                  time.start();
-                },
-                () -> {
-                  shooter.recordShot(new Pose3d(drive.getPose()), hood.getAngle(), time.get());
-                  time.stop();
-                  time.reset();
-                },
-                shooter));
-  }
-
-  /**
-   * Use this to pass the autonomous command to the main {@link Robot} class.
-   *
-   * @return the command to run in autonomous
-   */
-  public Command getAutonomousCommand() {
-    return autoChooser.get();
-  }
+    /**
+     * Use this to pass the autonomous command to the main {@link Robot} class.
+     *
+     * @return the command to run in autonomous
+     */
+    public Command getAutonomousCommand() {
+        return autoChooser.get();
+    }
 }

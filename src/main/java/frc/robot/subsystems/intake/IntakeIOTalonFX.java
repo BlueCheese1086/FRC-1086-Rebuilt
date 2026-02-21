@@ -14,6 +14,7 @@ import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -58,7 +59,8 @@ public class IntakeIOTalonFX implements IntakeIO {
     config.Voltage.PeakForwardVoltage = IntakeConstants.VoltageLimits.peakForwardVoltage.in(Volts);
     config.Voltage.PeakReverseVoltage = IntakeConstants.VoltageLimits.peakForwardVoltage.in(Volts);
 
-    config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+    config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
     PhoenixUtil.tryUntilOk(5, () -> (roller.getConfigurator().apply(config, 5)));
 
@@ -73,6 +75,7 @@ public class IntakeIOTalonFX implements IntakeIO {
 
     config.Feedback.SensorToMechanismRatio = IntakeConstants.Mechanical.gearing;
     config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
+    config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
     PhoenixUtil.tryUntilOk(5, () -> (pivot.getConfigurator().apply(config, 5)));
 
@@ -156,5 +159,9 @@ public class IntakeIOTalonFX implements IntakeIO {
   @Override
   public void setVoltage(Voltage applied) {
     roller.setControl(applyVoltage.withOutput(applied));
+
+    if (applied.magnitude() == 0.0) {
+      roller.stopMotor();
+    }
   }
 }

@@ -18,6 +18,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
+import frc.robot.RobotMap;
 
 /** Add your docs here. */
 public class ClimbIOTalonFX implements ClimbIO {
@@ -37,7 +38,7 @@ public class ClimbIOTalonFX implements ClimbIO {
 
   public ClimbIOTalonFX() {
     this.config = new TalonFXConfiguration();
-    this.climbTalon = new TalonFX(ClimbConstants.climbID);
+    this.climbTalon = new TalonFX(RobotMap.climber, RobotMap.systemBus);
     this.voltagething = new VoltageOut(0); // relace with value pls
 
     config.MotorOutput.Inverted = ClimbConstants.invertedValue;

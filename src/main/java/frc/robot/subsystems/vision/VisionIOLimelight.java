@@ -13,6 +13,7 @@ import java.util.Optional;
 import limelight.Limelight;
 import limelight.networktables.LimelightPoseEstimator;
 import limelight.networktables.LimelightPoseEstimator.EstimationMode;
+import limelight.networktables.LimelightResults;
 import limelight.networktables.LimelightSettings.ImuMode;
 import limelight.networktables.LimelightSettings.LEDMode;
 import limelight.networktables.LimelightSettings.StreamMode;
@@ -28,14 +29,19 @@ public class VisionIOLimelight implements VisionIO {
     limelight = new Limelight("limelight-" + name);
     poseEstimator = limelight.createPoseEstimator(EstimationMode.MEGATAG2);
     limelight.getSettings().withImuMode(ImuMode.ExternalImu);
-    limelight.getSettings().withLimelightLEDMode(LEDMode.ForceOn);
+    limelight.getSettings().withLimelightLEDMode(LEDMode.ForceOff);
     limelight.getSettings().withStreamMode(StreamMode.PictureInPictureMain);
   }
 
   @Override
   public Pose3d getPose() {
-    double[] poses = limelight.getLatestResults().get().botpose;
-    return new Pose3d(poses[0], poses[1], poses[2], new Rotation3d(poses[3], poses[4], poses[5]));
+    Optional<LimelightResults> results = limelight.getLatestResults();
+    if (results.isPresent()) {
+      double[] poses = results.get().botpose;
+      return new Pose3d(poses[0], poses[1], poses[2], new Rotation3d(poses[3], poses[4], poses[5]));
+    } else {
+      return Pose3d.kZero;
+    }
   }
 
   @Override
