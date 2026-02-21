@@ -2,6 +2,8 @@ package frc.robot.subsystems.shooter.FeederIO;
 
 import org.littletonrobotics.junction.AutoLog;
 
+import frc.robot.subsystems.shooter.FeederIOInputsAutoLogged;
+
 public interface FeederIO {
   @AutoLog
   public class FeederIOInputs {
@@ -14,5 +16,5 @@ public interface FeederIO {
 
   public default void setFeedVoltage(double volts) {}
 
-  public default void updateInputs(FeederIOInputs inputs) {}
+  public default void updateInputs(FeederIOInputsAutoLogged feederIOInputsAutoLogged) {}
 }
