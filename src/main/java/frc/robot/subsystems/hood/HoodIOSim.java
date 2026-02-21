@@ -13,7 +13,8 @@ public class HoodIOSim implements HoodIO {
   @Override
   public void updateInputs(HoodInputs inputs) {
     inputs.setPosition = setpoint;
-    inputs.leftPosition = 0.0;
+    inputs.leftPosition = setpoint;
+    inputs.rightPosition = setpoint;
   }
 
   @Override
