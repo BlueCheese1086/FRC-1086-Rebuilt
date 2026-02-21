@@ -43,7 +43,7 @@ public class IntakeConstants {
     public static final Angle agitate = Degrees.of(20);
     public static final Angle deployed = Degrees.of(-4);
 
-    public static final Voltage run = Volts.of(12);
+    public static final Voltage run = Volts.of(3);
   }
 
   public static class Mechanical { // TODO: Update all of these with the actual values

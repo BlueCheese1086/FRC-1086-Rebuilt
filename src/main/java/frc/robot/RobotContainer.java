@@ -13,17 +13,12 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.Volts;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.commands.AutoBuilder;
 import frc.robot.commands.AutoRoutines;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
@@ -55,7 +50,6 @@ import frc.robot.subsystems.shooter.FeederIO.FeederIO;
 import frc.robot.subsystems.shooter.FeederIO.FeederIOSim;
 import frc.robot.subsystems.shooter.FeederIO.FeederIOTalonFX;
 import frc.robot.subsystems.shooter.Shooter;
-import frc.robot.subsystems.shooter.ShooterConstants;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.shooter.ShooterIOTalonFX;
@@ -63,7 +57,6 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
-import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOSim;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -88,11 +81,12 @@ public class RobotContainer {
   private final Climb climb;
 
   @SuppressWarnings("unused")
-//   private final Superstructure superstructure;
+  // private final Superstructure superstructure;
 
-//   private final AutoBuilder autobuilder;
+  // private final AutoBuilder autobuilder;
   // Controller
   private final CommandXboxController driver = new CommandXboxController(0);
+
   private final CommandXboxController operator = new CommandXboxController(1);
 
   // Dashboard inputs
@@ -115,11 +109,11 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 drive::getPose,
-                new VisionIOPhotonVision(
-                    "left", VisionConstants.PhysicalConstants.cameraTransforms[0]),
-                new VisionIOPhotonVision(
-                    "right", VisionConstants.PhysicalConstants.cameraTransforms[1]),
-                new VisionIOLimelight("scoring"));
+                // new VisionIOPhotonVision(
+                //     "left", VisionConstants.PhysicalConstants.cameraTransforms[0]),
+                // new VisionIOPhotonVision(
+                //     "right", VisionConstants.PhysicalConstants.cameraTransforms[1]),
+                new VisionIOLimelight("marble"));
 
         intake = new Intake(new IntakeIOTalonFX());
         indexer = new Indexer(new IndexerIOTalonFX());
@@ -128,7 +122,7 @@ public class RobotContainer {
                 new FeederIOTalonFX(RobotMap.ShooterMap.feeder),
                 new ShooterIOTalonFX(RobotMap.ShooterMap.left, true),
                 new ShooterIOTalonFX(RobotMap.ShooterMap.middle, true),
-                new ShooterIOTalonFX(RobotMap.ShooterMap.right, true));
+                new ShooterIOTalonFX(RobotMap.ShooterMap.right, false));
         hood = new Hood(new HoodIOServo());
         climb = new Climb(new ClimbIOTalonFX());
         break;
@@ -193,16 +187,16 @@ public class RobotContainer {
     Superstructure.ControllerLayout.driverHid = driver::getHID;
 
     // superstructure =
-    //     new Superstructure(
-    //         drive,
-    //         intake,
-    //         shooter,
-    //         indexer,
-    //         hood,
-    //         climb,
-    //         drive::getPose,
-    //         drive::getChassisSpeeds,
-    //         drive::getRotation);
+    // new Superstructure(
+    // drive,
+    // intake,
+    // shooter,
+    // indexer,
+    // hood,
+    // climb,
+    // drive::getPose,
+    // drive::getChassisSpeeds,
+    // drive::getRotation);
     // autobuilder = new AutoBuilder(superstructure, drive);
 
     // Set up auto routines
@@ -247,31 +241,30 @@ public class RobotContainer {
                 .ignoringDisable(true));
 
     operator
+        .povLeft()
+        .whileTrue(
+            Commands.parallel(
+                intake.setVoltage(IntakeConstants.Setpoints.run),
+                indexer.setVoltage(IndexerConstants.Setpoints.feed),
+                shooter.runFeederVoltage(12.0).finallyDo(shooter.runFeederVoltage(0.0)::execute)));
+
+    operator
+        .povDown()
+        .whileTrue(
+            Commands.parallel(
+                shooter.runFeederVoltage(-12.0).finallyDo(shooter.runFeederVoltage(0.0)::execute)));
+    operator
         .y()
         .whileTrue(
             Commands.run(
-                () ->
-                    shooter.setVelocitySetpoint(
-                        RadiansPerSecond.of(
-                            ShooterConstants.Tuning.velocitySetpoint.getAsDouble())),
-                shooter))
-        .onFalse(Commands.runOnce(shooter::stopAll));
-
-    operator
-        .leftTrigger()
-        .whileTrue(
-            Commands.parallel(
-                intake.setPosition(IntakeConstants.Setpoints.deployed),
-                indexer.setVoltage(IndexerConstants.Setpoints.feed)))
-        .onFalse(
-            Commands.parallel(
-                intake.setPosition(IntakeConstants.Setpoints.stowed),
-                indexer.setVoltage(Volts.zero())));
-
-    operator
-        .rightTrigger()
-        .whileTrue(shooter.runFeederVoltage(8.0))
-        .onFalse(shooter.runFeederVoltage(0.0));
+                    () -> {
+                      shooter.setVoltage(4.8);
+                    })
+                .finallyDo(
+                    () -> {
+                      shooter.setVoltage(0.0);
+                    }));
+    operator.povRight().whileTrue(intake.setVoltage(IntakeConstants.Setpoints.run));
   }
 
   /**

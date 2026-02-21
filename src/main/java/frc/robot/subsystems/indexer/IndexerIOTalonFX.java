@@ -12,6 +12,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
@@ -45,6 +46,7 @@ public class IndexerIOTalonFX implements IndexerIO {
     config.Voltage.PeakReverseVoltage = IndexerConstants.VoltageLimits.peakForwardVoltage.in(Volts);
 
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
     PhoenixUtil.tryUntilOk(5, () -> (talon.getConfigurator().apply(config)));
 
@@ -78,6 +80,10 @@ public class IndexerIOTalonFX implements IndexerIO {
 
   public void setVoltage(Voltage applied) {
     talon.setControl(applyVoltage.withOutput(applied));
+
+    if (applied.magnitude() == 0) {
+      talon.stopMotor();
+    }
   }
 
   public void setCurrent(Current applied) {

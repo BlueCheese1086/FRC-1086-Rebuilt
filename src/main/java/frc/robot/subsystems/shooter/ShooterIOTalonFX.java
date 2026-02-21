@@ -43,7 +43,7 @@ public class ShooterIOTalonFX implements ShooterIO {
   private double bangBangVoltage = 0.0;
 
   public ShooterIOTalonFX(int id, boolean inverted) {
-    shooter = new TalonFX(id,RobotMap.systemBus);
+    shooter = new TalonFX(id, RobotMap.systemBus);
     bbController = new BangBangController();
 
     velocityTorqueCurrentFOC = new MotionMagicVelocityTorqueCurrentFOC(0.0);
@@ -70,9 +70,6 @@ public class ShooterIOTalonFX implements ShooterIO {
 
     tryUntilOk(5, () -> shooter.getConfigurator().apply(config));
 
-    BaseStatusSignal.setUpdateFrequencyForAll(
-        50.0, acceleration, position, statorCurrent, supplyCurrent, temp, velocity, volts);
-
     acceleration = shooter.getAcceleration();
     position = shooter.getPosition();
     statorCurrent = shooter.getStatorCurrent();
@@ -81,6 +78,8 @@ public class ShooterIOTalonFX implements ShooterIO {
     velocity = shooter.getVelocity();
     volts = shooter.getMotorVoltage();
 
+    BaseStatusSignal.setUpdateFrequencyForAll(
+        50.0, acceleration, position, statorCurrent, supplyCurrent, temp, velocity, volts);
     shooter.optimizeBusUtilization();
   }
 
@@ -112,5 +111,9 @@ public class ShooterIOTalonFX implements ShooterIO {
   @Override
   public void setVoltage(double volts) {
     shooter.setVoltage(volts);
+
+    if (volts == 0) {
+      shooter.stopMotor();
+    }
   }
 }
