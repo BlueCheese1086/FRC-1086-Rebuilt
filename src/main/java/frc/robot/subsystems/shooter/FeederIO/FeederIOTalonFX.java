@@ -23,7 +23,7 @@ public class FeederIOTalonFX implements FeederIO {
   private StatusSignal<Temperature> tempreature;
 
   public FeederIOTalonFX(int feedID) {
-    feeder = new TalonFX(feedID,RobotMap.systemBus);
+    feeder = new TalonFX(feedID, RobotMap.systemBus);
     voltageRequest = new VoltageOut(0.0).withEnableFOC(true);
     feedConfig = new TalonFXConfiguration();
 

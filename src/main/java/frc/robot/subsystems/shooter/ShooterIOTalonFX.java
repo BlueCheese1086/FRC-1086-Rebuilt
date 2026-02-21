@@ -43,7 +43,7 @@ public class ShooterIOTalonFX implements ShooterIO {
   private double bangBangVoltage = 0.0;
 
   public ShooterIOTalonFX(int id, boolean inverted) {
-    shooter = new TalonFX(id,RobotMap.systemBus);
+    shooter = new TalonFX(id, RobotMap.systemBus);
     bbController = new BangBangController();
 
     velocityTorqueCurrentFOC = new MotionMagicVelocityTorqueCurrentFOC(0.0);

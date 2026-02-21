@@ -18,13 +18,12 @@ import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.autonomous.old.AutoBuilder;
-import frc.robot.autonomous.old.AutoRoutines;
+import frc.robot.autonomous.AutosManager;
+import frc.robot.commands.AutoRoutines;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.climb.Climb;
@@ -77,6 +76,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
+  private final AutosManager automanager;
 
   @SuppressWarnings("unused")
   private final Vision vision;
@@ -88,11 +88,12 @@ public class RobotContainer {
   private final Climb climb;
 
   @SuppressWarnings("unused")
-//   private final Superstructure superstructure;
+  //   private final Superstructure superstructure;
 
-//   private final AutoBuilder autobuilder;
+  //   private final AutoBuilder autobuilder;
   // Controller
   private final CommandXboxController driver = new CommandXboxController(0);
+
   private final CommandXboxController operator = new CommandXboxController(1);
 
   // Dashboard inputs
@@ -205,6 +206,8 @@ public class RobotContainer {
     //         drive::getRotation);
     // autobuilder = new AutoBuilder(superstructure, drive);
 
+    automanager = new AutosManager(drive, shooter, indexer, intake, () -> false);
+
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices");
 
@@ -223,7 +226,7 @@ public class RobotContainer {
         "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-    // autoChooser.addOption("auto builder", autobuilder.build());
+    autoChooser.addOption("auto builder", automanager.getSelectedAuto());
 
     // Configure the button bindings
     configureButtonBindings();

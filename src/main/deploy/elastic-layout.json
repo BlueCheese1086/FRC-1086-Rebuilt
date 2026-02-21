@@ -162,28 +162,14 @@
             }
           },
           {
-            "title": "ShootTime",
-            "x": 0.0,
+            "title": "Auto time",
+            "x": 512.0,
             "y": 640.0,
-            "width": 384.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/Tuning/Auto/ShootTime",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "Full Time",
-            "x": 384.0,
-            "y": 640.0,
-            "width": 384.0,
+            "width": 128.0,
             "height": 128.0,
             "type": "Large Text Display",
             "properties": {
-              "topic": "/SmartDashboard/Auto/Full Time",
+              "topic": "/SmartDashboard/Auto time",
               "period": 0.06,
               "data_type": "double"
             }
