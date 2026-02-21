@@ -76,7 +76,7 @@ public class AutoStateMachine {
                     superstructure.setState(Superstructure.State.holding) // Prep while moving
                 ),
                 superstructure.setState(Superstructure.State.shoot),
-                Commands.waitSeconds(shootTime) // Wait for piece to leave
+                Commands.waitSeconds(shootTime) // Keep shooting
             );
             estimatedTime += shootTime;
             currentLocation = preloadShootPos;
@@ -92,7 +92,6 @@ public class AutoStateMachine {
                     AutoRoutines.runPath(path, isFirstPath),
                     superstructure.setState(Superstructure.State.intake) // Intake drops while driving
                 ),
-                // Path is done but keep intake down until sensor detects a piece
                 Commands.waitSeconds(intakeTime) 
             );
             estimatedTime += intakeTime;
