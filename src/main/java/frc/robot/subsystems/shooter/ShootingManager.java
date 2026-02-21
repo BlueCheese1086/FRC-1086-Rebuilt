@@ -38,10 +38,24 @@ public class ShootingManager {
             Units.inchesToMeters(7.0), Units.inchesToMeters(0.0), Units.inchesToMeters(10.0))
       };
 
-  private static final InterpolatingTreeMap<Double, Double> distanceToRpm =
-      new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Interpolator.forDouble());
-  private static final InterpolatingTreeMap<Double, Double> distanceToAngleDeg =
-      new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Interpolator.forDouble());
+  private static final InterpolatingTreeMap<Double, ShotParams> distanceToShotParams =
+      new InterpolatingTreeMap<>(
+          InverseInterpolator.forDouble(),
+          (startValue, endValue, t) ->
+              new ShotParams(
+                  Interpolator.forDouble()
+                      .interpolate(startValue.flywheelRpm, endValue.flywheelRpm, t),
+                  Interpolator.forDouble()
+                      .interpolate(startValue.hoodAngleRad, endValue.hoodAngleRad, t)));
+
+  // TODO: Replace with tuned polynomial coefficients for RPM = a + b*x + c*x^2 + d*x^3
+  private static final double[] LOOKUP_TABLE_POLYNOMIAL = new double[] {0.0, 0.0, 0.0, 0.0};
+  // TODO: Replace with tuned polynomial coefficients for hood angle deg = a + b*x + c*x^2 + d*x^3
+  private static final double[] LOOKUP_TABLE_HOOD_POLYNOMIAL = new double[] {0.0, 0.0, 0.0, 0.0};
+  private static final double POLY_RPM_WEIGHT =
+    0.5; // 0 = use map only, 1 = use poly only, 0.5 = blend both
+  private static final double POLY_HOOD_WEIGHT =
+    0.5; // 0 = use map only, 1 = use poly only, 0.5 = blend both
 
   public static final double MAX_ACCEL = 8.0;
   public static final double MAX_VELOCITY = 8.0;
@@ -70,21 +84,18 @@ public class ShootingManager {
   private double rpmStableSince = -Double.MAX_VALUE;
   private double lastCommandedRpm = 0.0;
   private double lastCommandTimestamp = -Double.MAX_VALUE;
+  private double lastHeadingRad = Double.NaN;
+  private double lastHeadingTimestamp = -Double.MAX_VALUE;
 
   private final Supplier<Pose2d> poseSupplier;
   private final Supplier<ChassisSpeeds> speedsSupplier;
   private final Supplier<Rotation2d> headingSupplier;
 
   static {
-    // TODO: Replace with calibrated distance->RPM data (meters -> RPM)
-    distanceToRpm.put(2.0, 3200.0);
-    distanceToRpm.put(4.0, 3800.0);
-    distanceToRpm.put(6.0, 4400.0);
-
-    // TODO: Replace with calibrated distance->exit angle data (meters -> degrees)
-    distanceToAngleDeg.put(2.0, 75.0);
-    distanceToAngleDeg.put(4.0, 68.0);
-    distanceToAngleDeg.put(6.0, 60.0);
+    // TODO: Replace with calibrated distance->shot params (meters, RPM, hood angle deg)
+    addShotParams(2.0, 3200.0, 75.0);
+    addShotParams(4.0, 3800.0, 68.0);
+    addShotParams(6.0, 4400.0, 60.0);
   }
 
   public ShootingManager() {
@@ -109,8 +120,10 @@ public class ShootingManager {
 
   public void addVisionMeasurement(Pose2d visionPose, double timestampSec) {
     double angularVelocity = 0.0;
-    if (headingSupplier != null) {
-      angularVelocity = 0.0;
+    if (speedsSupplier != null) {
+      angularVelocity = speedsSupplier.get().omegaRadiansPerSecond;
+    } else if (headingSupplier != null) {
+      angularVelocity = estimateAngularVelocity(headingSupplier.get(), timestampSec);
     }
     addVisionObservation(visionPose, timestampSec, angularVelocity, 0.0, 0, 0.0);
   }
@@ -186,10 +199,83 @@ public class ShootingManager {
   }
 
   public ShotParams getStaticShootingParams(double distanceMeters) {
-    double rpm = distanceToRpm.get(distanceMeters);
-    double hoodDeg = distanceToAngleDeg.get(distanceMeters);
-    return new ShotParams(
-        MathUtil.clamp(rpm, 0.0, MAX_FLYWHEEL_RPM), Units.degreesToRadians(hoodDeg));
+    ShotParams params = distanceToShotParams.get(distanceMeters);
+    double rpm = 0.0;
+    double mapRpm = params != null ? params.flywheelRpm : Double.NaN;
+    double polyRpm = evaluatePolynomial(LOOKUP_TABLE_POLYNOMIAL, distanceMeters);
+  boolean mapValid = Double.isFinite(mapRpm) && mapRpm > 0.0;
+  boolean polyValid = Double.isFinite(polyRpm) && polyRpm > 0.0;
+  double hoodAngleRad;
+  double minHoodRad = Units.degreesToRadians(HoodConstants.Targeting.minAngleDeg);
+  double maxHoodRad = Units.degreesToRadians(HoodConstants.Targeting.maxAngleDeg);
+    double mapHoodRad = params != null ? params.hoodAngleRad : Double.NaN;
+    double polyHoodDeg = evaluatePolynomial(LOOKUP_TABLE_HOOD_POLYNOMIAL, distanceMeters);
+    double polyHoodRad = Units.degreesToRadians(polyHoodDeg);
+  boolean mapHoodValid = Double.isFinite(mapHoodRad);
+  boolean polyHoodValid = Double.isFinite(polyHoodRad);
+    if (mapHoodValid && polyHoodValid) {
+      hoodAngleRad = blend(mapHoodRad, polyHoodRad, POLY_HOOD_WEIGHT);
+    } else if (mapHoodValid) {
+      hoodAngleRad = mapHoodRad;
+    } else if (polyHoodValid) {
+      hoodAngleRad = polyHoodRad;
+    } else {
+      double fallbackDeg =
+          (HoodConstants.Targeting.minAngleDeg + HoodConstants.Targeting.maxAngleDeg) * 0.5;
+      hoodAngleRad = Units.degreesToRadians(fallbackDeg);
+  }
+  hoodAngleRad = MathUtil.clamp(hoodAngleRad, minHoodRad, maxHoodRad);
+
+    if (mapValid && polyValid) {
+      rpm = blend(mapRpm, polyRpm, POLY_RPM_WEIGHT);
+    } else if (mapValid) {
+      rpm = mapRpm;
+    } else if (polyValid) {
+      rpm = polyRpm;
+    }
+    return new ShotParams(MathUtil.clamp(rpm, 0.0, MAX_FLYWHEEL_RPM), hoodAngleRad);
+  }
+
+  private static void addShotParams(double distanceMeters, double rpm, double hoodAngleDeg) {
+    distanceToShotParams.put(
+        distanceMeters, new ShotParams(rpm, Units.degreesToRadians(hoodAngleDeg)));
+  }
+
+  private static double evaluatePolynomial(double[] coeffs, double x) {
+    if (coeffs == null || coeffs.length == 0 || !Double.isFinite(x)) {
+      return 0.0;
+    }
+    double result = 0.0;
+    double power = 1.0;
+    for (double coeff : coeffs) {
+      result += coeff * power;
+      power *= x;
+    }
+    return result;
+  }
+
+  private static double blend(double a, double b, double weightB) {
+    double clampedWeight = MathUtil.clamp(weightB, 0.0, 1.0);
+    return a + (b - a) * clampedWeight;
+  }
+
+  private double estimateAngularVelocity(Rotation2d heading, double timestampSec) {
+    if (heading == null || !Double.isFinite(timestampSec)) {
+      return 0.0;
+    }
+    if (!Double.isFinite(lastHeadingTimestamp) || timestampSec <= lastHeadingTimestamp) {
+      lastHeadingRad = heading.getRadians();
+      lastHeadingTimestamp = timestampSec;
+      return 0.0;
+    }
+    double dt = timestampSec - lastHeadingTimestamp;
+    if (dt <= 1e-6) {
+      return 0.0;
+    }
+    double delta = MathUtil.angleModulus(heading.getRadians() - lastHeadingRad);
+    lastHeadingRad = heading.getRadians();
+    lastHeadingTimestamp = timestampSec;
+    return delta / dt;
   }
 
   public ShotSolution calculateShotSolution(
