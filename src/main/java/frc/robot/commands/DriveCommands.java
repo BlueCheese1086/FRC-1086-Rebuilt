@@ -47,6 +47,8 @@ public class DriveCommands {
 
   private DriveCommands() {}
 
+  
+
   private static Translation2d getLinearVelocityFromJoysticks(double x, double y) {
     // Apply deadband
     double linearMagnitude = MathUtil.applyDeadband(Math.hypot(x, y), DEADBAND);
@@ -148,6 +150,33 @@ public class DriveCommands {
 
         // Reset PID controller when command starts
         .beforeStarting(() -> angleController.reset());
+  }
+
+  /**
+   * Field relative drive where robot yaw is automatically pointed to the direction of travel.
+   *
+   * <p>This is useful for intaking: it overrides the turn joystick and keeps the intake pointed in
+   * the direction the driver is commanding translation.
+   */
+  public static Command joystickDriveSyom(
+      Drive drive, DoubleSupplier xSupplier, DoubleSupplier ySupplier) {
+    // Reuse the existing angle-hold command but source the target angle from the translation stick.
+    return joystickDriveAtAngle(
+        drive,
+        xSupplier,
+        ySupplier,
+        () -> {
+          Translation2d linearVelocity =
+              getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
+
+          // If the driver isn't commanding translation, hold current heading.
+          if (linearVelocity.getNorm() < 1e-3) {
+            return drive.getRotation();
+          }
+
+          // The translation direction is field-relative. Face that direction.
+          return linearVelocity.getAngle();
+        });
   }
 
   public static Command joystickDriveAtVirtualTarget(
