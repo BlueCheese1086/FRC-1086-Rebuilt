@@ -7,6 +7,7 @@ import java.util.function.BooleanSupplier;
 import choreo.Choreo;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Superstructure;
@@ -27,7 +28,7 @@ public class AutoStateMachine {
         this.isRed = isRed;
     }
 
-    private void addPathToPreview(String trajName, List<Pose2d> previewPoses){
+    private double addPathToPreview(String trajName, List<Pose2d> previewPoses){
         var traj = Choreo.loadTrajectory(trajName);
         if (traj.isPresent()) {
             Pose2d[] poses = traj.get().getPoses();
@@ -36,7 +37,10 @@ public class AutoStateMachine {
             for (Pose2d pose : poses) {
                 previewPoses.add(flip ? AllianceFlipUtil.apply(pose) : pose);
             }
+
+            return traj.get().getTotalTime();
         }
+        return 0.0;
     }
 
     public Command buildAutoSequence(
@@ -54,6 +58,8 @@ public class AutoStateMachine {
         String currentLocation = startPos;
         List<Pose2d> previewPoses = new ArrayList<>();
 
+        double estimatedTime = 0.0;
+
         if (startPos.endsWith("r")) {
             autoCommands = autoCommands.andThen(
                 superstructure.setState(Superstructure.State.shoot),
@@ -62,7 +68,7 @@ public class AutoStateMachine {
             );
         } else if (!preloadShootPos.equals("none")) {
             String path = currentLocation + "_" + preloadShootPos;
-            addPathToPreview(path, previewPoses);
+            estimatedTime += addPathToPreview(path, previewPoses);
             
             autoCommands = autoCommands.andThen(
                 Commands.deadline(
@@ -72,6 +78,7 @@ public class AutoStateMachine {
                 superstructure.setState(Superstructure.State.shoot),
                 Commands.waitSeconds(shootTime) // Wait for piece to leave
             );
+            estimatedTime += shootTime;
             currentLocation = preloadShootPos;
         }
 
@@ -79,7 +86,7 @@ public class AutoStateMachine {
 
         if (intakePos.endsWith("i")) {
             String path = currentLocation + "_" + intakePos;
-            addPathToPreview(path, previewPoses);
+            estimatedTime += addPathToPreview(path, previewPoses);
             autoCommands = autoCommands.andThen(
                 Commands.deadline(
                     AutoRoutines.runPath(path, isFirstPath),
@@ -88,12 +95,13 @@ public class AutoStateMachine {
                 // Path is done but keep intake down until sensor detects a piece
                 Commands.waitSeconds(intakeTime) 
             );
+            estimatedTime += intakeTime;
             currentLocation = intakePos;
         } else {
             String entryPath = currentLocation + "_" + nzEntry;
             String intakePath = nzEntry + "_" + intakePos;
-            addPathToPreview(entryPath, previewPoses);
-            addPathToPreview(intakePath, previewPoses);
+            estimatedTime += addPathToPreview(entryPath, previewPoses);
+            estimatedTime += addPathToPreview(intakePath, previewPoses);
 
             autoCommands = autoCommands.andThen(
                 AutoRoutines.runPath(entryPath, isFirstPath),
@@ -103,6 +111,7 @@ public class AutoStateMachine {
                 ),
                 Commands.waitSeconds(intakeTime)
             );
+            estimatedTime += intakeTime;
             currentLocation = intakePos;
         }
 
@@ -111,9 +120,9 @@ public class AutoStateMachine {
             String safePath = nzExit + "_" + nzExit + "s";
             String shootPath = nzExit + "s_" + finalShootPos;
 
-            addPathToPreview(exitPath, previewPoses);
-            addPathToPreview(safePath, previewPoses);
-            addPathToPreview(shootPath, previewPoses);
+            estimatedTime += addPathToPreview(exitPath, previewPoses);
+            estimatedTime += addPathToPreview(safePath, previewPoses);
+            estimatedTime += addPathToPreview(shootPath, previewPoses);
 
             autoCommands = autoCommands.andThen(
                 Commands.deadline(
@@ -123,12 +132,13 @@ public class AutoStateMachine {
                 AutoRoutines.runPath(safePath, false),
                 AutoRoutines.runPath(shootPath, false),
                 superstructure.setState(Superstructure.State.shoot),
-                Commands.waitSeconds(0.5)
+                Commands.waitSeconds(shootTime)
             );
+            estimatedTime += shootTime;
             currentLocation = finalShootPos;
         } else {
             String shootPath = currentLocation + "_" + finalShootPos;
-            addPathToPreview(shootPath, previewPoses);
+            estimatedTime += addPathToPreview(shootPath, previewPoses);
             
             autoCommands = autoCommands.andThen(
                 Commands.deadline(
@@ -136,14 +146,15 @@ public class AutoStateMachine {
                     superstructure.setState(Superstructure.State.holding) // Stow intake
                 ),
                 superstructure.setState(Superstructure.State.shoot),
-                Commands.waitSeconds(0.5)
+                Commands.waitSeconds(shootTime)
             );
+            estimatedTime += shootTime;
             currentLocation = finalShootPos;
         }
 
         if (!climbPos.equals("none")) {
             String climbPath = currentLocation + "_" + climbPos;
-            addPathToPreview(climbPath, previewPoses);
+            estimatedTime += addPathToPreview(climbPath, previewPoses);
             autoCommands = autoCommands.andThen(
                 AutoRoutines.runPath(climbPath, false),
                 superstructure.setState(Superstructure.State.climb),
@@ -153,6 +164,8 @@ public class AutoStateMachine {
         }
 
         autoPreviewField.getObject("traj").setPoses(previewPoses);
+        
+        SmartDashboard.putNumber("Auto time", estimatedTime);
 
         // Ensure everything stops and stows when auto ends
         return autoCommands.finallyDo(() -> {
