@@ -79,6 +79,7 @@ public class IntakeIOTalonFX implements IntakeIO {
 
     config.Feedback.SensorToMechanismRatio = IntakeConstants.Mechanical.gearing;
     config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
+    config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
     PhoenixUtil.tryUntilOk(5, () -> (pivot.getConfigurator().apply(config, 5)));
 

@@ -61,24 +61,32 @@ import frc.robot.subsystems.vision.VisionIOSim;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
- * This class is where the bulk of the robot should be declared. Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
+ * This class is where the bulk of the robot should be declared. Since
+ * Command-based is a
+ * "declarative" paradigm, very little robot logic should actually be handled in
+ * the {@link Robot}
+ * periodic methods (other than the scheduler calls). Instead, the structure of
+ * the robot (including
  * subsystems, commands, and button mappings) should be declared here.
  */
 @SuppressWarnings("unused")
 public class RobotContainer {
-  // Subsystems
-  private final Drive drive;
+    // Subsystems
+    private final Drive drive;
 
-  @SuppressWarnings("unused")
-  private final Vision vision;
+    @SuppressWarnings("unused")
+    private final Vision vision;
 
-  private final Shooter shooter;
-  private final Intake intake;
-  private final Indexer indexer;
-  private final Hood hood;
-  private final Climb climb;
+    private final Shooter shooter;
+    private final Intake intake;
+
+    @SuppressWarnings("unused")
+    private final Indexer indexer;
+
+    private final Hood hood;
+
+    @SuppressWarnings("unused")
+    private final Climb climb;
 
   @SuppressWarnings("unused")
   // private final Superstructure superstructure;
@@ -89,21 +97,22 @@ public class RobotContainer {
 
   private final CommandXboxController operator = new CommandXboxController(1);
 
-  // Dashboard inputs
-  private final LoggedDashboardChooser<Command> autoChooser;
+    // Dashboard inputs
+    private final LoggedDashboardChooser<Command> autoChooser;
 
-  /** The container for the robot. Contains subsystems, IO devices, and commands. */
-  public RobotContainer() {
-    switch (Constants.currentMode) {
-      case REAL:
-        // Real robot, instantiate hardware IO implementations
-        drive =
-            new Drive(
-                new GyroIOPigeon2(),
-                new ModuleIOTalonFX(TunerConstants.FrontLeft),
-                new ModuleIOTalonFX(TunerConstants.FrontRight),
-                new ModuleIOTalonFX(TunerConstants.BackLeft),
-                new ModuleIOTalonFX(TunerConstants.BackRight));
+    /**
+     * The container for the robot. Contains subsystems, IO devices, and commands.
+     */
+    public RobotContainer() {
+        switch (Constants.currentMode) {
+            case REAL:
+                // Real robot, instantiate hardware IO implementations
+                drive = new Drive(
+                        new GyroIOPigeon2(),
+                        new ModuleIOTalonFX(TunerConstants.FrontLeft),
+                        new ModuleIOTalonFX(TunerConstants.FrontRight),
+                        new ModuleIOTalonFX(TunerConstants.BackLeft),
+                        new ModuleIOTalonFX(TunerConstants.BackRight));
 
         vision =
             new Vision(
@@ -127,54 +136,63 @@ public class RobotContainer {
         climb = new Climb(new ClimbIOTalonFX());
         break;
 
-      case SIM:
-        // Sim robot, instantiate physics sim IO implementations
-        drive =
-            new Drive(
-                new GyroIO() {},
-                new ModuleIOSim(TunerConstants.FrontLeft),
-                new ModuleIOSim(TunerConstants.FrontRight),
-                new ModuleIOSim(TunerConstants.BackLeft),
-                new ModuleIOSim(TunerConstants.BackRight));
+            case SIM:
+                // Sim robot, instantiate physics sim IO implementations
+                drive = new Drive(
+                        new GyroIO() {
+                        },
+                        new ModuleIOSim(TunerConstants.FrontLeft),
+                        new ModuleIOSim(TunerConstants.FrontRight),
+                        new ModuleIOSim(TunerConstants.BackLeft),
+                        new ModuleIOSim(TunerConstants.BackRight));
 
-        vision =
-            new Vision(
-                drive::addVisionMeasurement,
-                drive::getPose,
-                new VisionIOSim("left", VisionConstants.PhysicalConstants.cameraTransforms[0]),
-                new VisionIOSim("right", VisionConstants.PhysicalConstants.cameraTransforms[1]));
-        indexer = new Indexer(new IndexerIOSim());
-        intake = new Intake(new IntakeIOSim());
-        shooter =
-            new Shooter(
-                new FeederIOSim(), new ShooterIOSim(), new ShooterIOSim(), new ShooterIOSim());
-        hood = new Hood(new HoodIOSim());
-        climb = new Climb(new ClimbIOSim());
-        break;
+                vision = new Vision(
+                        drive::addVisionMeasurement,
+                        drive::getPose,
+                        new VisionIOSim("left", VisionConstants.PhysicalConstants.cameraTransforms[0]),
+                        new VisionIOSim("right", VisionConstants.PhysicalConstants.cameraTransforms[1]));
+                indexer = new Indexer(new IndexerIOSim());
+                intake = new Intake(new IntakeIOSim());
+                shooter = new Shooter(
+                        new FeederIOSim(), new ShooterIOSim(), new ShooterIOSim(), new ShooterIOSim());
+                hood = new Hood(new HoodIOSim());
+                climb = new Climb(new ClimbIOSim());
+                break;
 
-      default:
-        // Replayed robot, disable IO implementations
-        drive =
-            new Drive(
-                new GyroIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {});
+            default:
+                // Replayed robot, disable IO implementations
+                drive = new Drive(
+                        new GyroIO() {
+                        },
+                        new ModuleIO() {
+                        },
+                        new ModuleIO() {
+                        },
+                        new ModuleIO() {
+                        },
+                        new ModuleIO() {
+                        });
 
-        vision =
-            new Vision(
-                drive::addVisionMeasurement, drive::getPose, new VisionIO() {}, new VisionIO() {});
+                vision = new Vision(
+                        drive::addVisionMeasurement, drive::getPose, new VisionIO() {
+                        }, new VisionIO() {
+                        });
 
-        shooter = new Shooter(new FeederIO() {}, new ShooterIO() {});
-        intake = new Intake(new IntakeIO() {});
-        indexer = new Indexer(new IndexerIO() {});
-        hood = new Hood(new HoodIO() {});
-        climb = new Climb(new ClimbIO() {});
-        break;
-    }
+                shooter = new Shooter(new FeederIO() {
+                }, new ShooterIO() {
+                });
+                intake = new Intake(new IntakeIO() {
+                });
+                indexer = new Indexer(new IndexerIO() {
+                });
+                hood = new Hood(new HoodIO() {
+                });
+                climb = new Climb(new ClimbIO() {
+                });
+                break;
+        }
 
-    AutoRoutines.setup(drive);
+        AutoRoutines.setup(drive);
 
     Superstructure.ControllerLayout.scoreRequest = driver.rightTrigger();
     Superstructure.ControllerLayout.cancelRequest = driver.povLeft().or(operator.povLeft());
@@ -199,8 +217,8 @@ public class RobotContainer {
     // drive::getRotation);
     // autobuilder = new AutoBuilder(superstructure, drive);
 
-    // Set up auto routines
-    autoChooser = new LoggedDashboardChooser<>("Auto Choices");
+        // Set up auto routines
+        autoChooser = new LoggedDashboardChooser<>("Auto Choices");
 
     // Set up SysId routines
     autoChooser.addOption(
@@ -219,26 +237,25 @@ public class RobotContainer {
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     // autoChooser.addOption("auto builder", autobuilder.build());
 
-    // Configure the button bindings
-    configureButtonBindings();
-  }
+        // Configure the button bindings
+        configureButtonBindings();
+    }
 
-  private void configureButtonBindings() {
+    private void configureButtonBindings() {
 
-    // Default command, normal field-relative drive
-    drive.setDefaultCommand(
-        DriveCommands.joystickDrive(
-            drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
+        // Default command, normal field-relative drive
+        drive.setDefaultCommand(
+                DriveCommands.joystickDrive(
+                        drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
 
-    driver
-        .b()
-        .onTrue(
-            Commands.runOnce(
-                    () ->
-                        drive.setPose(
-                            new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
-                    drive)
-                .ignoringDisable(true));
+        driver
+                .b()
+                .onTrue(
+                        Commands.runOnce(
+                                () -> drive.setPose(
+                                        new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
+                                drive)
+                                .ignoringDisable(true));
 
     operator
         .povLeft()
@@ -258,7 +275,7 @@ public class RobotContainer {
         .whileTrue(
             Commands.run(
                     () -> {
-                      shooter.setVoltage(4.8);
+                      shooter.setVoltage(4.25);
                     })
                 .finallyDo(
                     () -> {
@@ -267,12 +284,12 @@ public class RobotContainer {
     operator.povRight().whileTrue(intake.setVoltage(IntakeConstants.Setpoints.run));
   }
 
-  /**
-   * Use this to pass the autonomous command to the main {@link Robot} class.
-   *
-   * @return the command to run in autonomous
-   */
-  public Command getAutonomousCommand() {
-    return autoChooser.get();
-  }
+    /**
+     * Use this to pass the autonomous command to the main {@link Robot} class.
+     *
+     * @return the command to run in autonomous
+     */
+    public Command getAutonomousCommand() {
+        return autoChooser.get();
+    }
 }

@@ -53,7 +53,7 @@ public class ShooterIOTalonFX implements ShooterIO {
     config.Slot0.kV = ShooterConstants.Tuning.kV;
     config.Slot0.kA = ShooterConstants.Tuning.kA;
 
-    config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
     config.MotorOutput.Inverted =
         inverted ? InvertedValue.CounterClockwise_Positive : InvertedValue.Clockwise_Positive;
     config.Audio.BeepOnBoot = true;
