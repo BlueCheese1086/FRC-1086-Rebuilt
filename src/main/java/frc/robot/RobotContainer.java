@@ -130,7 +130,7 @@ public class RobotContainer {
         indexer = new Indexer(new IndexerIOTalonFX());
         shooter =
             new Shooter(
-                new FeederIOTalonFX(1),
+                new FeederIOTalonFX(RobotMap.ShooterMap.feeder),
                 new ShooterIOTalonFX(RobotMap.ShooterMap.left, true),
                 new ShooterIOTalonFX(RobotMap.ShooterMap.middle, true),
                 new ShooterIOTalonFX(RobotMap.ShooterMap.right, true));
@@ -195,6 +195,7 @@ public class RobotContainer {
     Superstructure.ControllerLayout.passingRequest = driver.povDown();
     Superstructure.ControllerLayout.joystickX = () -> -driver.getLeftY();
     Superstructure.ControllerLayout.joystickY = () -> -driver.getLeftX();
+    Superstructure.ControllerLayout.driverHid = driver::getHID;
 
     superstructure =
         new Superstructure(
@@ -266,35 +267,16 @@ public class RobotContainer {
         .whileTrue(
             Commands.parallel(
                 intake.setPosition(IntakeConstants.Setpoints.deployed),
-                indexer.setVoltage(IndexerConstants.Setpoints.feed),
-                intake.setVoltage(IntakeConstants.Setpoints.run)))
+                indexer.setVoltage(IndexerConstants.Setpoints.feed)))
         .onFalse(
             Commands.parallel(
                 intake.setPosition(IntakeConstants.Setpoints.stowed),
-                indexer.setVoltage(Volts.zero()),
-                intake.setVoltage(Volts.zero())));
+                indexer.setVoltage(Volts.zero())));
 
     operator
         .rightTrigger()
         .whileTrue(shooter.runFeederVoltage(8.0))
         .onFalse(shooter.runFeederVoltage(0.0));
-
-    operator
-        .back()
-        .onTrue(
-            Commands.runEnd(
-                () -> {
-                  shooter.setVelocitySetpoint(
-                      RadiansPerSecond.of(Tuning.velocitySetpoint.getAsDouble()));
-                  hood.setAngle(Degrees.of(HoodConstants.Targeting.hoodAngle.getAsDouble()));
-                  time.start();
-                },
-                () -> {
-                  shooter.recordShot(new Pose3d(drive.getPose()), hood.getAngle(), time.get());
-                  time.stop();
-                  time.reset();
-                },
-                shooter));
   }
 
   /**

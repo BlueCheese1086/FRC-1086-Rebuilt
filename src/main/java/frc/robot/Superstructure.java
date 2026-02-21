@@ -191,7 +191,6 @@ public class Superstructure extends SubsystemBase {
         .ignoringDisable(true);
   }
 
-  
   private void setupCancel() {
     ControllerLayout.cancelRequest.onTrue(setState(State.holding));
     ControllerLayout.cancelRequest.multiPress(2, 1.5).onTrue(setState(State.idle));
