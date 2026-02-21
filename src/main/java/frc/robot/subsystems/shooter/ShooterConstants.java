@@ -8,14 +8,13 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Meters;
 
-import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
-
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.MomentOfInertia;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 /** Add your docs here. */
 public class ShooterConstants {
@@ -29,7 +28,8 @@ public class ShooterConstants {
         cruiseVelocity
             / 0.23; // Cruise velocity / spin up time estimated, low numbers equal more brownouts,
     // and high numbers more stable.
-    public static final LoggedNetworkNumber velocitySetpoint = new LoggedNetworkNumber("/Tuning/Velocity Setpoint", 100.0);
+    public static final LoggedNetworkNumber velocitySetpoint =
+        new LoggedNetworkNumber("/Tuning/Velocity Setpoint", 100.0);
   }
 
   public static class Targeting {
@@ -39,6 +39,7 @@ public class ShooterConstants {
     public static final double movingSpeedThresholdMps = 0.25;
     public static final double movingRpmChangeWeight = 2.0;
     public static final double movingHoodChangeWeight = 0.5;
+    public static final String FileName = "Shot.csv";
   }
 
   public static class Mechanical {

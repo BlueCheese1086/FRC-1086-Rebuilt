@@ -1,4 +1,4 @@
-package frc.robot.subsystems.shooter;
+package frc.robot.subsystems.shooter.FeederIO;
 
 import static frc.robot.util.PhoenixUtil.tryUntilOk;
 

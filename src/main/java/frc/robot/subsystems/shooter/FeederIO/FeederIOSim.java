@@ -1,10 +1,11 @@
-package frc.robot.subsystems.shooter;
+package frc.robot.subsystems.shooter.FeederIO;
 
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import frc.robot.subsystems.shooter.ShooterConstants;
 
 public class FeederIOSim implements FeederIO {
   private DCMotorSim feeder;
