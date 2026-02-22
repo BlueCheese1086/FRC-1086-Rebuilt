@@ -15,6 +15,7 @@ import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.util.LoggedTunableNumber;
 import java.util.Set;
 
 /** Add your docs here. */
@@ -26,6 +27,9 @@ public class AutosManager extends SubsystemBase {
   private final SendableChooser<String> nzExit = new SendableChooser<>();
   private final SendableChooser<String> finalShootPos = new SendableChooser<>();
   private final SendableChooser<String> climbPos = new SendableChooser<>();
+
+  private final LoggedTunableNumber shootTime = new LoggedTunableNumber("Auto/ShootTime", 1.0);
+  private final LoggedTunableNumber intakeTime = new LoggedTunableNumber("Auto/intakeTime", 1.0);
 
   private final Field2d autoPreviewField = new Field2d();
 
@@ -114,17 +118,18 @@ public class AutosManager extends SubsystemBase {
   public Command getSelectedAuto() {
     return Commands.defer(
         () -> {
-            updatePreview();
-            return machine.buildAutoSequence(
-                startPos.getSelected(),
-                preloadShootPos.getSelected(),
-                intakePos.getSelected(),
-                nzEntry.getSelected(),
-                nzExit.getSelected(),
-                finalShootPos.getSelected(),
-                climbPos.getSelected(),
-                1.0,
-                1.0); },
+          updatePreview();
+          return machine.buildAutoSequence(
+              startPos.getSelected(),
+              preloadShootPos.getSelected(),
+              intakePos.getSelected(),
+              nzEntry.getSelected(),
+              nzExit.getSelected(),
+              finalShootPos.getSelected(),
+              climbPos.getSelected(),
+              1.0,
+              1.0);
+        },
         Set.of(drive));
   }
 
@@ -140,8 +145,8 @@ public class AutosManager extends SubsystemBase {
           nzExit.getSelected(),
           finalShootPos.getSelected(),
           climbPos.getSelected(),
-          1.0,
-          1.0);
+          shootTime.get(),
+          intakeTime.get());
 
       var pathPoses = machine.autoPreviewField.getObject("traj").getPoses();
       autoPreviewField.getObject("traj").setPoses(pathPoses);

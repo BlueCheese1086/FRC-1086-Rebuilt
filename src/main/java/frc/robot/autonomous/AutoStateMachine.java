@@ -146,15 +146,12 @@ public class AutoStateMachine {
           autoCommands.andThen(
               AutoRoutines.runPath(climbPath, false)
               // TODO: do climb stuff later
-              // superstructure.setState(Superstructure.State.climb),
-              // Commands.waitSeconds(1.0),
-              // superstructure.setState(Superstructure.State.climbscore)
               );
     }
 
     autoPreviewField.getObject("traj").setPoses(previewPoses);
 
-    SmartDashboard.putNumber("Auto time", estimatedTime);
+    SmartDashboard.putString("Auto time", String.format("%.2f", estimatedTime) + "s");
 
     return autoCommands.finallyDo(
         () -> {
