@@ -17,15 +17,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.subsystems.shooter.FeederIO.FeederIO;
-import frc.robot.subsystems.shooter.FeederIO.FeederIO.FeederIOInputs;
 import frc.robot.subsystems.shooter.FeederIO.FeederIOInputsAutoLogged;
-import frc.robot.util.AllianceFlipUtil;
-import frc.robot.util.FieldConstants.Hub;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
-
 
 public class Shooter extends SubsystemBase {
   private ShooterInputsAutoLogged[] inputs;
@@ -83,6 +77,13 @@ public class Shooter extends SubsystemBase {
       io[i].setVoltage(0.0);
     }
     feederIO.setFeedVoltage(0.0);
+  }
+
+  /**
+   * @return returns the setpoint of the MIDDLE SHOOTER, if that shooter is at the setpoint or not
+   */
+  public boolean atSetpoint() {
+    return inputs[1].atSetpoint;
   }
 
   public void recordShot(Pose3d drivePose, Angle hoodAngle, double tof) {

@@ -2,7 +2,6 @@ package frc.robot.subsystems.shooter.FeederIO;
 
 import org.littletonrobotics.junction.AutoLog;
 
-
 public interface FeederIO {
   @AutoLog
   public class FeederIOInputs {

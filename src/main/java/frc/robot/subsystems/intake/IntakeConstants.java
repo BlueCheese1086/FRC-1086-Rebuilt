@@ -25,14 +25,14 @@ public class IntakeConstants {
 
     public static LoggedTunableNumber kS = new LoggedTunableNumber("Pivot/FF/kS", 0.0);
     public static LoggedTunableNumber kG = new LoggedTunableNumber("Pivot/FF/kG", 0.0);
-    public static LoggedTunableNumber kV = new LoggedTunableNumber("Pivot/FF/kV", 12.0 / (6000.0 / 50.0));
+    public static LoggedTunableNumber kV =
+        new LoggedTunableNumber("Pivot/FF/kV", 12.0 / (6000.0 / 50.0));
     public static LoggedTunableNumber kA = new LoggedTunableNumber("Pivot/FF/kA", 0.0);
-
   }
 
   public static class CurrentLimits {
-    public static final Current maxSupply = Amps.of(60);
-    public static final Current maxStator = Amps.of(60.0);
+    public static final Current maxSupply = Amps.of(120);
+    public static final Current maxStator = Amps.of(70.0);
   }
 
   public static class VoltageLimits {
@@ -41,10 +41,10 @@ public class IntakeConstants {
   }
 
   public static class Setpoints {
-    public static final Angle stowed = Radians.of(1.744);
-    public static final Angle homed = Degrees.of(110);
-    public static final Angle agitate = Degrees.of(20);
-    public static final Angle deployed = Radians.of(-0.122);
+    public static final Angle stowed = Degrees.of(100.0);
+    public static final Angle homed = Degrees.of(110.0);
+    public static final Angle agitate = Degrees.of(20.0);
+    public static final Angle deployed = Degrees.of(-4.0);
 
     public static final Voltage run = Volts.of(3);
   }

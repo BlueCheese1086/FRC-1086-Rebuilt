@@ -5,17 +5,21 @@
 package frc.robot.subsystems.intake;
 
 import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Volts;
+import static frc.robot.subsystems.intake.IntakeConstants.PID.*;
 
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
-import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.units.measure.Angle;
@@ -23,15 +27,16 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
+import frc.robot.Constants;
 import frc.robot.RobotMap;
 import frc.robot.util.PhoenixUtil;
-import static frc.robot.subsystems.intake.IntakeConstants.PID.*;
 
 /** Add your docs here. */
 public class IntakeIOTalonFX implements IntakeIO {
   private final VoltageOut applyVoltage = new VoltageOut(0.0).withEnableFOC(true);
   private final TorqueCurrentFOC applyCurrent = new TorqueCurrentFOC(0.0);
   private final PositionTorqueCurrentFOC pivotPosition = new PositionTorqueCurrentFOC(0.0);
+  private final MotionMagicVoltage motionMagic = new MotionMagicVoltage(0.0).withEnableFOC(true);
   private final TalonFX pivot;
   private final TalonFX roller;
   private final TalonFXConfiguration config = new TalonFXConfiguration();
@@ -50,6 +55,9 @@ public class IntakeIOTalonFX implements IntakeIO {
   private final StatusSignal<Current> pivotStator;
   private final StatusSignal<Temperature> pivotTemperature;
 
+  // divide the max free speed by the gear ratio to get the max pviot velocity
+  private final AngularVelocity maxPivotVelocity = Constants.KrakenX60.kFreeSpeed.div(50.0);
+
   public IntakeIOTalonFX() {
     pivot = new TalonFX(RobotMap.IntakeMap.pivot, RobotMap.systemBus);
     roller = new TalonFX(RobotMap.IntakeMap.roller, RobotMap.systemBus);
@@ -60,14 +68,13 @@ public class IntakeIOTalonFX implements IntakeIO {
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
 
     config.Voltage.PeakForwardVoltage = IntakeConstants.VoltageLimits.peakForwardVoltage.in(Volts);
-    config.Voltage.PeakReverseVoltage = IntakeConstants.VoltageLimits.peakForwardVoltage.in(Volts);
+    config.Voltage.PeakReverseVoltage = IntakeConstants.VoltageLimits.peakReverseVoltage.in(Volts);
 
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
     PhoenixUtil.tryUntilOk(5, () -> (roller.getConfigurator().apply(config, 5)));
 
-    // TODO: PID STUFF
     config.Slot0.kP = IntakeConstants.PID.kP.get();
     config.Slot0.kI = IntakeConstants.PID.kI.get();
     config.Slot0.kD = IntakeConstants.PID.kD.get();
@@ -75,13 +82,16 @@ public class IntakeIOTalonFX implements IntakeIO {
     config.Slot0.kS = IntakeConstants.PID.kS.get();
     config.Slot0.kV = IntakeConstants.PID.kV.get();
     config.Slot0.kA = IntakeConstants.PID.kA.get();
-    config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
 
     config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
     config.Feedback.SensorToMechanismRatio = IntakeConstants.Mechanical.gearing;
     config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
     config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+
+    config.MotionMagic.MotionMagicAcceleration =
+        maxPivotVelocity.per(Second).in(RotationsPerSecondPerSecond);
+    config.MotionMagic.MotionMagicCruiseVelocity = maxPivotVelocity.in(RotationsPerSecond);
 
     PhoenixUtil.tryUntilOk(5, () -> (pivot.getConfigurator().apply(config, 5)));
 
@@ -132,6 +142,7 @@ public class IntakeIOTalonFX implements IntakeIO {
         pivotSupply,
         pivotStator,
         pivotTemperature);
+
     if (kP.hasChanged(hashCode())) {
       resetValues();
     }
@@ -180,7 +191,7 @@ public class IntakeIOTalonFX implements IntakeIO {
     inputs.pivotTemp = pivotTemperature.getValue();
   }
 
-    private void resetValues() {
+  private void resetValues() {
     Slot0Configs slot0Configs = new Slot0Configs();
     slot0Configs.withKP(kP.getAsDouble());
     slot0Configs.withKI(kI.getAsDouble());
@@ -192,10 +203,9 @@ public class IntakeIOTalonFX implements IntakeIO {
     pivot.getConfigurator().apply(slot0Configs, 0.25);
   }
 
-
   @Override
   public void setPosition(Angle angle) {
-    pivot.setControl(pivotPosition.withPosition(angle));
+    pivot.setControl(motionMagic.withPosition(angle));
   }
 
   @Override
