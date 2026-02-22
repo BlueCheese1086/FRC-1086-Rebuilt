@@ -17,9 +17,14 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.subsystems.shooter.FeederIO.FeederIO;
-import frc.robot.subsystems.shooter.FeederIO.FeederIOInputsAutoLogged;
+import frc.robot.subsystems.shooter.FeederIO.FeederIO.FeederIOInputs;
+import frc.robot.util.AllianceFlipUtil;
+import frc.robot.util.FieldConstants.Hub;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
+
 
 public class Shooter extends SubsystemBase {
   private ShooterInputsAutoLogged[] inputs;
