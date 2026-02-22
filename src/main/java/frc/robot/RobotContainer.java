@@ -50,6 +50,7 @@ import frc.robot.subsystems.shooter.FeederIO.FeederIO;
 import frc.robot.subsystems.shooter.FeederIO.FeederIOSim;
 import frc.robot.subsystems.shooter.FeederIO.FeederIOTalonFX;
 import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterConstants;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.shooter.ShooterIOTalonFX;
@@ -58,6 +59,10 @@ import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOSim;
+
+import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -273,14 +278,9 @@ public class RobotContainer {
     operator
         .y()
         .whileTrue(
-            Commands.run(
-                    () -> {
-                      shooter.setVoltage(4.25);
-                    })
-                .finallyDo(
-                    () -> {
-                      shooter.setVoltage(0.0);
-                    }));
+                Commands.run(()-> shooter.setVelocitySetpoint(RadiansPerSecond.of(ShooterConstants.Tuning.velocitySetpoint.getAsDouble())), shooter)
+        ).onFalse(Commands.runOnce(shooter::stopAll));
+   operator.leftTrigger().whileTrue(intake.setPosition(Radians.of(0.0)));
     operator.povRight().whileTrue(intake.setVoltage(IntakeConstants.Setpoints.run));
   }
 

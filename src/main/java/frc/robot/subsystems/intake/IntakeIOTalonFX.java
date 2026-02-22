@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
@@ -24,6 +25,7 @@ import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.RobotMap;
 import frc.robot.util.PhoenixUtil;
+import static frc.robot.subsystems.intake.IntakeConstants.PID.*;
 
 /** Add your docs here. */
 public class IntakeIOTalonFX implements IntakeIO {
@@ -66,13 +68,13 @@ public class IntakeIOTalonFX implements IntakeIO {
     PhoenixUtil.tryUntilOk(5, () -> (roller.getConfigurator().apply(config, 5)));
 
     // TODO: PID STUFF
-    config.Slot0.kP = IntakeConstants.PID.kP;
-    config.Slot0.kI = IntakeConstants.PID.kI;
-    config.Slot0.kD = IntakeConstants.PID.kD;
-    config.Slot0.kG = IntakeConstants.PID.kG;
-    config.Slot0.kS = IntakeConstants.PID.kS;
-    config.Slot0.kV = IntakeConstants.PID.kV;
-    config.Slot0.kA = IntakeConstants.PID.kA;
+    config.Slot0.kP = IntakeConstants.PID.kP.get();
+    config.Slot0.kI = IntakeConstants.PID.kI.get();
+    config.Slot0.kD = IntakeConstants.PID.kD.get();
+    config.Slot0.kG = IntakeConstants.PID.kG.get();
+    config.Slot0.kS = IntakeConstants.PID.kS.get();
+    config.Slot0.kV = IntakeConstants.PID.kV.get();
+    config.Slot0.kA = IntakeConstants.PID.kA.get();
     config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
 
     config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
@@ -130,6 +132,34 @@ public class IntakeIOTalonFX implements IntakeIO {
         pivotSupply,
         pivotStator,
         pivotTemperature);
+    if (kP.hasChanged(hashCode())) {
+      resetValues();
+    }
+
+    if (kI.hasChanged(hashCode())) {
+      resetValues();
+    }
+
+    if (kD.hasChanged(hashCode())) {
+      resetValues();
+    }
+
+    if (kV.hasChanged(hashCode())) {
+      resetValues();
+    }
+
+    if (kS.hasChanged(hashCode())) {
+      resetValues();
+    }
+
+    if (kA.hasChanged(hashCode())) {
+      resetValues();
+    }
+
+    if (kG.hasChanged(hashCode())) {
+      resetValues();
+    }
+
     inputs.rollerConnected =
         StatusSignal.isAllGood(
             rollerVelocity, rollerVoltage, rollerSupply, rollerStator, rollerTemperature);
@@ -149,6 +179,19 @@ public class IntakeIOTalonFX implements IntakeIO {
     inputs.pivotAppliedVoltage = pivotVoltage.getValue();
     inputs.pivotTemp = pivotTemperature.getValue();
   }
+
+    private void resetValues() {
+    Slot0Configs slot0Configs = new Slot0Configs();
+    slot0Configs.withKP(kP.getAsDouble());
+    slot0Configs.withKI(kI.getAsDouble());
+    slot0Configs.withKD(kD.getAsDouble());
+    slot0Configs.withKV(kV.getAsDouble());
+    slot0Configs.withKA(kA.getAsDouble());
+    slot0Configs.withKG(kG.getAsDouble());
+    slot0Configs.withKS(kS.getAsDouble());
+    pivot.getConfigurator().apply(slot0Configs, 0.25);
+  }
+
 
   @Override
   public void setPosition(Angle angle) {

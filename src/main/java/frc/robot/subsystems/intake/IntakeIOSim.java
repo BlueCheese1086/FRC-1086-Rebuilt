@@ -22,9 +22,9 @@ import org.littletonrobotics.junction.Logger;
 /** Add your docs here. */
 public class IntakeIOSim implements IntakeIO {
   private final PIDController pid =
-      new PIDController(IntakeConstants.PID.kP, IntakeConstants.PID.kI, IntakeConstants.PID.kD);
+      new PIDController(IntakeConstants.PID.kP.get(), IntakeConstants.PID.kI.get(), IntakeConstants.PID.kD.get());
   private final ArmFeedforward ff =
-      new ArmFeedforward(IntakeConstants.PID.kS, 0.0, IntakeConstants.PID.kV);
+      new ArmFeedforward(IntakeConstants.PID.kS.get(), 0.0, IntakeConstants.PID.kV.get());
 
   private final SingleJointedArmSim armSim =
       new SingleJointedArmSim(

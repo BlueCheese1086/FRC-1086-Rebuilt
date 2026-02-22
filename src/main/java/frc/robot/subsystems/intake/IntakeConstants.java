@@ -14,17 +14,20 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Voltage;
+import frc.robot.util.LoggedTunableNumber;
 
 /** Add your docs here. */
 public class IntakeConstants {
   public static class PID {
-    public static final double kP = 10.0;
-    public static final double kI = 0.0;
-    public static final double kD = 0.0;
-    public static final double kS = 0.0;
-    public static final double kG = 0.0;
-    public static final double kV = 0.0;
-    public static final double kA = 0.0;
+    public static LoggedTunableNumber kP = new LoggedTunableNumber("Pivot/PID/kP", 0.0);
+    public static LoggedTunableNumber kI = new LoggedTunableNumber("Pivot/PID/kI", 0.0);
+    public static LoggedTunableNumber kD = new LoggedTunableNumber("Pivot/PID/kD", 0.0);
+
+    public static LoggedTunableNumber kS = new LoggedTunableNumber("Pivot/FF/kS", 0.0);
+    public static LoggedTunableNumber kG = new LoggedTunableNumber("Pivot/FF/kG", 0.0);
+    public static LoggedTunableNumber kV = new LoggedTunableNumber("Pivot/FF/kV", 12.0 / (6000.0 / 50.0));
+    public static LoggedTunableNumber kA = new LoggedTunableNumber("Pivot/FF/kA", 0.0);
+
   }
 
   public static class CurrentLimits {
