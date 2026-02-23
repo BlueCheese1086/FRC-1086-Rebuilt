@@ -28,7 +28,7 @@ public class RobotMap {
   }
 
   public static class HoodMap {
-    public static final int left = 1; // james said its this
+    public static final int left = 0; // james said its this
     public static final int right = 6;
   }
 

@@ -38,10 +38,10 @@ public class Intake extends SubsystemBase {
     this.io = io;
     routine =
         new SysIdRoutine(
-            new Config(Volts.of(1.0).per(Second), Volts.of(4.0), Seconds.of(5.0)),
+            new Config(Volts.of(0.5).per(Second), Volts.of(1), Seconds.of(5.0)),
             new Mechanism(
                 (applied) -> {
-                  io.setPivotVoltage(applied);
+                  io.setPivotVoltage(Volts.of(MathUtil.clamp(applied.in(Volts), -1.0, 1.0)));
                 },
                 (log) -> {
                   log.motor("Pivot")
@@ -61,6 +61,8 @@ public class Intake extends SubsystemBase {
         .until(this::atSetpoint);
   }
 
+  // public Command switchMode() {}
+
   public Command setVoltage(Voltage applied) {
     return Commands.run(
             () -> {
@@ -69,6 +71,17 @@ public class Intake extends SubsystemBase {
         .finallyDo(
             () -> {
               io.setVoltage(Volts.zero());
+            });
+  }
+
+  public Command setPivotVoltage(Voltage applied) {
+    return Commands.run(
+            () -> {
+              io.setPivotVoltage(applied);
+            })
+        .finallyDo(
+            () -> {
+              io.setPivotVoltage(Volts.zero());
             });
   }
 
@@ -86,7 +99,7 @@ public class Intake extends SubsystemBase {
   public Command sysId() {
     return Commands.sequence(
         routine
-            .quasistatic(Direction.kReverse)
+            .dynamic(Direction.kReverse)
             .until(
                 () ->
                     (MathUtil.isNear(
@@ -95,7 +108,7 @@ public class Intake extends SubsystemBase {
                         IntakeConstants.Mechanical.kPositionTolerance.in(
                             Degrees)))), // TODO: Double Check This
         routine
-            .quasistatic(Direction.kForward)
+            .dynamic(Direction.kForward)
             .until(
                 () ->
                     (MathUtil.isNear(
@@ -103,7 +116,7 @@ public class Intake extends SubsystemBase {
                         inputs.pivotAngle.in(Degrees),
                         IntakeConstants.Mechanical.kPositionTolerance.in(Degrees)))),
         routine
-            .dynamic(Direction.kReverse)
+            .quasistatic(Direction.kReverse)
             .until(
                 () ->
                     (MathUtil.isNear(
@@ -111,7 +124,7 @@ public class Intake extends SubsystemBase {
                         inputs.pivotAngle.in(Degrees),
                         IntakeConstants.Mechanical.kPositionTolerance.in(Degrees)))),
         routine
-            .dynamic(Direction.kForward)
+            .quasistatic(Direction.kForward)
             .until(
                 () ->
                     (MathUtil.isNear(
@@ -127,6 +140,13 @@ public class Intake extends SubsystemBase {
         inputs.pivotAngle.in(Radians),
         IntakeConstants.Mechanical.kPositionTolerance.in(
             Radians)); // TODO: Tune this to require it to be more accurate.
+  }
+
+  public Command switchMode() {
+    return Commands.runOnce(
+        () -> {
+          io.switchMode();
+        });
   }
 
   @Override

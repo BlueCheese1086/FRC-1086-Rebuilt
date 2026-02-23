@@ -24,6 +24,6 @@ public class IndexerConstants {
 
   public static class Setpoints {
     public static final Voltage intake = Volts.of(3);
-    public static final Voltage feed = Volts.of(9.0);
+    public static final Voltage feed = Volts.of(10.0);
   }
 }

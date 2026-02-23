@@ -1,0 +1,11 @@
+{
+  "download": {
+    "deleteAfter": false,
+    "localDir": "F:\\dklafjlksd",
+    "remoteDir": "/u/logs",
+    "serverTeam": "1086"
+  },
+  "output": {
+    "outputFolder": "F:\\dklafjlksd"
+  }
+}
