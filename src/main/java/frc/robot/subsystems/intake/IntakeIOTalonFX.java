@@ -16,6 +16,7 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -35,10 +36,12 @@ import frc.robot.util.PhoenixUtil;
 import org.littletonrobotics.junction.Logger;
 
 /** Add your docs here. */
+@SuppressWarnings("unused")
 public class IntakeIOTalonFX implements IntakeIO {
   private final VoltageOut applyVoltage = new VoltageOut(0.0);
   private final VoltageOut applyPivotVoltage = new VoltageOut(0.0);
   private final TorqueCurrentFOC applyCurrent = new TorqueCurrentFOC(0.0);
+  private final PositionVoltage positionVoltage = new PositionVoltage(0.0);
   private final PositionTorqueCurrentFOC pivotPosition = new PositionTorqueCurrentFOC(0.0);
   private final MotionMagicVoltage motionMagic = new MotionMagicVoltage(0.0).withEnableFOC(true);
   private final TalonFX pivot;
@@ -208,7 +211,7 @@ public class IntakeIOTalonFX implements IntakeIO {
 
   @Override
   public void setPosition(Angle angle) {
-    pivot.setControl(motionMagic.withPosition(angle));
+    pivot.setControl(positionVoltage.withPosition(angle));
   }
 
   @Override

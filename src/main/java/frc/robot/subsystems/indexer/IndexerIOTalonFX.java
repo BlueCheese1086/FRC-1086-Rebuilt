@@ -43,7 +43,7 @@ public class IndexerIOTalonFX implements IndexerIO {
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
 
     config.Voltage.PeakForwardVoltage = IndexerConstants.VoltageLimits.peakForwardVoltage.in(Volts);
-    config.Voltage.PeakReverseVoltage = IndexerConstants.VoltageLimits.peakForwardVoltage.in(Volts);
+    config.Voltage.PeakReverseVoltage = IndexerConstants.VoltageLimits.peakReverseVoltage.in(Volts);
 
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
