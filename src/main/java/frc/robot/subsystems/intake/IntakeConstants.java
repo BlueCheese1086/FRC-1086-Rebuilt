@@ -52,6 +52,6 @@ public class IntakeConstants {
   public static class Mechanical { // TODO: Update all of these with the actual values
     public static final Distance intakeLength = Inches.of(14);
     public static final double gearing = 50.0;
-    public static final Angle kPositionTolerance = Radians.of(0.1);
+    public static final Angle kPositionTolerance = Radians.of(0.125);
   }
 }

@@ -112,7 +112,6 @@ public class ShooterIOTalonFX implements ShooterIO {
   @Override
   public void setVoltage(double volts) {
     shooter.setVoltage(volts);
-
     if (volts == 0) {
       shooter.stopMotor();
     }

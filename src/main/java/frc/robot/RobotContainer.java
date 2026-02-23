@@ -227,6 +227,8 @@ public class RobotContainer {
         "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+
+    autoChooser.addOption("Intake Pivot SysId", intake.sysId());
     // autoChooser.addOption("auto builder", autobuilder.build());
 
     // Configure the button bindings
@@ -276,19 +278,27 @@ public class RobotContainer {
         .y()
         .whileTrue(
             Commands.run(
-                () ->
-                    shooter.setVelocitySetpoint(
-                        RadiansPerSecond.of(
-                            ShooterConstants.Tuning.velocitySetpoint.getAsDouble())),
-                shooter))
-        .onFalse(Commands.runOnce(shooter::stopAll));
-    driver.povUp().whileTrue(hood.setPosition(() -> Targeting.hoodAngle.get()));
+                    () -> {
+                      shooter.setVoltage(9);
+                    })
+                .finallyDo(
+                    () -> {
+                      shooter.setVoltage(0.0);
+                    }));
 
-    // This is iffy btw dont really use this
+    operator.x().whileTrue(intake.sysId());
+    operator.povRight().whileTrue(intake.setVoltage(IntakeConstants.Setpoints.run));
+    operator.leftTrigger(0.1).whileTrue(hood.setPosition(operator::getLeftTriggerAxis));
     operator
         .rightTrigger()
         .whileTrue(
-            hood.directPWMControl(() -> MathUtil.clamp(operator.getRightTriggerAxis(), 0.0, 1.0)));
+            Commands.run(
+                () -> {
+                  shooter.setVelocitySetpoint(
+                      RadiansPerSecond.of(ShooterConstants.Tuning.velocitySetpoint.getAsDouble()));
+                },
+                shooter))
+        .onFalse(Commands.runOnce(shooter::stopAll));
   }
 
   /**
