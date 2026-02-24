@@ -99,5 +99,6 @@
     {"t":0.838, "x":0.7, "y":6.0, "heading":3.14, "vx":-4.2474, "vy":0.25491, "omega":-0.06373, "ax":0.0, "ay":0.0, "alpha":0.0, "fx":[0.0,0.0,0.0,0.0], "fy":[0.0,0.0,0.0,0.0]}],
   "splits":[0]
  },
- "events":[]
+ "events":[
+   {"name":"Marker", "from":{"target":1, "targetTimestamp":null, "offset":{"exp":"0 s", "val":0.0}}, "event":{"type":"named", "data":{"name":"deployIntake"}}}]
 }
