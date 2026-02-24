@@ -1574,7 +1574,7 @@ public record ChoreoTraj(
 	public static final ChoreoTraj ots_cs = new ChoreoTraj(
 	    "ots_cs",
 	    OptionalInt.empty(),
-	    0.9171,
+	    0.91742,
 	    new Pose2d(3.6, 0.5, Rotation2d.fromRadians(0)),
 	    new Pose2d(1.8, 4, Rotation2d.fromRadians(0))
 	);

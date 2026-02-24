@@ -89,7 +89,7 @@ public class AutoStateMachine {
       estimatedTime += addPathToPreview(path, previewPoses);
       autoCommands =
           autoCommands.andThen(
-              Commands.deadline(AutoRoutines.runPath(path, isFirstPath), startIntake()),
+              Commands.deadline(AutoRoutines.runPath(path, isFirstPath), startIntake()), //TODO: make it so that the intake does not drop when outpost intake
               Commands.waitSeconds(intakeTime));
       estimatedTime += intakeTime;
       currentLocation = intakePos;
