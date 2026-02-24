@@ -39,9 +39,9 @@ public class ClimbConstants {
   public static final double SysIdTolerance = 0.01;
 
   public static class Setpoints {
-    public static final double climbExtend = Units.inchesToMeters(8.515);//parallel from tube 
-    public static final double climbScore = Units.inchesToMeters(3.860572);//should be retracted
-    public static final double retracted = Units.inchesToMeters(3.860572);//in cad this is the parallel distance between the tube and the top of the hook, if it's supposed to be 0 and you're reading this go ahead and change it, 
+    public static final double climbExtend = Units.inchesToMeters(5.515);//parallel from tube 
+    public static final double climbScore = Units.inchesToMeters(0);//should be retracted
+    public static final double retracted = Units.inchesToMeters(0);//in cad this is the parallel distance between the tube and the top of the hook, if it's supposed to be 0 and you're reading this go ahead and change it, 
     // TODO: Change setpoints so that it actually moves please
   }
 
