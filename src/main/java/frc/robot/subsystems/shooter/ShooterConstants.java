@@ -35,7 +35,7 @@ public class ShooterConstants {
     public static final LoggedNetworkNumber voltageSetpoint =
         new LoggedNetworkNumber("/Tuning/Voltage Setpoint", 4.5);
   }
-
+//i could be wrong but do we need a current limit bc id like to not brown out while sotm if possible
   public static class Targeting {
     public static final double minRpm = 1500.0;
     public static final double maxRpm = 6000.0;
