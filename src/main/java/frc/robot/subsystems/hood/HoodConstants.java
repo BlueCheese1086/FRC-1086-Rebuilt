@@ -24,6 +24,7 @@ public class HoodConstants {
     public static final double kPositionTolerance = 0.01;
     public static final double minPosition = 0.01;
     public static final double maxPosition = 0.77;
+    // do we need the ratio? idk im genuinely asking
   }
 
   public static class Targeting {
