@@ -244,7 +244,7 @@ public record ChoreoTraj(
 	public static final ChoreoTraj dbs_ons = new ChoreoTraj(
 	    "dbs_ons",
 	    OptionalInt.empty(),
-	    0.8737,
+	    0.87446,
 	    new Pose2d(3.4, 5.5, Rotation2d.fromRadians(-0.79)),
 	    new Pose2d(2, 2.5, Rotation2d.fromRadians(0.51))
 	);
@@ -699,7 +699,7 @@ public record ChoreoTraj(
 	public static final ChoreoTraj dts_cs = new ChoreoTraj(
 	    "dts_cs",
 	    OptionalInt.empty(),
-	    0.9171,
+	    0.91742,
 	    new Pose2d(3.6, 7.5, Rotation2d.fromRadians(0)),
 	    new Pose2d(1.8, 4, Rotation2d.fromRadians(0))
 	);
@@ -755,7 +755,7 @@ public record ChoreoTraj(
 	public static final ChoreoTraj dts_ons = new ChoreoTraj(
 	    "dts_ons",
 	    OptionalInt.empty(),
-	    1.26193,
+	    1.26535,
 	    new Pose2d(3.6, 7.5, Rotation2d.fromRadians(0)),
 	    new Pose2d(2, 2.5, Rotation2d.fromRadians(0.51))
 	);
@@ -1000,7 +1000,7 @@ public record ChoreoTraj(
 	public static final ChoreoTraj obsr_dfs = new ChoreoTraj(
 	    "obsr_dfs",
 	    OptionalInt.empty(),
-	    1.11006,
+	    1.11112,
 	    new Pose2d(3.4, 2.5, Rotation2d.fromRadians(3.142)),
 	    new Pose2d(2.9, 6.5, Rotation2d.fromRadians(-0.97))
 	);
@@ -1014,7 +1014,7 @@ public record ChoreoTraj(
 	public static final ChoreoTraj obsr_dns = new ChoreoTraj(
 	    "obsr_dns",
 	    OptionalInt.empty(),
-	    0.98104,
+	    0.98293,
 	    new Pose2d(3.4, 2.5, Rotation2d.fromRadians(3.142)),
 	    new Pose2d(2, 5.5, Rotation2d.fromRadians(-0.51))
 	);
@@ -1070,7 +1070,7 @@ public record ChoreoTraj(
 	public static final ChoreoTraj obs_dfs = new ChoreoTraj(
 	    "obs_dfs",
 	    OptionalInt.empty(),
-	    1.08025,
+	    1.08101,
 	    new Pose2d(3.4, 2.5, Rotation2d.fromRadians(0.79)),
 	    new Pose2d(2.9, 6.5, Rotation2d.fromRadians(-0.97))
 	);
@@ -1084,7 +1084,7 @@ public record ChoreoTraj(
 	public static final ChoreoTraj obs_dns = new ChoreoTraj(
 	    "obs_dns",
 	    OptionalInt.empty(),
-	    0.8737,
+	    0.87431,
 	    new Pose2d(3.4, 2.5, Rotation2d.fromRadians(0.79)),
 	    new Pose2d(2, 5.5, Rotation2d.fromRadians(-0.51))
 	);
