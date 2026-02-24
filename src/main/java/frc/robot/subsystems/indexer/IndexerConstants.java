@@ -14,7 +14,7 @@ import edu.wpi.first.units.measure.Voltage;
 public class IndexerConstants {
   public static class CurrentLimits {
     public static final Current maxSupply = Amps.of(60);
-    public static final Current maxStator = Amps.of(60.0);
+    public static final Current maxStator = Amps.of(60.0); //a bit high imo
   }
 
   public static class VoltageLimits {
@@ -27,3 +27,4 @@ public class IndexerConstants {
     public static final Voltage feed = Volts.of(10.0);
   }
 }
+//should we add the reduction that indexer has in cad? it's a 3:1 reduction
