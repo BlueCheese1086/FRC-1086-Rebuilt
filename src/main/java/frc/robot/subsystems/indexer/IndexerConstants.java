@@ -27,4 +27,4 @@ public class IndexerConstants {
     public static final Voltage feed = Volts.of(10.0);
   }
 }
-//should we add the reduction that indexer has in cad? it's a 3:1 reduction
+//should we add the reduction that indexer has in cad? it's a 3:1 reduction, nah it is fine because it is a voltage based subsystem
