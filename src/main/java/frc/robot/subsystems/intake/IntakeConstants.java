@@ -31,12 +31,12 @@ public class IntakeConstants {
   }
 
   public static class CurrentLimits {
-    public static final Current maxSupply = Amps.of(120);
-    public static final Current maxStator = Amps.of(70.0);
+    public static final Current maxSupply = Amps.of(60);
+    public static final Current maxStator = Amps.of(50.0);
   }
 
   public static class VoltageLimits {
-    public static final Voltage peakForwardVoltage = Volts.of(12);//is this rollers or is this pivot
+    public static final Voltage peakForwardVoltage = Volts.of(12);//is this rollers or is this pivot, both - martin
     public static final Voltage peakReverseVoltage = Volts.of(-12);
   }
 
