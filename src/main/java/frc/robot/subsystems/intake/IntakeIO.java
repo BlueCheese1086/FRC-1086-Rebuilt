@@ -47,5 +47,7 @@ public interface IntakeIO {
 
   public default void setVoltage(Voltage applied) {}
 
+  public default void switchMode() {}
+
   public default void setPivotVoltage(Voltage applied) {}
 }

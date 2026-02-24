@@ -10,7 +10,7 @@ import frc.robot.generated.TunerConstants;
 /** Add your docs here. */
 public class RobotMap {
   public static final CANBus driveBus = TunerConstants.kCANBus;
-  public static final CANBus systemBus = new CANBus("BlueCheese");
+  public static final CANBus systemBus = new CANBus("SuperBus");
 
   // TODO: Replace all these with the actual ids
   public static class IntakeMap {
@@ -28,7 +28,7 @@ public class RobotMap {
   }
 
   public static class HoodMap {
-    public static final int left = 1; // james said its this
+    public static final int left = 0; // james said its this
     public static final int right = 6;
   }
 

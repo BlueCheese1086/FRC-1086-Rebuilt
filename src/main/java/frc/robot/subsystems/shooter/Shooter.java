@@ -7,7 +7,6 @@ package frc.robot.subsystems.shooter;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
-import static frc.robot.subsystems.shooter.ShooterConstants.Mechanical.shooterPose;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.units.measure.Angle;
@@ -19,10 +18,6 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.subsystems.shooter.FeederIO.FeederIO;
 import frc.robot.subsystems.shooter.FeederIO.FeederIOInputsAutoLogged;
-import frc.robot.util.AllianceFlipUtil;
-import frc.robot.util.FieldConstants.Hub;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -41,11 +36,11 @@ public class Shooter extends SubsystemBase {
       inputs[i] = new ShooterInputsAutoLogged();
     }
 
-    try (FileWriter writer = new FileWriter(ShooterConstants.Targeting.FileName)) {
-      writer.write("Distance,RadPerSec,Angle,TimeOfFlight\n");
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+    // try (FileWriter writer = new FileWriter(ShooterConstants.Targeting.FileName)) {
+    //   writer.write("Distance,RadPerSec,Angle,TimeOfFlight\n");
+    // } catch (IOException e) {
+    //   e.printStackTrace();
+    // }
   }
 
   public Command setVelocity(Supplier<AngularVelocity> radPerSec) {
@@ -84,18 +79,25 @@ public class Shooter extends SubsystemBase {
     feederIO.setFeedVoltage(0.0);
   }
 
+  /**
+   * @return returns the setpoint of the MIDDLE SHOOTER, if that shooter is at the setpoint or not
+   */
+  public boolean atSetpoint() {
+    return inputs[1].atSetpoint;
+  }
+
   public void recordShot(Pose3d drivePose, Angle hoodAngle, double tof) {
-    double distanceToHub =
-        Math.abs(
-            drivePose
-                .plus(shooterPose)
-                .getTranslation()
-                .getDistance(AllianceFlipUtil.apply(Hub.topCenterPoint)));
-    try (FileWriter writer = new FileWriter(ShooterConstants.Targeting.FileName, true)) {
-      writer.append(distanceToHub + "," + inputs[1].velocity + "," + hoodAngle + "," + tof);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    // double distanceToHub =
+    //     Math.abs(
+    //         drivePose
+    //             .plus(shooterPose)
+    //             .getTranslation()
+    //             .getDistance(AllianceFlipUtil.apply(Hub.topCenterPoint)));
+    // try (FileWriter writer = new FileWriter(ShooterConstants.Targeting.FileName, true)) {
+    //   writer.append(distanceToHub + "," + inputs[1].velocity + "," + hoodAngle + "," + tof);
+    // } catch (Exception e) {
+    //   e.printStackTrace();
+    // }
   }
 
   @Override

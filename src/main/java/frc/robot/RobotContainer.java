@@ -14,8 +14,8 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.Volts;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -37,6 +37,7 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.hood.Hood;
+import frc.robot.subsystems.hood.HoodConstants.Targeting;
 import frc.robot.subsystems.hood.HoodIO;
 import frc.robot.subsystems.hood.HoodIOServo;
 import frc.robot.subsystems.hood.HoodIOSim;
@@ -62,7 +63,6 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
-import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOSim;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -83,8 +83,13 @@ public class RobotContainer {
 
   private final Shooter shooter;
   private final Intake intake;
+
+  @SuppressWarnings("unused")
   private final Indexer indexer;
+
   private final Hood hood;
+
+  @SuppressWarnings("unused")
   private final Climb climb;
 
   @SuppressWarnings("unused")
@@ -116,11 +121,11 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 drive::getPose,
-                new VisionIOPhotonVision(
-                    "left", VisionConstants.PhysicalConstants.cameraTransforms[0]),
-                new VisionIOPhotonVision(
-                    "right", VisionConstants.PhysicalConstants.cameraTransforms[1]),
-                new VisionIOLimelight("scoring"));
+                // new VisionIOPhotonVision(
+                // "left", VisionConstants.PhysicalConstants.cameraTransforms[0]),
+                // new VisionIOPhotonVision(
+                // "right", VisionConstants.PhysicalConstants.cameraTransforms[1]),
+                new VisionIOLimelight("marble"));
 
         intake = new Intake(new IntakeIOTalonFX());
         indexer = new Indexer(new IndexerIOTalonFX());
@@ -129,7 +134,7 @@ public class RobotContainer {
                 new FeederIOTalonFX(RobotMap.ShooterMap.feeder),
                 new ShooterIOTalonFX(RobotMap.ShooterMap.left, true),
                 new ShooterIOTalonFX(RobotMap.ShooterMap.middle, true),
-                new ShooterIOTalonFX(RobotMap.ShooterMap.right, true));
+                new ShooterIOTalonFX(RobotMap.ShooterMap.right, false));
         hood = new Hood(new HoodIOServo());
         climb = new Climb(new ClimbIOTalonFX());
         break;
@@ -194,16 +199,16 @@ public class RobotContainer {
     Superstructure.ControllerLayout.driverHid = driver::getHID;
 
     // superstructure =
-    //     new Superstructure(
-    //         drive,
-    //         intake,
-    //         shooter,
-    //         indexer,
-    //         hood,
-    //         climb,
-    //         drive::getPose,
-    //         drive::getChassisSpeeds,
-    //         drive::getRotation);
+    // new Superstructure(
+    // drive,
+    // intake,
+    // shooter,
+    // indexer,
+    // hood,
+    // climb,
+    // drive::getPose,
+    // drive::getChassisSpeeds,
+    // drive::getRotation);
     // autobuilder = new AutoBuilder(superstructure, drive);
 
     automanager = new AutosManager(drive, shooter, indexer, intake);
@@ -228,6 +233,9 @@ public class RobotContainer {
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     autoChooser.addOption("auto builder", automanager.getSelectedAuto());
 
+    autoChooser.addOption("Intake Pivot SysId", intake.sysId());
+    // autoChooser.addOption("auto builder", autobuilder.build());
+
     // Configure the button bindings
     configureButtonBindings();
   }
@@ -249,32 +257,53 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    operator
-        .y()
-        .whileTrue(
-            Commands.run(
-                () ->
-                    shooter.setVelocitySetpoint(
-                        RadiansPerSecond.of(
-                            ShooterConstants.Tuning.velocitySetpoint.getAsDouble())),
-                shooter))
-        .onFalse(Commands.runOnce(shooter::stopAll));
-
-    operator
+    driver
         .leftTrigger()
         .whileTrue(
             Commands.parallel(
-                intake.setPosition(IntakeConstants.Setpoints.deployed),
-                indexer.setVoltage(IndexerConstants.Setpoints.feed)))
-        .onFalse(
-            Commands.parallel(
-                intake.setPosition(IntakeConstants.Setpoints.stowed),
-                indexer.setVoltage(Volts.zero())));
+                indexer.setVoltage(IndexerConstants.Setpoints.feed),
+                intake.setVoltage(IntakeConstants.Setpoints.run),
+                Commands.run(
+                    () -> shooter.setVoltage(ShooterConstants.Tuning.voltageSetpoint.getAsDouble()),
+                    shooter)))
+        .onFalse(Commands.runOnce(shooter::stopAll));
 
+    driver
+        .rightTrigger()
+        .whileTrue(
+            Commands.parallel(
+                shooter.runFeederVoltage(12.0).finallyDo(shooter.runFeederVoltage(0.0)::execute)));
+
+    driver
+        .povLeft()
+        .whileTrue(
+            Commands.parallel(
+                shooter.runFeederVoltage(-12.0).finallyDo(shooter.runFeederVoltage(0.0)::execute)));
+    driver
+        .y()
+        .whileTrue(
+            Commands.run(
+                    () -> {
+                      shooter.setVoltage(9);
+                    })
+                .finallyDo(
+                    () -> {
+                      shooter.setVoltage(0.0);
+                    }));
+
+    operator.x().whileTrue(intake.sysId());
+    operator.povRight().whileTrue(intake.setVoltage(IntakeConstants.Setpoints.run));
+    operator.leftTrigger(0.1).whileTrue(hood.setPosition(operator::getLeftTriggerAxis));
     operator
         .rightTrigger()
-        .whileTrue(shooter.runFeederVoltage(8.0))
-        .onFalse(shooter.runFeederVoltage(0.0));
+        .whileTrue(
+            Commands.run(
+                () -> {
+                  shooter.setVelocitySetpoint(
+                      RadiansPerSecond.of(ShooterConstants.Tuning.velocitySetpoint.getAsDouble()));
+                },
+                shooter))
+        .onFalse(Commands.runOnce(shooter::stopAll));
   }
 
   /**

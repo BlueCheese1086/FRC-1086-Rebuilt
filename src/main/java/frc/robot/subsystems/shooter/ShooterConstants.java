@@ -7,6 +7,7 @@ package frc.robot.subsystems.shooter;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -14,13 +15,14 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.MomentOfInertia;
+import frc.robot.Constants.KrakenX60;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 /** Add your docs here. */
 public class ShooterConstants {
   public static class Tuning {
     public static final double kS = 0.0;
-    public static final double kV = 12.0 / 620.0; // 113.067;
+    public static final double kV = 12.0 / KrakenX60.kFreeSpeed.in(RotationsPerSecond); // 113.067;
     public static final double kA = 0.0;
 
     public static final double cruiseVelocity = 6000.0 / 60.0; // ~ 600 rad per sec;
@@ -30,8 +32,10 @@ public class ShooterConstants {
     // and high numbers more stable.
     public static final LoggedNetworkNumber velocitySetpoint =
         new LoggedNetworkNumber("/Tuning/Velocity Setpoint", 100.0);
+    public static final LoggedNetworkNumber voltageSetpoint =
+        new LoggedNetworkNumber("/Tuning/Voltage Setpoint", 4.5);
   }
-
+//i could be wrong but do we need a current limit bc id like to not brown out while sotm if possible
   public static class Targeting {
     public static final double minRpm = 1500.0;
     public static final double maxRpm = 6000.0;
