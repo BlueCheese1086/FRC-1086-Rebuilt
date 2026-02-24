@@ -26,7 +26,7 @@ public class ClimbConstants {
 
   public static final double gearing =
       1.0 / 10.0; // TODO: FIX THIS ASAP! talk to james abt cad next pcs meeting or smth idk
-
+      // TODO: this is james the climb ratio is 44.4444444:1 also idk if this todo thing went through i dont use wpilib guys :sob
   public static final double radius = Units.inchesToMeters(0.265466625359);
 
   public static final InvertedValue invertedValue = InvertedValue.Clockwise_Positive;
@@ -42,6 +42,7 @@ public class ClimbConstants {
     public static final double climbExtend = 10.0;
     public static final double climbScore = 10.0;
     public static final double retracted = 10.0;
+    // TODO: Change setpoints so that it actually moves please
   }
 
   public static final double thesamethingasthevalueinthefeedback = 2 * Math.PI * radius * gearing;
