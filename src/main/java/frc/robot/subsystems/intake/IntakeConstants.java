@@ -36,7 +36,7 @@ public class IntakeConstants {
   }
 
   public static class VoltageLimits {
-    public static final Voltage peakForwardVoltage = Volts.of(12);
+    public static final Voltage peakForwardVoltage = Volts.of(12);//is this rollers or is this pivot
     public static final Voltage peakReverseVoltage = Volts.of(-12);
   }
 
@@ -45,7 +45,8 @@ public class IntakeConstants {
     public static final Angle homed = Degrees.of(110.0);
     public static final Angle agitate = Degrees.of(20.0);
     public static final Angle deployed = Degrees.of(-4.0);
-
+    //im js letting yall know i might have a funny idea for agitation while shooting so js be prepared for that
+    //i wanna try slowly moving intake up to homed or stowed while shooting cuz pumping will toss but not compress them towards shooter that well
     public static final Voltage run = Volts.of(3);
   }
 
@@ -53,5 +54,6 @@ public class IntakeConstants {
     public static final Distance intakeLength = Inches.of(14);
     public static final double gearing = 50.0;
     public static final Angle kPositionTolerance = Radians.of(0.125);
+    //all of these are in cad right
   }
 }
