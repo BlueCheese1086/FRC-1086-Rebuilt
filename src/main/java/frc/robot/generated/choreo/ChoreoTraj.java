@@ -622,7 +622,7 @@ public record ChoreoTraj(
 	public static final ChoreoTraj dtsr_cs = new ChoreoTraj(
 	    "dtsr_cs",
 	    OptionalInt.empty(),
-	    1.37999,
+	    1.17864,
 	    new Pose2d(3.6, 7.5, Rotation2d.fromRadians(3.142)),
 	    new Pose2d(1.8, 4, Rotation2d.fromRadians(0))
 	);
