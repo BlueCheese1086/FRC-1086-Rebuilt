@@ -77,7 +77,7 @@ public class AutoStateMachine {
       autoCommands =
           autoCommands.andThen(
               // Using the marker-aware path runner
-              Commands.deadline(runPathWithMarkers(path, true), stopIntake()),
+              Commands.deadline(AutoRoutines.runPath(path, true), stopIntake()),
               startShoot(),
               Commands.waitSeconds(shootTime));
       estimatedTime += shootTime;
@@ -92,7 +92,7 @@ public class AutoStateMachine {
       estimatedTime += addPathToPreview(path, previewPoses);
       autoCommands =
           autoCommands.andThen(
-              Commands.deadline(runPathWithMarkers(path, isFirstPath), startIntake()), 
+              Commands.deadline(AutoRoutines.runPath(path, isFirstPath), startIntake()), 
               Commands.waitSeconds(intakeTime));
       estimatedTime += intakeTime;
       currentLocation = intakePos;
@@ -104,8 +104,8 @@ public class AutoStateMachine {
 
       autoCommands =
           autoCommands.andThen(
-              runPathWithMarkers(entryPath, isFirstPath),
-              Commands.deadline(runPathWithMarkers(intakePath, false), startIntake()),
+              AutoRoutines.runPath(entryPath, isFirstPath),
+              Commands.deadline(AutoRoutines.runPath(intakePath, false), startIntake()),
               Commands.waitSeconds(intakeTime));
       estimatedTime += intakeTime;
       currentLocation = intakePos;
@@ -123,9 +123,9 @@ public class AutoStateMachine {
 
       autoCommands =
           autoCommands.andThen(
-              Commands.deadline(runPathWithMarkers(exitPath, false), stopIntake()),
-              runPathWithMarkers(safePath, false),
-              runPathWithMarkers(shootPath, false),
+              Commands.deadline(AutoRoutines.runPath(exitPath, false), stopIntake()),
+              AutoRoutines.runPath(safePath, false),
+              AutoRoutines.runPath(shootPath, false),
               startShoot(),
               Commands.waitSeconds(shootTime));
       estimatedTime += shootTime;
@@ -136,7 +136,7 @@ public class AutoStateMachine {
 
       autoCommands =
           autoCommands.andThen(
-              Commands.deadline(runPathWithMarkers(shootPath, false), stopIntake()),
+              Commands.deadline(AutoRoutines.runPath(shootPath, false), stopIntake()),
               startShoot(),
               Commands.waitSeconds(shootTime));
       estimatedTime += shootTime;
@@ -164,10 +164,6 @@ public class AutoStateMachine {
           stopIntake();
           // TODO: add more stops if needed
         });
-  }
-
-  private Command runPathWithMarkers(String pathName, boolean isFirstPath) {
-    return AutoRoutines.runPath(pathName, isFirstPath);
   }
 
   public Command startShoot() {
