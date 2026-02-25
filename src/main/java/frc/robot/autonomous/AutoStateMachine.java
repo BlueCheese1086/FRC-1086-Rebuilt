@@ -184,4 +184,8 @@ public class AutoStateMachine {
     return Commands.parallel(
         intake.setPosition(IntakeConstants.Setpoints.stowed), indexer.setVoltage(Volts.zero()));
   }
+
+  public Command startFeeder() {
+    return 
+  }
 }
