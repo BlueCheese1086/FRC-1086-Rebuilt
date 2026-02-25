@@ -26,6 +26,7 @@ import frc.robot.commands.AutoRoutines;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.climb.Climb;
+import frc.robot.subsystems.climb.ClimbConstants;
 import frc.robot.subsystems.climb.ClimbIO;
 import frc.robot.subsystems.climb.ClimbIOSim;
 import frc.robot.subsystems.climb.ClimbIOTalonFX;
@@ -260,10 +261,7 @@ public class RobotContainer {
         .whileTrue(
             Commands.parallel(
                 indexer.setVoltage(IndexerConstants.Setpoints.feed),
-                intake.setVoltage(IntakeConstants.Setpoints.run),
-                Commands.run(
-                    () -> shooter.setVoltage(ShooterConstants.Tuning.voltageSetpoint.getAsDouble()),
-                    shooter)))
+                intake.setVoltage(IntakeConstants.Setpoints.run)))
         .onFalse(Commands.runOnce(shooter::stopAll));
 
     driver
@@ -282,16 +280,24 @@ public class RobotContainer {
         .whileTrue(
             Commands.run(
                     () -> {
-                      shooter.setVoltage(9);
+                      shooter.setVelocity(
+                          () ->
+                              (RadiansPerSecond.of(
+                                  ShooterConstants.Tuning.velocitySetpoint.get())));
                     })
                 .finallyDo(
                     () -> {
                       shooter.setVoltage(0.0);
                     }));
 
-    operator.x().whileTrue(intake.sysId());
+    operator
+        .x()
+        .onTrue(climb.setPosition(ClimbConstants.Setpoints.climbExtend))
+        .onFalse(climb.setPosition(ClimbConstants.Setpoints.climbScore));
     operator.povRight().whileTrue(intake.setVoltage(IntakeConstants.Setpoints.run));
-    operator.leftTrigger(0.1).whileTrue(hood.setPosition(operator::getLeftTriggerAxis));
+    operator.leftTrigger(0.1).whileTrue(intake.setPosition(IntakeConstants.Setpoints.deployed));
+    operator.leftBumper().whileTrue(intake.setPosition(IntakeConstants.Setpoints.stowed));
+    operator.povUp().whileTrue(hood.setPosition(operator::getRightY));
     operator
         .rightTrigger()
         .whileTrue(

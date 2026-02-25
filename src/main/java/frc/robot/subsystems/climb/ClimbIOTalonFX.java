@@ -107,6 +107,7 @@ public class ClimbIOTalonFX implements ClimbIO {
     inputs.temp = temp.getValueAsDouble();
     inputs.statorCurrent = statorCurrent.getValueAsDouble();
     inputs.supplyCurrent = supplyCurrent.getValueAsDouble();
+    inputs.climbPosition = angle.getValueAsDouble();
   }
 
   @Override

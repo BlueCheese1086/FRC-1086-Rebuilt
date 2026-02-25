@@ -19,15 +19,14 @@ import frc.robot.util.LoggedTunableNumber;
 /** Add your docs here. */
 public class IntakeConstants {
   public static class PID {
-    public static LoggedTunableNumber kP = new LoggedTunableNumber("Pivot/PID/kP", 0.0);
+    public static LoggedTunableNumber kP = new LoggedTunableNumber("Pivot/PID/kP", 56.408);
     public static LoggedTunableNumber kI = new LoggedTunableNumber("Pivot/PID/kI", 0.0);
-    public static LoggedTunableNumber kD = new LoggedTunableNumber("Pivot/PID/kD", 0.0);
+    public static LoggedTunableNumber kD = new LoggedTunableNumber("Pivot/PID/kD", 16.039);
 
-    public static LoggedTunableNumber kS = new LoggedTunableNumber("Pivot/FF/kS", 0.0);
-    public static LoggedTunableNumber kG = new LoggedTunableNumber("Pivot/FF/kG", 0.0);
-    public static LoggedTunableNumber kV =
-        new LoggedTunableNumber("Pivot/FF/kV", 12.0 / (6000.0 / 50.0));
-    public static LoggedTunableNumber kA = new LoggedTunableNumber("Pivot/FF/kA", 0.0);
+    public static LoggedTunableNumber kS = new LoggedTunableNumber("Pivot/FF/kS", 0.42893);
+    public static LoggedTunableNumber kG = new LoggedTunableNumber("Pivot/FF/kG", 0.3871);
+    public static LoggedTunableNumber kV = new LoggedTunableNumber("Pivot/FF/kV", 2.7997);
+    public static LoggedTunableNumber kA = new LoggedTunableNumber("Pivot/FF/kA", 2.7468);
   }
 
   public static class CurrentLimits {

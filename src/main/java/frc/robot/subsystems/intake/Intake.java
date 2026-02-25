@@ -38,7 +38,7 @@ public class Intake extends SubsystemBase {
     this.io = io;
     routine =
         new SysIdRoutine(
-            new Config(Volts.of(0.5).per(Second), Volts.of(1), Seconds.of(5.0)),
+            new Config(Volts.of(1).per(Second), Volts.of(4), Seconds.of(5.0)),
             new Mechanism(
                 (applied) -> {
                   io.setPivotVoltage(Volts.of(MathUtil.clamp(applied.in(Volts), -1.0, 1.0)));
