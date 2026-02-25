@@ -34,7 +34,7 @@ public class AutosManager extends SubsystemBase {
   private final Field2d autoPreviewField = new Field2d();
 
   private final Drive drive;
-  private final AutoStateMachine machine;
+  public final AutoStateMachine machine;
 
   public record Auto(String name, Command command, Pose2d initPose) {}
 

@@ -186,7 +186,9 @@ public class RobotContainer {
         break;
     }
 
-    AutoRoutines.setup(drive);
+    automanager = new AutosManager(drive, shooter, indexer, intake);
+
+    AutoRoutines.setup(drive, automanager.machine);
 
     Superstructure.ControllerLayout.scoreRequest = driver.rightTrigger();
     Superstructure.ControllerLayout.cancelRequest = driver.povLeft().or(operator.povLeft());
@@ -210,8 +212,6 @@ public class RobotContainer {
     // drive::getChassisSpeeds,
     // drive::getRotation);
     // autobuilder = new AutoBuilder(superstructure, drive);
-
-    automanager = new AutosManager(drive, shooter, indexer, intake);
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices");

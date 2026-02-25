@@ -67,6 +67,7 @@ public class AutoStateMachine {
 
     double estimatedTime = 0.0;
 
+    // PRELOAD SHOOT
     if (startPos.endsWith("r")) {
       autoCommands = autoCommands.andThen(startShoot(), Commands.waitSeconds(0.5), stopShoot());
     } else if (!preloadShootPos.equals("none")) {
@@ -75,7 +76,8 @@ public class AutoStateMachine {
 
       autoCommands =
           autoCommands.andThen(
-              Commands.deadline(AutoRoutines.runPath(path, true), stopIntake()),
+              // Using the marker-aware path runner
+              Commands.deadline(runPathWithMarkers(path, true), stopIntake()),
               startShoot(),
               Commands.waitSeconds(shootTime));
       estimatedTime += shootTime;
@@ -84,12 +86,13 @@ public class AutoStateMachine {
 
     boolean isFirstPath = currentLocation.equals(startPos);
 
+    // INTAKE SEQUENCE
     if (intakePos.endsWith("i")) {
       String path = currentLocation + "_" + intakePos;
       estimatedTime += addPathToPreview(path, previewPoses);
       autoCommands =
           autoCommands.andThen(
-              Commands.deadline(AutoRoutines.runPath(path, isFirstPath), startIntake()), //TODO: make it so that the intake does not drop when outpost intake
+              Commands.deadline(runPathWithMarkers(path, isFirstPath), startIntake()), 
               Commands.waitSeconds(intakeTime));
       estimatedTime += intakeTime;
       currentLocation = intakePos;
@@ -101,13 +104,14 @@ public class AutoStateMachine {
 
       autoCommands =
           autoCommands.andThen(
-              AutoRoutines.runPath(entryPath, isFirstPath),
-              Commands.deadline(AutoRoutines.runPath(intakePath, false), startIntake()),
+              runPathWithMarkers(entryPath, isFirstPath),
+              Commands.deadline(runPathWithMarkers(intakePath, false), startIntake()),
               Commands.waitSeconds(intakeTime));
       estimatedTime += intakeTime;
       currentLocation = intakePos;
     }
 
+    // FINAL SHOOT SEQUENCE
     if (intakePos.endsWith("n")) {
       String exitPath = currentLocation + "_" + nzExit;
       String safePath = nzExit + "_" + nzExit + "s";
@@ -119,9 +123,9 @@ public class AutoStateMachine {
 
       autoCommands =
           autoCommands.andThen(
-              Commands.deadline(AutoRoutines.runPath(exitPath, false), stopIntake()),
-              AutoRoutines.runPath(safePath, false),
-              AutoRoutines.runPath(shootPath, false),
+              Commands.deadline(runPathWithMarkers(exitPath, false), stopIntake()),
+              runPathWithMarkers(safePath, false),
+              runPathWithMarkers(shootPath, false),
               startShoot(),
               Commands.waitSeconds(shootTime));
       estimatedTime += shootTime;
@@ -132,7 +136,7 @@ public class AutoStateMachine {
 
       autoCommands =
           autoCommands.andThen(
-              Commands.deadline(AutoRoutines.runPath(shootPath, false), stopIntake()),
+              Commands.deadline(runPathWithMarkers(shootPath, false), stopIntake()),
               startShoot(),
               Commands.waitSeconds(shootTime));
       estimatedTime += shootTime;
@@ -162,6 +166,10 @@ public class AutoStateMachine {
         });
   }
 
+  private Command runPathWithMarkers(String pathName, boolean isFirstPath) {
+    return AutoRoutines.runPath(pathName, isFirstPath);
+  }
+
   public Command startShoot() {
     return Commands.runOnce(
         () ->
@@ -186,6 +194,10 @@ public class AutoStateMachine {
   }
 
   public Command startFeeder() {
-    return 
+    return Commands.none();
+  }
+
+  public Command deployIntake() {
+    return Commands.none();
   }
 }
