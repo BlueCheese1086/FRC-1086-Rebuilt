@@ -14,5 +14,5 @@ public interface FeederIO {
 
   public default void setFeedVoltage(double volts) {}
 
-  public default void updateInputs(FeederIOInputs inputs) {}
+  public default void updateInputs(FeederIOInputs feederIOInputsAutoLogged) {}
 }

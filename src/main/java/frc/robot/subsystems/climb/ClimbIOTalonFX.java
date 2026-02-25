@@ -38,7 +38,7 @@ public class ClimbIOTalonFX implements ClimbIO {
 
   public ClimbIOTalonFX() {
     this.config = new TalonFXConfiguration();
-    this.climbTalon = new TalonFX(RobotMap.climber,RobotMap.systemBus);
+    this.climbTalon = new TalonFX(RobotMap.climber, RobotMap.systemBus);
     this.voltagething = new VoltageOut(0); // relace with value pls
 
     config.MotorOutput.Inverted = ClimbConstants.invertedValue;

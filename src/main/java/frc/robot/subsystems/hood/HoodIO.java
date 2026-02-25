@@ -13,6 +13,7 @@ public interface HoodIO {
   public class HoodInputs {
     public double setPosition;
     public Angle setAngle;
+    public double targetPosition;
 
     public boolean leftAtSetpoint;
     public double leftPosition;
