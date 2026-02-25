@@ -43,10 +43,9 @@ public class AutoRoutines {
   public static void setup(Drive drive, AutoStateMachine asm) {
     kDrive = drive;
     factory = new AutoFactory(drive::getPose, drive::setPose, run(), true, drive);
-    
+
     factory.bind("startFeeder", asm.startFeeder());
     factory.bind("deployIntake", asm.deployIntake());
-  
   }
   // private static final DoubleSupplier[] xSuppliers = new DoubleSupplier[]
   // {DogLog.tunable("Autos/X/P", Preferences.getDouble("Autos_X_P",

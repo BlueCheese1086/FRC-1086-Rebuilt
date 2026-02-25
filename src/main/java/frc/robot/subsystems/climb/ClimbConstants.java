@@ -24,9 +24,10 @@ public class ClimbConstants {
   public static final double kI = 0.0;
   public static final double kD = 0.5;
 
-  public static final double gearing = 44.444; //i think this works -james
-     // 1.0 / 10.0; // TODO: FIX THIS ASAP! talk to james abt cad next pcs meeting or smth idk
-      // TODO: this is james the climb ratio is 44.4444444:1 also idk if this todo thing went through i dont use wpilib guys :sob
+  public static final double gearing = 44.444; // i think this works -james
+  // 1.0 / 10.0; // TODO: FIX THIS ASAP! talk to james abt cad next pcs meeting or smth idk
+  // TODO: this is james the climb ratio is 44.4444444:1 also idk if this todo thing went through i
+  // dont use wpilib guys :sob
   public static final double radius = Units.inchesToMeters(0.265466625359);
 
   public static final InvertedValue invertedValue = InvertedValue.Clockwise_Positive;
@@ -39,9 +40,12 @@ public class ClimbConstants {
   public static final double SysIdTolerance = 0.01;
 
   public static class Setpoints {
-    public static final double climbExtend = Units.inchesToMeters(5.515);//parallel from tube 
-    public static final double climbScore = Units.inchesToMeters(0);//should be retracted
-    public static final double retracted = Units.inchesToMeters(0);//in cad this is the parallel distance between the tube and the top of the hook, if it's supposed to be 0 and you're reading this go ahead and change it, 
+    public static final double climbExtend = Units.inchesToMeters(5.515); // parallel from tube
+    public static final double climbScore = Units.inchesToMeters(0); // should be retracted
+    public static final double retracted =
+        Units.inchesToMeters(
+            0); // in cad this is the parallel distance between the tube and the top of the hook, if
+    // it's supposed to be 0 and you're reading this go ahead and change it,
     // TODO: Change setpoints so that it actually moves please
   }
 

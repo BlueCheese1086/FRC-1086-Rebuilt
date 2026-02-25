@@ -23,7 +23,10 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 public class ShooterConstants {
   public static class Tuning {
     public static final double kS = 0.0;
-    public static final double kV = 12.0 / RadiansPerSecond.of(DCMotor.getKrakenX60(1).freeSpeedRadPerSec).in(RotationsPerSecond); // 113.067;
+    public static final double kV =
+        12.0
+            / RadiansPerSecond.of(DCMotor.getKrakenX60(1).freeSpeedRadPerSec)
+                .in(RotationsPerSecond); // 113.067;
     public static final double kA = 0.0;
 
     public static final double cruiseVelocity = 6000.0 / 60.0; // ~ 600 rad per sec;
@@ -36,7 +39,8 @@ public class ShooterConstants {
     public static final LoggedNetworkNumber voltageSetpoint =
         new LoggedNetworkNumber("/Tuning/Voltage Setpoint", 4.5);
   }
-//i could be wrong but do we need a current limit bc id like to not brown out while sotm if possible
+  // i could be wrong but do we need a current limit bc id like to not brown out while sotm if
+  // possible
   public static class Targeting {
     public static final double minRpm = 1500.0;
     public static final double maxRpm = 6000.0;

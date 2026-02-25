@@ -92,7 +92,7 @@ public class AutoStateMachine {
       estimatedTime += addPathToPreview(path, previewPoses);
       autoCommands =
           autoCommands.andThen(
-              Commands.deadline(AutoRoutines.runPath(path, isFirstPath), startIntake()), 
+              Commands.deadline(AutoRoutines.runPath(path, isFirstPath), startIntake()),
               Commands.waitSeconds(intakeTime));
       estimatedTime += intakeTime;
       currentLocation = intakePos;
@@ -190,10 +190,10 @@ public class AutoStateMachine {
   }
 
   public Command startFeeder() {
-    return Commands.none();
+    return Commands.runOnce(null);
   }
 
   public Command deployIntake() {
-    return Commands.none();
+    return Commands.runOnce(null);
   }
 }
