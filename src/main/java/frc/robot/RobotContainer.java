@@ -255,59 +255,6 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                     drive)
                 .ignoringDisable(true));
-
-    driver
-        .leftTrigger()
-        .whileTrue(
-            Commands.parallel(
-                indexer.setVoltage(IndexerConstants.Setpoints.feed),
-                intake.setVoltage(IntakeConstants.Setpoints.run)))
-        .onFalse(Commands.runOnce(shooter::stopAll));
-
-    driver
-        .rightTrigger()
-        .whileTrue(
-            Commands.parallel(
-                shooter.runFeederVoltage(12.0).finallyDo(shooter.runFeederVoltage(0.0)::execute)));
-
-    driver
-        .povLeft()
-        .whileTrue(
-            Commands.parallel(
-                shooter.runFeederVoltage(-12.0).finallyDo(shooter.runFeederVoltage(0.0)::execute)));
-    driver
-        .y()
-        .whileTrue(
-            Commands.run(
-                    () -> {
-                      shooter.setVelocity(
-                          () ->
-                              (RadiansPerSecond.of(
-                                  ShooterConstants.Tuning.velocitySetpoint.get())));
-                    })
-                .finallyDo(
-                    () -> {
-                      shooter.setVoltage(0.0);
-                    }));
-
-    operator
-        .x()
-        .onTrue(climb.setPosition(ClimbConstants.Setpoints.climbExtend))
-        .onFalse(climb.setPosition(ClimbConstants.Setpoints.climbScore));
-    operator.povRight().whileTrue(intake.setVoltage(IntakeConstants.Setpoints.run));
-    operator.leftTrigger(0.1).whileTrue(intake.setPosition(IntakeConstants.Setpoints.deployed));
-    operator.leftBumper().whileTrue(intake.setPosition(IntakeConstants.Setpoints.stowed));
-    operator.povUp().whileTrue(hood.setPosition(operator::getRightY));
-    operator
-        .rightTrigger()
-        .whileTrue(
-            Commands.run(
-                () -> {
-                  shooter.setVelocitySetpoint(
-                      RadiansPerSecond.of(ShooterConstants.Tuning.velocitySetpoint.getAsDouble()));
-                },
-                shooter))
-        .onFalse(Commands.runOnce(shooter::stopAll));
   }
 
   /**
