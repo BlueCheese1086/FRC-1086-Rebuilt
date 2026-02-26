@@ -20,7 +20,6 @@ import frc.robot.subsystems.shooter.ShooterConstants;
 import frc.robot.subsystems.shooter.shooterUtil.ShootingCalculator;
 import frc.robot.util.LoggedTunableNumber;
 import frc.robot.util.PoseMath;
-
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 

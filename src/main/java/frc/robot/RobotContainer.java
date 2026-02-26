@@ -14,8 +14,6 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.RPM;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -24,12 +22,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.autonomous.AutosManager;
-import frc.robot.commands.AutoRoutines;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.climb.Climb;
-import frc.robot.subsystems.climb.ClimbConstants;
 import frc.robot.subsystems.climb.ClimbIO;
 import frc.robot.subsystems.climb.ClimbIOSim;
 import frc.robot.subsystems.climb.ClimbIOTalonFX;
@@ -50,7 +45,6 @@ import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSim;
 import frc.robot.subsystems.indexer.IndexerIOTalonFX;
 import frc.robot.subsystems.intake.Intake;
-import frc.robot.subsystems.intake.IntakeConstants;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.IntakeIOSim;
 import frc.robot.subsystems.intake.IntakeIOTalonFX;
@@ -79,7 +73,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
-//   private final AutosManager automanager;
+  //   private final AutosManager automanager;
 
   @SuppressWarnings("unused")
   private final Vision vision;
@@ -251,7 +245,8 @@ public class RobotContainer {
             drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
 
     // TODO: REMOVE THIS DURING SUPERSTRUCTURE TESTING
-    hood.setDefaultCommand(hood.setAngle(() -> (Degrees.of(HoodConstants.Setpoints.hoodAngle.get()))));
+    hood.setDefaultCommand(
+        hood.setAngle(() -> (Degrees.of(HoodConstants.Setpoints.hoodAngle.get()))));
 
     // Driver Commands
     driver
@@ -265,7 +260,14 @@ public class RobotContainer {
                 .ignoringDisable(true));
 
     driver.rightTrigger().whileTrue(indexer.setVoltage(IndexerConstants.Setpoints.feed));
-    driver.y().whileTrue(shooter.setVelocity(() -> {return RotationsPerSecond.of(ShooterConstants.Tuning.velocitySetpoint.getAsDouble());}));
+    driver
+        .y()
+        .whileTrue(
+            shooter.setVelocity(
+                () -> {
+                  return RotationsPerSecond.of(
+                      ShooterConstants.Tuning.velocitySetpoint.getAsDouble());
+                }));
 
     // Operator Commands
   }

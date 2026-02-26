@@ -32,10 +32,10 @@ import frc.robot.subsystems.intake.IntakeConstants;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterConstants;
 import frc.robot.util.FieldConstants;
-import frc.robot.util.PoseMath;
 import frc.robot.util.FieldConstants.Hub;
 // import frc.robot.util.shooter.LauncherCalculator;
 // import frc.robot.util.shooter.LauncherCalculator.LaunchingParameters;
+import frc.robot.util.PoseMath;
 import java.util.HashMap;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -98,7 +98,8 @@ public class Superstructure extends SubsystemBase {
 
   private Timer timer = new Timer();
 
-  private double desiredRPM = 0; // TODO update this to a decent RPM once shooting tests have been determined
+  private double desiredRPM =
+      0; // TODO update this to a decent RPM once shooting tests have been determined
 
   public Superstructure(
       final Drive drive,
@@ -261,7 +262,18 @@ public class Superstructure extends SubsystemBase {
         .onTrue(intake.setPosition(IntakeConstants.Setpoints.agitate))
         .onFalse(intake.setPosition(IntakeConstants.Setpoints.deployed));
 
-    stateTriggers.get(State.shoot).and(this::useTargeting).whileTrue(DriveCommands.joystickDriveAtAngle(drive, ControllerLayout.joystickX, ControllerLayout.joystickY, () -> {return PoseMath.getOrientationToTarget(drive.getPose(), FieldConstants.Hub.hubCenter);}));
+    stateTriggers
+        .get(State.shoot)
+        .and(this::useTargeting)
+        .whileTrue(
+            DriveCommands.joystickDriveAtAngle(
+                drive,
+                ControllerLayout.joystickX,
+                ControllerLayout.joystickY,
+                () -> {
+                  return PoseMath.getOrientationToTarget(
+                      drive.getPose(), FieldConstants.Hub.hubCenter);
+                }));
 
     stateTriggers
         .get(State.shoot)
@@ -271,22 +283,29 @@ public class Superstructure extends SubsystemBase {
                 () -> {
                   this.useTargeting = !this.useTargeting;
                 }));
-    
+
     stateTriggers
         .get(State.shoot)
         .and(() -> (FieldConstants.LinesVertical.inAllianceZone(drivePose.get())))
         .and(() -> !useTargeting)
         .whileTrue(
-          Commands.parallel(
-            shooter.setVelocity(
-              () -> {
-                return RPM.of(
-                  ShotCalc.getShot(
-                    Meters.of(
-                      PoseMath.getDistanceToTarget(drive.getPose(), Hub.hubCenter))).shooterRPM);}),
-                      hood.setPosition(() -> {
-                        return ShotCalc.getShot(Meters.of(PoseMath.getDistanceToTarget(drive.getPose(), Hub.hubCenter))).hoodPosition;
-                      }))); // Why was shoot on the move stuff put in here. This is the worst place to put the shoot on the move stuff.
+            Commands.parallel(
+                shooter.setVelocity(
+                    () -> {
+                      return RPM.of(
+                          ShotCalc.getShot(
+                                  Meters.of(
+                                      PoseMath.getDistanceToTarget(drive.getPose(), Hub.hubCenter)))
+                              .shooterRPM);
+                    }),
+                hood.setPosition(
+                    () -> {
+                      return ShotCalc.getShot(
+                              Meters.of(
+                                  PoseMath.getDistanceToTarget(drive.getPose(), Hub.hubCenter)))
+                          .hoodPosition;
+                    }))); // Why was shoot on the move stuff put in here. This is the worst place to
+    // put the shoot on the move stuff.
   }
 
   private void setupPass() {
@@ -298,11 +317,12 @@ public class Superstructure extends SubsystemBase {
     stateTriggers
         .get(State.pass)
         .whileTrue(
-          Commands.parallel(
-            hood.setAngle(() -> HoodConstants.Setpoints.passAngle), // TODO make this target center of alliance zone.
-            shooter.setVelocity(() -> (RotationsPerSecond.of(300)))
-          )
-        );
+            Commands.parallel(
+                hood.setAngle(
+                    () ->
+                        HoodConstants.Setpoints
+                            .passAngle), // TODO make this target center of alliance zone.
+                shooter.setVelocity(() -> (RotationsPerSecond.of(300)))));
 
     stateTriggers
         .get(State.pass)
@@ -311,13 +331,17 @@ public class Superstructure extends SubsystemBase {
         .whileTrue(
             Commands.parallel(
                 indexer.setVoltage(IndexerConstants.Setpoints.feed),
-                shooter.runFeederVoltage(ShooterConstants.FeederSetpoints.run.in(Volts)))); // Continue Targetting & Flywheel set speed.
+                shooter.runFeederVoltage(
+                    ShooterConstants.FeederSetpoints.run.in(
+                        Volts)))); // Continue Targetting & Flywheel set speed.
   }
 
   private void setupClimb() {
     stateTriggers.get(State.climb).onTrue(climb.setPosition(ClimbConstants.Setpoints.climbExtend));
 
-    stateTriggers.get(State.climbscore).onTrue(climb.setPosition(ClimbConstants.Setpoints.climbScore));
+    stateTriggers
+        .get(State.climbscore)
+        .onTrue(climb.setPosition(ClimbConstants.Setpoints.climbScore));
   }
 
   public Command setState(State newState) {
