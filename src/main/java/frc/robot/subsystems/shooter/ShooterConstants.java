@@ -19,6 +19,8 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.Filesystem;
+
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 /** Add your docs here. */
@@ -47,7 +49,7 @@ public class ShooterConstants {
     public static final double movingSpeedThresholdMps = 0.25;
     public static final double movingRpmChangeWeight = 2.0;
     public static final double movingHoodChangeWeight = 0.5;
-    public static final String FileName = "/home/lvuser/regrssion/Shot.csv";
+    public static final String FileName = Filesystem.getDeployDirectory()+"Shot.csv";
   }
 
   public static class FeederSetpoints {

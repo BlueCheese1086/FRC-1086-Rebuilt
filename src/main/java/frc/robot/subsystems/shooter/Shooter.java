@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.shooter;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
@@ -21,6 +22,7 @@ import frc.robot.subsystems.shooter.FeederIO.FeederIOInputsAutoLogged;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants.Hub;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.function.Supplier;
@@ -31,6 +33,8 @@ public class Shooter extends SubsystemBase {
   private ShooterIO[] io;
   private FeederIO feederIO;
   private FeederIOInputsAutoLogged feederIOInputsAutoLogged;
+  private final File shotCSV;
+  private FileWriter writer;
 
   public Shooter(FeederIO feederIO, ShooterIO... io) {
     this.io = io;
@@ -41,9 +45,15 @@ public class Shooter extends SubsystemBase {
       inputs[i] = new ShooterInputsAutoLogged();
     }
 
-    try (FileWriter writer = new FileWriter(ShooterConstants.Targeting.FileName)) {
-      writer.write("Distance,RadPerSec,Angle,TimeOfFlight\n");
-    } catch (IOException e) {
+    shotCSV = new File(ShooterConstants.Targeting.FileName);
+      try {
+        if (shotCSV.exists()) {
+        writer = new FileWriter(shotCSV);
+      } else {
+        shotCSV.createNewFile();
+        writer = new FileWriter(shotCSV);
+      }
+    } catch(IOException e) {
       e.printStackTrace();
     }
   }
@@ -104,8 +114,10 @@ public class Shooter extends SubsystemBase {
                 .plus(ShooterConstants.ShooterTransforms.centerShooter)
                 .getTranslation()
                 .getDistance(AllianceFlipUtil.apply(Hub.topCenterPoint)));
-    try (FileWriter writer = new FileWriter(ShooterConstants.Targeting.FileName, true)) {
-      writer.append(distanceToHub + "," + inputs[1].velocity + "," + hoodAngle + "," + tof);
+    try {
+      if (writer != null) {
+        writer.append(distanceToHub + "," + inputs[1].velocity + "," + hoodAngle.in(Degrees) + "," + tof+"\n");
+      }
     } catch (Exception e) {
       e.printStackTrace();
     }
