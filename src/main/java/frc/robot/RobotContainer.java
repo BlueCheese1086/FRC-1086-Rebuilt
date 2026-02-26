@@ -13,7 +13,9 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -21,11 +23,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.autonomous.AutosManager;
-import frc.robot.commands.AutoRoutines;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.climb.Climb;
+import frc.robot.subsystems.climb.ClimbConstants;
 import frc.robot.subsystems.climb.ClimbIO;
 import frc.robot.subsystems.climb.ClimbIOSim;
 import frc.robot.subsystems.climb.ClimbIOTalonFX;
@@ -36,6 +37,7 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.hood.Hood;
+import frc.robot.subsystems.hood.HoodConstants;
 import frc.robot.subsystems.hood.HoodIO;
 import frc.robot.subsystems.hood.HoodIOServo;
 import frc.robot.subsystems.hood.HoodIOSim;
@@ -74,7 +76,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
-  private final AutosManager automanager;
+  // private final AutosManager automanager;
 
   @SuppressWarnings("unused")
   private final Vision vision;
@@ -91,9 +93,9 @@ public class RobotContainer {
   private final Climb climb;
 
   @SuppressWarnings("unused")
-  //   private final Superstructure superstructure;
+  // private final Superstructure superstructure;
 
-  //   private final AutoBuilder autobuilder;
+  // private final AutoBuilder autobuilder;
   // Controller
   private final CommandXboxController driver = new CommandXboxController(0);
 
@@ -184,9 +186,9 @@ public class RobotContainer {
         break;
     }
 
-    automanager = new AutosManager(drive, shooter, indexer, intake);
+    // automanager = new AutosManager(drive, shooter, indexer, intake);
 
-    AutoRoutines.setup(drive, automanager.machine);
+    // AutoRoutines.setup(drive, automanager.machine);
 
     Superstructure.ControllerLayout.scoreRequest = driver.rightTrigger();
     Superstructure.ControllerLayout.cancelRequest = driver.povLeft().or(operator.povLeft());
@@ -229,7 +231,7 @@ public class RobotContainer {
         "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption("auto builder", automanager.getSelectedAuto());
+    // autoChooser.addOption("auto builder", automanager.getSelectedAuto());
 
     autoChooser.addOption("Intake Pivot SysId", intake.sysId());
     // autoChooser.addOption("auto builder", autobuilder.build());
@@ -239,12 +241,16 @@ public class RobotContainer {
   }
 
   private void configureButtonBindings() {
-
     // Default command, normal field-relative drive
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
 
+    // TODO: REMOVE THIS DURING SUPERSTRUCTURE TESTING
+    hood.setDefaultCommand(
+        hood.setAngle(() -> (Degrees.of(HoodConstants.Setpoints.hoodAngle.get()))));
+
+    // Driver Commands
     driver
         .b()
         .onTrue(
@@ -259,49 +265,29 @@ public class RobotContainer {
         .leftTrigger()
         .whileTrue(
             Commands.parallel(
-                indexer.setVoltage(IndexerConstants.Setpoints.feed),
                 intake.setVoltage(IntakeConstants.Setpoints.run),
-                Commands.run(
-                    () -> shooter.setVoltage(ShooterConstants.Tuning.voltageSetpoint.getAsDouble()),
-                    shooter)))
-        .onFalse(Commands.runOnce(shooter::stopAll));
+                intake.setPosition(IntakeConstants.Setpoints.deployed),
+                indexer.setVoltage(IndexerConstants.Setpoints.feed),
+                shooter.setVelocity(
+                    () ->
+                        RotationsPerSecond.of(
+                            ShooterConstants.Tuning.velocitySetpoint.getAsDouble()))));
 
     driver
         .rightTrigger()
         .whileTrue(
-            Commands.parallel(
-                shooter.runFeederVoltage(12.0).finallyDo(shooter.runFeederVoltage(0.0)::execute)));
-
-    driver
-        .povLeft()
-        .whileTrue(
-            Commands.parallel(
-                shooter.runFeederVoltage(-12.0).finallyDo(shooter.runFeederVoltage(0.0)::execute)));
-    driver
-        .y()
-        .whileTrue(
             Commands.run(
-                    () -> {
-                      shooter.setVoltage(9);
-                    })
-                .finallyDo(
-                    () -> {
-                      shooter.setVoltage(0.0);
-                    }));
+                () -> shooter.runFeederVoltage(ShooterConstants.FeederSetpoints.run.in(Volts)),
+                shooter));
 
-    operator.x().whileTrue(intake.sysId());
-    operator.povRight().whileTrue(intake.setVoltage(IntakeConstants.Setpoints.run));
-    operator.leftTrigger(0.1).whileTrue(hood.setPosition(operator::getLeftTriggerAxis));
+    // Operator Commands
     operator
         .rightTrigger()
-        .whileTrue(
-            Commands.run(
-                () -> {
-                  shooter.setVelocitySetpoint(
-                      RadiansPerSecond.of(ShooterConstants.Tuning.velocitySetpoint.getAsDouble()));
-                },
-                shooter))
-        .onFalse(Commands.runOnce(shooter::stopAll));
+        .onTrue(
+            climb
+                .setPosition(ClimbConstants.extendedHeight)
+                .until(() -> climb.atSetpoint())
+                .andThen(climb.setPosition(ClimbConstants.retractedHeight)));
   }
 
   /**

@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,5 +39,14 @@ public class PoseMath {
       finalPose = average(finalPose, poseList.remove(poseList.size() - 1));
     }
     return finalPose;
+  }
+
+  public static Rotation2d getOrientationToTarget(Pose2d pose, Pose2d target) {
+    Translation2d diff = target.relativeTo(pose).getTranslation();
+    return diff.getAngle();
+  }
+
+  public static double getDistanceToTarget(Pose2d pose, Pose2d target) {
+    return pose.relativeTo(target).getTranslation().getNorm();
   }
 }

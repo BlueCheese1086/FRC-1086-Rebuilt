@@ -19,6 +19,7 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterConstants;
 import frc.robot.subsystems.shooter.shooterUtil.ShootingCalculator;
 import frc.robot.util.LoggedTunableNumber;
+import frc.robot.util.PoseMath;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -54,7 +55,7 @@ public class SotmCalculator {
 
     Pose2d virtualTarget2d =
         new Pose2d(virtualTarget.getTranslation().toTranslation2d(), Rotation2d.kZero);
-    return DriveCommands.getOrientationToTarget(drive.getPose(), virtualTarget2d);
+    return PoseMath.getOrientationToTarget(drive.getPose(), virtualTarget2d);
   }
 
   private static LoggedTunableNumber adjust = new LoggedTunableNumber("SOTM/Adjust", 0.0);

@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -17,6 +18,8 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.MomentOfInertia;
+import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.Filesystem;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 /** Add your docs here. */
@@ -25,20 +28,23 @@ public class ShooterConstants {
     public static final double kS = 0.0;
     public static final double kV =
         12.0
-            / RadiansPerSecond.of(DCMotor.getKrakenX60(1).freeSpeedRadPerSec)
+            / RadiansPerSecond.of(DCMotor.getKrakenX60Foc(1).freeSpeedRadPerSec)
                 .in(RotationsPerSecond); // 113.067;
-    public static final double kA = 0.0;
+    public static final double kA =
+        0.0015; // if its too much lower it if its not enough increase it
 
     public static final double cruiseVelocity = 6000.0 / 60.0; // ~ 600 rad per sec;
     public static final double acceleration =
         cruiseVelocity
-            / 0.23; // Cruise velocity / spin up time estimated, low numbers equal more brownouts,
+            / 0.5; // Cruise velocity / spin up time estimated, low numbers equal more brownouts,
     // and high numbers more stable.
     public static final LoggedNetworkNumber velocitySetpoint =
         new LoggedNetworkNumber("/Tuning/Velocity Setpoint", 100.0);
     public static final LoggedNetworkNumber voltageSetpoint =
         new LoggedNetworkNumber("/Tuning/Voltage Setpoint", 4.5);
   }
+  // i could be wrong but do we need a current limit bc id like to not brown out while sotm if
+  // possible
   // i could be wrong but do we need a current limit bc id like to not brown out while sotm if
   // possible
   public static class Targeting {
@@ -48,7 +54,11 @@ public class ShooterConstants {
     public static final double movingSpeedThresholdMps = 0.25;
     public static final double movingRpmChangeWeight = 2.0;
     public static final double movingHoodChangeWeight = 0.5;
-    public static final String FileName = "Shot.csv";
+    public static final String FileName = Filesystem.getDeployDirectory() + "Shot.csv";
+  }
+
+  public static class FeederSetpoints {
+    public static final Voltage run = Volts.of(12);
   }
 
   public static class Mechanical {

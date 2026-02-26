@@ -15,6 +15,7 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
@@ -25,6 +26,7 @@ public class ClimbIOTalonFX implements ClimbIO {
   private final TalonFX climbTalon;
   private final TalonFXConfiguration config;
   private StatusSignal<Angle> angle;
+  private StatusSignal<AngularVelocity> velocity;
   private StatusSignal<Voltage> volts;
   private StatusSignal<Temperature> temp;
   private StatusSignal<Current> statorCurrent;
@@ -45,7 +47,8 @@ public class ClimbIOTalonFX implements ClimbIO {
     config.MotorOutput.NeutralMode = ClimbConstants.neutralMode;
     config.MotorOutput.PeakForwardDutyCycle = 0.8;
     config.MotorOutput.PeakReverseDutyCycle = 0.8;
-    config.Feedback.SensorToMechanismRatio = ClimbConstants.gearing / ClimbConstants.radius;
+    config.Feedback.SensorToMechanismRatio =
+        ClimbConstants.gearing / (2 * Math.PI * ClimbConstants.radius);
 
     var limitConfig = config.CurrentLimits;
 
@@ -74,13 +77,14 @@ public class ClimbIOTalonFX implements ClimbIO {
     climbTalon.getConfigurator().apply(config);
 
     this.angle = climbTalon.getPosition();
+    this.velocity = climbTalon.getVelocity();
     this.volts = climbTalon.getMotorVoltage();
     this.temp = climbTalon.getDeviceTemp();
     this.statorCurrent = climbTalon.getStatorCurrent();
     this.supplyCurrent = climbTalon.getSupplyCurrent();
 
     BaseStatusSignal.setUpdateFrequencyForAll(
-        50.0, angle, volts, temp, statorCurrent, supplyCurrent);
+        50.0, angle, velocity, volts, temp, statorCurrent, supplyCurrent);
 
     climbTalon.optimizeBusUtilization();
     // Stator, supply,vel, accl, temp
@@ -107,6 +111,8 @@ public class ClimbIOTalonFX implements ClimbIO {
     inputs.temp = temp.getValueAsDouble();
     inputs.statorCurrent = statorCurrent.getValueAsDouble();
     inputs.supplyCurrent = supplyCurrent.getValueAsDouble();
+    inputs.climbPosition = angle.getValueAsDouble();
+    inputs.velocity = velocity.getValueAsDouble();
   }
 
   @Override
