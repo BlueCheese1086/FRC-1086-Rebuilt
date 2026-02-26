@@ -16,6 +16,8 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
+
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -88,7 +90,7 @@ public class ShooterIOTalonFX implements ShooterIO {
     BaseStatusSignal.refreshAll(
         acceleration, position, statorCurrent, supplyCurrent, temp, velocity, volts);
 
-    inputs.velocity = velocity.getValue().in(RadiansPerSecond);
+    inputs.velocity = BaseStatusSignal.getLatencyCompensatedValueAsDouble(velocity, acceleration);
     inputs.appliedVoltage = volts.getValueAsDouble();
     inputs.statorCurrent = statorCurrent.getValueAsDouble();
     inputs.supplyCurrent = supplyCurrent.getValueAsDouble();
@@ -106,7 +108,7 @@ public class ShooterIOTalonFX implements ShooterIO {
     shooter.setControl(
         velocityVoltage
             .withVelocity(velocity)
-            .withFeedForward(bangBangVoltage * RobotController.getBatteryVoltage()));
+            .withFeedForward(MathUtil.clamp(bangBangVoltage, 0.0, 1.0) * RobotController.getBatteryVoltage()));
   }
 
   @Override

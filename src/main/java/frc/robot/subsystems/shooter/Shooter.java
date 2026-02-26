@@ -52,7 +52,7 @@ public class Shooter extends SubsystemBase {
             })
         .finallyDo(
             () -> {
-              setVoltage(0.0);
+              stopShooter();
             });
   }
 
@@ -77,6 +77,12 @@ public class Shooter extends SubsystemBase {
       io[i].setVoltage(0.0);
     }
     feederIO.setFeedVoltage(0.0);
+  }
+
+  public void stopShooter(){
+    for (int i = 0; i < io.length; i++) {
+      io[i].setVoltage(0.0);
+    }
   }
 
   /**
