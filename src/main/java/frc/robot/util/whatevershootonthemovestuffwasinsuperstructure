@@ -1,18 +1,18 @@
-    stateTriggers
-        .get(State.shoot)
-        .and(() -> (FieldConstants.LinesVertical.inAllianceZone(drivePose.get())))
-        .and(this::useTargeting)
-        .whileTrue(
-            Commands.run(
-                () -> {
-                  LaunchingParameters parms =
-                      LauncherCalculator.getInstance()
-                          .getParameters(drivePose, robotRelativeSpeeds, driveHeading);
-                  if (parms.isValid()) {
-                    shooter.setVelocitySetpoint(RadiansPerSecond.of(parms.flywheelSpeed()));
-                    hood.setAngle(Radians.of(parms.hoodAngle()));
-                  }
-                }));
+    // stateTriggers
+        // .get(State.shoot)
+        // .and(() -> (FieldConstants.LinesVertical.inAllianceZone(drivePose.get())))
+        // .and(this::useTargeting)
+        // .whileTrue(
+        //     Commands.run(
+        //         () -> {
+        //           LaunchingParameters parms =
+        //               LauncherCalculator.getInstance()
+        //                   .getParameters(drivePose, robotRelativeSpeeds, driveHeading);
+        //           if (parms.isValid()) {
+        //             shooter.setVelocitySetpoint(RadiansPerSecond.of(parms.flywheelSpeed()));
+        //             hood.setAngle(Radians.of(parms.hoodAngle()));
+        //           }
+        //         }));
     // Commands.run(
     //     () -> {
     //       var chassisSpeeds = drive.getChassisSpeeds();
@@ -52,16 +52,16 @@
     //     }));
 
 
-                Commands.run(
-                () -> {
-                  LaunchingParameters parms =
-                      LauncherCalculator.getInstance()
-                          .getParameters(drivePose, robotRelativeSpeeds, driveHeading);
-                  if (parms.isValid()) {
-                    shooter.setVelocitySetpoint(RadiansPerSecond.of(parms.flywheelSpeed()));
-                    hood.setAngle(Radians.of(parms.hoodAngle()));
-                  }
-                  Logger.recordOutput("SOTM/Flywheel Speed", parms.flywheelSpeed());
-                  Logger.recordOutput("SOTM/Hood Angle", parms.hoodAngle());
-                  Logger.recordOutput("SOTM/TOF", parms.timeOfFlight());
-                })
+                // Commands.run(
+                // () -> {
+                //   LaunchingParameters parms =
+                //       LauncherCalculator.getInstance()
+                //           .getParameters(drivePose, robotRelativeSpeeds, driveHeading);
+                //   if (parms.isValid()) {
+                //     shooter.setVelocitySetpoint(RadiansPerSecond.of(parms.flywheelSpeed()));
+                //     hood.setAngle(Radians.of(parms.hoodAngle()));
+                //   }
+                //   Logger.recordOutput("SOTM/Flywheel Speed", parms.flywheelSpeed());
+                //   Logger.recordOutput("SOTM/Hood Angle", parms.hoodAngle());
+                //   Logger.recordOutput("SOTM/TOF", parms.timeOfFlight());
+                // })

@@ -18,6 +18,11 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.subsystems.shooter.FeederIO.FeederIO;
 import frc.robot.subsystems.shooter.FeederIO.FeederIOInputsAutoLogged;
+import frc.robot.util.AllianceFlipUtil;
+import frc.robot.util.FieldConstants.Hub;
+
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -36,11 +41,11 @@ public class Shooter extends SubsystemBase {
       inputs[i] = new ShooterInputsAutoLogged();
     }
 
-    // try (FileWriter writer = new FileWriter(ShooterConstants.Targeting.FileName)) {
-    //   writer.write("Distance,RadPerSec,Angle,TimeOfFlight\n");
-    // } catch (IOException e) {
-    //   e.printStackTrace();
-    // }
+    try (FileWriter writer = new FileWriter(ShooterConstants.Targeting.FileName)) {
+      writer.write("Distance,RadPerSec,Angle,TimeOfFlight\n");
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   public Command setVelocity(Supplier<AngularVelocity> radPerSec) {
@@ -93,17 +98,17 @@ public class Shooter extends SubsystemBase {
   }
 
   public void recordShot(Pose3d drivePose, Angle hoodAngle, double tof) {
-    // double distanceToHub =
-    //     Math.abs(
-    //         drivePose
-    //             .plus(shooterPose)
-    //             .getTranslation()
-    //             .getDistance(AllianceFlipUtil.apply(Hub.topCenterPoint)));
-    // try (FileWriter writer = new FileWriter(ShooterConstants.Targeting.FileName, true)) {
-    //   writer.append(distanceToHub + "," + inputs[1].velocity + "," + hoodAngle + "," + tof);
-    // } catch (Exception e) {
-    //   e.printStackTrace();
-    // }
+    double distanceToHub =
+        Math.abs(
+            drivePose
+                .plus(ShooterConstants.ShooterTransforms.centerShooter)
+                .getTranslation()
+                .getDistance(AllianceFlipUtil.apply(Hub.topCenterPoint)));
+    try (FileWriter writer = new FileWriter(ShooterConstants.Targeting.FileName, true)) {
+      writer.append(distanceToHub + "," + inputs[1].velocity + "," + hoodAngle + "," + tof);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   @Override
