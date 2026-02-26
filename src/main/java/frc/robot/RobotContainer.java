@@ -252,7 +252,6 @@ public class RobotContainer {
     }
 
     private void configureButtonBindings() {
-        // Default Commands
         // Default command, normal field-relative drive
         drive.setDefaultCommand(
                 DriveCommands.joystickDrive(
