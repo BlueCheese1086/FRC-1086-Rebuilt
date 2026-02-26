@@ -20,18 +20,23 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Filesystem;
-
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 /** Add your docs here. */
 public class ShooterConstants {
   public static class Tuning {
     public static final double kS = 0.0;
-    public static final double kV = 12.0 / RadiansPerSecond.of(DCMotor.getKrakenX60Foc(1).freeSpeedRadPerSec).in(RotationsPerSecond); // 113.067;
-    public static final double kA = 0.0015; // if its too much lower it if its not enough increase it
+    public static final double kV =
+        12.0
+            / RadiansPerSecond.of(DCMotor.getKrakenX60Foc(1).freeSpeedRadPerSec)
+                .in(RotationsPerSecond); // 113.067;
+    public static final double kA =
+        0.0015; // if its too much lower it if its not enough increase it
 
     public static final double cruiseVelocity = 6000.0 / 60.0; // ~ 600 rad per sec;
-    public static final double acceleration = cruiseVelocity / 0.5; // Cruise velocity / spin up time estimated, low numbers equal more brownouts,
+    public static final double acceleration =
+        cruiseVelocity
+            / 0.5; // Cruise velocity / spin up time estimated, low numbers equal more brownouts,
     // and high numbers more stable.
     public static final LoggedNetworkNumber velocitySetpoint =
         new LoggedNetworkNumber("/Tuning/Velocity Setpoint", 100.0);
@@ -49,7 +54,7 @@ public class ShooterConstants {
     public static final double movingSpeedThresholdMps = 0.25;
     public static final double movingRpmChangeWeight = 2.0;
     public static final double movingHoodChangeWeight = 0.5;
-    public static final String FileName = Filesystem.getDeployDirectory()+"Shot.csv";
+    public static final String FileName = Filesystem.getDeployDirectory() + "Shot.csv";
   }
 
   public static class FeederSetpoints {

@@ -18,7 +18,7 @@ public class ClimbConstants {
   // 1.0 / 10.0; // TODO: FIX THIS ASAP! talk to james abt cad next pcs meeting or smth idk
   // TODO: this is james the climb ratio is 44.4444444:1 also idk if this todo thing went through i
   // dont use wpilib guys :sob
-  
+
   public static final double kG = 0.0;
   public static final double kS = 0.0;
 

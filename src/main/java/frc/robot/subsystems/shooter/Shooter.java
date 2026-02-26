@@ -21,7 +21,6 @@ import frc.robot.subsystems.shooter.FeederIO.FeederIO;
 import frc.robot.subsystems.shooter.FeederIO.FeederIOInputsAutoLogged;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants.Hub;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -46,14 +45,14 @@ public class Shooter extends SubsystemBase {
     }
 
     shotCSV = new File(ShooterConstants.Targeting.FileName);
-      try {
-        if (shotCSV.exists()) {
+    try {
+      if (shotCSV.exists()) {
         writer = new FileWriter(shotCSV);
       } else {
         shotCSV.createNewFile();
         writer = new FileWriter(shotCSV);
       }
-    } catch(IOException e) {
+    } catch (IOException e) {
       e.printStackTrace();
     }
   }
@@ -94,7 +93,7 @@ public class Shooter extends SubsystemBase {
     feederIO.setFeedVoltage(0.0);
   }
 
-  public void stopShooter(){
+  public void stopShooter() {
     for (int i = 0; i < io.length; i++) {
       io[i].setVoltage(0.0);
     }
@@ -116,7 +115,15 @@ public class Shooter extends SubsystemBase {
                 .getDistance(AllianceFlipUtil.apply(Hub.topCenterPoint)));
     try {
       if (writer != null) {
-        writer.append(distanceToHub + "," + inputs[1].velocity + "," + hoodAngle.in(Degrees) + "," + tof+"\n");
+        writer.append(
+            distanceToHub
+                + ","
+                + inputs[1].velocity
+                + ","
+                + hoodAngle.in(Degrees)
+                + ","
+                + tof
+                + "\n");
       }
     } catch (Exception e) {
       e.printStackTrace();
