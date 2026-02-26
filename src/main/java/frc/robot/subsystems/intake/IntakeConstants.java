@@ -25,7 +25,7 @@ public class IntakeConstants {
 
     public static LoggedTunableNumber kS = new LoggedTunableNumber("Pivot/FF/kS", 0.42893);
     public static LoggedTunableNumber kG = new LoggedTunableNumber("Pivot/FF/kG", 0.3871);
-    public static LoggedTunableNumber kV = new LoggedTunableNumber("Pivot/FF/kV", 2.797);
+    public static LoggedTunableNumber kV = new LoggedTunableNumber("Pivot/FF/kV", 2.7997);
     public static LoggedTunableNumber kA = new LoggedTunableNumber("Pivot/FF/kA", 2.7468);
   }
 

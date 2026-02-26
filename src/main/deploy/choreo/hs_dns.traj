@@ -74,5 +74,6 @@
     {"t":0.53547, "x":2.0, "y":5.5, "heading":-0.51, "vx":-2.98761, "vy":3.06559, "omega":-0.00165, "ax":0.0, "ay":0.0, "alpha":0.0, "fx":[0.0,0.0,0.0,0.0], "fy":[0.0,0.0,0.0,0.0]}],
   "splits":[0]
  },
- "events":[]
+ "events":[
+   {"name":"Marker", "from":{"target":0, "targetTimestamp":null, "offset":{"exp":"0 s", "val":0.0}}, "event":{"type":"named", "data":{"name":"startFeeder"}}}]
 }

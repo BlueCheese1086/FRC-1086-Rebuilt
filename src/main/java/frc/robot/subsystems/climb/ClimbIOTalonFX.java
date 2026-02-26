@@ -45,7 +45,7 @@ public class ClimbIOTalonFX implements ClimbIO {
     config.MotorOutput.NeutralMode = ClimbConstants.neutralMode;
     config.MotorOutput.PeakForwardDutyCycle = 0.8;
     config.MotorOutput.PeakReverseDutyCycle = 0.8;
-    config.Feedback.SensorToMechanismRatio = ClimbConstants.gearing / ClimbConstants.radius;
+    config.Feedback.SensorToMechanismRatio = ClimbConstants.gearing / (2 * Math.PI * ClimbConstants.radius);
 
     var limitConfig = config.CurrentLimits;
 
@@ -107,6 +107,7 @@ public class ClimbIOTalonFX implements ClimbIO {
     inputs.temp = temp.getValueAsDouble();
     inputs.statorCurrent = statorCurrent.getValueAsDouble();
     inputs.supplyCurrent = supplyCurrent.getValueAsDouble();
+    inputs.climbPosition = angle.getValueAsDouble();
   }
 
   @Override

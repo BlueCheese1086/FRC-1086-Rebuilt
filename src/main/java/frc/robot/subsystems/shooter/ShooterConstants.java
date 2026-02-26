@@ -8,11 +8,14 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Distance;
@@ -41,6 +44,8 @@ public class ShooterConstants {
   }
   // i could be wrong but do we need a current limit bc id like to not brown out while sotm if
   // possible
+  // i could be wrong but do we need a current limit bc id like to not brown out while sotm if
+  // possible
   public static class Targeting {
     public static final double minRpm = 1500.0;
     public static final double maxRpm = 6000.0;
@@ -49,6 +54,10 @@ public class ShooterConstants {
     public static final double movingRpmChangeWeight = 2.0;
     public static final double movingHoodChangeWeight = 0.5;
     public static final String FileName = "Shot.csv";
+  }
+
+  public static class FeederSetpoints {
+    public static final Voltage run = Volts.of(12);
   }
 
   public static class Mechanical {

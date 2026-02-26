@@ -1,0 +1,67 @@
+    stateTriggers
+        .get(State.shoot)
+        .and(() -> (FieldConstants.LinesVertical.inAllianceZone(drivePose.get())))
+        .and(this::useTargeting)
+        .whileTrue(
+            Commands.run(
+                () -> {
+                  LaunchingParameters parms =
+                      LauncherCalculator.getInstance()
+                          .getParameters(drivePose, robotRelativeSpeeds, driveHeading);
+                  if (parms.isValid()) {
+                    shooter.setVelocitySetpoint(RadiansPerSecond.of(parms.flywheelSpeed()));
+                    hood.setAngle(Radians.of(parms.hoodAngle()));
+                  }
+                }));
+    // Commands.run(
+    //     () -> {
+    //       var chassisSpeeds = drive.getChassisSpeeds();
+    //       double speedMps = Math.hypot(chassisSpeeds.vxMetersPerSecond,
+    // chassisSpeeds.vyMetersPerSecond);
+    //       boolean isMoving = speedMps >= ShooterConstants.Targeting.movingSpeedThresholdMps;
+
+    //       ShootingCalculator.ShootingSolution solution = isMoving
+    //           ? ShootingCalculator.calculateMovingSolution(
+    //               drive.getPose(),
+    //               chassisSpeeds,
+    //               Units.degreesToRadians(HoodConstants.Targeting.minAngleDeg),
+    //               Units.degreesToRadians(HoodConstants.Targeting.maxAngleDeg),
+    //               ShooterConstants.Targeting.minRpm,
+    //               ShooterConstants.Targeting.maxRpm,
+    //               ShooterConstants.Targeting.movingRpmChangeWeight,
+    //               ShooterConstants.Targeting.movingHoodChangeWeight)
+    //           : ShootingCalculator.calculateStationarySolution(
+    //               drive.getPose(),
+    //               Units.degreesToRadians(HoodConstants.Targeting.minAngleDeg),
+    //               Units.degreesToRadians(HoodConstants.Targeting.maxAngleDeg),
+    //               ShooterConstants.Targeting.stationaryRpm);
+
+    //       hood.setAngle(Degrees.of(Math.toDegrees(solution.hoodAngleRad)));
+    //       shooter.setVelocitySetpoint(
+    //           RadiansPerSecond.of(
+    //               Units.rotationsPerMinuteToRadiansPerSecond(solution.flywheelRpm)));
+
+    //       Logger.recordOutput(
+    //           "Superstructure/Target/HoodAngleDeg", Math.toDegrees(solution.hoodAngleRad));
+    //       Logger.recordOutput("Superstructure/Target/FlywheelRpm", solution.flywheelRpm);
+    //       Logger.recordOutput(
+    //           "Superstructure/Target/DistanceMeters", solution.distanceMeters);
+    //       Logger.recordOutput("Superstructure/Target/Valid", solution.valid);
+    //       Logger.recordOutput("Superstructure/Target/SpeedMps", speedMps);
+    //       Logger.recordOutput("Superstructure/Target/IsMoving", isMoving);
+    //     }));
+
+
+                Commands.run(
+                () -> {
+                  LaunchingParameters parms =
+                      LauncherCalculator.getInstance()
+                          .getParameters(drivePose, robotRelativeSpeeds, driveHeading);
+                  if (parms.isValid()) {
+                    shooter.setVelocitySetpoint(RadiansPerSecond.of(parms.flywheelSpeed()));
+                    hood.setAngle(Radians.of(parms.hoodAngle()));
+                  }
+                  Logger.recordOutput("SOTM/Flywheel Speed", parms.flywheelSpeed());
+                  Logger.recordOutput("SOTM/Hood Angle", parms.hoodAngle());
+                  Logger.recordOutput("SOTM/TOF", parms.timeOfFlight());
+                })

@@ -13,9 +13,6 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.RPM;
-
-import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.RobotBase;
 import org.littletonrobotics.junction.AutoLogOutput;
 
@@ -31,10 +28,6 @@ public final class Constants {
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
 
   public static final boolean tuningMode = true;
-
-  public static class KrakenX60 {
-    public static final AngularVelocity kFreeSpeed = RPM.of(6000);
-  }
 
   public static enum Mode {
     /** Running on a real robot. */

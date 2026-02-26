@@ -29,7 +29,7 @@ public class Climb extends SubsystemBase {
     io.resetEncoder();
     routine =
         new SysIdRoutine(
-            new SysIdRoutine.Config(null, Volts.of(4.0), Seconds.of(1.25)),
+            new SysIdRoutine.Config(Volts.of(3).per(Seconds), Volts.of(7.0), Seconds.of(2.0)),
             new SysIdRoutine.Mechanism(
                 (applied) -> {
                   io.setVoltage(applied.in(Volts));

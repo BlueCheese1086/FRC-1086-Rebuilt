@@ -8,7 +8,6 @@
     {"x":3.0364885330200195, "y":3.3432202339172363, "heading":0.8726646259971648, "intervals":20, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
     {"x":2.9, "y":1.5, "heading":0.97, "intervals":40, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false}],
   "constraints":[
-    {"from":"last", "to":null, "data":{"type":"StopPoint", "props":{}}, "enabled":true},
     {"from":"first", "to":"last", "data":{"type":"KeepInRectangle", "props":{"x":0.0, "y":0.0, "w":16.541, "h":8.0692}}, "enabled":false}],
   "targetDt":0.05
  },
@@ -19,7 +18,6 @@
     {"x":{"exp":"3.0364885330200195 m", "val":3.0364885330200195}, "y":{"exp":"3.3432202339172363 m", "val":3.3432202339172363}, "heading":{"exp":"50 deg", "val":0.8726646259971648}, "intervals":20, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
     {"x":{"exp":"ofs.x", "val":2.9}, "y":{"exp":"ofs.y", "val":1.5}, "heading":{"exp":"ofs.heading", "val":0.97}, "intervals":40, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false}],
   "constraints":[
-    {"from":"last", "to":null, "data":{"type":"StopPoint", "props":{}}, "enabled":true},
     {"from":"first", "to":"last", "data":{"type":"KeepInRectangle", "props":{"x":{"exp":"0 m", "val":0.0}, "y":{"exp":"0 m", "val":0.0}, "w":{"exp":"16.541 m", "val":16.541}, "h":{"exp":"8.0692 m", "val":8.0692}}}, "enabled":false}],
   "targetDt":{
    "exp":"0.05 s",
@@ -129,5 +127,6 @@
     {"t":1.79394, "x":2.9, "y":1.5, "heading":0.97, "vx":0.0, "vy":0.0, "omega":0.0, "ax":0.0, "ay":0.0, "alpha":0.0, "fx":[0.0,0.0,0.0,0.0], "fy":[0.0,0.0,0.0,0.0]}],
   "splits":[0]
  },
- "events":[]
+ "events":[
+   {"name":"Marker", "from":{"target":2, "targetTimestamp":null, "offset":{"exp":"0 s", "val":0.0}}, "event":{"type":"named", "data":{"name":"startFeeder"}}}]
 }

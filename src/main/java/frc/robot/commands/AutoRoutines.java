@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism;
+import frc.robot.autonomous.AutoStateMachine;
 import frc.robot.subsystems.drive.Drive;
 import java.util.function.Consumer;
 // import java.util.function.DoubleSupplier;
@@ -39,9 +40,12 @@ public class AutoRoutines {
   private static AutoFactory factory;
   private static Drive kDrive;
 
-  public static void setup(Drive drive) {
+  public static void setup(Drive drive, AutoStateMachine asm) {
     kDrive = drive;
     factory = new AutoFactory(drive::getPose, drive::setPose, run(), true, drive);
+
+    factory.bind("startFeeder", asm.startFeeder());
+    factory.bind("deployIntake", asm.deployIntake());
   }
   // private static final DoubleSupplier[] xSuppliers = new DoubleSupplier[]
   // {DogLog.tunable("Autos/X/P", Preferences.getDouble("Autos_X_P",
