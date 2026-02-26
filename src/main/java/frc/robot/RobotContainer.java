@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.climb.Climb;
+import frc.robot.subsystems.climb.ClimbConstants;
 import frc.robot.subsystems.climb.ClimbIO;
 import frc.robot.subsystems.climb.ClimbIOSim;
 import frc.robot.subsystems.climb.ClimbIOTalonFX;
@@ -282,6 +283,8 @@ public class RobotContainer {
                 Commands.run(() -> shooter.runFeederVoltage(ShooterConstants.FeederSetpoints.run.in(Volts)), shooter));
 
         // Operator Commands
+        operator.rightTrigger().onTrue(climb.setPosition(ClimbConstants.extendedHeight).until(()-> climb.atSetpoint()).andThen(climb.setPosition(ClimbConstants.retractedHeight)));
+
     }
 
     /**
