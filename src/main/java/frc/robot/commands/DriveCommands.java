@@ -326,9 +326,4 @@ public class DriveCommands {
     Rotation2d lastAngle = Rotation2d.kZero;
     double gyroDelta = 0.0;
   }
-
-  public static Rotation2d getOrientationToTarget(Pose2d pose, Pose2d target) {
-    Translation2d diff = target.relativeTo(pose).getTranslation();
-    return diff.getAngle();
-  }
 }

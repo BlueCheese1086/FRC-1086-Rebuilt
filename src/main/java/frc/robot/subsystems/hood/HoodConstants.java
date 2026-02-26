@@ -4,11 +4,12 @@
 
 package frc.robot.subsystems.hood;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Millimeters;
 import static edu.wpi.first.units.Units.Second;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
@@ -30,11 +31,11 @@ public class HoodConstants {
   public static class Targeting {
     public static final double minAngleDeg = 54.0;
     public static final double maxAngleDeg = 81.0;
-    public static final LoggedNetworkNumber hoodAngle =
-        new LoggedNetworkNumber("/Tuning/Hood Setpoint", 55.0);
   }
 
   public static class Setpoints {
-    public static final Rotation2d passAngle = Rotation2d.fromDegrees(60.0); // guessing
+    public static final Angle passAngle = Degrees.of(60.0); 
+    public static final LoggedNetworkNumber hoodAngle =
+        new LoggedNetworkNumber("/Tuning/Hood Setpoint", 55.0);
   }
 }

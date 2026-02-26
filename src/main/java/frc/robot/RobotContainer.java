@@ -13,7 +13,10 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -37,6 +40,7 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.hood.Hood;
+import frc.robot.subsystems.hood.HoodConstants;
 import frc.robot.subsystems.hood.HoodIO;
 import frc.robot.subsystems.hood.HoodIOServo;
 import frc.robot.subsystems.hood.HoodIOSim;
@@ -75,7 +79,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
-  private final AutosManager automanager;
+//   private final AutosManager automanager;
 
   @SuppressWarnings("unused")
   private final Vision vision;
@@ -185,9 +189,9 @@ public class RobotContainer {
         break;
     }
 
-    automanager = new AutosManager(drive, shooter, indexer, intake);
+    // automanager = new AutosManager(drive, shooter, indexer, intake);
 
-    AutoRoutines.setup(drive, automanager.machine);
+    // AutoRoutines.setup(drive, automanager.machine);
 
     Superstructure.ControllerLayout.scoreRequest = driver.rightTrigger();
     Superstructure.ControllerLayout.cancelRequest = driver.povLeft().or(operator.povLeft());
@@ -230,7 +234,7 @@ public class RobotContainer {
         "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption("auto builder", automanager.getSelectedAuto());
+    // autoChooser.addOption("auto builder", automanager.getSelectedAuto());
 
     autoChooser.addOption("Intake Pivot SysId", intake.sysId());
     // autoChooser.addOption("auto builder", autobuilder.build());
@@ -240,12 +244,16 @@ public class RobotContainer {
   }
 
   private void configureButtonBindings() {
-
+    // Default Commands
     // Default command, normal field-relative drive
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
 
+    // TODO: REMOVE THIS DURING SUPERSTRUCTURE TESTING
+    hood.setDefaultCommand(hood.setAngle(() -> (Degrees.of(HoodConstants.Setpoints.hoodAngle.get()))));
+
+    // Driver Commands
     driver
         .b()
         .onTrue(
@@ -255,6 +263,11 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                     drive)
                 .ignoringDisable(true));
+
+    driver.rightTrigger().whileTrue(indexer.setVoltage(IndexerConstants.Setpoints.feed));
+    driver.y().whileTrue(shooter.setVelocity(() -> {return RotationsPerSecond.of(ShooterConstants.Tuning.velocitySetpoint.getAsDouble());}));
+
+    // Operator Commands
   }
 
   /**
