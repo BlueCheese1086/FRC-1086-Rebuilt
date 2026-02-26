@@ -37,8 +37,9 @@ public class Hood extends SubsystemBase {
   public Command setAngle(Supplier<Angle> angle) {
     Logger.recordOutput("/Hood/Map/0-1", AngleToPosition.get(angle.get().in(Degrees)));
     Logger.recordOutput("/Hood/Map/key", angle.get().in(Degrees));
-    return Commands.runOnce(() -> io.setPosition(AngleToPosition.get(angle.get().in(Degrees))))
-        .andThen(Commands.waitUntil(() -> io.atSetpoint()));
+    return this.run(() -> io.setPosition(AngleToPosition.get(angle.get().in(Degrees))))
+        .andThen(Commands.waitUntil(() -> io.atSetpoint()))
+        .until(io::atSetpoint);
   }
 
   public void setAngle(Angle angle) {
@@ -50,8 +51,8 @@ public class Hood extends SubsystemBase {
   public Command setPosition(DoubleSupplier position) {
     Logger.recordOutput("/Hood/Map/0-1", AngleToPosition.get(position.getAsDouble()));
     Logger.recordOutput("/Hood/Map/key", position);
-    return Commands.runOnce(() -> io.setPosition(AngleToPosition.get(position.getAsDouble())))
-        .andThen(Commands.waitUntil(() -> io.atSetpoint()));
+    return this.run(() -> io.setPosition(AngleToPosition.get(position.getAsDouble())))
+        .until(io::atSetpoint);
   }
 
   public Command directPWMControl(DoubleSupplier pwm) {

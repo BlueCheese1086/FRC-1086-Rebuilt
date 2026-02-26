@@ -234,6 +234,7 @@ public class RobotContainer {
     // autoChooser.addOption("auto builder", automanager.getSelectedAuto());
 
     autoChooser.addOption("Intake Pivot SysId", intake.sysId());
+    autoChooser.addOption("Climb SysId", climb.sysId());
     // autoChooser.addOption("auto builder", autobuilder.build());
 
     // Configure the button bindings
@@ -283,11 +284,8 @@ public class RobotContainer {
     // Operator Commands
     operator
         .rightTrigger()
-        .onTrue(
-            climb
-                .setPosition(ClimbConstants.extendedHeight)
-                .until(() -> climb.atSetpoint())
-                .andThen(climb.setPosition(ClimbConstants.retractedHeight)));
+        .onTrue(climb.setPosition(ClimbConstants.extendedHeight).until(() -> climb.atSetpoint()))
+        .onFalse(climb.setPosition(ClimbConstants.Setpoints.climbScore));
   }
 
   /**
