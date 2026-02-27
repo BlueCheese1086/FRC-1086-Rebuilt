@@ -14,7 +14,7 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -26,7 +26,6 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.climb.Climb;
-import frc.robot.subsystems.climb.ClimbConstants;
 import frc.robot.subsystems.climb.ClimbIO;
 import frc.robot.subsystems.climb.ClimbIOSim;
 import frc.robot.subsystems.climb.ClimbIOTalonFX;
@@ -93,7 +92,7 @@ public class RobotContainer {
   private final Climb climb;
 
   @SuppressWarnings("unused")
-  // private final Superstructure superstructure;
+  //   private final Superstructure superstructure;
 
   // private final AutoBuilder autobuilder;
   // Controller
@@ -192,25 +191,25 @@ public class RobotContainer {
 
     Superstructure.ControllerLayout.scoreRequest = driver.rightTrigger();
     Superstructure.ControllerLayout.cancelRequest = driver.povLeft().or(operator.povLeft());
-    Superstructure.ControllerLayout.climbRequest = driver.povRight();
-    Superstructure.ControllerLayout.disableTargeting = driver.povUp();
+    Superstructure.ControllerLayout.climbRequest = operator.rightTrigger();
+    Superstructure.ControllerLayout.disableTargeting = driver.y();
     Superstructure.ControllerLayout.intakeRequest = driver.leftTrigger();
-    Superstructure.ControllerLayout.passingRequest = driver.povDown();
+    Superstructure.ControllerLayout.passingRequest = driver.b();
     Superstructure.ControllerLayout.joystickX = () -> -driver.getLeftY();
     Superstructure.ControllerLayout.joystickY = () -> -driver.getLeftX();
     Superstructure.ControllerLayout.driverHid = driver::getHID;
 
     // superstructure =
-    // new Superstructure(
-    // drive,
-    // intake,
-    // shooter,
-    // indexer,
-    // hood,
-    // climb,
-    // drive::getPose,
-    // drive::getChassisSpeeds,
-    // drive::getRotation);
+    //     new Superstructure(
+    //         drive,
+    //         intake,
+    //         shooter,
+    //         indexer,
+    //         hood,
+    //         climb,
+    //         drive::getPose,
+    //         drive::getChassisSpeeds,
+    //         drive::getRotation);
     // autobuilder = new AutoBuilder(superstructure, drive);
 
     // Set up auto routines
@@ -247,13 +246,13 @@ public class RobotContainer {
         DriveCommands.joystickDrive(
             drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
 
-    // TODO: REMOVE THIS DURING SUPERSTRUCTURE TESTING
+    // // TODO: REMOVE THIS DURING SUPERSTRUCTURE TESTING
     hood.setDefaultCommand(
         hood.setAngle(() -> (Degrees.of(HoodConstants.Setpoints.hoodAngle.get()))));
 
     // Driver Commands
     driver
-        .b()
+        .start()
         .onTrue(
             Commands.runOnce(
                     () ->
@@ -268,24 +267,43 @@ public class RobotContainer {
             Commands.parallel(
                 intake.setVoltage(IntakeConstants.Setpoints.run),
                 intake.setPosition(IntakeConstants.Setpoints.deployed),
-                indexer.setVoltage(IndexerConstants.Setpoints.feed),
-                shooter.setVelocity(
-                    () ->
-                        RotationsPerSecond.of(
-                            ShooterConstants.Tuning.velocitySetpoint.getAsDouble()))));
+                indexer.setVoltage(IndexerConstants.Setpoints.feed)));
 
+    driver.y().whileTrue(Commands.run(() -> shooter.setVoltage(8)).finallyDo(shooter::stopShooter));
+    operator
+        .y()
+        .whileTrue(
+            Commands.run(
+                () ->
+                    shooter.setVelocitySetpoint(
+                        RadiansPerSecond.of(
+                            ShooterConstants.Tuning.velocitySetpoint.getAsDouble())),
+                shooter))
+        .onFalse(Commands.runOnce(shooter::stopAll));
+    driver
+        .rightTrigger()
+        .onTrue(intake.setPosition(IntakeConstants.Setpoints.agitate))
+        .onFalse(intake.setPosition(IntakeConstants.Setpoints.deployed));
     driver
         .rightTrigger()
         .whileTrue(
-            Commands.run(
-                () -> shooter.runFeederVoltage(ShooterConstants.FeederSetpoints.run.in(Volts)),
-                shooter));
-
+            Commands.parallel(
+                intake.setVoltage(IntakeConstants.Setpoints.run),
+                indexer.setVoltage(IndexerConstants.Setpoints.feed),
+                shooter.runFeederVoltage(ShooterConstants.FeederSetpoints.run.in(Volts))));
+    driver
+        .povLeft()
+        .whileTrue(
+            Commands.parallel(
+                indexer.setVoltage(IndexerConstants.Setpoints.intake.negate()),
+                intake.setVoltage(IntakeConstants.Setpoints.run.negate()),
+                shooter
+                    .runFeederVoltage(-ShooterConstants.FeederSetpoints.run.in(Volts))
+                    .finallyDo(shooter.runFeederVoltage(0)::execute)));
     // Operator Commands
-    operator
-        .rightTrigger()
-        .onTrue(climb.setPosition(ClimbConstants.extendedHeight).until(() -> climb.atSetpoint()))
-        .onFalse(climb.setPosition(ClimbConstants.Setpoints.climbScore));
+    operator.leftTrigger().whileTrue(DriveCommands.recordData(drive, shooter, hood));
+    operator.x().whileTrue(DriveCommands.wheelRadiusCharacterization(drive));
+    operator.a().whileTrue(DriveCommands.feedforwardCharacterization(drive));
   }
 
   /**

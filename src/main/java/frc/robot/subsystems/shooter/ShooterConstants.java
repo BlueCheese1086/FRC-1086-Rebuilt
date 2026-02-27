@@ -30,8 +30,7 @@ public class ShooterConstants {
         12.0
             / RadiansPerSecond.of(DCMotor.getKrakenX60Foc(1).freeSpeedRadPerSec)
                 .in(RotationsPerSecond); // 113.067;
-    public static final double kA =
-        0.0015; // if its too much lower it if its not enough increase it
+    public static final double kA = 0.0; // if its too much lower it if its not enough increase it
 
     public static final double cruiseVelocity = 6000.0 / 60.0; // ~ 600 rad per sec;
     public static final double acceleration =
@@ -39,7 +38,7 @@ public class ShooterConstants {
             / 0.5; // Cruise velocity / spin up time estimated, low numbers equal more brownouts,
     // and high numbers more stable.
     public static final LoggedNetworkNumber velocitySetpoint =
-        new LoggedNetworkNumber("/Tuning/Velocity Setpoint", 100.0);
+        new LoggedNetworkNumber("/Tuning/Velocity Setpoint", 300.0);
     public static final LoggedNetworkNumber voltageSetpoint =
         new LoggedNetworkNumber("/Tuning/Voltage Setpoint", 4.5);
   }

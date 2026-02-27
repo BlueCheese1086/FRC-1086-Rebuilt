@@ -7,10 +7,13 @@
 
 package frc.robot.commands;
 
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -22,6 +25,10 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.hood.Hood;
+import frc.robot.subsystems.hood.HoodConstants;
+import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterConstants;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
@@ -98,6 +105,23 @@ public class DriveCommands {
                       : drive.getRotation()));
         },
         drive);
+  }
+
+  public static Command recordData(Drive drive, Shooter shooter, Hood hood) {
+    Timer time = new Timer();
+    time.restart();
+    return Commands.runEnd(
+        () -> {
+          shooter.setVelocitySetpoint(
+              RadiansPerSecond.of(ShooterConstants.Tuning.velocitySetpoint.getAsDouble()));
+          hood.setPosition(() -> HoodConstants.Setpoints.hoodAngle.getAsDouble());
+        },
+        () -> {
+          time.stop();
+          shooter.recordShot(new Pose3d(drive.getPose()), hood.getAngle(), time.get());
+          shooter.stopAll();
+        },
+        shooter);
   }
 
   /**

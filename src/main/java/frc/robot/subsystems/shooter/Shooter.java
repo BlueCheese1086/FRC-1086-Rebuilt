@@ -46,12 +46,8 @@ public class Shooter extends SubsystemBase {
 
     shotCSV = new File(ShooterConstants.Targeting.FileName);
     try {
-      if (shotCSV.exists()) {
-        writer = new FileWriter(shotCSV);
-      } else {
-        shotCSV.createNewFile();
-        writer = new FileWriter(shotCSV);
-      }
+      writer = new FileWriter(shotCSV);
+      writer.write("Distance, shoot velocity, angle, tof");
     } catch (IOException e) {
       e.printStackTrace();
     }

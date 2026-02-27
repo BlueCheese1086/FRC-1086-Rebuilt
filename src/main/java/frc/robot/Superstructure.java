@@ -31,6 +31,7 @@ import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeConstants;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterConstants;
+import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants;
 import frc.robot.util.FieldConstants.Hub;
 // import frc.robot.util.shooter.LauncherCalculator;
@@ -49,7 +50,7 @@ public class Superstructure extends SubsystemBase {
     public static Trigger scoreRequest = new Trigger(() -> false);
     public static Trigger intakeRequest = new Trigger(() -> false);
     public static Trigger cancelRequest = new Trigger(() -> false);
-    public static Trigger cancel = new Trigger(() -> false);
+    public static Trigger flushRequest = new Trigger(() -> false);
     public static Trigger disableTargeting = new Trigger(() -> false);
     public static Trigger passingRequest = new Trigger(() -> false);
     public static Trigger climbRequest = new Trigger(() -> false);
@@ -93,7 +94,7 @@ public class Superstructure extends SubsystemBase {
   private final Supplier<Rotation2d> driveHeading;
 
   @AutoLogOutput(key = "Superstructure/Target/Use Targetting")
-  private boolean useTargeting = true;
+  private boolean useTargeting = false;
 
   private boolean redStart = false;
 
@@ -218,6 +219,7 @@ public class Superstructure extends SubsystemBase {
                 Commands.runOnce(() -> shooter.setVelocitySetpoint(RadiansPerSecond.of(0.0)))));
 
     stateTriggers.get(State.idle).onTrue(intake.setPosition(IntakeConstants.Setpoints.stowed));
+    ControllerLayout.flushRequest.whileTrue(Commands.parallel());
   }
 
   private void setupIntake() {
@@ -265,7 +267,7 @@ public class Superstructure extends SubsystemBase {
 
     stateTriggers
         .get(State.shoot)
-        .and(this::useTargeting)
+        .and(ControllerLayout.disableTargeting)
         .whileTrue(
             DriveCommands.joystickDriveAtAngle(
                 drive,
@@ -273,7 +275,7 @@ public class Superstructure extends SubsystemBase {
                 ControllerLayout.joystickY,
                 () -> {
                   return PoseMath.getOrientationToTarget(
-                      drive.getPose(), FieldConstants.Hub.hubCenter);
+                      drive.getPose(), AllianceFlipUtil.apply(FieldConstants.Hub.hubCenter));
                 }));
 
     stateTriggers
@@ -287,8 +289,6 @@ public class Superstructure extends SubsystemBase {
 
     stateTriggers
         .get(State.shoot)
-        .and(() -> (FieldConstants.LinesVertical.inAllianceZone(drivePose.get())))
-        .and(() -> !useTargeting)
         .whileTrue(
             Commands.parallel(
                 shooter.setVelocity(
