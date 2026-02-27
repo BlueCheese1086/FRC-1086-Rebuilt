@@ -49,8 +49,8 @@ public class Hood extends SubsystemBase {
   public Command setPosition(DoubleSupplier position) {
     Logger.recordOutput("/Hood/Map/0-1", AngleToPosition.get(position.getAsDouble()));
     Logger.recordOutput("/Hood/Map/key", position);
-    return Commands.runOnce(() -> io.setPosition(AngleToPosition.get(position.getAsDouble())))
-        .andThen(Commands.waitUntil(() -> io.atSetpoint()));
+    return this.run(() -> io.setPosition(AngleToPosition.get(position.getAsDouble())))
+        .until(io::atSetpoint);
   }
 
   public Command directPWMControl(DoubleSupplier pwm) {

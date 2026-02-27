@@ -2,6 +2,8 @@ package frc.robot.generated.choreo;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.*;
 
 /**
  * Generated file containing variables defined in Choreo.
@@ -16,7 +18,7 @@ public final class ChoreoVars {
         public static final Pose2d db = new Pose2d(4.6, 5.5, Rotation2d.fromRadians(-0.79));
         public static final Pose2d dbs = new Pose2d(3.4, 5.5, Rotation2d.fromRadians(-0.79));
         public static final Pose2d dbsr = new Pose2d(3.4, 5.5, Rotation2d.fromRadians(3.142));
-        public static final Pose2d dc = new Pose2d(0.8, 4.7, Rotation2d.fromRadians(3.14));
+        public static final Pose2d dc = new Pose2d(1.1, 4.7, Rotation2d.kZero);
         public static final Pose2d dcn = new Pose2d(6, 5.5, Rotation2d.fromRadians(3.14));
         public static final Pose2d dfrn = new Pose2d(8.7, 6.4, Rotation2d.fromRadians(-0.79));
         public static final Pose2d dfs = new Pose2d(2.9, 6.5, Rotation2d.fromRadians(-0.97));

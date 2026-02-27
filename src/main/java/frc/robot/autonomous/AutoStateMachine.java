@@ -190,10 +190,10 @@ public class AutoStateMachine {
   }
 
   public Command startFeeder() {
-    return Commands.runOnce(null);
+    return Commands.print("STOP GIVING ME ERRORS YOU");
   }
 
   public Command deployIntake() {
-    return Commands.runOnce(null);
+    return Commands.print("STOP GIVING ME ERRORS YOU");
   }
 }

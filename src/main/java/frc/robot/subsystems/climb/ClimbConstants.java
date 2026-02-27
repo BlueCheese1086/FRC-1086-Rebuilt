@@ -19,19 +19,19 @@ public class ClimbConstants {
   // TODO: this is james the climb ratio is 44.4444444:1 also idk if this todo thing went through i
   // dont use wpilib guys :sob
 
-  public static final double kG = 0.0;
-  public static final double kS = 0.0;
+  public static final double kG = 0.11485;
+  public static final double kS = 0.060238;
 
   public static final double kV = 12.0 / (6000.0 / gearing); // max battery voltage / max motor rpm
-  public static final double kA = 0.5;
-  public static final double kP = 40.0;
+  public static final double kA = 1.8297;
+  public static final double kP = 27.507;
   public static final double kI = 0.0;
-  public static final double kD = 0.5;
+  public static final double kD = 1.4477;
 
   public static final double radius = Units.inchesToMeters(0.265466625359);
 
   public static final InvertedValue invertedValue = InvertedValue.CounterClockwise_Positive;
-  public static final NeutralModeValue neutralMode = NeutralModeValue.Coast;
+  public static final NeutralModeValue neutralMode = NeutralModeValue.Brake;
 
   private static final double maxHeight = 10.0;
 

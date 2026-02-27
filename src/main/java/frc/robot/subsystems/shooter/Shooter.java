@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.shooter;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
@@ -20,6 +21,7 @@ import frc.robot.subsystems.shooter.FeederIO.FeederIO;
 import frc.robot.subsystems.shooter.FeederIO.FeederIOInputsAutoLogged;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants.Hub;
+import java.io.File;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -88,6 +90,7 @@ public class Shooter extends SubsystemBase {
     feederIO.setFeedVoltage(0.0);
   }
 
+  public void stopShooter() {
   public void stopShooter() {
     for (int i = 0; i < io.length; i++) {
       io[i].setVoltage(0.0);
