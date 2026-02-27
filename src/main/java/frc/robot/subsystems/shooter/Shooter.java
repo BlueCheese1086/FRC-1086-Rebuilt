@@ -20,7 +20,7 @@ import frc.robot.subsystems.shooter.FeederIO.FeederIO;
 import frc.robot.subsystems.shooter.FeederIO.FeederIOInputsAutoLogged;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants.Hub;
-
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.function.Supplier;
@@ -31,6 +31,7 @@ public class Shooter extends SubsystemBase {
   private ShooterIO[] io;
   private FeederIO feederIO;
   private FeederIOInputsAutoLogged feederIOInputsAutoLogged;
+  private final File file;
 
   public Shooter(FeederIO feederIO, ShooterIO... io) {
     this.io = io;
@@ -40,9 +41,12 @@ public class Shooter extends SubsystemBase {
     for (int i = 0; i < io.length; i++) {
       inputs[i] = new ShooterInputsAutoLogged();
     }
+    file = new File(ShooterConstants.Targeting.FileName);
 
-    try (FileWriter writer = new FileWriter(ShooterConstants.Targeting.FileName)) {
-      writer.write("Distance,RadPerSec,Angle,TimeOfFlight\n");
+    try (FileWriter writer = new FileWriter(file, true)) {
+      if (file.length() == 0) {
+        writer.write("Distance,Shooter,Angle,TOF\n");
+      }
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -84,7 +88,7 @@ public class Shooter extends SubsystemBase {
     feederIO.setFeedVoltage(0.0);
   }
 
-  public void stopShooter(){
+  public void stopShooter() {
     for (int i = 0; i < io.length; i++) {
       io[i].setVoltage(0.0);
     }
@@ -104,8 +108,9 @@ public class Shooter extends SubsystemBase {
                 .plus(ShooterConstants.ShooterTransforms.centerShooter)
                 .getTranslation()
                 .getDistance(AllianceFlipUtil.apply(Hub.topCenterPoint)));
-    try (FileWriter writer = new FileWriter(ShooterConstants.Targeting.FileName, true)) {
+    try (FileWriter writer = new FileWriter(file, true)) {
       writer.append(distanceToHub + "," + inputs[1].velocity + "," + hoodAngle + "," + tof);
+      System.out.println("Writing");
     } catch (Exception e) {
       e.printStackTrace();
     }

@@ -37,13 +37,12 @@ public class Hood extends SubsystemBase {
   public Command setAngle(Supplier<Angle> angle) {
     Logger.recordOutput("/Hood/Map/0-1", AngleToPosition.get(angle.get().in(Degrees)));
     Logger.recordOutput("/Hood/Map/key", angle.get().in(Degrees));
-    return Commands.runOnce(() -> io.setPosition(AngleToPosition.get(angle.get().in(Degrees))))
-        .andThen(Commands.waitUntil(() -> io.atSetpoint()));
+    return Commands.runOnce(() -> io.setPosition(AngleToPosition.get(angle.get().in(Degrees))));
   }
 
-  public void setAngle(Angle angle) {
-    setAngle = angle;
-    io.setPosition(AngleToPosition.get(angle.in(Degrees)));
+  public void moveToAngle(Supplier<Angle> angle) {
+    setAngle = angle.get();
+    io.setPosition(AngleToPosition.get(angle.get().in(Degrees)));
   }
 
   /* expects a value between 0 and 1 */
