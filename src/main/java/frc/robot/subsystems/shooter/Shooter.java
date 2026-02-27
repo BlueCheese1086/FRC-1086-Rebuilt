@@ -22,7 +22,6 @@ import frc.robot.subsystems.shooter.FeederIO.FeederIOInputsAutoLogged;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants.Hub;
 import java.io.File;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.function.Supplier;
@@ -47,9 +46,20 @@ public class Shooter extends SubsystemBase {
 
     try (FileWriter writer = new FileWriter(file, true)) {
       if (file.length() == 0) {
-        writer.write("Distance,Shooter,Angle,TOF\n");
+        writer.write("Distance, Shooter, Angle, TOF\n");
+      } else {
+        clearFile(file);
+        writer.write("Distance, Shooter, Angle, TOF\n");
       }
     } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  private void clearFile(File file) {
+    try (FileWriter writer = new FileWriter(file, false)) {
+      writer.write("");
+    } catch (Exception e) {
       e.printStackTrace();
     }
   }
@@ -91,7 +101,6 @@ public class Shooter extends SubsystemBase {
   }
 
   public void stopShooter() {
-  public void stopShooter() {
     for (int i = 0; i < io.length; i++) {
       io[i].setVoltage(0.0);
     }
@@ -112,8 +121,15 @@ public class Shooter extends SubsystemBase {
                 .getTranslation()
                 .getDistance(AllianceFlipUtil.apply(Hub.topCenterPoint)));
     try (FileWriter writer = new FileWriter(file, true)) {
-      writer.append(distanceToHub + "," + inputs[1].velocity + "," + hoodAngle + "," + tof);
-      System.out.println("Writing");
+      writer.append(
+          distanceToHub
+              + " ,"
+              + inputs[1].velocity
+              + " ,"
+              + hoodAngle.in(Degrees)
+              + " , "
+              + tof
+              + "\n");
     } catch (Exception e) {
       e.printStackTrace();
     }

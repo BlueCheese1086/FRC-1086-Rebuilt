@@ -248,7 +248,10 @@ public class RobotContainer {
 
     // // TODO: REMOVE THIS DURING SUPERSTRUCTURE TESTING
     hood.setDefaultCommand(
-        hood.setAngle(() -> (Degrees.of(HoodConstants.Setpoints.hoodAngle.get()))));
+        Commands.run(
+            () ->
+                hood.moveToAngle(() -> Degrees.of(HoodConstants.Setpoints.hoodAngle.getAsDouble())),
+            hood));
 
     // Driver Commands
     driver
@@ -301,9 +304,7 @@ public class RobotContainer {
                     .runFeederVoltage(-ShooterConstants.FeederSetpoints.run.in(Volts))
                     .finallyDo(shooter.runFeederVoltage(0)::execute)));
     // Operator Commands
-    operator.leftTrigger().whileTrue(DriveCommands.recordData(drive, shooter, hood));
-    operator.x().whileTrue(DriveCommands.wheelRadiusCharacterization(drive));
-    operator.a().whileTrue(DriveCommands.feedforwardCharacterization(drive));
+    driver.b().whileTrue(DriveCommands.recordData(drive, shooter, hood));
   }
 
   /**
