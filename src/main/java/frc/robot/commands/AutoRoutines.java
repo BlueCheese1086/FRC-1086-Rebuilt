@@ -92,6 +92,7 @@ public class AutoRoutines {
   public static Command runPath(String trajectory, boolean resetPose) {
     return (Commands.runOnce(
                 () -> {
+                  System.out.println(trajectory);
                   Logger.recordOutput(
                       "Autos/Selected Path", Choreo.loadTrajectory(trajectory).get().getPoses());
                   if (resetPose) {
