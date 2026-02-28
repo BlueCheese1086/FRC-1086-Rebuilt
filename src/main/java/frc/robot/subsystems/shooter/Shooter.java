@@ -11,6 +11,7 @@ import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -121,6 +122,9 @@ public class Shooter extends SubsystemBase {
                 .plus(ShooterConstants.ShooterTransforms.centerShooter)
                 .getTranslation()
                 .getDistance(AllianceFlipUtil.apply(Hub.topCenterPoint)));
+    Logger.recordOutput("File Writing/ Distance to Hub", distanceToHub);
+    Logger.recordOutput("File Writing/ Shooter RPM", Units.radiansPerSecondToRotationsPerMinute(inputs[1].velocity));
+              
     try (FileWriter writer = new FileWriter(file, true)) {
       writer.append(
           distanceToHub

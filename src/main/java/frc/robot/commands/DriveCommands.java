@@ -131,6 +131,7 @@ public class DriveCommands {
               time.stop();
               shooter.recordShot(new Pose3d(drive.getPose()), hood.getAngle(), time.get());
               shooter.stopAll();
+              Logger.recordOutput("File Writing/ Hood Angle", hood.getAngle());
               Logger.recordOutput("File Writing/Time", time.get());
               Logger.recordOutput("File Writing/Shot finished?", true);
             },

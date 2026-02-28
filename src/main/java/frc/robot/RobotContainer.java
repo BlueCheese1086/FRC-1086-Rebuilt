@@ -13,10 +13,12 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Centimeters;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -99,6 +101,8 @@ public class RobotContainer {
   private final CommandXboxController driver = new CommandXboxController(0);
 
   private final CommandXboxController operator = new CommandXboxController(1);
+
+  private Pose2d[] backStartPose = new Pose2d[1];
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -308,6 +312,22 @@ public class RobotContainer {
     // Operator Commands
     operator.povLeft().onTrue(intake.setPosition(IntakeConstants.Setpoints.stowed));
     operator.x().whileTrue(DriveCommands.recordData(drive, shooter, hood));
+    operator
+        .povDown()
+        .onTrue(
+            Commands.sequence(
+                    Commands.runOnce(() -> backStartPose[0] = drive.getPose()),
+                    Commands.run(() -> drive.runVelocity(new ChassisSpeeds(-0.5, 0.0, 0.0)),
+    drive)
+                        .until(
+                            () ->
+                                backStartPose[0] != null
+                                    && drive
+                                            .getPose()
+                                            .getTranslation()
+                                            .getDistance(backStartPose[0].getTranslation())
+                                        >= Centimeters.of(10.0).in(Centimeters)))
+                .finallyDo(() -> drive.runVelocity(new ChassisSpeeds())));
   }
 
   /**
