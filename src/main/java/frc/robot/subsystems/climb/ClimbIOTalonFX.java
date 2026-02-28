@@ -101,7 +101,8 @@ public class ClimbIOTalonFX implements ClimbIO {
 
   @Override
   public void updateInputs(ClimbIOInputsAutoLogged inputs) {
-    var status = BaseStatusSignal.refreshAll(angle, volts, temp, statorCurrent, supplyCurrent);
+    var status =
+        BaseStatusSignal.refreshAll(angle, velocity, volts, temp, statorCurrent, supplyCurrent);
 
     inputs.motorConnected = connected.calculate(status.isOK());
 

@@ -12,6 +12,7 @@ import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
@@ -34,7 +35,9 @@ public class ShooterIOSim implements ShooterIO {
             DCMotor.getKrakenX60Foc(1));
     shooterFF =
         new SimpleMotorFeedforward(
-            ShooterConstants.Tuning.kS, ShooterConstants.Tuning.kV, ShooterConstants.Tuning.kA);
+            ShooterConstants.Tuning.kS,
+            12.0 / Units.rotationsPerMinuteToRadiansPerSecond(6000.0),
+            ShooterConstants.Tuning.kA);
     bbController = new BangBangController();
   }
 
@@ -43,8 +46,8 @@ public class ShooterIOSim implements ShooterIO {
     shooter.update(0.02);
 
     appliedVoltage =
-        bbController.calculate(shooter.getAngularVelocityRadPerSec())
-                * RobotController.getBatteryVoltage()
+        (bbController.calculate(shooter.getAngularVelocityRadPerSec())
+                * RobotController.getBatteryVoltage())
             + (shooterFF.calculate(shooter.getAngularVelocityRadPerSec()));
 
     shooter.setInputVoltage(MathUtil.clamp(appliedVoltage, -12.0, 12.0));

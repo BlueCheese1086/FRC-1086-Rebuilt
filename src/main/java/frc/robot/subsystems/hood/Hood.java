@@ -34,24 +34,23 @@ public class Hood extends SubsystemBase {
     this.io = io;
   }
 
-  public Command setAngle(Supplier<Angle> angle) {
-    Logger.recordOutput("/Hood/Map/0-1", AngleToPosition.get(angle.get().in(Degrees)));
-    Logger.recordOutput("/Hood/Map/key", angle.get().in(Degrees));
-    return Commands.runOnce(() -> io.setPosition(AngleToPosition.get(angle.get().in(Degrees))))
-        .andThen(Commands.waitUntil(() -> io.atSetpoint()));
+  public Command setAngle(Angle angle) {
+    Logger.recordOutput("/Hood/Map/0-1", AngleToPosition.get(angle.in(Degrees)));
+    Logger.recordOutput("/Hood/Map/key", angle.in(Degrees));
+    return Commands.runOnce(() -> io.setPosition(AngleToPosition.get(angle.in(Degrees))));
   }
 
-  public void setAngle(Angle angle) {
-    setAngle = angle;
-    io.setPosition(AngleToPosition.get(angle.in(Degrees)));
+  public void moveToAngle(Supplier<Angle> angle) {
+    setAngle = angle.get();
+    io.setPosition(AngleToPosition.get(angle.get().in(Degrees)));
   }
 
   /* expects a value between 0 and 1 */
   public Command setPosition(DoubleSupplier position) {
     Logger.recordOutput("/Hood/Map/0-1", AngleToPosition.get(position.getAsDouble()));
     Logger.recordOutput("/Hood/Map/key", position);
-    return Commands.runOnce(() -> io.setPosition(AngleToPosition.get(position.getAsDouble())))
-        .andThen(Commands.waitUntil(() -> io.atSetpoint()));
+    return this.run(() -> io.setPosition(AngleToPosition.get(position.getAsDouble())))
+        .until(io::atSetpoint);
   }
 
   public Command directPWMControl(DoubleSupplier pwm) {

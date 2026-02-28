@@ -31,6 +31,7 @@ import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeConstants;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterConstants;
+import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants;
 import frc.robot.util.FieldConstants.Hub;
 // import frc.robot.util.shooter.LauncherCalculator;
@@ -42,13 +43,14 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
+@SuppressWarnings("unused")
 public class Superstructure extends SubsystemBase {
 
   public static class ControllerLayout {
     public static Trigger scoreRequest = new Trigger(() -> false);
     public static Trigger intakeRequest = new Trigger(() -> false);
     public static Trigger cancelRequest = new Trigger(() -> false);
-    public static Trigger cancel = new Trigger(() -> false);
+    public static Trigger flushRequest = new Trigger(() -> false);
     public static Trigger disableTargeting = new Trigger(() -> false);
     public static Trigger passingRequest = new Trigger(() -> false);
     public static Trigger climbRequest = new Trigger(() -> false);
@@ -92,7 +94,7 @@ public class Superstructure extends SubsystemBase {
   private final Supplier<Rotation2d> driveHeading;
 
   @AutoLogOutput(key = "Superstructure/Target/Use Targetting")
-  private boolean useTargeting = true;
+  private boolean useTargeting = false;
 
   private boolean redStart = false;
 
@@ -217,6 +219,7 @@ public class Superstructure extends SubsystemBase {
                 Commands.runOnce(() -> shooter.setVelocitySetpoint(RadiansPerSecond.of(0.0)))));
 
     stateTriggers.get(State.idle).onTrue(intake.setPosition(IntakeConstants.Setpoints.stowed));
+    ControllerLayout.flushRequest.whileTrue(Commands.parallel());
   }
 
   private void setupIntake() {
@@ -235,6 +238,8 @@ public class Superstructure extends SubsystemBase {
             Commands.parallel(
                 intake.setVoltage(Volts.of(12.0)),
                 indexer.setVoltage(IndexerConstants.Setpoints.intake)));
+
+    stateTriggers.get(State.intake).whileTrue(DriveCommands.joystickDriveSyom(drive, ControllerLayout.joystickX, ControllerLayout.joystickY));
 
     // While intaking, override turning control so robot yaw faces direction of travel (SYOM).
     // This makes lining the intake up with balls much easier.
@@ -264,7 +269,7 @@ public class Superstructure extends SubsystemBase {
 
     stateTriggers
         .get(State.shoot)
-        .and(this::useTargeting)
+        .and(ControllerLayout.disableTargeting)
         .whileTrue(
             DriveCommands.joystickDriveAtAngle(
                 drive,
@@ -272,7 +277,7 @@ public class Superstructure extends SubsystemBase {
                 ControllerLayout.joystickY,
                 () -> {
                   return PoseMath.getOrientationToTarget(
-                      drive.getPose(), FieldConstants.Hub.hubCenter);
+                      drive.getPose(), AllianceFlipUtil.apply(FieldConstants.Hub.hubCenter));
                 }));
 
     stateTriggers
@@ -286,8 +291,6 @@ public class Superstructure extends SubsystemBase {
 
     stateTriggers
         .get(State.shoot)
-        .and(() -> (FieldConstants.LinesVertical.inAllianceZone(drivePose.get())))
-        .and(() -> !useTargeting)
         .whileTrue(
             Commands.parallel(
                 shooter.setVelocity(
@@ -319,9 +322,8 @@ public class Superstructure extends SubsystemBase {
         .whileTrue(
             Commands.parallel(
                 hood.setAngle(
-                    () ->
-                        HoodConstants.Setpoints
-                            .passAngle), // TODO make this target center of alliance zone.
+                    HoodConstants.Setpoints
+                        .passAngle), // TODO make this target center of alliance zone.
                 shooter.setVelocity(() -> (RotationsPerSecond.of(300)))));
 
     stateTriggers

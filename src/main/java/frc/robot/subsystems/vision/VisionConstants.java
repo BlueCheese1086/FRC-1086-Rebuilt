@@ -21,22 +21,22 @@ public class VisionConstants {
     public static final Transform3d[] cameraTransforms =
         new Transform3d[] { // Camera Transforms Left to Right,
           // Front to Back
-          new Transform3d(
-              Units.inchesToMeters(12.066),
-              Units.inchesToMeters(11.906),
-              Units.inchesToMeters(8.355),
-              new Rotation3d(
-                  0.0, -Units.degreesToRadians(13.125000), Units.degreesToRadians(-35))), // Front
           // Left
           // Camera
           new Transform3d(
-              Units.inchesToMeters(12.066),
-              Units.inchesToMeters(-11.906),
-              Units.inchesToMeters(8.355),
+              Units.inchesToMeters(-Units.inchesToMeters(11)),
+              Units.inchesToMeters(Units.inchesToMeters(11.75)),
+              Units.inchesToMeters(Units.inchesToMeters(6)),
               new Rotation3d(
-                  0.0, -Units.degreesToRadians(13.125000), Units.degreesToRadians(35))) // Front
+                  0.0, -Units.degreesToRadians(150),0.0)), // Front
           // Right
           // Camera
+          new Transform3d(
+              -Units.inchesToMeters(11),
+              Units.inchesToMeters(11.75),
+              Units.inchesToMeters(6),
+              new Rotation3d(
+                  0.0, -Units.degreesToRadians(150), 0.0)) // Front
         };
 
     public static final AprilTagFieldLayout fieldLayout = FieldConstants.defaultAprilTagType;
