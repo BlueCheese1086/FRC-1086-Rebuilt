@@ -19,7 +19,6 @@ import static edu.wpi.first.units.Units.Volts;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -65,7 +64,6 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.util.AllianceFlipUtil;
-
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -123,12 +121,8 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVision(
-                    "backLeft",
-                    VisionConstants.robotToLeftCam),
-                new VisionIOPhotonVision(
-                    "backRight",
-                    VisionConstants.robotToRightCam));
+                new VisionIOPhotonVision("backLeft", VisionConstants.robotToLeftCam),
+                new VisionIOPhotonVision("backRight", VisionConstants.robotToRightCam));
 
         intake = new Intake(new IntakeIOTalonFX());
         indexer = new Indexer(new IndexerIOTalonFX());
@@ -157,12 +151,8 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVision(
-                    "backLeft",
-                    VisionConstants.robotToLeftCam),
-                new VisionIOPhotonVision(
-                    "backRight",
-                    VisionConstants.robotToRightCam));
+                new VisionIOPhotonVision("backLeft", VisionConstants.robotToLeftCam),
+                new VisionIOPhotonVision("backRight", VisionConstants.robotToRightCam));
         indexer = new Indexer(new IndexerIOSim());
         intake = new Intake(new IntakeIOSim());
         shooter =
@@ -185,12 +175,8 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVision(
-                    "left",
-                    VisionConstants.robotToLeftCam),
-                new VisionIOPhotonVision(
-                    "right",
-                    VisionConstants.robotToRightCam));
+                new VisionIOPhotonVision("left", VisionConstants.robotToLeftCam),
+                new VisionIOPhotonVision("right", VisionConstants.robotToRightCam));
         shooter = new Shooter(new FeederIO() {}, new ShooterIO() {});
         intake = new Intake(new IntakeIO() {});
         indexer = new Indexer(new IndexerIO() {});
@@ -268,10 +254,20 @@ public class RobotContainer {
         Commands.run(
             () -> hood.setPosition(() -> HoodConstants.Setpoints.hoodAngle.getAsDouble()), hood));
 
-    driver.start().onTrue(Commands.run(() -> drive.setPose(new Pose2d(drive.getPose().getTranslation(), AllianceFlipUtil.apply(Rotation2d.kZero)))).ignoringDisable(true));
+    driver
+        .start()
+        .onTrue(
+            Commands.run(
+                    () ->
+                        drive.setPose(
+                            new Pose2d(
+                                drive.getPose().getTranslation(),
+                                AllianceFlipUtil.apply(Rotation2d.kZero))))
+                .ignoringDisable(true));
 
     driver
         .leftTrigger()
+        .and(()-> driver.leftBumper())
         .whileTrue(
             Commands.parallel(
                 DriveCommands.joystickDriveSyom(
@@ -318,8 +314,7 @@ public class RobotContainer {
         .onTrue(
             Commands.sequence(
                     Commands.runOnce(() -> backStartPose[0] = drive.getPose()),
-                    Commands.run(() -> drive.runVelocity(new ChassisSpeeds(-0.5, 0.0, 0.0)),
-    drive)
+                    Commands.run(() -> drive.runVelocity(new ChassisSpeeds(-0.5, 0.0, 0.0)), drive)
                         .until(
                             () ->
                                 backStartPose[0] != null

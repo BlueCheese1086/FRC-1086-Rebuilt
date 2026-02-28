@@ -123,8 +123,10 @@ public class Shooter extends SubsystemBase {
                 .getTranslation()
                 .getDistance(AllianceFlipUtil.apply(Hub.topCenterPoint)));
     Logger.recordOutput("File Writing/ Distance to Hub", distanceToHub);
-    Logger.recordOutput("File Writing/ Shooter RPM", Units.radiansPerSecondToRotationsPerMinute(inputs[1].velocity));
-              
+    Logger.recordOutput(
+        "File Writing/ Shooter RPM",
+        Units.radiansPerSecondToRotationsPerMinute(inputs[1].velocity));
+
     try (FileWriter writer = new FileWriter(file, true)) {
       writer.append(
           distanceToHub

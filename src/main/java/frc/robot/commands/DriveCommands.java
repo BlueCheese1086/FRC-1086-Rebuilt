@@ -229,7 +229,7 @@ public class DriveCommands {
   public static Command joystickDriveSyom(
       Drive drive, DoubleSupplier xSupplier, DoubleSupplier ySupplier) {
     // Reuse the existing angle-hold command but source the target angle from the
-    // translation stick.
+    // translation stick. Add a deadband to avoid instability from stick drift.
     return joystickDriveAtAngle(
         drive,
         xSupplier,
@@ -239,7 +239,7 @@ public class DriveCommands {
               getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
 
           // If the driver isn't commanding translation, hold current heading.
-          if (linearVelocity.getNorm() < 1e-3) {
+          if (linearVelocity.getNorm() < 1e-2) { // increased deadband for stability
             return drive.getRotation();
           }
 
