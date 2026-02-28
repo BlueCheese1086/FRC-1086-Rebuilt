@@ -2,7 +2,7 @@
   "download": {
     "deleteAfter": false,
     "localDir": "F:\\dklafjlksd",
-    "remoteDir": "/u/logs",
+    "remoteDir": "/home/lvuser/deploy",
     "serverTeam": "1086"
   },
   "output": {
