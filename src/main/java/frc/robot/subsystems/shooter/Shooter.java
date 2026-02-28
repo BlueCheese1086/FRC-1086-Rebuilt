@@ -32,8 +32,7 @@ public class Shooter extends SubsystemBase {
   private ShooterIO[] io;
   private FeederIO feederIO;
   private FeederIOInputsAutoLogged feederIOInputsAutoLogged;
-  private final File shotCSV;
-  private FileWriter writer;
+  private final File file;
 
   public Shooter(FeederIO feederIO, ShooterIO... io) {
     this.io = io;
@@ -43,12 +42,24 @@ public class Shooter extends SubsystemBase {
     for (int i = 0; i < io.length; i++) {
       inputs[i] = new ShooterInputsAutoLogged();
     }
+    file = new File(ShooterConstants.Targeting.FileName);
 
-    shotCSV = new File(ShooterConstants.Targeting.FileName);
-    try {
-      writer = new FileWriter(shotCSV);
-      writer.write("Distance, shoot velocity, angle, tof");
+    try (FileWriter writer = new FileWriter(file, true)) {
+      if (file.length() == 0) {
+        writer.write("Distance, Shooter, Angle, TOF\n");
+      } else {
+        clearFile(file);
+        writer.write("Distance, Shooter, Angle, TOF\n");
+      }
     } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  private void clearFile(File file) {
+    try (FileWriter writer = new FileWriter(file, false)) {
+      writer.write("");
+    } catch (Exception e) {
       e.printStackTrace();
     }
   }
@@ -109,18 +120,16 @@ public class Shooter extends SubsystemBase {
                 .plus(ShooterConstants.ShooterTransforms.centerShooter)
                 .getTranslation()
                 .getDistance(AllianceFlipUtil.apply(Hub.topCenterPoint)));
-    try {
-      if (writer != null) {
-        writer.append(
-            distanceToHub
-                + ","
-                + inputs[1].velocity
-                + ","
-                + hoodAngle.in(Degrees)
-                + ","
-                + tof
-                + "\n");
-      }
+    try (FileWriter writer = new FileWriter(file, true)) {
+      writer.append(
+          distanceToHub
+              + " ,"
+              + inputs[1].velocity
+              + " ,"
+              + hoodAngle.in(Degrees)
+              + " , "
+              + tof
+              + "\n");
     } catch (Exception e) {
       e.printStackTrace();
     }

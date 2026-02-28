@@ -35,6 +35,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 public class DriveCommands {
   private static final double DEADBAND = 0.1;
@@ -109,19 +110,26 @@ public class DriveCommands {
 
   public static Command recordData(Drive drive, Shooter shooter, Hood hood) {
     Timer time = new Timer();
-    time.restart();
     return Commands.runEnd(
-        () -> {
-          shooter.setVelocitySetpoint(
-              RadiansPerSecond.of(ShooterConstants.Tuning.velocitySetpoint.getAsDouble()));
-          hood.setPosition(() -> HoodConstants.Setpoints.hoodAngle.getAsDouble());
-        },
-        () -> {
-          time.stop();
-          shooter.recordShot(new Pose3d(drive.getPose()), hood.getAngle(), time.get());
-          shooter.stopAll();
-        },
-        shooter);
+            () -> {
+              shooter.setVelocitySetpoint(
+                  RadiansPerSecond.of(ShooterConstants.Tuning.velocitySetpoint.getAsDouble()));
+              hood.setPosition(() -> HoodConstants.Setpoints.hoodAngle.getAsDouble());
+            },
+            () -> {
+              time.stop();
+              shooter.recordShot(new Pose3d(drive.getPose()), hood.getAngle(), time.get());
+              shooter.stopAll();
+              Logger.recordOutput("File Writing/Time", time.get());
+              Logger.recordOutput("File Writing/Shot finished?", true);
+            },
+            shooter)
+        .beforeStarting(
+            () -> {
+              time.reset();
+              time.start();
+              Logger.recordOutput("File Writing/Shot finished?", false);
+            });
   }
 
   /**
@@ -182,7 +190,8 @@ public class DriveCommands {
    */
   public static Command joystickDriveSyom(
       Drive drive, DoubleSupplier xSupplier, DoubleSupplier ySupplier) {
-    // Reuse the existing angle-hold command but source the target angle from the translation stick.
+    // Reuse the existing angle-hold command but source the target angle from the
+    // translation stick.
     return joystickDriveAtAngle(
         drive,
         xSupplier,

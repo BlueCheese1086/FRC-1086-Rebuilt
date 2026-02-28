@@ -53,7 +53,7 @@ public class ShooterConstants {
     public static final double movingSpeedThresholdMps = 0.25;
     public static final double movingRpmChangeWeight = 2.0;
     public static final double movingHoodChangeWeight = 0.5;
-    public static final String FileName = Filesystem.getDeployDirectory() + "Shot.csv";
+    public static final String FileName = "/home/lvuser/logs/Shot.csv";
   }
 
   public static class FeederSetpoints {
