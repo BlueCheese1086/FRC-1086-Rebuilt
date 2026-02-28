@@ -12,7 +12,6 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
-import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 /** Add your docs here. */
 public class HoodConstants {
@@ -35,7 +34,5 @@ public class HoodConstants {
 
   public static class Setpoints {
     public static final Angle passAngle = Degrees.of(60.0);
-    public static final LoggedNetworkNumber hoodAngle =
-        new LoggedNetworkNumber("/Tuning/Hood Setpoint", 55.0);
   }
 }

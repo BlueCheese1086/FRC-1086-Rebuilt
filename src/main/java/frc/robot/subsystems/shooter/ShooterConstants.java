@@ -34,7 +34,7 @@ public class ShooterConstants {
     public static final double cruiseVelocity = 6000.0 / 60.0; // ~ 600 rad per sec;
     public static final double acceleration =
         cruiseVelocity
-            / 0.5; // Cruise velocity / spin up time estimated, low numbers equal more brownouts,
+            / 0.6; // Cruise velocity / spin up time estimated, low numbers equal more brownouts,
     // and high numbers more stable.
     public static final LoggedNetworkNumber velocitySetpoint =
         new LoggedNetworkNumber("/Tuning/Velocity Setpoint", 300.0);

@@ -61,9 +61,9 @@ public class ShooterIOTalonFX implements ShooterIO {
     config.Slot0.StaticFeedforwardSign = StaticFeedforwardSignValue.UseVelocitySign;
 
     config.CurrentLimits.StatorCurrentLimitEnable = true;
-    config.CurrentLimits.StatorCurrentLimit = 120.0; // arbittury
+    config.CurrentLimits.StatorCurrentLimit = 80.0; // arbittury
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
-    config.CurrentLimits.SupplyCurrentLimit = 70.0; // arbittury
+    config.CurrentLimits.SupplyCurrentLimit = 60.0; // arbittury
 
     config.ClosedLoopRamps.VoltageClosedLoopRampPeriod = 0.1;
 

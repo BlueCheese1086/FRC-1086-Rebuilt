@@ -75,7 +75,7 @@ public class Shooter extends SubsystemBase {
             })
         .finallyDo(
             () -> {
-              stopShooter();
+              // stopShooter();
             });
   }
 
@@ -96,9 +96,9 @@ public class Shooter extends SubsystemBase {
   }
 
   public void stopAll() {
-    for (int i = 0; i < io.length; i++) {
-      io[i].setVoltage(0.0);
-    }
+    // for (int i = 0; i < io.length; i++) {
+    //   io[i].setVoltage(0.0);
+    // }
     feederIO.setFeedVoltage(0.0);
   }
 
@@ -123,8 +123,10 @@ public class Shooter extends SubsystemBase {
                 .getTranslation()
                 .getDistance(AllianceFlipUtil.apply(Hub.topCenterPoint)));
     Logger.recordOutput("File Writing/ Distance to Hub", distanceToHub);
-    Logger.recordOutput("File Writing/ Shooter RPM", Units.radiansPerSecondToRotationsPerMinute(inputs[1].velocity));
-              
+    Logger.recordOutput(
+        "File Writing/ Shooter RPM",
+        Units.radiansPerSecondToRotationsPerMinute(inputs[1].velocity));
+
     try (FileWriter writer = new FileWriter(file, true)) {
       writer.append(
           distanceToHub
