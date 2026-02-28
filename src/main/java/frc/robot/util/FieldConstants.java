@@ -57,7 +57,9 @@ public class FieldConstants {
     public static final double oppAllianceZone = defaultAprilTagType.getTagPose(10).get().getX();
 
     public static boolean inAllianceZone(Pose2d pose) {
-      return pose.getX() < allianceZone || pose.getX() > (fieldLength - allianceZone);
+      return AllianceFlipUtil.shouldFlip()
+          ? pose.getX() > allianceZone
+          : pose.getX() < allianceZone;
     }
   }
 

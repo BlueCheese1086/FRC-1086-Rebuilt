@@ -242,8 +242,20 @@ public class ShootingManager {
 
   private static double evaluatePolynomial(double[] coeffs, double x) {
     if (coeffs == null || coeffs.length == 0 || !Double.isFinite(x)) {
-      return 0.0;
+      return Double.NaN;
     }
+    // If all coefficients are (effectively) zero the polynomial is uninitialized.
+    boolean anyNonZero = false;
+    for (double c : coeffs) {
+      if (Math.abs(c) > 1e-12) {
+        anyNonZero = true;
+        break;
+      }
+    }
+    if (!anyNonZero) {
+      return Double.NaN;
+    }
+
     double result = 0.0;
     double power = 1.0;
     for (double coeff : coeffs) {

@@ -44,8 +44,8 @@ public class AutoRoutines {
     kDrive = drive;
     factory = new AutoFactory(drive::getPose, drive::setPose, run(), true, drive);
 
-    // factory.bind("startFeeder", asm.startFeeder());
-    // factory.bind("deployIntake", asm.deployIntake());
+    factory.bind("startFeeder", asm.startFeeder());
+    factory.bind("deployIntake", asm.deployIntake());
   }
   // private static final DoubleSupplier[] xSuppliers = new DoubleSupplier[]
   // {DogLog.tunable("Autos/X/P", Preferences.getDouble("Autos_X_P",
@@ -92,6 +92,7 @@ public class AutoRoutines {
   public static Command runPath(String trajectory, boolean resetPose) {
     return (Commands.runOnce(
                 () -> {
+                  // System.out.println(trajectory);
                   Logger.recordOutput(
                       "Autos/Selected Path", Choreo.loadTrajectory(trajectory).get().getPoses());
                   if (resetPose) {

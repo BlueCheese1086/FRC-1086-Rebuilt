@@ -11,6 +11,7 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -18,6 +19,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -29,6 +31,8 @@ import frc.robot.subsystems.hood.Hood;
 import frc.robot.subsystems.hood.HoodConstants;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterConstants;
+import frc.robot.util.AllianceFlipUtil;
+import frc.robot.util.PoseMath;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
@@ -41,6 +45,12 @@ public class DriveCommands {
   private static final double DEADBAND = 0.1;
   private static final double ANGLE_KP = 10.0;
   private static final double ANGLE_KD = 0.4;
+
+  // Lock Radius
+  private static final double LOCK_RADIUS_KP = 1.5; // normalized output per meter error
+  private static final double LOCK_RADIUS_MAX_OUTPUT = 0.8; // percent of max linear speed
+  private static final double ANGLE_MAX_VELOCITY_LOCK = 50.0;
+  private static final double ANGLE_MAX_ACCELERATION_LOCK = 70.0;
 
   @SuppressWarnings("unused")
   private static final double ANGLE_MAX_VELOCITY = 8.0;
@@ -129,6 +139,32 @@ public class DriveCommands {
               time.reset();
               time.start();
               Logger.recordOutput("File Writing/Shot finished?", false);
+            });
+  }
+
+  private static Pose2d target = Pose2d.kZero;
+
+  public static Command moveBack(Drive drive) {
+    @SuppressWarnings("resource")
+    PIDController movementController = new PIDController(4.0, 0.0, 0.0);
+    return Commands.run(
+            () -> {
+              Pose2d pose = drive.getPose();
+              Logger.recordOutput("Auto Align/Target", target);
+              double speed =
+                  movementController.calculate(
+                      pose.getTranslation().getNorm(), target.getTranslation().getNorm());
+              drive.runVelocity(
+                  ChassisSpeeds.fromFieldRelativeSpeeds(
+                      new ChassisSpeeds(speed, 0.0, 0.0), drive.getRotation()));
+            },
+            drive)
+        .beforeStarting(
+            () -> {
+              Pose2d pose = drive.getPose();
+              target =
+                  pose.transformBy(
+                      new Transform2d(-Units.inchesToMeters(5.0), 0.0, Rotation2d.kZero));
             });
   }
 
@@ -352,6 +388,99 @@ public class DriveCommands {
                               + formatter.format(Units.metersToInches(wheelRadius))
                               + " inches");
                     })));
+  }
+  /**
+   * Field relative drive command that removes radial motion to a target (locks radius), while using
+   * PID to continuously face the target.
+   */
+  public static Command joystickDriveLockRadiusToTarget(
+      Drive drive,
+      DoubleSupplier xSupplier,
+      DoubleSupplier ySupplier,
+      Supplier<Pose2d> targetSupplier) {
+
+    // Create PID controller for heading
+    ProfiledPIDController angleController =
+        new ProfiledPIDController(
+            ANGLE_KP,
+            0.0,
+            ANGLE_KD,
+            new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY_LOCK, ANGLE_MAX_ACCELERATION_LOCK));
+    angleController.enableContinuousInput(-Math.PI, Math.PI);
+
+    final double[] lockedRadius = new double[] {0.0};
+
+    return Commands.run(
+            () -> {
+              Pose2d robotPose = drive.getPose();
+              Pose2d targetPose = targetSupplier.get();
+
+              // Get raw field-relative velocity from joysticks
+              Translation2d rawVelocity =
+                  getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
+
+              // Compute radial unit vector from target to robot
+              Translation2d radial = robotPose.getTranslation().minus(targetPose.getTranslation());
+              double radius = radial.getNorm();
+
+              Translation2d tangentialVelocity = Translation2d.kZero;
+              if (radius > 0.0001) {
+                Translation2d radialUnit = radial.div(radius);
+                double radialComponent =
+                    rawVelocity.getX() * radialUnit.getX() + rawVelocity.getY() * radialUnit.getY();
+                // Remove radial component to lock distance
+                tangentialVelocity = rawVelocity.minus(radialUnit.times(radialComponent));
+
+                // Add small radial correction to hold radius against drift
+                double radiusError = radius - lockedRadius[0];
+                double correction =
+                    MathUtil.clamp(
+                        -radiusError * LOCK_RADIUS_KP,
+                        -LOCK_RADIUS_MAX_OUTPUT,
+                        LOCK_RADIUS_MAX_OUTPUT);
+                tangentialVelocity = tangentialVelocity.plus(radialUnit.times(correction));
+              }
+
+              // Calculate desired heading to face target
+              Rotation2d targetHeading = PoseMath.getOrientationToTarget(robotPose, targetPose);
+              // Rotation2d finalWithOffset =
+              // new Rotation2d(targetHeading.getRadians() + Units.degreesToRadians(15.0));
+              double omega =
+                  angleController.calculate(
+                      drive.getRotation().getRadians(), targetHeading.getRadians());
+
+              // Convert to field relative speeds & send command
+              ChassisSpeeds speeds =
+                  new ChassisSpeeds(
+                      tangentialVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
+                      tangentialVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
+                      omega);
+
+              boolean isFlipped = AllianceFlipUtil.shouldFlip();
+              Logger.recordOutput(
+                  "Lock Radius/Speeds",
+                  ChassisSpeeds.fromFieldRelativeSpeeds(
+                      speeds,
+                      isFlipped
+                          ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                          : drive.getRotation()));
+              drive.runVelocity(
+                  ChassisSpeeds.fromFieldRelativeSpeeds(
+                      speeds,
+                      isFlipped
+                          ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                          : drive.getRotation()));
+            },
+            drive)
+        .beforeStarting(
+            () -> {
+              angleController.reset(drive.getRotation().getRadians());
+              lockedRadius[0] =
+                  drive
+                      .getPose()
+                      .getTranslation()
+                      .getDistance(targetSupplier.get().getTranslation());
+            });
   }
 
   private static class WheelRadiusCharacterizationState {
