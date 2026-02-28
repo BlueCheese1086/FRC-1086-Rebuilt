@@ -21,6 +21,7 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShotCalc;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.climb.Climb;
+import frc.robot.subsystems.climb.ClimbConstants;
 import frc.robot.subsystems.climb.ClimbIO;
 import frc.robot.subsystems.climb.ClimbIOSim;
 import frc.robot.subsystems.climb.ClimbIOTalonFX;
@@ -31,6 +32,7 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.hood.Hood;
+import frc.robot.subsystems.hood.HoodConstants;
 import frc.robot.subsystems.hood.HoodIO;
 import frc.robot.subsystems.hood.HoodIOServo;
 import frc.robot.subsystems.hood.HoodIOSim;
@@ -60,8 +62,10 @@ import frc.robot.subsystems.vision.VisionIOSim;
 import frc.robot.util.FieldConstants.Hub;
 import frc.robot.util.PoseMath;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import frc.robot.util.FieldConstants;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;

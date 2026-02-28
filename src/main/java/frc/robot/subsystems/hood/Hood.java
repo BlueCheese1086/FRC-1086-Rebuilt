@@ -34,10 +34,10 @@ public class Hood extends SubsystemBase {
     this.io = io;
   }
 
-  public Command setAngle(Supplier<Angle> angle) {
-    Logger.recordOutput("/Hood/Map/0-1", AngleToPosition.get(angle.get().in(Degrees)));
-    Logger.recordOutput("/Hood/Map/key", angle.get().in(Degrees));
-    return Commands.runOnce(() -> io.setPosition(AngleToPosition.get(angle.get().in(Degrees))));
+  public Command setAngle(Angle angle) {
+    Logger.recordOutput("/Hood/Map/0-1", AngleToPosition.get(angle.in(Degrees)));
+    Logger.recordOutput("/Hood/Map/key", angle.in(Degrees));
+    return Commands.runOnce(() -> io.setPosition(AngleToPosition.get(angle.in(Degrees))));
   }
 
   public void moveToAngle(Supplier<Angle> angle) {
