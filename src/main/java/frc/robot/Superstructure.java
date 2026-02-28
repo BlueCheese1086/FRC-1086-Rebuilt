@@ -239,6 +239,8 @@ public class Superstructure extends SubsystemBase {
                 intake.setVoltage(Volts.of(12.0)),
                 indexer.setVoltage(IndexerConstants.Setpoints.intake)));
 
+    stateTriggers.get(State.intake).whileTrue(DriveCommands.joystickDriveSyom(drive, ControllerLayout.joystickX, ControllerLayout.joystickY));
+
     // While intaking, override turning control so robot yaw faces direction of travel (SYOM).
     // This makes lining the intake up with balls much easier.
     stateTriggers

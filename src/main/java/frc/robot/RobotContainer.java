@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Superstructure.ControllerLayout;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShotCalc;
 import frc.robot.generated.TunerConstants;
@@ -267,16 +268,8 @@ public class RobotContainer {
         Commands.run(
             () -> hood.setAngle(Degrees.of(HoodConstants.Setpoints.hoodAngle.get())), hood));
 
-
-    driver
-        .leftTrigger()
-        .whileTrue(
-            Commands.parallel(
-                intake.setVoltage(IntakeConstants.Setpoints.run),
-                intake.setPosition(IntakeConstants.Setpoints.deployed)));
-    driver.povDown().whileTrue(DriveCommands.moveBack(drive));
-
     driver.y().whileTrue(Commands.parallel(
+                DriveCommands.joystickDriveLockRadiusToTarget(drive, ControllerLayout.joystickX, ControllerLayout.joystickY, () -> FieldConstants.Hub.hubCenter),
                 shooter.setVelocity(
                     () -> {
                       return RPM.of(
@@ -293,16 +286,16 @@ public class RobotContainer {
                           .hoodPosition;
                     })));
 
-    driver.rightTrigger().whileTrue(indexer.setVoltage(IndexerConstants.Setpoints.feed));
+    driver
+        .leftTrigger()
+        .whileTrue(
+            Commands.parallel(
+                DriveCommands.joystickDriveSyom(drive, ControllerLayout.joystickX, ControllerLayout.joystickY),
+                intake.setVoltage(IntakeConstants.Setpoints.run),
+                intake.setPosition(IntakeConstants.Setpoints.deployed)));
 
     // Operator Commands
-    operator
-        .rightTrigger()
-        .onTrue(
-            climb
-                .setPosition(ClimbConstants.extendedHeight)
-                .until(() -> climb.atSetpoint())
-                .andThen(climb.setPosition(ClimbConstants.retractedHeight)));
+
     }
 
     // Driver X -> Shoot-on-the-move test (hold to aim and spin up). This also locks
