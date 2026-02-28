@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -77,9 +78,9 @@ public class Shooter extends SubsystemBase {
             });
   }
 
-  public void setVelocitySetpoint(AngularVelocity radPerSec) {
+  public void setVelocitySetpoint(Supplier<AngularVelocity> radPerSec) {
     for (int i = 0; i < io.length; i++) {
-      io[i].setVelocity(radPerSec);
+      io[i].setVelocity(radPerSec.get());
     }
   }
 
@@ -133,6 +134,15 @@ public class Shooter extends SubsystemBase {
     } catch (Exception e) {
       e.printStackTrace();
     }
+  }
+
+  public Pose3d[] getShooterPoses(Pose2d robotPose) {
+    Pose3d robot3d = new Pose3d(robotPose);
+    return new Pose3d[] {
+      robot3d.transformBy(ShooterConstants.ShooterTransforms.leftShooter),
+      robot3d.transformBy(ShooterConstants.ShooterTransforms.centerShooter),
+      robot3d.transformBy(ShooterConstants.ShooterTransforms.rightShooter)
+    };
   }
 
   @Override

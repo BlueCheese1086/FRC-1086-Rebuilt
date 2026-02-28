@@ -99,7 +99,6 @@ public class IntakeIOTalonFX implements IntakeIO {
     config.MotionMagic.MotionMagicAcceleration =
         maxPivotVelocity.per(Second).in(RotationsPerSecondPerSecond);
     config.MotionMagic.MotionMagicCruiseVelocity = maxPivotVelocity.in(RotationsPerSecond);
-    config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
     PhoenixUtil.tryUntilOk(5, () -> (pivot.getConfigurator().apply(config, 5)));
 

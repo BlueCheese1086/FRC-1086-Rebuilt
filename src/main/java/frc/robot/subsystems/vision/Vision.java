@@ -4,13 +4,11 @@
 
 package frc.robot.subsystems.vision;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 import frc.robot.subsystems.vision.VisionIO.VisionInputs;
@@ -56,10 +54,7 @@ public class Vision extends SubsystemBase {
       cameras[i].updatePose(poseSupplier.get());
       Logger.processInputs("Vision/Camera " + i, inputs[i]);
       if (Robot.isReal()) {
-        // && !VisionUtil.checkForInverseRead(inputs[i].pose, inputs[i].tagsUsed)
-        if (VisionUtil.inFieldBounds(inputs[i].pose)
-            && (MathUtil.applyDeadband(Timer.getFPGATimestamp() - inputs[i].timestamp, 2.5)
-                == 0.0)) {
+        if (VisionUtil.inFieldBounds(inputs[i].pose)) {
           consumer.accept(inputs[i].pose, inputs[i].timestamp, calculateSTDDevs(inputs[i]));
         }
       }

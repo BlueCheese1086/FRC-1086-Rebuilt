@@ -170,7 +170,7 @@ public class AutoStateMachine {
     return Commands.runOnce(
         () ->
             shooter.setVelocitySetpoint(
-                RadiansPerSecond.of(ShooterConstants.Tuning.velocitySetpoint.getAsDouble())),
+                () -> RadiansPerSecond.of(ShooterConstants.Tuning.velocitySetpoint.getAsDouble())),
         shooter);
   }
 

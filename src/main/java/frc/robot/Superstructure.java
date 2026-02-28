@@ -216,7 +216,7 @@ public class Superstructure extends SubsystemBase {
             Commands.parallel(
                 indexer.setVoltage(Volts.of(0.0)),
                 intake.setVoltage(Volts.of(0.0)),
-                Commands.runOnce(() -> shooter.setVelocitySetpoint(RadiansPerSecond.of(0.0)))));
+                Commands.runOnce(() -> shooter.setVelocitySetpoint(RadiansPerSecond::zero))));
 
     stateTriggers.get(State.idle).onTrue(intake.setPosition(IntakeConstants.Setpoints.stowed));
     ControllerLayout.flushRequest.whileTrue(Commands.parallel());
@@ -239,7 +239,11 @@ public class Superstructure extends SubsystemBase {
                 intake.setVoltage(Volts.of(12.0)),
                 indexer.setVoltage(IndexerConstants.Setpoints.intake)));
 
-    stateTriggers.get(State.intake).whileTrue(DriveCommands.joystickDriveSyom(drive, ControllerLayout.joystickX, ControllerLayout.joystickY));
+    stateTriggers
+        .get(State.intake)
+        .whileTrue(
+            DriveCommands.joystickDriveSyom(
+                drive, ControllerLayout.joystickX, ControllerLayout.joystickY));
 
     // While intaking, override turning control so robot yaw faces direction of travel (SYOM).
     // This makes lining the intake up with balls much easier.

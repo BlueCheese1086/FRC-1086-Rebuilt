@@ -7,11 +7,13 @@ package frc.robot.subsystems.vision;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import frc.robot.subsystems.vision.VisionIO.ObservationType;
 import frc.robot.util.FieldConstants;
+import java.util.Optional;
 
 /** Add your docs here. */
 public class VisionUtil {
@@ -38,14 +40,21 @@ public class VisionUtil {
   }
 
   public static boolean checkForInverseRead(Pose2d pose, int[] usedIds) {
+    if (pose == null || usedIds.length == 0) {
+      return false;
+    }
     Rotation2d poseRotation = pose.getRotation();
     boolean isBad = false;
     for (int i = 0; i < usedIds.length; i++) {
       if (usedIds[i] > 0) {
-        Pose2d tagPose = FieldConstants.defaultAprilTagType.getTagPose(i).get().toPose2d();
-        if (MathUtil.isNear(
-            tagPose.getRotation().getRadians(), poseRotation.getRadians(), Math.PI)) {
-          isBad = true;
+        Optional<Pose3d> tagPose = FieldConstants.defaultAprilTagType.getTagPose(i);
+        if (tagPose.isPresent()) {
+          if (MathUtil.isNear(
+              tagPose.get().toPose2d().getRotation().getRadians(),
+              poseRotation.getRadians(),
+              Math.PI)) {
+            isBad = true;
+          }
         }
       }
     }

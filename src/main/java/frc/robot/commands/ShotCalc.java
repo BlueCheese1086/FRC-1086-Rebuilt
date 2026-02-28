@@ -4,6 +4,7 @@
 
 package frc.robot.commands;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 
@@ -12,6 +13,7 @@ import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.math.interpolation.Interpolator;
 import edu.wpi.first.math.interpolation.InverseInterpolator;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import frc.robot.subsystems.hood.Hood;
 import frc.robot.subsystems.shooter.ShooterConstants;
@@ -54,9 +56,13 @@ public class ShotCalc {
     }
 
     public double getMPS() {
-      return Rotation2d.fromDegrees(Hood.AngleToPosition.get(hoodPosition)).getCos()
+      return Rotation2d.fromDegrees(Hood.InvertAngleToPosition.get(hoodPosition)).getCos()
           * (Units.rotationsToRadians(shooterRPM / 60)
               * ShooterConstants.Mechanical.flywheelRadius.in(Meters));
+    }
+
+    public Angle getAngle() {
+      return Degrees.of(Hood.InvertAngleToPosition.get(hoodPosition));
     }
   }
 

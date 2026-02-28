@@ -71,7 +71,7 @@ public class ShooterConstants {
     // calculating the distance to the hub.
     public static final Transform3d shooterPose =
         new Transform3d(
-            shooterXOffset.in(Meters),
+            -Units.inchesToMeters(8.5),
             shooterYOffset.in(Meters),
             shooterHeight.in(Meters),
             new Rotation3d());
@@ -79,8 +79,21 @@ public class ShooterConstants {
 
   public static class ShooterTransforms {
     public static final Transform3d leftShooter =
-        new Transform3d(new Translation3d(Units.inchesToMeters(0), 0, 0), Rotation3d.kZero);
-    public static final Transform3d centerShooter = new Transform3d();
-    public static final Transform3d rightShooter = new Transform3d();
+        new Transform3d(
+            new Translation3d(
+                -Units.inchesToMeters(8.5), Units.inchesToMeters(6.5), Units.inchesToMeters(26)),
+            Rotation3d.kZero);
+    public static final Transform3d centerShooter =
+        new Transform3d(
+            -Units.inchesToMeters(8.5),
+            Units.inchesToMeters(0.0),
+            Units.inchesToMeters(26),
+            Rotation3d.kZero);
+    public static final Transform3d rightShooter =
+        new Transform3d(
+            -Units.inchesToMeters(8.5),
+            -Units.inchesToMeters(6.5),
+            Units.inchesToMeters(26),
+            Rotation3d.kZero);
   }
 }

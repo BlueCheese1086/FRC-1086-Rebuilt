@@ -20,12 +20,17 @@ import org.littletonrobotics.junction.Logger;
 public class Hood extends SubsystemBase {
   public static final InterpolatingDoubleTreeMap AngleToPosition = new InterpolatingDoubleTreeMap();
 
+  public static final InterpolatingDoubleTreeMap InvertAngleToPosition =
+      new InterpolatingDoubleTreeMap();
   private Angle setAngle = Radians.zero();
   private final HoodInputsAutoLogged inputs = new HoodInputsAutoLogged();
 
   static {
     AngleToPosition.put(81.0, 0.01);
     AngleToPosition.put(54.0, 0.77);
+
+    InvertAngleToPosition.put(0.01, 81.0);
+    InvertAngleToPosition.put(0.77, 54.0);
   }
 
   private final HoodIO io;
@@ -37,12 +42,14 @@ public class Hood extends SubsystemBase {
   public Command setAngle(Angle angle) {
     Logger.recordOutput("/Hood/Map/0-1", AngleToPosition.get(angle.in(Degrees)));
     Logger.recordOutput("/Hood/Map/key", angle.in(Degrees));
-    return Commands.runOnce(() -> io.setPosition(AngleToPosition.get(angle.in(Degrees))));
+    return this.run(() -> io.setPosition(AngleToPosition.get(angle.in(Degrees)))).withTimeout(0.1);
   }
 
-  public void moveToAngle(Supplier<Angle> angle) {
-    setAngle = angle.get();
-    io.setPosition(AngleToPosition.get(angle.get().in(Degrees)));
+  public Command setAngle(Supplier<Angle> angle) {
+    Logger.recordOutput("/Hood/Map/0-1", AngleToPosition.get(angle.get().in(Degrees)));
+    Logger.recordOutput("/Hood/Map/key", angle.get().in(Degrees));
+    return this.run(() -> io.setPosition(AngleToPosition.get(angle.get().in(Degrees))))
+        .withTimeout(0.1);
   }
 
   /* expects a value between 0 and 1 */
