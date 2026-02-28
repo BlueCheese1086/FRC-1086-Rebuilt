@@ -303,43 +303,44 @@ public class RobotContainer {
                 .setPosition(ClimbConstants.extendedHeight)
                 .until(() -> climb.atSetpoint())
                 .andThen(climb.setPosition(ClimbConstants.retractedHeight)));
+    }
 
-    // Operator X -> Shoot-on-the-move test (hold to aim and spin up). This also locks
+    // Driver X -> Shoot-on-the-move test (hold to aim and spin up). This also locks
     // rotation to the computed SOTM heading while held (driver retains translation control).
-    driver
-        .x()
-        .whileTrue(
-            Commands.parallel(
-                // (1) continuously update shooter and hood setpoints
-                Commands.run(
-                    () -> {
-                      var sol =
-                          shootingManager.calculateShotSolution(
-                              drive.getPose(),
-                              drive.getChassisSpeeds(),
-                              FieldConstants.Hub.topCenterPoint,
-                              0.10,
-                              0.10);
-                      shooter.setVelocitySetpoint(RotationsPerSecond.of(sol.flywheelRpm / 60.0));
-                      hood.setAngle(Degrees.of(Math.toDegrees(sol.hoodPitchRad)));
-                    },
-                    shooter,
-                    hood),
+//     driver
+//         .x()
+//         .whileTrue(
+//             Commands.parallel(
+//                 // (1) continuously update shooter and hood setpoints
+//                 Commands.run(
+//                     () -> {
+//                       var sol =
+//                           shootingManager.calculateShotSolution(
+//                               drive.getPose(),
+//                               drive.getChassisSpeeds(),
+//                               FieldConstants.Hub.topCenterPoint,
+//                               0.10,
+//                               0.10);
+//                       shooter.setVelocitySetpoint(RotationsPerSecond.of(sol.flywheelRpm / 60.0));
+//                       hood.setAngle(Degrees.of(Math.toDegrees(sol.hoodPitchRad)));
+//                     },
+//                     shooter,
+//                     hood),
 
-                // (2) keep driver translation but force rotation to the SOTM heading
-                DriveCommands.joystickDriveAtAngle(
-                    drive,
-                    () -> -driver.getLeftY(),
-                    () -> -driver.getLeftX(),
-                    () ->
-                        shootingManager.calculateShotSolution(
-                                drive.getPose(),
-                                drive.getChassisSpeeds(),
-                                FieldConstants.Hub.topCenterPoint,
-                                0.10,
-                                0.10)
-                            .drivetrainHeading)));
-  }
+//                 // (2) keep driver translation but force rotation to the SOTM heading
+//                 DriveCommands.joystickDriveAtAngle(
+//                     drive,
+//                     () -> -driver.getLeftY(),
+//                     () -> -driver.getLeftX(),
+//                     () ->
+//                         shootingManager.calculateShotSolution(
+//                                 drive.getPose(),
+//                                 drive.getChassisSpeeds(),
+//                                 FieldConstants.Hub.topCenterPoint,
+//                                 0.10,
+//                                 0.10)
+//                             .drivetrainHeading)));
+//   }
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
