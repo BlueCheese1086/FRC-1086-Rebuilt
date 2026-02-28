@@ -60,9 +60,7 @@ import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.shooter.ShooterIOTalonFX;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
-import frc.robot.subsystems.vision.VisionIO;
-import frc.robot.subsystems.vision.VisionIOLimelight;
-import frc.robot.subsystems.vision.VisionIOSim;
+import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -92,7 +90,7 @@ public class RobotContainer {
   private final Climb climb;
 
   @SuppressWarnings("unused")
-  //   private final Superstructure superstructure;
+  // private final Superstructure superstructure;
 
   // private final AutoBuilder autobuilder;
   // Controller
@@ -115,16 +113,20 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
-
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                drive::getPose,
-                // new VisionIOPhotonVision(
-                // "left", VisionConstants.PhysicalConstants.cameraTransforms[0]),
-                // new VisionIOPhotonVision(
-                // "right", VisionConstants.PhysicalConstants.cameraTransforms[1]),
-                new VisionIOLimelight("marble"));
+                VisionConstants.fieldLayout,
+                new VisionIOPhotonVision(
+                    "backLeft",
+                    VisionConstants.robotToLeftCam,
+                    drive::getRotation,
+                    VisionConstants.fieldLayout),
+                new VisionIOPhotonVision(
+                    "backRight",
+                    VisionConstants.robotToRightCam,
+                    drive::getRotation,
+                    VisionConstants.fieldLayout));
 
         intake = new Intake(new IntakeIOTalonFX());
         indexer = new Indexer(new IndexerIOTalonFX());
@@ -151,9 +153,17 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                drive::getPose,
-                new VisionIOSim("left", VisionConstants.PhysicalConstants.cameraTransforms[0]),
-                new VisionIOSim("right", VisionConstants.PhysicalConstants.cameraTransforms[1]));
+                VisionConstants.fieldLayout,
+                new VisionIOPhotonVision(
+                    "backLeft",
+                    VisionConstants.robotToLeftCam,
+                    drive::getRotation,
+                    VisionConstants.fieldLayout),
+                new VisionIOPhotonVision(
+                    "backRight",
+                    VisionConstants.robotToRightCam,
+                    drive::getRotation,
+                    VisionConstants.fieldLayout));
         indexer = new Indexer(new IndexerIOSim());
         intake = new Intake(new IntakeIOSim());
         shooter =
@@ -175,8 +185,18 @@ public class RobotContainer {
 
         vision =
             new Vision(
-                drive::addVisionMeasurement, drive::getPose, new VisionIO() {}, new VisionIO() {});
-
+                drive::addVisionMeasurement,
+                VisionConstants.fieldLayout,
+                new VisionIOPhotonVision(
+                    "left",
+                    VisionConstants.robotToLeftCam,
+                    drive::getRotation,
+                    VisionConstants.fieldLayout),
+                new VisionIOPhotonVision(
+                    "right",
+                    VisionConstants.robotToRightCam,
+                    drive::getRotation,
+                    VisionConstants.fieldLayout));
         shooter = new Shooter(new FeederIO() {}, new ShooterIO() {});
         intake = new Intake(new IntakeIO() {});
         indexer = new Indexer(new IndexerIO() {});
@@ -200,16 +220,16 @@ public class RobotContainer {
     Superstructure.ControllerLayout.driverHid = driver::getHID;
 
     // superstructure =
-    //     new Superstructure(
-    //         drive,
-    //         intake,
-    //         shooter,
-    //         indexer,
-    //         hood,
-    //         climb,
-    //         drive::getPose,
-    //         drive::getChassisSpeeds,
-    //         drive::getRotation);
+    // new Superstructure(
+    // drive,
+    // intake,
+    // shooter,
+    // indexer,
+    // hood,
+    // climb,
+    // drive::getPose,
+    // drive::getChassisSpeeds,
+    // drive::getRotation);
     // autobuilder = new AutoBuilder(superstructure, drive);
 
     // Set up auto routines

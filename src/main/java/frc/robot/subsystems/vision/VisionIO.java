@@ -1,43 +1,47 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.subsystems.vision;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;
 
-/** Add your docs here. */
 public interface VisionIO {
+  public enum measurementType {
+    MultiTag,
+    SingleTag,
+    MegaTag
+  }
+
   @AutoLog
-  public class VisionInputs {
-    public Pose2d pose = Pose2d.kZero;
-    public Pose3d estimatedPose = Pose3d.kZero;
-    public double timestamp = 0.0;
-    public int tagCount = 0;
-    public Pose3d[] usedTagPoses = new Pose3d[] {};
-    public double averageDistance = 0.0;
-    public ObservationType type = ObservationType.Empty;
-    public int[] tagsUsed = new int[] {};
+  public static class VisionIOInputs {
+    public boolean connected = false;
+    public TargetObservation latestTargetObservation =
+        new TargetObservation(new Rotation2d(), new Rotation2d());
+    public PoseObservation[] poseObservations = new PoseObservation[0];
+    public int[] tagIds = new int[0];
+    public AlgaePoses[] algaePose = new AlgaePoses[0];
   }
 
-  public static enum ObservationType {
-    PhotonMultiTag,
-    PhotonTrig,
-    PhotonPnP,
-    LimeLightMegatag1,
-    LimeLightMegatag2,
-    Empty
+  /** Represents the angle to a simple target, not used for pose estimation. */
+  public static record TargetObservation(Rotation2d tx, Rotation2d ty) {}
+
+  /** Represents a robot pose sample used for pose estimation. */
+  public static record PoseObservation(
+      double timestamp,
+      Pose3d pose,
+      double ambiguity,
+      int tagCount,
+      double averageTagDistance,
+      PoseObservationType type) {}
+
+  public static enum PoseObservationType {
+    MEGATAG_1,
+    MULTITAG,
+    PHOTONVISION
   }
 
-  public default Pose3d getPose() {
-    return Pose3d.kZero;
-  }
+  // add more later
+  public static record AlgaePoses(Pose2d algaePose) {}
 
-  public default void updatePose(
-      Pose2d robotPose) {} // Use this to set sim pose in Sim and update rotation in Real for both
-  // PhotonVision and Limelight
-
-  public default void updateInputs(VisionInputs inputs) {}
+  public default void updateInputs(VisionIOInputs inputs) {}
 }
