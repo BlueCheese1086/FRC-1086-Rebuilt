@@ -62,9 +62,16 @@ public record ChoreoTraj(
 	public static final ChoreoTraj cs_dc = new ChoreoTraj(
 	    "cs_dc",
 	    OptionalInt.empty(),
-	    0.94038,
+	    1.43518,
 	    new Pose2d(1.8, 4, Rotation2d.fromRadians(0)),
-	    new Pose2d(0.8, 4.7, Rotation2d.fromRadians(0))
+	    new Pose2d(1.1, 4.7, Rotation2d.fromRadians(0))
+	);
+	public static final ChoreoTraj cs_di = new ChoreoTraj(
+	    "cs_di",
+	    OptionalInt.empty(),
+	    0.79719,
+	    new Pose2d(1.8, 4, Rotation2d.fromRadians(0)),
+	    new Pose2d(0.7, 6, Rotation2d.fromRadians(3.14))
 	);
 	public static final ChoreoTraj cs_dt = new ChoreoTraj(
 	    "cs_dt",
@@ -83,7 +90,7 @@ public record ChoreoTraj(
 	public static final ChoreoTraj cs_oc = new ChoreoTraj(
 	    "cs_oc",
 	    OptionalInt.empty(),
-	    0.883,
+	    1.02716,
 	    new Pose2d(1.8, 4, Rotation2d.fromRadians(0)),
 	    new Pose2d(0.8, 2.8, Rotation2d.fromRadians(3.14))
 	);
@@ -118,7 +125,7 @@ public record ChoreoTraj(
 	public static final ChoreoTraj dbsr_dc = new ChoreoTraj(
 	    "dbsr_dc",
 	    OptionalInt.empty(),
-	    1.6356,
+	    1.64551,
 	    new Pose2d(3.4, 5.5, Rotation2d.fromRadians(3.142)),
 	    new Pose2d(1.1, 4.7, Rotation2d.fromRadians(0))
 	);
@@ -128,6 +135,13 @@ public record ChoreoTraj(
 	    0.55916,
 	    new Pose2d(3.4, 5.5, Rotation2d.fromRadians(3.142)),
 	    new Pose2d(2.9, 6.5, Rotation2d.fromRadians(-0.97))
+	);
+	public static final ChoreoTraj dbsr_di = new ChoreoTraj(
+	    "dbsr_di",
+	    OptionalInt.empty(),
+	    0.84179,
+	    new Pose2d(3.4, 5.5, Rotation2d.fromRadians(3.142)),
+	    new Pose2d(0.7, 6, Rotation2d.fromRadians(3.14))
 	);
 	public static final ChoreoTraj dbsr_dns = new ChoreoTraj(
 	    "dbsr_dns",
@@ -146,7 +160,7 @@ public record ChoreoTraj(
 	public static final ChoreoTraj dbsr_oc = new ChoreoTraj(
 	    "dbsr_oc",
 	    OptionalInt.empty(),
-	    1.21045,
+	    1.26111,
 	    new Pose2d(3.4, 5.5, Rotation2d.fromRadians(3.142)),
 	    new Pose2d(0.8, 2.8, Rotation2d.fromRadians(3.14))
 	);
@@ -192,6 +206,13 @@ public record ChoreoTraj(
 	    new Pose2d(3.4, 5.5, Rotation2d.fromRadians(-0.79)),
 	    new Pose2d(2.9, 6.5, Rotation2d.fromRadians(-0.97))
 	);
+	public static final ChoreoTraj dbs_di = new ChoreoTraj(
+	    "dbs_di",
+	    OptionalInt.empty(),
+	    0.838,
+	    new Pose2d(3.4, 5.5, Rotation2d.fromRadians(-0.79)),
+	    new Pose2d(0.7, 6, Rotation2d.fromRadians(3.14))
+	);
 	public static final ChoreoTraj dbs_dns = new ChoreoTraj(
 	    "dbs_dns",
 	    OptionalInt.empty(),
@@ -227,6 +248,13 @@ public record ChoreoTraj(
 	    new Pose2d(3.4, 5.5, Rotation2d.fromRadians(-0.79)),
 	    new Pose2d(2, 2.5, Rotation2d.fromRadians(0.51))
 	);
+	public static final ChoreoTraj db_crn = new ChoreoTraj(
+	    "db_crn",
+	    OptionalInt.empty(),
+	    1.9291,
+	    new Pose2d(4.6, 5.5, Rotation2d.fromRadians(-0.79)),
+	    new Pose2d(8.7, 4, Rotation2d.fromRadians(-0.79))
+	);
 	public static final ChoreoTraj db_dbs = new ChoreoTraj(
 	    "db_dbs",
 	    OptionalInt.empty(),
@@ -241,12 +269,68 @@ public record ChoreoTraj(
 	    new Pose2d(4.6, 5.5, Rotation2d.fromRadians(-0.79)),
 	    new Pose2d(6, 5.5, Rotation2d.fromRadians(3.14))
 	);
+	public static final ChoreoTraj db_dfrn = new ChoreoTraj(
+	    "db_dfrn",
+	    OptionalInt.empty(),
+	    1.34708,
+	    new Pose2d(4.6, 5.5, Rotation2d.fromRadians(-0.79)),
+	    new Pose2d(8.7, 6.4, Rotation2d.fromRadians(-0.79))
+	);
+	public static final ChoreoTraj db_dfsn = new ChoreoTraj(
+	    "db_dfsn",
+	    OptionalInt.empty(),
+	    0.76432,
+	    new Pose2d(4.6, 5.5, Rotation2d.fromRadians(-0.79)),
+	    new Pose2d(7.7, 6, Rotation2d.fromRadians(-0.4))
+	);
+	public static final ChoreoTraj db_dnrn = new ChoreoTraj(
+	    "db_dnrn",
+	    OptionalInt.empty(),
+	    1.52423,
+	    new Pose2d(4.6, 5.5, Rotation2d.fromRadians(-0.79)),
+	    new Pose2d(8.7, 5.2, Rotation2d.fromRadians(-0.79))
+	);
+	public static final ChoreoTraj db_dnsn = new ChoreoTraj(
+	    "db_dnsn",
+	    OptionalInt.empty(),
+	    0.78168,
+	    new Pose2d(4.6, 5.5, Rotation2d.fromRadians(-0.79)),
+	    new Pose2d(7.7, 4.6, Rotation2d.fromRadians(-0.4))
+	);
 	public static final ChoreoTraj db_ocn = new ChoreoTraj(
 	    "db_ocn",
 	    OptionalInt.empty(),
 	    1.12461,
 	    new Pose2d(4.6, 5.5, Rotation2d.fromRadians(-0.79)),
 	    new Pose2d(6, 2.5, Rotation2d.fromRadians(3.14))
+	);
+	public static final ChoreoTraj db_ofrn = new ChoreoTraj(
+	    "db_ofrn",
+	    OptionalInt.empty(),
+	    2.55492,
+	    new Pose2d(4.6, 5.5, Rotation2d.fromRadians(-0.79)),
+	    new Pose2d(8.7, 1.6, Rotation2d.fromRadians(-0.79))
+	);
+	public static final ChoreoTraj db_ofsn = new ChoreoTraj(
+	    "db_ofsn",
+	    OptionalInt.empty(),
+	    1.33452,
+	    new Pose2d(4.6, 5.5, Rotation2d.fromRadians(-0.79)),
+	    new Pose2d(7.7, 2, Rotation2d.fromRadians(0.4))
+	);
+	public static final ChoreoTraj db_onrn = new ChoreoTraj(
+	    "db_onrn",
+	    OptionalInt.empty(),
+	    2.21687,
+	    new Pose2d(4.6, 5.5, Rotation2d.fromRadians(-0.79)),
+	    new Pose2d(8.7, 2.8, Rotation2d.fromRadians(-0.79))
+	);
+	public static final ChoreoTraj db_onsn = new ChoreoTraj(
+	    "db_onsn",
+	    OptionalInt.empty(),
+	    1.02993,
+	    new Pose2d(4.6, 5.5, Rotation2d.fromRadians(-0.79)),
+	    new Pose2d(7.7, 3.4, Rotation2d.fromRadians(0.4))
 	);
 	public static final ChoreoTraj dcn_db = new ChoreoTraj(
 	    "dcn_db",
@@ -342,9 +426,16 @@ public record ChoreoTraj(
 	public static final ChoreoTraj dfs_dc = new ChoreoTraj(
 	    "dfs_dc",
 	    OptionalInt.empty(),
-	    0.87027,
+	    1.34933,
 	    new Pose2d(2.9, 6.5, Rotation2d.fromRadians(-0.97)),
-	    new Pose2d(0.8, 4.7, Rotation2d.fromRadians(0))
+	    new Pose2d(1.1, 4.7, Rotation2d.fromRadians(0))
+	);
+	public static final ChoreoTraj dfs_di = new ChoreoTraj(
+	    "dfs_di",
+	    OptionalInt.empty(),
+	    0.69983,
+	    new Pose2d(2.9, 6.5, Rotation2d.fromRadians(-0.97)),
+	    new Pose2d(0.7, 6, Rotation2d.fromRadians(3.14))
 	);
 	public static final ChoreoTraj dfs_dt = new ChoreoTraj(
 	    "dfs_dt",
@@ -482,9 +573,9 @@ public record ChoreoTraj(
 	public static final ChoreoTraj dns_dc = new ChoreoTraj(
 	    "dns_dc",
 	    OptionalInt.empty(),
-	    0.55245,
+	    1.04591,
 	    new Pose2d(2, 5.5, Rotation2d.fromRadians(-0.51)),
-	    new Pose2d(0.8, 4.7, Rotation2d.fromRadians(3.14))
+	    new Pose2d(1.1, 4.7, Rotation2d.fromRadians(0))
 	);
 	public static final ChoreoTraj dns_di = new ChoreoTraj(
 	    "dns_di",
@@ -510,7 +601,7 @@ public record ChoreoTraj(
 	public static final ChoreoTraj dns_oc = new ChoreoTraj(
 	    "dns_oc",
 	    OptionalInt.empty(),
-	    1.14399,
+	    1.38301,
 	    new Pose2d(2, 5.5, Rotation2d.fromRadians(-0.51)),
 	    new Pose2d(0.8, 2.8, Rotation2d.fromRadians(3.14))
 	);
@@ -545,9 +636,9 @@ public record ChoreoTraj(
 	public static final ChoreoTraj dtsr_dc = new ChoreoTraj(
 	    "dtsr_dc",
 	    OptionalInt.empty(),
-	    1.30164,
+	    1.8761,
 	    new Pose2d(3.6, 7.5, Rotation2d.fromRadians(3.142)),
-	    new Pose2d(0.8, 4.7, Rotation2d.fromRadians(0))
+	    new Pose2d(1.1, 4.7, Rotation2d.fromRadians(0))
 	);
 	public static final ChoreoTraj dtsr_dfs = new ChoreoTraj(
 	    "dtsr_dfs",
@@ -555,6 +646,13 @@ public record ChoreoTraj(
 	    0.59189,
 	    new Pose2d(3.6, 7.5, Rotation2d.fromRadians(3.142)),
 	    new Pose2d(2.9, 6.5, Rotation2d.fromRadians(-0.97))
+	);
+	public static final ChoreoTraj dtsr_di = new ChoreoTraj(
+	    "dtsr_di",
+	    OptionalInt.empty(),
+	    0.96427,
+	    new Pose2d(3.6, 7.5, Rotation2d.fromRadians(3.142)),
+	    new Pose2d(0.7, 6, Rotation2d.fromRadians(3.14))
 	);
 	public static final ChoreoTraj dtsr_dns = new ChoreoTraj(
 	    "dtsr_dns",
@@ -619,6 +717,13 @@ public record ChoreoTraj(
 	    new Pose2d(3.6, 7.5, Rotation2d.fromRadians(0)),
 	    new Pose2d(2.9, 6.5, Rotation2d.fromRadians(-0.97))
 	);
+	public static final ChoreoTraj dts_di = new ChoreoTraj(
+	    "dts_di",
+	    OptionalInt.empty(),
+	    1.01909,
+	    new Pose2d(3.6, 7.5, Rotation2d.fromRadians(0)),
+	    new Pose2d(0.7, 6, Rotation2d.fromRadians(3.14))
+	);
 	public static final ChoreoTraj dts_dns = new ChoreoTraj(
 	    "dts_dns",
 	    OptionalInt.empty(),
@@ -668,6 +773,34 @@ public record ChoreoTraj(
 	    new Pose2d(4.6, 7.4, Rotation2d.fromRadians(0)),
 	    new Pose2d(6, 5.5, Rotation2d.fromRadians(3.14))
 	);
+	public static final ChoreoTraj dt_dfrn = new ChoreoTraj(
+	    "dt_dfrn",
+	    OptionalInt.empty(),
+	    1.05989,
+	    new Pose2d(4.6, 7.4, Rotation2d.fromRadians(0)),
+	    new Pose2d(8.7, 6.4, Rotation2d.fromRadians(-0.79))
+	);
+	public static final ChoreoTraj dt_dfsn = new ChoreoTraj(
+	    "dt_dfsn",
+	    OptionalInt.empty(),
+	    0.84563,
+	    new Pose2d(4.6, 7.4, Rotation2d.fromRadians(0)),
+	    new Pose2d(7.7, 6, Rotation2d.fromRadians(-0.4))
+	);
+	public static final ChoreoTraj dt_dnrn = new ChoreoTraj(
+	    "dt_dnrn",
+	    OptionalInt.empty(),
+	    1.42806,
+	    new Pose2d(4.6, 7.4, Rotation2d.fromRadians(0)),
+	    new Pose2d(8.7, 5.2, Rotation2d.fromRadians(-0.79))
+	);
+	public static final ChoreoTraj dt_dnsn = new ChoreoTraj(
+	    "dt_dnsn",
+	    OptionalInt.empty(),
+	    1.09574,
+	    new Pose2d(4.6, 7.4, Rotation2d.fromRadians(0)),
+	    new Pose2d(7.7, 4.6, Rotation2d.fromRadians(-0.4))
+	);
 	public static final ChoreoTraj dt_dts = new ChoreoTraj(
 	    "dt_dts",
 	    OptionalInt.empty(),
@@ -682,6 +815,34 @@ public record ChoreoTraj(
 	    new Pose2d(4.6, 7.4, Rotation2d.fromRadians(0)),
 	    new Pose2d(6, 2.5, Rotation2d.fromRadians(3.14))
 	);
+	public static final ChoreoTraj dt_ofrn = new ChoreoTraj(
+	    "dt_ofrn",
+	    OptionalInt.empty(),
+	    2.2226,
+	    new Pose2d(4.6, 7.4, Rotation2d.fromRadians(0)),
+	    new Pose2d(8.7, 1.6, Rotation2d.fromRadians(-0.79))
+	);
+	public static final ChoreoTraj dt_ofsn = new ChoreoTraj(
+	    "dt_ofsn",
+	    OptionalInt.empty(),
+	    1.85596,
+	    new Pose2d(4.6, 7.4, Rotation2d.fromRadians(0)),
+	    new Pose2d(7.7, 2, Rotation2d.fromRadians(0.4))
+	);
+	public static final ChoreoTraj dt_onrn = new ChoreoTraj(
+	    "dt_onrn",
+	    OptionalInt.empty(),
+	    1.95957,
+	    new Pose2d(4.6, 7.4, Rotation2d.fromRadians(0)),
+	    new Pose2d(8.7, 2.8, Rotation2d.fromRadians(-0.79))
+	);
+	public static final ChoreoTraj dt_onsn = new ChoreoTraj(
+	    "dt_onsn",
+	    OptionalInt.empty(),
+	    1.5116,
+	    new Pose2d(4.6, 7.4, Rotation2d.fromRadians(0)),
+	    new Pose2d(7.7, 3.4, Rotation2d.fromRadians(0.4))
+	);
 	public static final ChoreoTraj hsr_db = new ChoreoTraj(
 	    "hsr_db",
 	    OptionalInt.empty(),
@@ -692,9 +853,16 @@ public record ChoreoTraj(
 	public static final ChoreoTraj hsr_dc = new ChoreoTraj(
 	    "hsr_dc",
 	    OptionalInt.empty(),
-	    1.05393,
+	    1.76074,
 	    new Pose2d(3.5, 4, Rotation2d.fromRadians(3.142)),
-	    new Pose2d(0.8, 4.7, Rotation2d.fromRadians(0))
+	    new Pose2d(1.1, 4.7, Rotation2d.fromRadians(0))
+	);
+	public static final ChoreoTraj hsr_di = new ChoreoTraj(
+	    "hsr_di",
+	    OptionalInt.empty(),
+	    1.00702,
+	    new Pose2d(3.5, 4, Rotation2d.fromRadians(3.142)),
+	    new Pose2d(0.7, 6, Rotation2d.fromRadians(3.14))
 	);
 	public static final ChoreoTraj hsr_dt = new ChoreoTraj(
 	    "hsr_dt",
@@ -752,6 +920,13 @@ public record ChoreoTraj(
 	    new Pose2d(3.5, 4, Rotation2d.fromRadians(0)),
 	    new Pose2d(2.9, 6.5, Rotation2d.fromRadians(-0.97))
 	);
+	public static final ChoreoTraj hs_di = new ChoreoTraj(
+	    "hs_di",
+	    OptionalInt.empty(),
+	    1.05873,
+	    new Pose2d(3.5, 4, Rotation2d.fromRadians(0)),
+	    new Pose2d(0.7, 6, Rotation2d.fromRadians(3.14))
+	);
 	public static final ChoreoTraj hs_dns = new ChoreoTraj(
 	    "hs_dns",
 	    OptionalInt.empty(),
@@ -804,7 +979,7 @@ public record ChoreoTraj(
 	public static final ChoreoTraj main = new ChoreoTraj(
 	    "main",
 	    OptionalInt.empty(),
-	    30.26117,
+	    30.27692,
 	    new Pose2d(3.6, 7.5, Rotation2d.fromRadians(0)),
 	    new Pose2d(3.6, 0.5, Rotation2d.fromRadians(3.142))
 	);
@@ -818,9 +993,9 @@ public record ChoreoTraj(
 	public static final ChoreoTraj obsr_dc = new ChoreoTraj(
 	    "obsr_dc",
 	    OptionalInt.empty(),
-	    1.12481,
+	    2.09336,
 	    new Pose2d(3.4, 2.5, Rotation2d.fromRadians(3.142)),
-	    new Pose2d(0.8, 4.7, Rotation2d.fromRadians(3.122))
+	    new Pose2d(1.1, 4.7, Rotation2d.fromRadians(0))
 	);
 	public static final ChoreoTraj obsr_dfs = new ChoreoTraj(
 	    "obsr_dfs",
@@ -828,6 +1003,13 @@ public record ChoreoTraj(
 	    1.11112,
 	    new Pose2d(3.4, 2.5, Rotation2d.fromRadians(3.142)),
 	    new Pose2d(2.9, 6.5, Rotation2d.fromRadians(-0.97))
+	);
+	public static final ChoreoTraj obsr_di = new ChoreoTraj(
+	    "obsr_di",
+	    OptionalInt.empty(),
+	    1.09254,
+	    new Pose2d(3.4, 2.5, Rotation2d.fromRadians(3.142)),
+	    new Pose2d(0.7, 6, Rotation2d.fromRadians(3.14))
 	);
 	public static final ChoreoTraj obsr_dns = new ChoreoTraj(
 	    "obsr_dns",
@@ -846,7 +1028,7 @@ public record ChoreoTraj(
 	public static final ChoreoTraj obsr_oc = new ChoreoTraj(
 	    "obsr_oc",
 	    OptionalInt.empty(),
-	    0.61112,
+	    0.91842,
 	    new Pose2d(3.4, 2.5, Rotation2d.fromRadians(3.142)),
 	    new Pose2d(0.8, 2.8, Rotation2d.fromRadians(3.14))
 	);
@@ -892,6 +1074,13 @@ public record ChoreoTraj(
 	    new Pose2d(3.4, 2.5, Rotation2d.fromRadians(0.79)),
 	    new Pose2d(2.9, 6.5, Rotation2d.fromRadians(-0.97))
 	);
+	public static final ChoreoTraj obs_di = new ChoreoTraj(
+	    "obs_di",
+	    OptionalInt.empty(),
+	    1.27207,
+	    new Pose2d(3.4, 2.5, Rotation2d.fromRadians(0.79)),
+	    new Pose2d(0.7, 6, Rotation2d.fromRadians(3.14))
+	);
 	public static final ChoreoTraj obs_dns = new ChoreoTraj(
 	    "obs_dns",
 	    OptionalInt.empty(),
@@ -934,12 +1123,47 @@ public record ChoreoTraj(
 	    new Pose2d(3.4, 2.5, Rotation2d.fromRadians(0.79)),
 	    new Pose2d(4.6, 0.6, Rotation2d.fromRadians(0))
 	);
+	public static final ChoreoTraj ob_crn = new ChoreoTraj(
+	    "ob_crn",
+	    OptionalInt.empty(),
+	    1.72031,
+	    new Pose2d(4.6, 2.5, Rotation2d.fromRadians(0.79)),
+	    new Pose2d(8.7, 4, Rotation2d.fromRadians(-0.79))
+	);
 	public static final ChoreoTraj ob_dcn = new ChoreoTraj(
 	    "ob_dcn",
 	    OptionalInt.empty(),
 	    1.12493,
 	    new Pose2d(4.6, 2.5, Rotation2d.fromRadians(0.79)),
 	    new Pose2d(6, 5.5, Rotation2d.fromRadians(3.14))
+	);
+	public static final ChoreoTraj ob_dfrn = new ChoreoTraj(
+	    "ob_dfrn",
+	    OptionalInt.empty(),
+	    2.1771,
+	    new Pose2d(4.6, 2.5, Rotation2d.fromRadians(0.79)),
+	    new Pose2d(8.7, 6.4, Rotation2d.fromRadians(-0.79))
+	);
+	public static final ChoreoTraj ob_dfsn = new ChoreoTraj(
+	    "ob_dfsn",
+	    OptionalInt.empty(),
+	    1.28886,
+	    new Pose2d(4.6, 2.5, Rotation2d.fromRadians(0.79)),
+	    new Pose2d(7.7, 6, Rotation2d.fromRadians(-0.4))
+	);
+	public static final ChoreoTraj ob_dnrn = new ChoreoTraj(
+	    "ob_dnrn",
+	    OptionalInt.empty(),
+	    1.99588,
+	    new Pose2d(4.6, 2.5, Rotation2d.fromRadians(0.79)),
+	    new Pose2d(8.7, 5.2, Rotation2d.fromRadians(-0.79))
+	);
+	public static final ChoreoTraj ob_dnsn = new ChoreoTraj(
+	    "ob_dnsn",
+	    OptionalInt.empty(),
+	    0.992,
+	    new Pose2d(4.6, 2.5, Rotation2d.fromRadians(0.79)),
+	    new Pose2d(7.7, 4.6, Rotation2d.fromRadians(-0.4))
 	);
 	public static final ChoreoTraj ob_obs = new ChoreoTraj(
 	    "ob_obs",
@@ -954,6 +1178,34 @@ public record ChoreoTraj(
 	    0.52339,
 	    new Pose2d(4.6, 2.5, Rotation2d.fromRadians(0.79)),
 	    new Pose2d(6, 2.5, Rotation2d.fromRadians(3.14))
+	);
+	public static final ChoreoTraj ob_ofrn = new ChoreoTraj(
+	    "ob_ofrn",
+	    OptionalInt.empty(),
+	    1.10413,
+	    new Pose2d(4.6, 2.5, Rotation2d.fromRadians(0.79)),
+	    new Pose2d(8.7, 1.6, Rotation2d.fromRadians(-0.79))
+	);
+	public static final ChoreoTraj ob_ofsn = new ChoreoTraj(
+	    "ob_ofsn",
+	    OptionalInt.empty(),
+	    0.76421,
+	    new Pose2d(4.6, 2.5, Rotation2d.fromRadians(0.79)),
+	    new Pose2d(7.7, 2, Rotation2d.fromRadians(0.4))
+	);
+	public static final ChoreoTraj ob_onrn = new ChoreoTraj(
+	    "ob_onrn",
+	    OptionalInt.empty(),
+	    1.48511,
+	    new Pose2d(4.6, 2.5, Rotation2d.fromRadians(0.79)),
+	    new Pose2d(8.7, 2.8, Rotation2d.fromRadians(-0.79))
+	);
+	public static final ChoreoTraj ob_onsn = new ChoreoTraj(
+	    "ob_onsn",
+	    OptionalInt.empty(),
+	    0.78163,
+	    new Pose2d(4.6, 2.5, Rotation2d.fromRadians(0.79)),
+	    new Pose2d(7.7, 3.4, Rotation2d.fromRadians(0.4))
 	);
 	public static final ChoreoTraj ocn_db = new ChoreoTraj(
 	    "ocn_db",
@@ -1049,9 +1301,9 @@ public record ChoreoTraj(
 	public static final ChoreoTraj ofs_dc = new ChoreoTraj(
 	    "ofs_dc",
 	    OptionalInt.empty(),
-	    1.61091,
+	    2.13137,
 	    new Pose2d(2.9, 1.5, Rotation2d.fromRadians(0.97)),
-	    new Pose2d(0.8, 4.7, Rotation2d.fromRadians(0))
+	    new Pose2d(1.1, 4.7, Rotation2d.fromRadians(0))
 	);
 	public static final ChoreoTraj ofs_di = new ChoreoTraj(
 	    "ofs_di",
@@ -1196,9 +1448,16 @@ public record ChoreoTraj(
 	public static final ChoreoTraj ons_dc = new ChoreoTraj(
 	    "ons_dc",
 	    OptionalInt.empty(),
-	    1.08814,
+	    1.99635,
 	    new Pose2d(2, 2.5, Rotation2d.fromRadians(0.51)),
-	    new Pose2d(0.8, 4.7, Rotation2d.fromRadians(0))
+	    new Pose2d(1.1, 4.7, Rotation2d.fromRadians(0))
+	);
+	public static final ChoreoTraj ons_di = new ChoreoTraj(
+	    "ons_di",
+	    OptionalInt.empty(),
+	    1.36932,
+	    new Pose2d(2, 2.5, Rotation2d.fromRadians(0.51)),
+	    new Pose2d(0.7, 6, Rotation2d.fromRadians(3.14))
 	);
 	public static final ChoreoTraj ons_dt = new ChoreoTraj(
 	    "ons_dt",
@@ -1245,9 +1504,9 @@ public record ChoreoTraj(
 	public static final ChoreoTraj otsr_dc = new ChoreoTraj(
 	    "otsr_dc",
 	    OptionalInt.empty(),
-	    1.75993,
+	    2.48922,
 	    new Pose2d(3.6, 0.5, Rotation2d.fromRadians(3.142)),
-	    new Pose2d(0.8, 4.7, Rotation2d.fromRadians(0))
+	    new Pose2d(1.1, 4.7, Rotation2d.fromRadians(0))
 	);
 	public static final ChoreoTraj otsr_dfs = new ChoreoTraj(
 	    "otsr_dfs",
@@ -1255,6 +1514,13 @@ public record ChoreoTraj(
 	    1.63581,
 	    new Pose2d(3.6, 0.5, Rotation2d.fromRadians(3.142)),
 	    new Pose2d(2.9, 6.5, Rotation2d.fromRadians(-0.97))
+	);
+	public static final ChoreoTraj otsr_di = new ChoreoTraj(
+	    "otsr_di",
+	    OptionalInt.empty(),
+	    1.53564,
+	    new Pose2d(3.6, 0.5, Rotation2d.fromRadians(3.142)),
+	    new Pose2d(0.7, 6, Rotation2d.fromRadians(3.14))
 	);
 	public static final ChoreoTraj otsr_dns = new ChoreoTraj(
 	    "otsr_dns",
@@ -1319,6 +1585,13 @@ public record ChoreoTraj(
 	    new Pose2d(3.6, 0.5, Rotation2d.fromRadians(0)),
 	    new Pose2d(2.9, 6.5, Rotation2d.fromRadians(-0.97))
 	);
+	public static final ChoreoTraj ots_di = new ChoreoTraj(
+	    "ots_di",
+	    OptionalInt.empty(),
+	    1.81603,
+	    new Pose2d(3.6, 0.5, Rotation2d.fromRadians(0)),
+	    new Pose2d(0.7, 6, Rotation2d.fromRadians(3.14))
+	);
 	public static final ChoreoTraj ots_dns = new ChoreoTraj(
 	    "ots_dns",
 	    OptionalInt.empty(),
@@ -1361,6 +1634,13 @@ public record ChoreoTraj(
 	    new Pose2d(3.6, 0.5, Rotation2d.fromRadians(0)),
 	    new Pose2d(4.6, 0.6, Rotation2d.fromRadians(0))
 	);
+	public static final ChoreoTraj ot_crn = new ChoreoTraj(
+	    "ot_crn",
+	    OptionalInt.empty(),
+	    1.64271,
+	    new Pose2d(4.6, 0.6, Rotation2d.fromRadians(0)),
+	    new Pose2d(8.7, 4, Rotation2d.fromRadians(-0.79))
+	);
 	public static final ChoreoTraj ot_dcn = new ChoreoTraj(
 	    "ot_dcn",
 	    OptionalInt.empty(),
@@ -1375,6 +1655,27 @@ public record ChoreoTraj(
 	    new Pose2d(4.6, 0.6, Rotation2d.fromRadians(0)),
 	    new Pose2d(8.7, 6.4, Rotation2d.fromRadians(-0.79))
 	);
+	public static final ChoreoTraj ot_dfsn = new ChoreoTraj(
+	    "ot_dfsn",
+	    OptionalInt.empty(),
+	    1.84927,
+	    new Pose2d(4.6, 0.6, Rotation2d.fromRadians(0)),
+	    new Pose2d(7.7, 6, Rotation2d.fromRadians(-0.4))
+	);
+	public static final ChoreoTraj ot_dnrn = new ChoreoTraj(
+	    "ot_dnrn",
+	    OptionalInt.empty(),
+	    1.96323,
+	    new Pose2d(4.6, 0.6, Rotation2d.fromRadians(0)),
+	    new Pose2d(8.7, 5.2, Rotation2d.fromRadians(-0.79))
+	);
+	public static final ChoreoTraj ot_dnsn = new ChoreoTraj(
+	    "ot_dnsn",
+	    OptionalInt.empty(),
+	    1.47222,
+	    new Pose2d(4.6, 0.6, Rotation2d.fromRadians(0)),
+	    new Pose2d(7.7, 4.6, Rotation2d.fromRadians(-0.4))
+	);
 	public static final ChoreoTraj ot_ocn = new ChoreoTraj(
 	    "ot_ocn",
 	    OptionalInt.empty(),
@@ -1382,12 +1683,33 @@ public record ChoreoTraj(
 	    new Pose2d(4.6, 0.6, Rotation2d.fromRadians(0)),
 	    new Pose2d(6, 2.5, Rotation2d.fromRadians(3.14))
 	);
+	public static final ChoreoTraj ot_ofrn = new ChoreoTraj(
+	    "ot_ofrn",
+	    OptionalInt.empty(),
+	    1.05236,
+	    new Pose2d(4.6, 0.6, Rotation2d.fromRadians(0)),
+	    new Pose2d(8.7, 1.6, Rotation2d.fromRadians(-0.79))
+	);
+	public static final ChoreoTraj ot_ofsn = new ChoreoTraj(
+	    "ot_ofsn",
+	    OptionalInt.empty(),
+	    0.85476,
+	    new Pose2d(4.6, 0.6, Rotation2d.fromRadians(0)),
+	    new Pose2d(7.7, 2, Rotation2d.fromRadians(0.4))
+	);
 	public static final ChoreoTraj ot_onrn = new ChoreoTraj(
 	    "ot_onrn",
 	    OptionalInt.empty(),
 	    1.32794,
 	    new Pose2d(4.6, 0.6, Rotation2d.fromRadians(0)),
 	    new Pose2d(8.7, 2.8, Rotation2d.fromRadians(-0.79))
+	);
+	public static final ChoreoTraj ot_onsn = new ChoreoTraj(
+	    "ot_onsn",
+	    OptionalInt.empty(),
+	    1.09271,
+	    new Pose2d(4.6, 0.6, Rotation2d.fromRadians(0)),
+	    new Pose2d(7.7, 3.4, Rotation2d.fromRadians(0.4))
 	);
 	public static final ChoreoTraj ot_ots = new ChoreoTraj(
 	    "ot_ots",
@@ -1408,6 +1730,7 @@ public record ChoreoTraj(
 		Map.entry("crn_ot", crn_ot),
 		Map.entry("cs_db", cs_db),
 		Map.entry("cs_dc", cs_dc),
+		Map.entry("cs_di", cs_di),
 		Map.entry("cs_dt", cs_dt),
 		Map.entry("cs_ob", cs_ob),
 		Map.entry("cs_oc", cs_oc),
@@ -1417,6 +1740,7 @@ public record ChoreoTraj(
 		Map.entry("dbsr_db", dbsr_db),
 		Map.entry("dbsr_dc", dbsr_dc),
 		Map.entry("dbsr_dfs", dbsr_dfs),
+		Map.entry("dbsr_di", dbsr_di),
 		Map.entry("dbsr_dns", dbsr_dns),
 		Map.entry("dbsr_dt", dbsr_dt),
 		Map.entry("dbsr_oc", dbsr_oc),
@@ -1426,14 +1750,24 @@ public record ChoreoTraj(
 		Map.entry("dbs_cs", dbs_cs),
 		Map.entry("dbs_db", dbs_db),
 		Map.entry("dbs_dfs", dbs_dfs),
+		Map.entry("dbs_di", dbs_di),
 		Map.entry("dbs_dns", dbs_dns),
 		Map.entry("dbs_dt", dbs_dt),
 		Map.entry("dbs_ofs", dbs_ofs),
 		Map.entry("dbs_oi", dbs_oi),
 		Map.entry("dbs_ons", dbs_ons),
+		Map.entry("db_crn", db_crn),
 		Map.entry("db_dbs", db_dbs),
 		Map.entry("db_dcn", db_dcn),
+		Map.entry("db_dfrn", db_dfrn),
+		Map.entry("db_dfsn", db_dfsn),
+		Map.entry("db_dnrn", db_dnrn),
+		Map.entry("db_dnsn", db_dnsn),
 		Map.entry("db_ocn", db_ocn),
+		Map.entry("db_ofrn", db_ofrn),
+		Map.entry("db_ofsn", db_ofsn),
+		Map.entry("db_onrn", db_onrn),
+		Map.entry("db_onsn", db_onsn),
 		Map.entry("dcn_db", dcn_db),
 		Map.entry("dcn_dt", dcn_dt),
 		Map.entry("dcn_ob", dcn_ob),
@@ -1448,6 +1782,7 @@ public record ChoreoTraj(
 		Map.entry("dfsn_ot", dfsn_ot),
 		Map.entry("dfs_db", dfs_db),
 		Map.entry("dfs_dc", dfs_dc),
+		Map.entry("dfs_di", dfs_di),
 		Map.entry("dfs_dt", dfs_dt),
 		Map.entry("dfs_ob", dfs_ob),
 		Map.entry("dfs_oc", dfs_oc),
@@ -1478,6 +1813,7 @@ public record ChoreoTraj(
 		Map.entry("dtsr_db", dtsr_db),
 		Map.entry("dtsr_dc", dtsr_dc),
 		Map.entry("dtsr_dfs", dtsr_dfs),
+		Map.entry("dtsr_di", dtsr_di),
 		Map.entry("dtsr_dns", dtsr_dns),
 		Map.entry("dtsr_dt", dtsr_dt),
 		Map.entry("dtsr_oc", dtsr_oc),
@@ -1487,6 +1823,7 @@ public record ChoreoTraj(
 		Map.entry("dts_cs", dts_cs),
 		Map.entry("dts_db", dts_db),
 		Map.entry("dts_dfs", dts_dfs),
+		Map.entry("dts_di", dts_di),
 		Map.entry("dts_dns", dts_dns),
 		Map.entry("dts_dt", dts_dt),
 		Map.entry("dts_ofs", dts_ofs),
@@ -1494,10 +1831,19 @@ public record ChoreoTraj(
 		Map.entry("dts_ons", dts_ons),
 		Map.entry("dt_crn", dt_crn),
 		Map.entry("dt_dcn", dt_dcn),
+		Map.entry("dt_dfrn", dt_dfrn),
+		Map.entry("dt_dfsn", dt_dfsn),
+		Map.entry("dt_dnrn", dt_dnrn),
+		Map.entry("dt_dnsn", dt_dnsn),
 		Map.entry("dt_dts", dt_dts),
 		Map.entry("dt_ocn", dt_ocn),
+		Map.entry("dt_ofrn", dt_ofrn),
+		Map.entry("dt_ofsn", dt_ofsn),
+		Map.entry("dt_onrn", dt_onrn),
+		Map.entry("dt_onsn", dt_onsn),
 		Map.entry("hsr_db", hsr_db),
 		Map.entry("hsr_dc", hsr_dc),
+		Map.entry("hsr_di", hsr_di),
 		Map.entry("hsr_dt", hsr_dt),
 		Map.entry("hsr_ob", hsr_ob),
 		Map.entry("hsr_oc", hsr_oc),
@@ -1506,6 +1852,7 @@ public record ChoreoTraj(
 		Map.entry("hs_cs", hs_cs),
 		Map.entry("hs_db", hs_db),
 		Map.entry("hs_dfs", hs_dfs),
+		Map.entry("hs_di", hs_di),
 		Map.entry("hs_dns", hs_dns),
 		Map.entry("hs_dt", hs_dt),
 		Map.entry("hs_ob", hs_ob),
@@ -1517,6 +1864,7 @@ public record ChoreoTraj(
 		Map.entry("obsr_cs", obsr_cs),
 		Map.entry("obsr_dc", obsr_dc),
 		Map.entry("obsr_dfs", obsr_dfs),
+		Map.entry("obsr_di", obsr_di),
 		Map.entry("obsr_dns", obsr_dns),
 		Map.entry("obsr_ob", obsr_ob),
 		Map.entry("obsr_oc", obsr_oc),
@@ -1526,15 +1874,25 @@ public record ChoreoTraj(
 		Map.entry("obsr_ot", obsr_ot),
 		Map.entry("obs_cs", obs_cs),
 		Map.entry("obs_dfs", obs_dfs),
+		Map.entry("obs_di", obs_di),
 		Map.entry("obs_dns", obs_dns),
 		Map.entry("obs_ob", obs_ob),
 		Map.entry("obs_ofs", obs_ofs),
 		Map.entry("obs_oi", obs_oi),
 		Map.entry("obs_ons", obs_ons),
 		Map.entry("obs_ot", obs_ot),
+		Map.entry("ob_crn", ob_crn),
 		Map.entry("ob_dcn", ob_dcn),
+		Map.entry("ob_dfrn", ob_dfrn),
+		Map.entry("ob_dfsn", ob_dfsn),
+		Map.entry("ob_dnrn", ob_dnrn),
+		Map.entry("ob_dnsn", ob_dnsn),
 		Map.entry("ob_obs", ob_obs),
 		Map.entry("ob_ocn", ob_ocn),
+		Map.entry("ob_ofrn", ob_ofrn),
+		Map.entry("ob_ofsn", ob_ofsn),
+		Map.entry("ob_onrn", ob_onrn),
+		Map.entry("ob_onsn", ob_onsn),
 		Map.entry("ocn_db", ocn_db),
 		Map.entry("ocn_dt", ocn_dt),
 		Map.entry("ocn_ob", ocn_ob),
@@ -1570,6 +1928,7 @@ public record ChoreoTraj(
 		Map.entry("onsn_ot", onsn_ot),
 		Map.entry("ons_db", ons_db),
 		Map.entry("ons_dc", ons_dc),
+		Map.entry("ons_di", ons_di),
 		Map.entry("ons_dt", ons_dt),
 		Map.entry("ons_ob", ons_ob),
 		Map.entry("ons_oc", ons_oc),
@@ -1578,6 +1937,7 @@ public record ChoreoTraj(
 		Map.entry("otsr_cs", otsr_cs),
 		Map.entry("otsr_dc", otsr_dc),
 		Map.entry("otsr_dfs", otsr_dfs),
+		Map.entry("otsr_di", otsr_di),
 		Map.entry("otsr_dns", otsr_dns),
 		Map.entry("otsr_ob", otsr_ob),
 		Map.entry("otsr_oc", otsr_oc),
@@ -1587,16 +1947,24 @@ public record ChoreoTraj(
 		Map.entry("otsr_ot", otsr_ot),
 		Map.entry("ots_cs", ots_cs),
 		Map.entry("ots_dfs", ots_dfs),
+		Map.entry("ots_di", ots_di),
 		Map.entry("ots_dns", ots_dns),
 		Map.entry("ots_ob", ots_ob),
 		Map.entry("ots_ofs", ots_ofs),
 		Map.entry("ots_oi", ots_oi),
 		Map.entry("ots_ons", ots_ons),
 		Map.entry("ots_ot", ots_ot),
+		Map.entry("ot_crn", ot_crn),
 		Map.entry("ot_dcn", ot_dcn),
 		Map.entry("ot_dfrn", ot_dfrn),
+		Map.entry("ot_dfsn", ot_dfsn),
+		Map.entry("ot_dnrn", ot_dnrn),
+		Map.entry("ot_dnsn", ot_dnsn),
 		Map.entry("ot_ocn", ot_ocn),
+		Map.entry("ot_ofrn", ot_ofrn),
+		Map.entry("ot_ofsn", ot_ofsn),
 		Map.entry("ot_onrn", ot_onrn),
+		Map.entry("ot_onsn", ot_onsn),
 		Map.entry("ot_ots", ot_ots)
     );
 

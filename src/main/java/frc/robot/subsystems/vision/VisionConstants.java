@@ -1,52 +1,57 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.subsystems.vision;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
-import frc.robot.util.FieldConstants;
-import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
 /** Add your docs here. */
 public class VisionConstants {
-  public static class PhysicalConstants {
-    public static final Transform3d[] cameraTransforms =
-        new Transform3d[] { // Camera Transforms Left to Right,
-          // Front to Back
-          // Left
-          // Camera
-          new Transform3d(
-              -Units.inchesToMeters(12),
-              Units.inchesToMeters(12),
-              Units.inchesToMeters(9.85),
-              new Rotation3d(0.0, -Units.degreesToRadians(150), 0.0)), // Front
-          // Right
-          // Camera
-          new Transform3d(
-              -Units.inchesToMeters(12),
-              -Units.inchesToMeters(12),
-              Units.inchesToMeters(9.85),
-              new Rotation3d(0.0, -Units.degreesToRadians(150), 0.0)) // Front
-        };
 
-    public static final AprilTagFieldLayout fieldLayout = FieldConstants.defaultAprilTagType;
-  }
+  // Basic filtering thresholds
+  public static double maxAmbiguity = 0.37; // 0.3d
+  public static double maxZError = 0.19; // 0.75
 
-  public static class Strategies {
-    public static final PoseStrategy primary = PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR;
-    public static final PoseStrategy secondary = PoseStrategy.PNP_DISTANCE_TRIG_SOLVE;
-  }
+  // Standard deviation baselines, for 1 meter distance and 1 tag
+  // (Adjusted automatically based on distance and # of tags)
+  public static double linearStdDevBaseline = 4.0; // Meters
+  public static double angularStdDevBaseline = 4.5; // Radians
 
-  public static class StandardDevs {
-    public static final Matrix<N3, N1> multiTagDevs = VecBuilder.fill(1, 1, 1);
-    public static final Matrix<N3, N1> trigDevs = VecBuilder.fill(1, 1, Double.MAX_VALUE);
-  }
+  // Standard deviation multipliers for each camera
+  // (Adjust to trust some cameras more than others)
+  public static double[] cameraStdDevFactors =
+      new double[] {
+        1.0, // Camera 0
+        1.0 // Camera 1
+      };
+
+  // Multipliers to apply for MegaTag 2 observations
+  public static double linearStdDevMegatag2Factor = 0.5; // More stable than full 3D solve
+  public static double angularStdDevMegatag2Factor =
+      Double.POSITIVE_INFINITY; // No rotation data available
+
+  public static AprilTagFieldLayout fieldLayout =
+      AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
+
+  public static Transform3d robotToLeftCam =
+      new Transform3d(
+          -Units.inchesToMeters(12.0),
+          Units.inchesToMeters(12.0),
+          Units.inchesToMeters(6.0),
+          new Rotation3d(0.0, -Units.degreesToRadians(150.0), Units.degreesToRadians(0)));
+  public static Transform3d robotToRightCam =
+      new Transform3d(
+          -Units.inchesToMeters(12.0),
+          -Units.inchesToMeters(12.0),
+          Units.inchesToMeters(6.0),
+          new Rotation3d(0.0, -Units.degreesToRadians(150.0), Units.degreesToRadians(0)));
+
+  public static double trigLinearStdDevBaseline = 0.35; // Meters
+  public static double trigAngularStdDevBaseline = Double.POSITIVE_INFINITY; // Radians
+
+  public static double multitagLinearStdDevBaseline = 0.07; // Meters
+  public static double multitagAngularStdDevBaseline = 0.03; // Radians
+
+  public static double averageTagDistance = 3.2;
 }

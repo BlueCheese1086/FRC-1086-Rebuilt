@@ -1,5 +1,7 @@
 package frc.robot.autonomous;
 
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -10,7 +12,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.commands.AutoRoutines;
+import frc.robot.commands.ShotCalc;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.hood.Hood;
+import frc.robot.subsystems.hood.HoodConstants;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerConstants;
 import frc.robot.subsystems.intake.Intake;
@@ -18,6 +23,8 @@ import frc.robot.subsystems.intake.IntakeConstants;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterConstants;
 import frc.robot.util.AllianceFlipUtil;
+import frc.robot.util.FieldConstants.Hub;
+import frc.robot.util.PoseMath;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,14 +33,16 @@ public class AutoStateMachine {
   private final Shooter shooter;
   private final Indexer indexer;
   private final Intake intake;
+  private final Hood hood;
 
   public final Field2d autoPreviewField = new Field2d();
 
-  public AutoStateMachine(Drive drive, Shooter shooter, Indexer indexer, Intake intake) {
+  public AutoStateMachine(Drive drive, Shooter shooter, Indexer indexer, Intake intake, Hood hood) {
     this.drive = drive;
     this.shooter = shooter;
     this.indexer = indexer;
     this.intake = intake;
+    this.hood = hood;
   }
 
   private double addPathToPreview(String trajName, List<Pose2d> previewPoses) {
@@ -166,6 +175,11 @@ public class AutoStateMachine {
         });
   }
 
+  public Command
+      startFeeder() { // START FEEDER DOES NOT ACTUALLY START THE FEEDER, IT SPINS UP THE FLYWHEELS
+    return shooter.setVelocity(() -> RadiansPerSecond.zero());
+  }
+
   public Command startShoot() {
     return Commands.runOnce(
         () ->
@@ -175,25 +189,24 @@ public class AutoStateMachine {
   }
 
   public Command stopShoot() {
-    return Commands.runOnce(shooter::stopAll);
+    return Commands.runOnce(shooter::stopAll)
+        .andThen(indexer.setVoltage(Volts.zero()))
+        .andThen(hood.setAngle(HoodConstants.Setpoints.passAngle));
+  }
+
+  public Command deployIntake() {
+    return intake.setPosition(IntakeConstants.Setpoints.deployed);
   }
 
   public Command startIntake() {
     return Commands.parallel(
-        intake.setPosition(IntakeConstants.Setpoints.deployed),
-        indexer.setVoltage(IndexerConstants.Setpoints.feed));
+        intake.setVoltage(IntakeConstants.Setpoints.run),
+        indexer.setVoltage(IndexerConstants.Setpoints.intake));
   }
 
   public Command stopIntake() {
-    return Commands.parallel(
-        intake.setPosition(IntakeConstants.Setpoints.stowed), indexer.setVoltage(Volts.zero()));
-  }
-
-  public Command startFeeder() {
-    return Commands.print("STOP GIVING ME ERRORS YOU");
-  }
-
-  public Command deployIntake() {
-    return Commands.print("STOP GIVING ME ERRORS YOU");
+    return Commands.sequence(
+        intake.setPosition(IntakeConstants.Setpoints.stowed),
+        Commands.parallel(intake.setVoltage(Volts.zero()), indexer.setVoltage(Volts.zero())));
   }
 }

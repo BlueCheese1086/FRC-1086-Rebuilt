@@ -15,7 +15,6 @@ import edu.wpi.first.wpilibj.Timer;
 import frc.robot.subsystems.hood.HoodConstants;
 import frc.robot.subsystems.shooter.ShooterConstants.Mechanical;
 import frc.robot.subsystems.shooter.shooterUtil.ShootingCalculator;
-import frc.robot.subsystems.vision.VisionIO.VisionInputs;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -147,16 +146,16 @@ public class ShootingManager {
     }
   }
 
-  public void addVisionObservation(
-      VisionInputs inputs, double robotAngularVelocityRadPerSec, double targetYawDeg) {
-    addVisionObservation(
-        inputs.pose,
-        inputs.timestamp,
-        robotAngularVelocityRadPerSec,
-        targetYawDeg,
-        inputs.tagCount,
-        inputs.averageDistance);
-  }
+  // public void addVisionObservation(
+  //     VisionInputs inputs, double robotAngularVelocityRadPerSec, double targetYawDeg) {
+  //   addVisionObservation(
+  //       inputs.pose,
+  //       inputs.timestamp,
+  //       robotAngularVelocityRadPerSec,
+  //       targetYawDeg,
+  //       inputs.tagCount,
+  //       inputs.averageDistance);
+  // }
 
   public void addVisionObservation(
       Pose2d visionPose,
