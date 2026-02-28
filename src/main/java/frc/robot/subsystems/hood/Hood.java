@@ -10,7 +10,6 @@ import static edu.wpi.first.units.Units.Radians;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 import java.util.function.DoubleSupplier;
@@ -42,7 +41,7 @@ public class Hood extends SubsystemBase {
   public Command setAngle(Angle angle) {
     Logger.recordOutput("/Hood/Map/0-1", AngleToPosition.get(angle.in(Degrees)));
     Logger.recordOutput("/Hood/Map/key", angle.in(Degrees));
-    return this.run(() -> io.setPosition(AngleToPosition.get(angle.in(Degrees)))).withTimeout(0.1);
+    return this.run(() -> io.setPosition(AngleToPosition.get(angle.in(Degrees))));
   }
 
   public Command setAngle(Supplier<Angle> angle) {
@@ -53,16 +52,14 @@ public class Hood extends SubsystemBase {
   }
 
   /* expects a value between 0 and 1 */
-  public Command setPosition(DoubleSupplier position) {
+  public void setPosition(DoubleSupplier position) {
     Logger.recordOutput("/Hood/Map/0-1", AngleToPosition.get(position.getAsDouble()));
     Logger.recordOutput("/Hood/Map/key", position);
-    return this.run(() -> io.setPosition(AngleToPosition.get(position.getAsDouble())))
-        .until(io::atSetpoint);
+    io.setPosition(AngleToPosition.get(position.getAsDouble()));
   }
 
   public Command directPWMControl(DoubleSupplier pwm) {
-    return Commands.runOnce(() -> io.setPosition(pwm.getAsDouble()))
-        .andThen(Commands.waitUntil(() -> io.atSetpoint()));
+    return this.run(() -> io.setPosition(pwm.getAsDouble())).until(io::atSetpoint);
   }
 
   public boolean atSetpoint() {

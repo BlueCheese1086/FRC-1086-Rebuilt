@@ -304,16 +304,16 @@ public class Superstructure extends SubsystemBase {
                                   Meters.of(
                                       PoseMath.getDistanceToTarget(drive.getPose(), Hub.hubCenter)))
                               .shooterRPM);
-                    }),
-                hood.setPosition(
-                    () -> {
-                      return ShotCalc.getShot(
-                              Meters.of(
-                                  PoseMath.getDistanceToTarget(drive.getPose(), Hub.hubCenter)))
-                          .hoodPosition;
-                    }))); // Why was shoot on the move stuff put in here. This is the worst place to
-    // put the shoot on the move stuff.
+                    })));
+    // hood.setPosition(
+    //     () -> {
+    //       return ShotCalc.getShot(
+    //               Meters.of(
+    //                   PoseMath.getDistanceToTarget(drive.getPose(), Hub.hubCenter)))
+    //           .hoodPosition;
   }
+  ; // Why was shoot on the move stuff put in here. This is the worst place to
+  // put the shoot on the move stuff.
 
   private void setupPass() {
     stateTriggers

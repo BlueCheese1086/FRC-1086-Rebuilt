@@ -123,7 +123,8 @@ public class DriveCommands {
     return Commands.runEnd(
             () -> {
               shooter.setVelocitySetpoint(
-                  RadiansPerSecond.of(ShooterConstants.Tuning.velocitySetpoint.getAsDouble()));
+                  () ->
+                      RadiansPerSecond.of(ShooterConstants.Tuning.velocitySetpoint.getAsDouble()));
               hood.setPosition(() -> HoodConstants.Setpoints.hoodAngle.getAsDouble());
             },
             () -> {

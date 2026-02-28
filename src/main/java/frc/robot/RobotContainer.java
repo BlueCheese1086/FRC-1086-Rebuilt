@@ -13,9 +13,7 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -25,7 +23,6 @@ import frc.robot.Superstructure.ControllerLayout;
 import frc.robot.autonomous.AutosManager;
 import frc.robot.commands.AutoRoutines;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.ShotCalc;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.climb.Climb;
 import frc.robot.subsystems.climb.ClimbIO;
@@ -42,6 +39,7 @@ import frc.robot.subsystems.hood.HoodIO;
 import frc.robot.subsystems.hood.HoodIOServo;
 import frc.robot.subsystems.hood.HoodIOSim;
 import frc.robot.subsystems.indexer.Indexer;
+import frc.robot.subsystems.indexer.IndexerConstants;
 import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSim;
 import frc.robot.subsystems.indexer.IndexerIOTalonFX;
@@ -58,7 +56,6 @@ import frc.robot.subsystems.shooter.ShooterConstants;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.shooter.ShooterIOTalonFX;
-import frc.robot.subsystems.shooter.ShootingManager;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
@@ -92,6 +89,7 @@ public class RobotContainer {
 
   @SuppressWarnings("unused")
   // private final Superstructure superstructure;
+  double angle = 0;
 
   // Controller
   private final CommandXboxController driver = new CommandXboxController(0);
@@ -271,34 +269,10 @@ public class RobotContainer {
 
     // TODO: REMOVE THIS DURING SUPERSTRUCTURE TESTING
     // Default command must require the subsystem; run periodically to maintain setpoint
+    // hood.setDefaultCommand(hood.setAngle(Degrees.of(angle)));
     hood.setDefaultCommand(
         Commands.run(
-            () -> hood.setAngle(Degrees.of(HoodConstants.Setpoints.hoodAngle.get())), hood));
-
-    // driver
-    //     .y()
-    //     .whileTrue(
-    //         Commands.parallel(
-    //             DriveCommands.joystickDriveLockRadiusToTarget(
-    //                 drive,
-    //                 ControllerLayout.joystickX,
-    //                 ControllerLayout.joystickY,
-    //                 () -> FieldConstants.Hub.hubCenter),
-    //             shooter.setVelocity(
-    //                 () -> {
-    //                   return RPM.of(
-    //                       ShotCalc.getShot(
-    //                               Meters.of(
-    //                                   PoseMath.getDistanceToTarget(drive.getPose(), Hub.hubCenter)))
-    //                           .shooterRPM);
-    //                 }),
-    //             hood.setPosition(
-    //                 () -> {
-    //                   return ShotCalc.getShot(
-    //                           Meters.of(
-    //                               PoseMath.getDistanceToTarget(drive.getPose(), Hub.hubCenter)))
-    //                       .hoodPosition;
-    //                 })));
+            () -> hood.setPosition(() -> HoodConstants.Setpoints.hoodAngle.getAsDouble()), hood));
 
     driver
         .leftTrigger()
@@ -310,6 +284,17 @@ public class RobotContainer {
                 intake.setPosition(IntakeConstants.Setpoints.deployed)));
 
     driver
+        .rightTrigger()
+        .whileTrue(
+            Commands.parallel(
+                shooter
+                    .runFeederVoltage(ShooterConstants.FeederSetpoints.run.in(Volts))
+                    .finallyDo(shooter.runFeederVoltage(0.0)::execute),
+                indexer.setVoltage(IndexerConstants.Setpoints.feed),
+                Commands.repeatingSequence(
+                    intake.setPosition(IntakeConstants.Setpoints.agitate),
+                    intake.setPosition(IntakeConstants.Setpoints.deployed))));
+    driver
         .povLeft()
         .whileTrue(
             Commands.parallel(
@@ -319,48 +304,20 @@ public class RobotContainer {
                     .runFeederVoltage(-ShooterConstants.FeederSetpoints.run.in(Volts))
                     .finallyDo(shooter.runFeederVoltage(0.0)::execute),
                 Commands.run(() -> shooter.setVoltage(12)).finallyDo(shooter::stopShooter)));
+    driver
+        .povDown()
+        .whileTrue(
+            Commands.parallel(
+                indexer.setVoltage(IndexerConstants.Setpoints.intake.negate()),
+                shooter
+                    .runFeederVoltage(-ShooterConstants.FeederSetpoints.run.in(Volts))
+                    .finallyDo(shooter.runFeederVoltage(0.0)::execute),
+                Commands.run(() -> shooter.setVoltage(12)).finallyDo(shooter::stopShooter)));
 
     // Operator Commands
-
+    operator.povLeft().onTrue(intake.setPosition(IntakeConstants.Setpoints.stowed));
+    operator.x().whileTrue(DriveCommands.recordData(drive, shooter, hood));
   }
-
-  // Driver X -> Shoot-on-the-move test (hold to aim and spin up). This also locks
-  // rotation to the computed SOTM heading while held (driver retains translation control).
-  //     driver
-  //         .x()
-  //         .whileTrue(
-  //             Commands.parallel(
-  //                 // (1) continuously update shooter and hood setpoints
-  //                 Commands.run(
-  //                     () -> {
-  //                       var sol =
-  //                           shootingManager.calculateShotSolution(
-  //                               drive.getPose(),
-  //                               drive.getChassisSpeeds(),
-  //                               FieldConstants.Hub.topCenterPoint,
-  //                               0.10,
-  //                               0.10);
-  //                       shooter.setVelocitySetpoint(RotationsPerSecond.of(sol.flywheelRpm /
-  // 60.0));
-  //                       hood.setAngle(Degrees.of(Math.toDegrees(sol.hoodPitchRad)));
-  //                     },
-  //                     shooter,
-  //                     hood),
-
-  //                 // (2) keep driver translation but force rotation to the SOTM heading
-  //                 DriveCommands.joystickDriveAtAngle(
-  //                     drive,
-  //                     () -> -driver.getLeftY(),
-  //                     () -> -driver.getLeftX(),
-  //                     () ->
-  //                         shootingManager.calculateShotSolution(
-  //                                 drive.getPose(),
-  //                                 drive.getChassisSpeeds(),
-  //                                 FieldConstants.Hub.topCenterPoint,
-  //                                 0.10,
-  //                                 0.10)
-  //                             .drivetrainHeading)));
-  //   }
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
@@ -369,17 +326,5 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     return autoChooser.get();
-  }
-
-  public void simPeriodic() {
-    Logger.recordOutput("Shooter/Poses", shooter.getShooterPoses(drive.getPose()));
-    Logger.recordOutput(
-        "Vision/Left Cam Pose",
-        new Pose3d(drive.getPose())
-            .transformBy(VisionConstants.PhysicalConstants.cameraTransforms[0]));
-    Logger.recordOutput(
-        "Vision/Right Cam Pose",
-        new Pose3d(drive.getPose())
-            .transformBy(VisionConstants.PhysicalConstants.cameraTransforms[1]));
   }
 }
