@@ -208,8 +208,8 @@ public class RobotContainer {
     automanager = new AutosManager(drive, shooter, indexer, intake, hood);
     AutoRoutines.setup(drive, automanager.machine);
     // Shooting manager uses drive pose/speeds for SOTM calculations
-    shootingManager =
-        new ShootingManager(drive::getPose, drive::getChassisSpeeds, drive::getRotation);
+    // shootingManager =
+    //     new ShootingManager(drive::getPose, drive::getChassisSpeeds, drive::getRotation);
 
     Superstructure.ControllerLayout.scoreRequest = driver.rightTrigger();
     Superstructure.ControllerLayout.cancelRequest = driver.povLeft().or(operator.povLeft());
@@ -273,30 +273,30 @@ public class RobotContainer {
         Commands.run(
             () -> hood.setAngle(Degrees.of(HoodConstants.Setpoints.hoodAngle.get())), hood));
 
-    driver
-        .y()
-        .whileTrue(
-            Commands.parallel(
-                DriveCommands.joystickDriveLockRadiusToTarget(
-                    drive,
-                    ControllerLayout.joystickX,
-                    ControllerLayout.joystickY,
-                    () -> FieldConstants.Hub.hubCenter),
-                shooter.setVelocity(
-                    () -> {
-                      return RPM.of(
-                          ShotCalc.getShot(
-                                  Meters.of(
-                                      PoseMath.getDistanceToTarget(drive.getPose(), Hub.hubCenter)))
-                              .shooterRPM);
-                    }),
-                hood.setPosition(
-                    () -> {
-                      return ShotCalc.getShot(
-                              Meters.of(
-                                  PoseMath.getDistanceToTarget(drive.getPose(), Hub.hubCenter)))
-                          .hoodPosition;
-                    })));
+    // driver
+    //     .y()
+    //     .whileTrue(
+    //         Commands.parallel(
+    //             DriveCommands.joystickDriveLockRadiusToTarget(
+    //                 drive,
+    //                 ControllerLayout.joystickX,
+    //                 ControllerLayout.joystickY,
+    //                 () -> FieldConstants.Hub.hubCenter),
+    //             shooter.setVelocity(
+    //                 () -> {
+    //                   return RPM.of(
+    //                       ShotCalc.getShot(
+    //                               Meters.of(
+    //                                   PoseMath.getDistanceToTarget(drive.getPose(), Hub.hubCenter)))
+    //                           .shooterRPM);
+    //                 }),
+    //             hood.setPosition(
+    //                 () -> {
+    //                   return ShotCalc.getShot(
+    //                           Meters.of(
+    //                               PoseMath.getDistanceToTarget(drive.getPose(), Hub.hubCenter)))
+    //                       .hoodPosition;
+    //                 })));
 
     driver
         .leftTrigger()
