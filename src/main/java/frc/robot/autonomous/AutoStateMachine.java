@@ -15,6 +15,7 @@ import frc.robot.commands.AutoRoutines;
 import frc.robot.commands.ShotCalc;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.hood.Hood;
+import frc.robot.subsystems.hood.HoodConstants;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerConstants;
 import frc.robot.subsystems.intake.Intake;
@@ -24,7 +25,6 @@ import frc.robot.subsystems.shooter.ShooterConstants;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants.Hub;
 import frc.robot.util.PoseMath;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -175,35 +175,40 @@ public class AutoStateMachine {
         });
   }
 
-  public Command startFeeder() { //START FEEDER DOES NOT ACTUALLY START THE FEEDER, IT SPINS UP THE FLYWHEELS
+  public Command
+      startFeeder() { // START FEEDER DOES NOT ACTUALLY START THE FEEDER, IT SPINS UP THE FLYWHEELS
     return shooter.setVelocity(() -> RadiansPerSecond.zero());
   }
 
   public Command startShoot() {
-    return Commands.parallel(
+    return Commands.runOnce(
+        () ->
+            Commands.sequence(
                 shooter.runFeederVoltage(ShooterConstants.FeederSetpoints.run.magnitude()),
-                indexer.setVoltage(IndexerConstants.Setpoints.feed),
-                shooter.setVelocity(
-                    () -> {
-                      return RPM.of(
-                          ShotCalc.getShot(
+                Commands.parallel(
+                    indexer.setVoltage(IndexerConstants.Setpoints.feed),
+                    shooter.setVelocity(
+                        () -> {
+                          return RPM.of(
+                              ShotCalc.getShot(
+                                      Meters.of(
+                                          PoseMath.getDistanceToTarget(
+                                              drive.getPose(), Hub.hubCenter)))
+                                  .shooterRPM);
+                        }),
+                    hood.setPosition(
+                        () -> {
+                          return ShotCalc.getShot(
                                   Meters.of(
                                       PoseMath.getDistanceToTarget(drive.getPose(), Hub.hubCenter)))
-                              .shooterRPM);
-                    }),
-                hood.setPosition(
-                    () -> {
-                      return ShotCalc.getShot(
-                              Meters.of(
-                                  PoseMath.getDistanceToTarget(drive.getPose(), Hub.hubCenter)))
-                          .hoodPosition;
-                    }));
+                              .hoodPosition;
+                        }))));
   }
 
   public Command stopShoot() {
-    return Commands.parallel(
-      Commands.runOnce(shooter::stopAll),
-      indexer.setVoltage(Volts.zero()));
+    return Commands.runOnce(shooter::stopAll)
+        .andThen(indexer.setVoltage(Volts.zero()))
+        .andThen(hood.setAngle(HoodConstants.Setpoints.passAngle));
   }
 
   public Command deployIntake() {
@@ -212,14 +217,13 @@ public class AutoStateMachine {
 
   public Command startIntake() {
     return Commands.parallel(
-      intake.setVoltage(IntakeConstants.Setpoints.run),
-      indexer.setVoltage(IndexerConstants.Setpoints.intake));
+        intake.setVoltage(IntakeConstants.Setpoints.run),
+        indexer.setVoltage(IndexerConstants.Setpoints.intake));
   }
 
   public Command stopIntake() {
-    return Commands.parallel(
-        intake.setPosition(IntakeConstants.Setpoints.stowed), 
-        intake.setVoltage(Volts.zero()),
-        indexer.setVoltage(Volts.zero()));
+    return Commands.sequence(
+        intake.setPosition(IntakeConstants.Setpoints.stowed),
+        Commands.parallel(intake.setVoltage(Volts.zero()), indexer.setVoltage(Volts.zero())));
   }
 }

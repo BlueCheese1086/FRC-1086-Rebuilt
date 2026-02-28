@@ -27,16 +27,14 @@ public class VisionConstants {
               Units.inchesToMeters(-Units.inchesToMeters(11)),
               Units.inchesToMeters(Units.inchesToMeters(11.75)),
               Units.inchesToMeters(Units.inchesToMeters(6)),
-              new Rotation3d(
-                  0.0, -Units.degreesToRadians(150),0.0)), // Front
+              new Rotation3d(0.0, -Units.degreesToRadians(150), 0.0)), // Front
           // Right
           // Camera
           new Transform3d(
               -Units.inchesToMeters(11),
               Units.inchesToMeters(11.75),
               Units.inchesToMeters(6),
-              new Rotation3d(
-                  0.0, -Units.degreesToRadians(150), 0.0)) // Front
+              new Rotation3d(0.0, -Units.degreesToRadians(150), 0.0)) // Front
         };
 
     public static final AprilTagFieldLayout fieldLayout = FieldConstants.defaultAprilTagType;
