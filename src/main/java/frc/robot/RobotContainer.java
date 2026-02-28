@@ -13,12 +13,6 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.Volts;
-
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -36,12 +30,10 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.hood.Hood;
-import frc.robot.subsystems.hood.HoodConstants;
 import frc.robot.subsystems.hood.HoodIO;
 import frc.robot.subsystems.hood.HoodIOServo;
 import frc.robot.subsystems.hood.HoodIOSim;
 import frc.robot.subsystems.indexer.Indexer;
-import frc.robot.subsystems.indexer.IndexerConstants;
 import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSim;
 import frc.robot.subsystems.indexer.IndexerIOTalonFX;
@@ -54,7 +46,6 @@ import frc.robot.subsystems.shooter.FeederIO.FeederIO;
 import frc.robot.subsystems.shooter.FeederIO.FeederIOSim;
 import frc.robot.subsystems.shooter.FeederIO.FeederIOTalonFX;
 import frc.robot.subsystems.shooter.Shooter;
-import frc.robot.subsystems.shooter.ShooterConstants;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.shooter.ShooterIOTalonFX;
@@ -242,68 +233,70 @@ public class RobotContainer {
 
   private void configureButtonBindings() {
     // Default command, normal field-relative drive
-    drive.setDefaultCommand(
-        DriveCommands.joystickDrive(
-            drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
+    // drive.setDefaultCommand(
+    //     DriveCommands.joystickDrive(
+    //         drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () ->
+    // -driver.getRightX()));
 
     // // TODO: REMOVE THIS DURING SUPERSTRUCTURE TESTING
-    hood.setDefaultCommand(
-        hood.setAngle(() -> (Degrees.of(HoodConstants.Setpoints.hoodAngle.get()))));
+    // hood.setDefaultCommand(
+    //     hood.setAngle(() -> (Degrees.of(HoodConstants.Setpoints.hoodAngle.get()))));
 
     // Driver Commands
-    driver
-        .start()
-        .onTrue(
-            Commands.runOnce(
-                    () ->
-                        drive.setPose(
-                            new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
-                    drive)
-                .ignoringDisable(true));
+    // driver
+    //     .start()
+    //     .onTrue(
+    //         Commands.runOnce(
+    //                 () ->
+    //                     drive.setPose(
+    //                         new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
+    //                 drive)
+    //             .ignoringDisable(true));
 
     driver
         .leftTrigger()
         .whileTrue(
             Commands.parallel(
                 intake.setVoltage(IntakeConstants.Setpoints.run),
-                intake.setPosition(IntakeConstants.Setpoints.deployed),
-                indexer.setVoltage(IndexerConstants.Setpoints.feed)));
+                intake.setPosition(IntakeConstants.Setpoints.deployed)));
+    // indexer.setVoltage(IndexerConstants.Setpoints.feed)));
 
-    driver.y().whileTrue(Commands.run(() -> shooter.setVoltage(8)).finallyDo(shooter::stopShooter));
-    operator
-        .y()
-        .whileTrue(
-            Commands.run(
-                () ->
-                    shooter.setVelocitySetpoint(
-                        RadiansPerSecond.of(
-                            ShooterConstants.Tuning.velocitySetpoint.getAsDouble())),
-                shooter))
-        .onFalse(Commands.runOnce(shooter::stopAll));
-    driver
-        .rightTrigger()
-        .onTrue(intake.setPosition(IntakeConstants.Setpoints.agitate))
-        .onFalse(intake.setPosition(IntakeConstants.Setpoints.deployed));
-    driver
-        .rightTrigger()
-        .whileTrue(
-            Commands.parallel(
-                intake.setVoltage(IntakeConstants.Setpoints.run),
-                indexer.setVoltage(IndexerConstants.Setpoints.feed),
-                shooter.runFeederVoltage(ShooterConstants.FeederSetpoints.run.in(Volts))));
-    driver
-        .povLeft()
-        .whileTrue(
-            Commands.parallel(
-                indexer.setVoltage(IndexerConstants.Setpoints.intake.negate()),
-                intake.setVoltage(IntakeConstants.Setpoints.run.negate()),
-                shooter
-                    .runFeederVoltage(-ShooterConstants.FeederSetpoints.run.in(Volts))
-                    .finallyDo(shooter.runFeederVoltage(0)::execute)));
-    // Operator Commands
-    operator.leftTrigger().whileTrue(DriveCommands.recordData(drive, shooter, hood));
-    operator.x().whileTrue(DriveCommands.wheelRadiusCharacterization(drive));
-    operator.a().whileTrue(DriveCommands.feedforwardCharacterization(drive));
+    // driver.y().whileTrue(Commands.run(() ->
+    // shooter.setVoltage(8)).finallyDo(shooter::stopShooter));
+    // operator
+    //     .y()
+    //     .whileTrue(
+    //         Commands.run(
+    //             () ->
+    //                 shooter.setVelocitySetpoint(
+    //                     RadiansPerSecond.of(
+    //                         ShooterConstants.Tuning.velocitySetpoint.getAsDouble())),
+    //             shooter))
+    //     .onFalse(Commands.runOnce(shooter::stopAll));
+    // driver
+    //     .rightTrigger()
+    //     .onTrue(intake.setPosition(IntakeConstants.Setpoints.agitate))
+    //     .onFalse(intake.setPosition(IntakeConstants.Setpoints.deployed));
+    // driver
+    //     .rightTrigger()
+    //     .whileTrue(
+    //         Commands.parallel(
+    //             intake.setVoltage(IntakeConstants.Setpoints.run),
+    //             indexer.setVoltage(IndexerConstants.Setpoints.feed),
+    //             shooter.runFeederVoltage(ShooterConstants.FeederSetpoints.run.in(Volts))));
+    // driver
+    //     .povLeft()
+    //     .whileTrue(
+    //         Commands.parallel(
+    //             indexer.setVoltage(IndexerConstants.Setpoints.intake.negate()),
+    //             intake.setVoltage(IntakeConstants.Setpoints.run.negate()),
+    //             shooter
+    //                 .runFeederVoltage(-ShooterConstants.FeederSetpoints.run.in(Volts))
+    //                 .finallyDo(shooter.runFeederVoltage(0)::execute)));
+    // // Operator Commands
+    // operator.leftTrigger().whileTrue(DriveCommands.recordData(drive, shooter, hood));
+    // operator.x().whileTrue(DriveCommands.wheelRadiusCharacterization(drive));
+    // operator.a().whileTrue(DriveCommands.feedforwardCharacterization(drive));
   }
 
   /**
