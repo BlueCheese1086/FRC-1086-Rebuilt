@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.hood.Hood;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
@@ -38,9 +39,9 @@ public class AutosManager extends SubsystemBase {
 
   public record Auto(String name, Command command, Pose2d initPose) {}
 
-  public AutosManager(Drive drive, Shooter shooter, Indexer indexer, Intake intake) {
+  public AutosManager(Drive drive, Shooter shooter, Indexer indexer, Intake intake, Hood hood) {
     this.drive = drive;
-    this.machine = new AutoStateMachine(drive, shooter, indexer, intake);
+    this.machine = new AutoStateMachine(drive, shooter, indexer, intake, hood);
 
     initUI();
   }

@@ -200,7 +200,7 @@ public class RobotContainer {
         break;
     }
 
-    automanager = new AutosManager(drive, shooter, indexer, intake);
+    automanager = new AutosManager(drive, shooter, indexer, intake, hood);
     AutoRoutines.setup(drive, automanager.machine);
     // Shooting manager uses drive pose/speeds for SOTM calculations
     shootingManager =
