@@ -59,6 +59,7 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
+import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOSim;
 import frc.robot.util.FieldConstants.Hub;
 import frc.robot.util.PoseMath;
@@ -128,10 +129,10 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 drive::getPose,
-                // new VisionIOPhotonVision(
-                // "left", VisionConstants.PhysicalConstants.cameraTransforms[0]),
-                // new VisionIOPhotonVision(
-                // "right", VisionConstants.PhysicalConstants.cameraTransforms[1]),
+                new VisionIOPhotonVision(
+                    "left", VisionConstants.PhysicalConstants.cameraTransforms[0]),
+                new VisionIOPhotonVision(
+                    "right", VisionConstants.PhysicalConstants.cameraTransforms[1]),
                 new VisionIOLimelight("marble"));
 
         intake = new Intake(new IntakeIOTalonFX());
