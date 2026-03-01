@@ -23,7 +23,7 @@ import frc.robot.util.PhoenixUtil;
 
 /** Add your docs here. */
 public class IndexerIOTalonFX implements IndexerIO {
-  private final TalonFX talon; // Not 540
+  private final TalonFX talon; 
   private final TalonFXConfiguration config = new TalonFXConfiguration();
   private final VoltageOut applyVoltage = new VoltageOut(0.0).withEnableFOC(true);
   private final TorqueCurrentFOC applyCurrent = new TorqueCurrentFOC(0.0);
@@ -38,7 +38,7 @@ public class IndexerIOTalonFX implements IndexerIO {
     talon = new TalonFX(RobotMap.indexer, RobotMap.systemBus);
     config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     config.CurrentLimits.StatorCurrentLimit = IndexerConstants.CurrentLimits.maxStator.in(Amps);
-    config.CurrentLimits.StatorCurrentLimitEnable = true;
+    config.CurrentLimits.StatorCurrentLimitEnable = false;
     config.CurrentLimits.SupplyCurrentLimit = IndexerConstants.CurrentLimits.maxSupply.in(Amps);
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
 
@@ -57,7 +57,7 @@ public class IndexerIOTalonFX implements IndexerIO {
     temp = talon.getDeviceTemp();
 
     StatusSignal.setUpdateFrequencyForAll(
-        RobotMap.systemBus.isNetworkFD() ? 250.0 : 50.0,
+        50.0,
         velocity,
         appliedVoltage,
         stator,
