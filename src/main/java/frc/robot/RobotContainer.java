@@ -63,6 +63,7 @@ import frc.robot.subsystems.shooter.ShooterIOTalonFX;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
+import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.AllianceFlipUtil;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -131,9 +132,7 @@ public class RobotContainer {
                 new FeederIOTalonFX(RobotMap.ShooterMap.feeder),
                 new ShooterIOTalonFX(RobotMap.ShooterMap.left, true),
                 new ShooterIOTalonFX(RobotMap.ShooterMap.middle, true),
-                new ShooterIOTalonFX(RobotMap.ShooterMap.right, false)
-                // new FeederIO() {}, new ShooterIO() {}
-                );
+                new ShooterIOTalonFX(RobotMap.ShooterMap.right, false));
         hood = new Hood(new HoodIOServo());
         climb = new Climb(new ClimbIO() {});
         break;
@@ -151,8 +150,8 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVision("backLeft", VisionConstants.robotToLeftCam),
-                new VisionIOPhotonVision("backRight", VisionConstants.robotToRightCam));
+                new VisionIOPhotonVisionSim("backLeft", VisionConstants.robotToLeftCam, drive::getPose),
+                new VisionIOPhotonVisionSim("backRight", VisionConstants.robotToRightCam, drive::getPose));
         indexer = new Indexer(new IndexerIOSim());
         intake = new Intake(new IntakeIOSim());
         shooter =
@@ -267,7 +266,6 @@ public class RobotContainer {
 
     driver
         .leftTrigger()
-        .and(()-> driver.leftBumper())
         .whileTrue(
             Commands.parallel(
                 DriveCommands.joystickDriveSyom(
