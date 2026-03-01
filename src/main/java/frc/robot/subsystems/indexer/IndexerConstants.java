@@ -23,8 +23,7 @@ public class IndexerConstants {
   }
 
   public static class Setpoints {
-    public static final Voltage intake = Volts.of(3);
-    public static final Voltage feed = Volts.of(10.0);
+    public static final Voltage feed = Volts.of(12.0);
   }
 }
 // should we add the reduction that indexer has in cad? it's a 3:1 reduction, nah it is fine because

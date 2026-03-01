@@ -14,11 +14,13 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.Centimeters;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -55,6 +57,7 @@ import frc.robot.subsystems.intake.IntakeIOTalonFX;
 import frc.robot.subsystems.shooter.FeederIO.FeederIO;
 import frc.robot.subsystems.shooter.FeederIO.FeederIOSim;
 import frc.robot.subsystems.shooter.FeederIO.FeederIOTalonFX;
+import frc.robot.subsystems.shooter.ShooterConstants.FeederSetpoints;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterConstants;
 import frc.robot.subsystems.shooter.ShooterIO;
@@ -272,40 +275,36 @@ public class RobotContainer {
                     drive, ControllerLayout.joystickX, ControllerLayout.joystickY),
                 intake.setVoltage(IntakeConstants.Setpoints.run),
                 intake.setPosition(IntakeConstants.Setpoints.deployed)));
-
-    driver
-        .rightTrigger()
+    driver.rightTrigger()
         .whileTrue(
             Commands.parallel(
-                shooter
-                    .runFeederVoltage(ShooterConstants.FeederSetpoints.run.in(Volts))
-                    .finallyDo(shooter.runFeederVoltage(0.0)::execute),
-                indexer.setVoltage(IndexerConstants.Setpoints.feed),
-                Commands.repeatingSequence(
-                    intake.setPosition(IntakeConstants.Setpoints.agitate),
-                    intake.setPosition(IntakeConstants.Setpoints.deployed))));
+                shooter.runFeed(FeederSetpoints.run.in(Volts)),
+                indexer.setVoltage(IndexerConstants.Setpoints.feed)
+            )
+        );
+    
     driver
         .povLeft()
         .whileTrue(
             Commands.parallel(
                 intake.setVoltage(IntakeConstants.Setpoints.run.negate()),
                 indexer.setVoltage(IndexerConstants.Setpoints.feed.negate()),
-                shooter
-                    .runFeederVoltage(-ShooterConstants.FeederSetpoints.run.in(Volts))
-                    .finallyDo(shooter.runFeederVoltage(0.0)::execute),
-                Commands.run(() -> shooter.setVoltage(12)).finallyDo(shooter::stopShooter)));
-    driver
-        .povDown()
+                shooter.runFeed(-FeederSetpoints.run.in(Volts)),
+                shooter.setVoltage(12.0)
+            )
+        );
+    
+    // Operator Commands
+    operator
+        .povLeft()
         .whileTrue(
             Commands.parallel(
-                indexer.setVoltage(IndexerConstants.Setpoints.intake.negate()),
-                shooter
-                    .runFeederVoltage(-ShooterConstants.FeederSetpoints.run.in(Volts))
-                    .finallyDo(shooter.runFeederVoltage(0.0)::execute),
-                Commands.run(() -> shooter.setVoltage(12)).finallyDo(shooter::stopShooter)));
-
-    // Operator Commands
-    operator.povLeft().onTrue(intake.setPosition(IntakeConstants.Setpoints.stowed));
+                indexer.setVoltage(IndexerConstants.Setpoints.feed.negate()),
+                shooter.setVoltage(12.0),
+                shooter.runFeed(-12.0)
+            )
+        );
+    operator.povDown().onTrue(intake.setPosition(IntakeConstants.Setpoints.stowed));
     operator.x().whileTrue(DriveCommands.recordData(drive, shooter, hood));
     operator
         .povDown()
@@ -320,7 +319,7 @@ public class RobotContainer {
                                             .getPose()
                                             .getTranslation()
                                             .getDistance(backStartPose[0].getTranslation())
-                                        >= Centimeters.of(10.0).in(Centimeters)))
+                                        >= Units.inchesToMeters(5.0)))
                 .finallyDo(() -> drive.runVelocity(new ChassisSpeeds())));
   }
 

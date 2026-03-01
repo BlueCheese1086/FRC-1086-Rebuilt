@@ -172,7 +172,7 @@ public class AutoStateMachine {
 
   public Command
       startFeeder() { // START FEEDER DOES NOT ACTUALLY START THE FEEDER, IT SPINS UP THE FLYWHEELS
-    return shooter.setVelocity(() -> RadiansPerSecond.zero());
+    return shooter.runShooter(() -> RadiansPerSecond.zero());
   }
 
   public Command startShoot() {
@@ -196,7 +196,7 @@ public class AutoStateMachine {
   public Command startIntake() {
     return Commands.parallel(
         intake.setVoltage(IntakeConstants.Setpoints.run),
-        indexer.setVoltage(IndexerConstants.Setpoints.intake));
+        indexer.setVoltage(IndexerConstants.Setpoints.feed));
   }
 
   public Command stopIntake() {
