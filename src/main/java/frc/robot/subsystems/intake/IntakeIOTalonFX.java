@@ -16,8 +16,6 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
-import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -61,8 +59,8 @@ public class IntakeIOTalonFX implements IntakeIO {
   private final StatusSignal<Temperature> pivotTemperature;
 
   // divide the max free speed by the gear ratio to get the max pviot velocity
-  private final AngularVelocity maxPivotVelocity = RadiansPerSecond.of(DCMotor.getKrakenX60Foc(1).freeSpeedRadPerSec)
-      .div(50.0);
+  private final AngularVelocity maxPivotVelocity =
+      RadiansPerSecond.of(DCMotor.getKrakenX60Foc(1).freeSpeedRadPerSec).div(50.0);
 
   public IntakeIOTalonFX() {
     pivot = new TalonFX(RobotMap.IntakeMap.pivot, RobotMap.systemBus);
@@ -88,7 +86,8 @@ public class IntakeIOTalonFX implements IntakeIO {
     config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
     config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
-    config.MotionMagic.MotionMagicAcceleration = maxPivotVelocity.per(Second).in(RotationsPerSecondPerSecond);
+    config.MotionMagic.MotionMagicAcceleration =
+        maxPivotVelocity.per(Second).in(RotationsPerSecondPerSecond);
     config.MotionMagic.MotionMagicCruiseVelocity = maxPivotVelocity.in(RotationsPerSecond);
     config.CurrentLimits.StatorCurrentLimit = IntakeConstants.CurrentLimits.maxStator.in(Amps);
     config.CurrentLimits.StatorCurrentLimitEnable = true;
@@ -112,8 +111,7 @@ public class IntakeIOTalonFX implements IntakeIO {
 
     pivot.setPosition(IntakeConstants.Setpoints.stowed);
 
-    StatusSignal.setUpdateFrequencyForAll(
-        250.0, pivotAngle);
+    StatusSignal.setUpdateFrequencyForAll(250.0, pivotAngle);
     StatusSignal.setUpdateFrequencyForAll(
         50.0,
         rollerVoltage,
@@ -173,16 +171,18 @@ public class IntakeIOTalonFX implements IntakeIO {
       resetValues();
     }
 
-    inputs.rollerConnected = StatusSignal.isAllGood(
-        rollerVelocity, rollerVoltage, rollerSupply, rollerStator, rollerTemperature);
+    inputs.rollerConnected =
+        StatusSignal.isAllGood(
+            rollerVelocity, rollerVoltage, rollerSupply, rollerStator, rollerTemperature);
     inputs.rollerVelocity = rollerVelocity.getValue();
     inputs.rollerAppliedVoltage = rollerVoltage.getValue();
     inputs.rollerStator = rollerStator.getValue();
     inputs.rollerSupply = rollerSupply.getValue();
     inputs.rollerTemp = rollerTemperature.getValue();
 
-    inputs.pivotConnected = StatusSignal.isAllGood(
-        pivotAngle, pivotVelocity, pivotVoltage, pivotSupply, pivotStator, pivotTemperature);
+    inputs.pivotConnected =
+        StatusSignal.isAllGood(
+            pivotAngle, pivotVelocity, pivotVoltage, pivotSupply, pivotStator, pivotTemperature);
     inputs.pivotAngle = pivotAngle.getValue();
     inputs.pivotVelocity = pivotVelocity.getValue();
     inputs.pivotStator = pivotStator.getValue();

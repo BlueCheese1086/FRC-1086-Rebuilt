@@ -74,9 +74,9 @@ public class ShooterConstants {
             -Units.inchesToMeters(8.5),
             shooterYOffset.in(Meters),
             shooterHeight.in(Meters),
-            new Rotation3d(0.0 , 0.0 , 0.0));
-      public static Transform3d robotToLauncher =
-      new Transform3d(-0.276, 0.09, 0.599, new Rotation3d(0.0, 0.0, Math.PI));
+            new Rotation3d(0.0, 0.0, 0.0));
+    public static Transform3d robotToLauncher =
+        new Transform3d(-0.276, 0.09, 0.599, new Rotation3d(0.0, 0.0, Math.PI));
   }
 
   public static class ShooterTransforms {

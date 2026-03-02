@@ -78,7 +78,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public Command runShooter(Supplier<AngularVelocity> velocity) {
-    return Commands.run(() -> setVelocitySetpoint(velocity)).finallyDo(()-> stopShooter());
+    return Commands.run(() -> setVelocitySetpoint(velocity)).finallyDo(() -> stopShooter());
   }
 
   public Command stopShoot() {
@@ -95,11 +95,12 @@ public class Shooter extends SubsystemBase {
 
   public Command setVoltage(double volts) {
     return Commands.run(
-        () -> {
-          for (int i = 0; i < io.length; i++) {
-            io[i].setVoltage(volts);
-          }
-        }).finallyDo(()-> stopShoot());
+            () -> {
+              for (int i = 0; i < io.length; i++) {
+                io[i].setVoltage(volts);
+              }
+            })
+        .finallyDo(() -> stopShoot());
   }
 
   public void stopAll() {
@@ -122,19 +123,19 @@ public class Shooter extends SubsystemBase {
   }
 
   /**
-   * @return returns the setpoint of the MIDDLE SHOOTER, if that shooter is at the
-   *         setpoint or not
+   * @return returns the setpoint of the MIDDLE SHOOTER, if that shooter is at the setpoint or not
    */
   public boolean atSetpoint() {
     return inputs[0].atSetpoint && inputs[1].atSetpoint && inputs[2].atSetpoint;
   }
 
   public void recordShot(Pose3d drivePose, Angle hoodAngle, double tof) {
-    double distanceToHub = Math.abs(
-        drivePose
-            .plus(ShooterConstants.ShooterTransforms.centerShooter)
-            .getTranslation()
-            .getDistance(AllianceFlipUtil.apply(Hub.topCenterPoint)));
+    double distanceToHub =
+        Math.abs(
+            drivePose
+                .plus(ShooterConstants.ShooterTransforms.centerShooter)
+                .getTranslation()
+                .getDistance(AllianceFlipUtil.apply(Hub.topCenterPoint)));
     Logger.recordOutput("File Writing/ Distance to Hub", distanceToHub);
     Logger.recordOutput(
         "File Writing/ Shooter RPM",
@@ -158,9 +159,9 @@ public class Shooter extends SubsystemBase {
   public static Pose3d[] getShooterPoses(Pose2d robotPose) {
     Pose3d robot3d = new Pose3d(robotPose);
     return new Pose3d[] {
-        robot3d.transformBy(ShooterConstants.ShooterTransforms.leftShooter),
-        robot3d.transformBy(ShooterConstants.ShooterTransforms.centerShooter),
-        robot3d.transformBy(ShooterConstants.ShooterTransforms.rightShooter)
+      robot3d.transformBy(ShooterConstants.ShooterTransforms.leftShooter),
+      robot3d.transformBy(ShooterConstants.ShooterTransforms.centerShooter),
+      robot3d.transformBy(ShooterConstants.ShooterTransforms.rightShooter)
     };
   }
 
@@ -189,31 +190,31 @@ public class Shooter extends SubsystemBase {
 
   public Command getShooterSysIdQuasistatic(Direction direction, int index, String name) {
     return new SysIdRoutine(
-        new SysIdRoutine.Config(null, Volts.of(4), null),
-        new SysIdRoutine.Mechanism(
-            volts -> io[index].setVoltage(volts.in(Volts)),
-            log -> {
-              log.motor(name)
-                  .voltage(Volts.of(inputs[index].appliedVoltage))
-                  .angularPosition(Rotations.of(inputs[index].positionRadPerSec))
-                  .angularVelocity(RotationsPerSecond.of(inputs[index].velocity));
-            },
-            this))
+            new SysIdRoutine.Config(null, Volts.of(4), null),
+            new SysIdRoutine.Mechanism(
+                volts -> io[index].setVoltage(volts.in(Volts)),
+                log -> {
+                  log.motor(name)
+                      .voltage(Volts.of(inputs[index].appliedVoltage))
+                      .angularPosition(Rotations.of(inputs[index].positionRadPerSec))
+                      .angularVelocity(RotationsPerSecond.of(inputs[index].velocity));
+                },
+                this))
         .quasistatic(direction);
   }
 
   public Command getShooterSysIdDynamic(Direction direction, int index, String name) {
     return new SysIdRoutine(
-        new SysIdRoutine.Config(null, Volts.of(4), null),
-        new SysIdRoutine.Mechanism(
-            volts -> io[index].setVoltage(volts.in(Volts)),
-            log -> {
-              log.motor(name)
-                  .voltage(Volts.of(inputs[index].appliedVoltage))
-                  .angularPosition(Rotations.of(inputs[index].positionRadPerSec))
-                  .angularVelocity(RotationsPerSecond.of(inputs[index].velocity));
-            },
-            this))
+            new SysIdRoutine.Config(null, Volts.of(4), null),
+            new SysIdRoutine.Mechanism(
+                volts -> io[index].setVoltage(volts.in(Volts)),
+                log -> {
+                  log.motor(name)
+                      .voltage(Volts.of(inputs[index].appliedVoltage))
+                      .angularPosition(Rotations.of(inputs[index].positionRadPerSec))
+                      .angularVelocity(RotationsPerSecond.of(inputs[index].velocity));
+                },
+                this))
         .dynamic(direction);
   }
 }

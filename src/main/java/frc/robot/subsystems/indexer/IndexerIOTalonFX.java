@@ -23,7 +23,7 @@ import frc.robot.util.PhoenixUtil;
 
 /** Add your docs here. */
 public class IndexerIOTalonFX implements IndexerIO {
-  private final TalonFX talon; 
+  private final TalonFX talon;
   private final TalonFXConfiguration config = new TalonFXConfiguration();
   private final VoltageOut applyVoltage = new VoltageOut(0.0).withEnableFOC(true);
   private final TorqueCurrentFOC applyCurrent = new TorqueCurrentFOC(0.0);
@@ -56,13 +56,7 @@ public class IndexerIOTalonFX implements IndexerIO {
     supply = talon.getSupplyCurrent();
     temp = talon.getDeviceTemp();
 
-    StatusSignal.setUpdateFrequencyForAll(
-        50.0,
-        velocity,
-        appliedVoltage,
-        stator,
-        supply,
-        temp);
+    StatusSignal.setUpdateFrequencyForAll(50.0, velocity, appliedVoltage, stator, supply, temp);
 
     PhoenixUtil.tryUntilOk(5, () -> (talon.optimizeBusUtilization()));
   }
