@@ -47,10 +47,10 @@ public class ShootingManager {
                   Interpolator.forDouble()
                       .interpolate(startValue.hoodAngleRad, endValue.hoodAngleRad, t)));
 
-  // TODO: Replace with tuned polynomial coefficients for RPM = a + b*x + c*x^2 + d*x^3
-  private static final double[] LOOKUP_TABLE_POLYNOMIAL = new double[] {0.0, 0.0, 0.0, 0.0};
-  // TODO: Replace with tuned polynomial coefficients for hood angle deg = a + b*x + c*x^2 + d*x^3
-  private static final double[] LOOKUP_TABLE_HOOD_POLYNOMIAL = new double[] {0.0, 0.0, 0.0, 0.0};
+  // TODO: Replace with new coefficients for RPM = a + b*x + c*x^2 + d*x^3 where x is distance meters
+  private static final double[] LOOKUP_TABLE_POLYNOMIAL = new double[] {6123.98722364, -3372.91648691, 1172.73628787, -116.49524005};
+  // TODO: Replace with new coefficients for hood angle deg = a + b*x + c*x^2 + d*x^3 where x is distance meters
+  private static final double[] LOOKUP_TABLE_HOOD_POLYNOMIAL = new double[] {157.65295921, -87.06823815, 26.34973988, -2.55605388};
   private static final double POLY_RPM_WEIGHT =
       0.5; // 0 = use map only, 1 = use poly only, 0.5 = blend both
   private static final double POLY_HOOD_WEIGHT =
@@ -92,9 +92,11 @@ public class ShootingManager {
 
   static {
     // TODO: Replace with calibrated distance->shot params (meters, RPM, hood angle deg)
-    addShotParams(2.0, 3200.0, 75.0);
-    addShotParams(4.0, 3800.0, 68.0);
-    addShotParams(6.0, 4400.0, 60.0);
+    addShotParams(1.4478, 3351.803102, 78.0);
+    addShotParams(1.8, 3151.267873, 65.0);
+    addShotParams(2.054, 3151.267873, 75.0);
+    addShotParams(3.048, 3437.746771, 65.0);
+    addShotParams(5.334, 3819.718634, 55.0);
   }
 
   public ShootingManager() {
