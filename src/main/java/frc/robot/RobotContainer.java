@@ -249,9 +249,6 @@ public class RobotContainer {
         DriveCommands.joystickDrive(
             drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
 
-    // TODO: REMOVE THIS DURING SUPERSTRUCTURE TESTING
-    // Default command must require the subsystem; run periodically to maintain setpoint
-    // hood.setDefaultCommand(hood.setAngle(Degrees.of(angle)));
     hood.setDefaultCommand(
         Commands.run(
             () -> hood.setPosition(() -> HoodConstants.Setpoints.hoodAngle.getAsDouble()), hood));
@@ -271,15 +268,17 @@ public class RobotContainer {
         .leftTrigger()
         .whileTrue(
             Commands.parallel(
-                DriveCommands.joystickDriveSyom(
-                    drive, ControllerLayout.joystickX, ControllerLayout.joystickY),
+                // DriveCommands.joystickDriveSyom(
+                //     drive, ControllerLayout.joystickX, ControllerLayout.joystickY),
                 intake.setVoltage(IntakeConstants.Setpoints.run),
                 intake.setPosition(IntakeConstants.Setpoints.deployed)));
+
     driver.rightTrigger()
         .whileTrue(
             Commands.parallel(
                 shooter.runFeed(FeederSetpoints.run.in(Volts)),
-                indexer.setVoltage(IndexerConstants.Setpoints.feed)
+                indexer.setVoltage(IndexerConstants.Setpoints.feed),
+                intake.setVoltage(IntakeConstants.Setpoints.run)
             )
         );
     
@@ -304,8 +303,9 @@ public class RobotContainer {
                 shooter.runFeed(-12.0)
             )
         );
-    operator.povDown().onTrue(intake.setPosition(IntakeConstants.Setpoints.stowed));
+    operator.leftTrigger().onTrue(intake.setPosition(IntakeConstants.Setpoints.stowed));
     operator.x().whileTrue(DriveCommands.recordData(drive, shooter, hood));
+    operator.y().whileTrue(shooter.runShooter(()-> RadiansPerSecond.of(ShooterConstants.Tuning.velocitySetpoint.getAsDouble())));
     operator
         .povDown()
         .onTrue(

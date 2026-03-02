@@ -61,7 +61,7 @@ public class ShooterConstants {
 
   public static class Mechanical {
     public static final MomentOfInertia J = KilogramSquareMeters.of(0.001);
-    public static final Distance shooterHeight = Inches.of(24.5);
+    public static final Distance shooterHeight = Inches.of(26.0);
     public static final Distance flywheelRadius = Inches.of(2.0);
     public static final double shooterWheelGearRatio = 1.0;
     public static final Distance shooterXOffset = Inches.of(-10.0);
@@ -74,7 +74,9 @@ public class ShooterConstants {
             -Units.inchesToMeters(8.5),
             shooterYOffset.in(Meters),
             shooterHeight.in(Meters),
-            new Rotation3d());
+            new Rotation3d(0.0 , 0.0 , 0.0));
+      public static Transform3d robotToLauncher =
+      new Transform3d(-0.276, 0.09, 0.599, new Rotation3d(0.0, 0.0, Math.PI));
   }
 
   public static class ShooterTransforms {
