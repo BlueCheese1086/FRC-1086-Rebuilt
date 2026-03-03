@@ -78,7 +78,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public Command runShooter(Supplier<AngularVelocity> velocity) {
-    return Commands.run(() -> setVelocitySetpoint(velocity), this).until(() -> atSetpoint());
+    return Commands.run(() -> setVelocitySetpoint(velocity)).finallyDo(() -> stopShooter());
   }
 
   public Command stopShoot() {
@@ -156,7 +156,7 @@ public class Shooter extends SubsystemBase {
     }
   }
 
-  public Pose3d[] getShooterPoses(Pose2d robotPose) {
+  public static Pose3d[] getShooterPoses(Pose2d robotPose) {
     Pose3d robot3d = new Pose3d(robotPose);
     return new Pose3d[] {
       robot3d.transformBy(ShooterConstants.ShooterTransforms.leftShooter),

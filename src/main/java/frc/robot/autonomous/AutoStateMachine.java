@@ -170,17 +170,19 @@ public class AutoStateMachine {
         });
   }
 
-  public Command
-      startFeeder() { // START FEEDER DOES NOT ACTUALLY START THE FEEDER, IT SPINS UP THE FLYWHEELS
-    return shooter.runShooter(() -> RadiansPerSecond.zero());
+  public Command startFeeder() { //just spins up flywheel, TODO: make better
+    return Commands.runOnce(() -> shooter.setVoltage(12));
   }
 
-  public Command startShoot() {
-    return Commands.runOnce(
-        () ->
-            shooter.setVelocitySetpoint(
-                () -> RadiansPerSecond.of(ShooterConstants.Tuning.velocitySetpoint.getAsDouble())),
-        shooter);
+  public Command startShoot() { 
+    return Commands.parallel(
+      shooter
+          .runFeederVoltage(ShooterConstants.FeederSetpoints.run.in(Volts))
+          /*.finallyDo(shooter.runFeederVoltage(0.0)::execute)*/,
+      indexer.setVoltage(IndexerConstants.Setpoints.feed),
+      Commands.repeatingSequence( //TODO: uhh probaly not gonna agitate
+          intake.setPosition(IntakeConstants.Setpoints.agitate),
+          intake.setPosition(IntakeConstants.Setpoints.deployed)));
   }
 
   public Command stopShoot() {

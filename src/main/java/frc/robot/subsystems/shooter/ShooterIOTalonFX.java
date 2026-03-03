@@ -11,6 +11,7 @@ import static frc.robot.util.PhoenixUtil.tryUntilOk;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -30,6 +31,7 @@ public class ShooterIOTalonFX implements ShooterIO {
   private final TalonFX shooter;
   private final BangBangController bbController;
   private final VelocityVoltage velocityVoltage;
+  private final MotionMagicVelocityVoltage motionMagic;
 
   // Status Signals
   private StatusSignal<AngularVelocity> velocity;
@@ -45,9 +47,10 @@ public class ShooterIOTalonFX implements ShooterIO {
 
   public ShooterIOTalonFX(int id, boolean inverted) {
     shooter = new TalonFX(id, RobotMap.systemBus);
-    bbController = new BangBangController(RadiansPerSecond.of(10.0).in(RotationsPerSecond));
+    bbController = new BangBangController(RadiansPerSecond.of(30.0).in(RotationsPerSecond));
 
     velocityVoltage = new VelocityVoltage(0.0).withEnableFOC(true);
+    motionMagic = new MotionMagicVelocityVoltage(0.0).withEnableFOC(true).withSlot(0);
 
     TalonFXConfiguration config = new TalonFXConfiguration();
     config.Slot0.kS = ShooterConstants.Tuning.kS;
@@ -65,6 +68,9 @@ public class ShooterIOTalonFX implements ShooterIO {
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
     config.CurrentLimits.SupplyCurrentLimit = 70.0; // arbittury
 
+    config.MotionMagic.MotionMagicJerk = 0.0;
+    config.MotionMagic.MotionMagicAcceleration = 500.0;
+
     config.ClosedLoopRamps.VoltageClosedLoopRampPeriod = 0.1;
 
     tryUntilOk(5, () -> shooter.getConfigurator().apply(config));
@@ -78,7 +84,7 @@ public class ShooterIOTalonFX implements ShooterIO {
     volts = shooter.getMotorVoltage();
 
     velocity.setUpdateFrequency(250.0);
-    acceleration.setUpdateFrequency(25.0);
+    acceleration.setUpdateFrequency(250.0);
     BaseStatusSignal.setUpdateFrequencyForAll(
         50.0, acceleration, position, statorCurrent, supplyCurrent, temp, volts);
     shooter.optimizeBusUtilization();
@@ -105,7 +111,7 @@ public class ShooterIOTalonFX implements ShooterIO {
     this.setpoint = velocity.in(RadiansPerSecond);
     bbController.setSetpoint(velocity.in(RotationsPerSecond));
     shooter.setControl(
-        velocityVoltage
+        motionMagic
             .withVelocity(velocity)
             .withFeedForward(bangBangVoltage * RobotController.getBatteryVoltage()));
   }
@@ -113,6 +119,7 @@ public class ShooterIOTalonFX implements ShooterIO {
   @Override
   public void setVoltage(double volts) {
     shooter.setVoltage(volts);
+    bbController.setSetpoint(0.0);
     if (volts == 0) {
       shooter.stopMotor();
     }

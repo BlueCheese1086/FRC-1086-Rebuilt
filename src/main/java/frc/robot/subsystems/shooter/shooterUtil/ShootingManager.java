@@ -1,4 +1,4 @@
-package frc.robot.subsystems.shooter;
+package frc.robot.subsystems.shooter.shooterUtil;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -14,7 +14,6 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.subsystems.hood.HoodConstants;
 import frc.robot.subsystems.shooter.ShooterConstants.Mechanical;
-import frc.robot.subsystems.shooter.shooterUtil.ShootingCalculator;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
