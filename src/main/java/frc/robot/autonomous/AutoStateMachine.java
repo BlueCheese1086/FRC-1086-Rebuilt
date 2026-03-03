@@ -177,7 +177,7 @@ public class AutoStateMachine {
   public Command startShoot() { 
     return Commands.parallel(
       shooter
-          .runFeederVoltage(ShooterConstants.FeederSetpoints.run.in(Volts))
+          .runFeed(ShooterConstants.FeederSetpoints.run.in(Volts))
           /*.finallyDo(shooter.runFeederVoltage(0.0)::execute)*/,
       indexer.setVoltage(IndexerConstants.Setpoints.feed),
       Commands.repeatingSequence( //TODO: uhh probaly not gonna agitate

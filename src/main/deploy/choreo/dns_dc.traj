@@ -13,7 +13,7 @@
  },
  "params":{
   "waypoints":[
-    {"x":{"exp":"dns.x", "val":2.0}, "y":{"exp":"dns.y", "val":5.5}, "heading":{"exp":"dns.heading", "val":-0.51}, "intervals":22, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
+    {"x":{"exp":"dns.x", "val":3.6}, "y":{"exp":"dns.y", "val":7.5}, "heading":{"exp":"dns.heading", "val":-1.28}, "intervals":36, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
     {"x":{"exp":"0.49099183082580566 m", "val":0.49099183082580566}, "y":{"exp":"4.84842586517334 m", "val":4.84842586517334}, "heading":{"exp":"0 deg", "val":0.0}, "intervals":10, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
     {"x":{"exp":"dc.x", "val":1.1}, "y":{"exp":"dc.y", "val":4.7}, "heading":{"exp":"dc.heading", "val":0.0}, "intervals":40, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false}],
   "constraints":[
