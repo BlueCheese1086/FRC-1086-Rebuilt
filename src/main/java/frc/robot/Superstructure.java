@@ -1,9 +1,6 @@
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -19,7 +16,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.ShotCalc;
 import frc.robot.subsystems.climb.Climb;
 import frc.robot.subsystems.climb.ClimbConstants;
 import frc.robot.subsystems.drive.Drive;
@@ -33,7 +29,6 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterConstants;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants;
-import frc.robot.util.FieldConstants.Hub;
 // import frc.robot.util.shooter.LauncherCalculator;
 // import frc.robot.util.shooter.LauncherCalculator.LaunchingParameters;
 import frc.robot.util.PoseMath;
@@ -260,8 +255,7 @@ public class Superstructure extends SubsystemBase {
         .and(ControllerLayout.scoreRequest)
         .whileTrue(
             Commands.parallel(
-                shooter.runFeed(8.0),
-                indexer.setVoltage(IndexerConstants.Setpoints.feed)));
+                shooter.runFeed(8.0), indexer.setVoltage(IndexerConstants.Setpoints.feed)));
   }
 
   private void setupTarget() {
@@ -302,7 +296,8 @@ public class Superstructure extends SubsystemBase {
     //                   return RPM.of(
     //                       ShotCalc.getShot(
     //                               Meters.of(
-    //                                   PoseMath.getDistanceToTarget(drive.getPose(), Hub.hubCenter)))
+    //                                   PoseMath.getDistanceToTarget(drive.getPose(),
+    // Hub.hubCenter)))
     //                           .shooterRPM);
     //                 })));
     // hood.setPosition(

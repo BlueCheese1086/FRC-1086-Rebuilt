@@ -47,10 +47,14 @@ public class ShootingManager {
                   Interpolator.forDouble()
                       .interpolate(startValue.hoodAngleRad, endValue.hoodAngleRad, t)));
 
-  // TODO: Replace with new coefficients for RPM = a + b*x + c*x^2 + d*x^3 where x is distance meters
-  private static final double[] LOOKUP_TABLE_POLYNOMIAL = new double[] {6123.98722364, -3372.91648691, 1172.73628787, -116.49524005};
-  // TODO: Replace with new coefficients for hood angle deg = a + b*x + c*x^2 + d*x^3 where x is distance meters
-  private static final double[] LOOKUP_TABLE_HOOD_POLYNOMIAL = new double[] {157.65295921, -87.06823815, 26.34973988, -2.55605388};
+  // TODO: Replace with new coefficients for RPM = a + b*x + c*x^2 + d*x^3 where x is distance
+  // meters
+  private static final double[] LOOKUP_TABLE_POLYNOMIAL =
+      new double[] {6123.98722364, -3372.91648691, 1172.73628787, -116.49524005};
+  // TODO: Replace with new coefficients for hood angle deg = a + b*x + c*x^2 + d*x^3 where x is
+  // distance meters
+  private static final double[] LOOKUP_TABLE_HOOD_POLYNOMIAL =
+      new double[] {157.65295921, -87.06823815, 26.34973988, -2.55605388};
   private static final double POLY_RPM_WEIGHT =
       0.5; // 0 = use map only, 1 = use poly only, 0.5 = blend both
   private static final double POLY_HOOD_WEIGHT =

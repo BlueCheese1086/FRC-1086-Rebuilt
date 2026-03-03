@@ -13,8 +13,6 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Centimeters;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -57,9 +55,8 @@ import frc.robot.subsystems.intake.IntakeIOTalonFX;
 import frc.robot.subsystems.shooter.FeederIO.FeederIO;
 import frc.robot.subsystems.shooter.FeederIO.FeederIOSim;
 import frc.robot.subsystems.shooter.FeederIO.FeederIOTalonFX;
-import frc.robot.subsystems.shooter.ShooterConstants.FeederSetpoints;
 import frc.robot.subsystems.shooter.Shooter;
-import frc.robot.subsystems.shooter.ShooterConstants;
+import frc.robot.subsystems.shooter.ShooterConstants.FeederSetpoints;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.shooter.ShooterIOTalonFX;
@@ -153,8 +150,10 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVisionSim("backLeft", VisionConstants.robotToLeftCam, drive::getPose),
-                new VisionIOPhotonVisionSim("backRight", VisionConstants.robotToRightCam, drive::getPose));
+                new VisionIOPhotonVisionSim(
+                    "backLeft", VisionConstants.robotToLeftCam, drive::getPose),
+                new VisionIOPhotonVisionSim(
+                    "backRight", VisionConstants.robotToRightCam, drive::getPose));
         indexer = new Indexer(new IndexerIOSim());
         intake = new Intake(new IntakeIOSim());
         shooter =
@@ -275,14 +274,13 @@ public class RobotContainer {
                     drive, ControllerLayout.joystickX, ControllerLayout.joystickY),
                 intake.setVoltage(IntakeConstants.Setpoints.run),
                 intake.setPosition(IntakeConstants.Setpoints.deployed)));
-    driver.rightTrigger()
+    driver
+        .rightTrigger()
         .whileTrue(
             Commands.parallel(
                 shooter.runFeed(FeederSetpoints.run.in(Volts)),
-                indexer.setVoltage(IndexerConstants.Setpoints.feed)
-            )
-        );
-    
+                indexer.setVoltage(IndexerConstants.Setpoints.feed)));
+
     driver
         .povLeft()
         .whileTrue(
@@ -290,10 +288,8 @@ public class RobotContainer {
                 intake.setVoltage(IntakeConstants.Setpoints.run.negate()),
                 indexer.setVoltage(IndexerConstants.Setpoints.feed.negate()),
                 shooter.runFeed(-FeederSetpoints.run.in(Volts)),
-                shooter.setVoltage(12.0)
-            )
-        );
-    
+                shooter.setVoltage(12.0)));
+
     // Operator Commands
     operator
         .povLeft()
@@ -301,9 +297,7 @@ public class RobotContainer {
             Commands.parallel(
                 indexer.setVoltage(IndexerConstants.Setpoints.feed.negate()),
                 shooter.setVoltage(12.0),
-                shooter.runFeed(-12.0)
-            )
-        );
+                shooter.runFeed(-12.0)));
     operator.povDown().onTrue(intake.setPosition(IntakeConstants.Setpoints.stowed));
     operator.x().whileTrue(DriveCommands.recordData(drive, shooter, hood));
     operator
