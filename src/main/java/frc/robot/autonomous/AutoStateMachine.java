@@ -198,7 +198,7 @@ public class AutoStateMachine {
   public Command startIntake() {
     return Commands.parallel(
         intake.setVoltage(IntakeConstants.Setpoints.run),
-        indexer.setVoltage(IndexerConstants.Setpoints.intake));
+        indexer.setVoltage(IndexerConstants.Setpoints.feed));
   }
 
   public Command stopIntake() {
