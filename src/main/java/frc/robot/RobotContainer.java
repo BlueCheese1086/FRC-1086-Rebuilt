@@ -29,6 +29,7 @@ import frc.robot.commands.AutoRoutines;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.climb.Climb;
+import frc.robot.subsystems.climb.ClimbConstants;
 import frc.robot.subsystems.climb.ClimbIO;
 import frc.robot.subsystems.climb.ClimbIOSim;
 import frc.robot.subsystems.drive.Drive;
@@ -301,7 +302,7 @@ public class RobotContainer {
             Commands.run(
             ()->{
                 LaunchingParameters parms = LauncherCalculator.getInstance().getParameters(drive::getPose, drive::getChassisSpeeds);
-                shooter.setVelocitySetpoint(()-> RadiansPerSecond.of(parms.flywheelSpeed()));
+                shooter.setVelocitySetpoint(()-> RadiansPerSecond.of(parms.flywheelIdleSpeed()));
                 hood.setPosition(()-> parms.hoodAngle());
             }, shooter)
         );
@@ -347,7 +348,7 @@ public class RobotContainer {
             shooter.runShooter(
                 () -> RadiansPerSecond.of(ShooterConstants.Tuning.velocitySetpoint.getAsDouble())));
     operator
-        .povDown()
+        .povRight()
         .onTrue(
             Commands.sequence(
                     Commands.runOnce(() -> backStartPose[0] = drive.getPose()),
@@ -361,6 +362,8 @@ public class RobotContainer {
                                             .getDistance(backStartPose[0].getTranslation())
                                         >= Units.inchesToMeters(5.0)))
                 .finallyDo(() -> drive.runVelocity(new ChassisSpeeds())));
+    operator.povUp().onTrue(climb.setPosition(ClimbConstants.extendedHeight));
+    operator.povDown().onTrue(climb.setPosition(ClimbConstants.retractedHeight));
   }
 
   /**
