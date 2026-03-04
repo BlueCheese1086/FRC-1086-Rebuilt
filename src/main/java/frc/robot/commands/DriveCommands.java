@@ -248,18 +248,6 @@ public class DriveCommands {
         });
   }
 
-  public static Command joystickDriveAtVirtualTarget(
-      Drive drive,
-      DoubleSupplier xSupplier,
-      DoubleSupplier ySupplier,
-      Supplier<Pose2d> targetSupplier) {
-    return joystickDriveAtAngle(
-        drive,
-        xSupplier,
-        ySupplier,
-        () -> SotmCalculator.getDesiredRotation(drive, targetSupplier.get()));
-  }
-
   /**
    * Measures the velocity feedforward constants for the drive motors.
    *

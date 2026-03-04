@@ -12,9 +12,9 @@
  },
  "params":{
   "waypoints":[
-    {"x":{"exp":"ots.x", "val":3.6}, "y":{"exp":"ots.y", "val":0.5}, "heading":{"exp":"ots.heading", "val":0.0}, "intervals":20, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
-    {"x":{"exp":"2.6090307235717773 m", "val":2.6090307235717773}, "y":{"exp":"1.6947473287582397 m", "val":1.6947473287582395}, "heading":{"exp":"0 deg", "val":0.0}, "intervals":17, "split":false, "fixTranslation":true, "fixHeading":false, "overrideIntervals":false},
-    {"x":{"exp":"ons.x", "val":2.0}, "y":{"exp":"ons.y", "val":2.5}, "heading":{"exp":"ons.heading", "val":0.51}, "intervals":40, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false}],
+    {"x":{"exp":"ots.x", "val":3.6}, "y":{"exp":"ots.y", "val":0.5}, "heading":{"exp":"ots.heading", "val":0.0}, "intervals":22, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
+    {"x":{"exp":"2.6090307235717773 m", "val":2.6090307235717773}, "y":{"exp":"1.6947473287582397 m", "val":1.6947473287582395}, "heading":{"exp":"0 deg", "val":0.0}, "intervals":22, "split":false, "fixTranslation":true, "fixHeading":false, "overrideIntervals":false},
+    {"x":{"exp":"ons.x", "val":3.6}, "y":{"exp":"ons.y", "val":0.5}, "heading":{"exp":"ons.heading", "val":1.28}, "intervals":40, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false}],
   "constraints":[
     {"from":"first", "to":"last", "data":{"type":"KeepInRectangle", "props":{"x":{"exp":"0 m", "val":0.0}, "y":{"exp":"0 m", "val":0.0}, "w":{"exp":"16.541 m", "val":16.541}, "h":{"exp":"8.0692 m", "val":8.0692}}}, "enabled":false}],
   "targetDt":{

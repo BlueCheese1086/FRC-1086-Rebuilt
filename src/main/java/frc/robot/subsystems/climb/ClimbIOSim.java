@@ -74,7 +74,7 @@ public class ClimbIOSim implements ClimbIO {
   }
 
   @Override
-  public void updateInputs(ClimbIOInputsAutoLogged inputs) {
+  public void updateInputs(ClimbIOInputs inputs) {
 
     if (closedLoop) {
       controller.setP(KP.get());

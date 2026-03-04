@@ -5,7 +5,6 @@
 package frc.robot.commands;
 
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -33,9 +32,16 @@ public class ShotCalc {
                       .interpolate(startValue.hoodPosition, endValue.hoodPosition, t)));
 
   static {
-    distanceToShotMap.put(Inches.of(52.0), new Shot(2800, 0.19));
-    distanceToShotMap.put(Inches.of(114.4), new Shot(3275, 0.40));
-    distanceToShotMap.put(Inches.of(165.5), new Shot(3650, 0.48));
+    distanceToShotMap.put(Meters.of(1.4478), new Shot(3351.803102, 78));
+    distanceToShotMap.put(Meters.of(1.8), new Shot(3151.267873, 65));
+    distanceToShotMap.put(Meters.of(2.054), new Shot(3151.267873, 75));
+    distanceToShotMap.put(Meters.of(3.048), new Shot(3437.746771, 65));
+    distanceToShotMap.put(Meters.of(5.334), new Shot(3819.718634, 55));
+    // addShotParams(1.4478, 3351.803102, 78.0);
+    // addShotParams(1.8, 3151.267873, 65.0);
+    // addShotParams(2.054, 3151.267873, 75.0);
+    // addShotParams(3.048, 3437.746771, 65.0);
+    // addShotParams(5.334, 3819.718634, 55.0)
   }
 
   public static Shot getShot(Distance distance) {
@@ -62,7 +68,7 @@ public class ShotCalc {
     }
 
     public Angle getAngle() {
-      return Degrees.of(Hood.InvertAngleToPosition.get(hoodPosition));
+      return Degrees.of(hoodPosition);
     }
   }
 

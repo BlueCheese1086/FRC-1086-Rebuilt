@@ -4,7 +4,9 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.math.interpolation.Interpolator;
@@ -21,19 +23,22 @@ import java.util.List;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
+import static edu.wpi.first.units.Units.Meters;
+import static frc.robot.subsystems.shooter.ShooterConstants.Mechanical.flywheelRadius;;
+
 public class ShootingManager {
-  public static final Translation3d[] CAMERA_X_Y_Z_OFFSETS =
-      new Translation3d[] {
-        new Translation3d(
-            Units.inchesToMeters(12.066),
-            Units.inchesToMeters(11.906),
-            Units.inchesToMeters(8.355)),
-        new Translation3d(
-            Units.inchesToMeters(12.066),
-            Units.inchesToMeters(-11.906),
-            Units.inchesToMeters(8.355)),
-        new Translation3d(
-            Units.inchesToMeters(7.0), Units.inchesToMeters(0.0), Units.inchesToMeters(10.0))
+  public static final Transform3d[] ROBOT_TO_PHOTON_CAMS =
+      new Transform3d[] {
+        new Transform3d(
+            -Units.inchesToMeters(12.0),
+            Units.inchesToMeters(12.0),
+            Units.inchesToMeters(6.0),
+            new Rotation3d(0.0, -Units.degreesToRadians(150.0), Units.degreesToRadians(0.0))),
+        new Transform3d(
+            -Units.inchesToMeters(12.0),
+            -Units.inchesToMeters(12.0),
+            Units.inchesToMeters(6.0),
+            new Rotation3d(0.0, -Units.degreesToRadians(150.0), Units.degreesToRadians(0.0)))
       };
 
   private static final InterpolatingTreeMap<Double, ShotParams> distanceToShotParams =
@@ -306,7 +311,7 @@ public class ShootingManager {
     double distanceMeters = shooterToTarget.toTranslation2d().getNorm();
     ShotParams staticParams = getStaticShootingParams(distanceMeters);
     double staticExitVelocity =
-        ShootingCalculator.calculateExitVelocityMetersPerSecondFromRpm(staticParams.flywheelRpm);
+        calculateExitVelocityMetersPerSecondFromRpm(staticParams.flywheelRpm);
 
     double yaw = Math.atan2(shooterToTarget.getY(), shooterToTarget.getX());
     double pitchStatic = staticParams.hoodAngleRad;
@@ -330,7 +335,7 @@ public class ShootingManager {
     double finalPitch = Math.atan2(vFinal.getZ(), vFinal.toTranslation2d().getNorm());
     double clampedFinalPitch = MathUtil.clamp(finalPitch, minPitch, maxPitch);
     double finalExitVelocity = vFinal.getNorm();
-    double rawRpm = ShootingCalculator.calculateFlywheelRpmFromExitVelocity(finalExitVelocity);
+    double rawRpm = calculateFlywheelRpmFromExitVelocity(finalExitVelocity);
     double limitedRpm = limitRpm(rawRpm, Timer.getFPGATimestamp());
 
     double yawErrorMeters = distanceMeters * Math.abs(MathUtil.angleModulus(finalYaw - yaw));
@@ -340,8 +345,8 @@ public class ShootingManager {
     Logger.recordOutput("ShootingManager/FinalPitchDeg", Units.radiansToDegrees(clampedFinalPitch));
     Logger.recordOutput(
         "ShootingManager/StaticPitchDeg", Units.radiansToDegrees(clampedPitchStatic));
-    Logger.recordOutput("ShootingManager/RawRpm", rawRpm);
-    Logger.recordOutput("ShootingManager/LimitedRpm", limitedRpm);
+    Logger.recordOutput("ShootingManager/RawRpm", rawRpm * (2 * Math.PI / 60));
+    Logger.recordOutput("ShootingManager/LimitedRpm", limitedRpm * (2 * Math.PI / 60));
     Logger.recordOutput("ShootingManager/HoodPitchDeg", Units.radiansToDegrees(finalPitch));
 
     return new ShotSolution(
@@ -384,7 +389,7 @@ public class ShootingManager {
     Translation3d origin = shooterPose.getTranslation();
 
     double exitVelocity =
-        ShootingCalculator.calculateExitVelocityMetersPerSecondFromRpm(solution.flywheelRpm);
+        calculateExitVelocityMetersPerSecondFromRpm(solution.flywheelRpm);
     double yaw = solution.drivetrainHeading.getRadians();
     double pitch = solution.hoodPitchRad;
 
@@ -548,5 +553,18 @@ public class ShootingManager {
       this.yawWithinTolerance = yawWithinTolerance;
       this.pitchWithinTolerance = pitchWithinTolerance;
     }
+  }
+
+  private double calculateFlywheelRpmFromExitVelocity(double exitVelocityMps) {
+    if (exitVelocityMps <= 0.0) {
+      return 0.0;
+    }
+    double omegaRadPerSec = exitVelocityMps / flywheelRadius.in(Meters);
+    return Units.radiansPerSecondToRotationsPerMinute(omegaRadPerSec);
+  }
+
+  private double calculateExitVelocityMetersPerSecondFromRpm(double flywheelRpm) {
+    double omegaRadPerSec = Units.rotationsPerMinuteToRadiansPerSecond(flywheelRpm);
+    return omegaRadPerSec * flywheelRadius.in(Meters);
   }
 }
