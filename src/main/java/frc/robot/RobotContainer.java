@@ -13,6 +13,8 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -27,6 +29,8 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.autonomous.AutosManager;
 import frc.robot.commands.AutoRoutines;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.ShotCalc;
+import frc.robot.commands.ShotCalc.Shot;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.climb.Climb;
 import frc.robot.subsystems.climb.ClimbIO;
@@ -68,6 +72,9 @@ import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.AllianceFlipUtil;
+import frc.robot.util.FieldConstants;
+import frc.robot.util.PoseMath;
+
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -299,12 +306,12 @@ public class RobotContainer {
         .a()
         .whileTrue(
             Commands.run(
-            ()->{
-                LaunchingParameters parms = LauncherCalculator.getInstance().getParameters(drive::getPose, drive::getChassisSpeeds);
-                shooter.setVelocitySetpoint(()-> RadiansPerSecond.of(parms.flywheelSpeed()));
-                hood.setPosition(()-> parms.hoodAngle());
-            }, shooter)
-        );
+                () -> {
+                  Shot shot = ShotCalc.getShot(Meters.of(PoseMath.getDistanceToTarget(drive.getPose(), AllianceFlipUtil.apply(FieldConstants.Hub.hubCenter))));
+                  shooter.setVelocitySetpoint(() -> RPM.of(shot.shooterRPM));
+                  hood.setPosition(() -> shot.hoodPosition);
+                },
+                shooter));
     driver
         .y()
         .whileTrue(
@@ -312,23 +319,18 @@ public class RobotContainer {
                     drive,
                     () -> -driver.getLeftY(),
                     () -> -driver.getLeftX(),
-                    () ->
-                        LauncherCalculator.getInstance()
-                            .getParameters(drive::getPose, drive::getChassisSpeeds)
-                            .driveAngle())
+                    () -> PoseMath.getOrientationToTarget(drive.getPose(), AllianceFlipUtil.apply(FieldConstants.Hub.hubCenter)))
                 .alongWith(
                     Commands.run(
                         () -> {
-                          LaunchingParameters parms =
-                              LauncherCalculator.getInstance()
-                                  .getParameters(drive::getPose, drive::getChassisSpeeds);
+                        Shot shot = ShotCalc.getShot(Meters.of(PoseMath.getDistanceToTarget(drive.getPose(), AllianceFlipUtil.apply(FieldConstants.Hub.hubCenter))));
                           shooter.setVelocitySetpoint(
-                              () -> RadiansPerSecond.of(parms.flywheelSpeed()));
-                          hood.setPosition(() -> parms.hoodAngle());
+                              () -> RPM.of(shot.shooterRPM));
+                          hood.setPosition(() -> shot.hoodPosition);
 
-                          Logger.recordOutput("Shoot Parms/ Hood Angle", parms.hoodAngle());
-                          Logger.recordOutput("Shoot Parms/ Drive Angle", parms.driveAngle());
-                          Logger.recordOutput("Shoot Parms/ Flywheel Speed", parms.flywheelSpeed());
+                          Logger.recordOutput("Shoot Parms/ Hood Angle", shot.hoodPosition);
+                          Logger.recordOutput("Shoot Parms/ Drive Angle", PoseMath.getOrientationToTarget(drive.getPose(), FieldConstants.Hub.hubCenter));
+                          Logger.recordOutput("Shoot Parms/ Flywheel Speed", shot.shooterRPM);
                         },
                         shooter)));
     // Operator Commands
