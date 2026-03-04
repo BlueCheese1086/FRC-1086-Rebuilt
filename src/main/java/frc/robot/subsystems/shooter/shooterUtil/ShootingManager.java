@@ -23,6 +23,9 @@ import java.util.List;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
+import static edu.wpi.first.units.Units.Meters;
+import static frc.robot.subsystems.shooter.ShooterConstants.Mechanical.flywheelRadius;;
+
 public class ShootingManager {
   public static final Transform3d[] ROBOT_TO_PHOTON_CAMS =
       new Transform3d[] {
@@ -308,7 +311,7 @@ public class ShootingManager {
     double distanceMeters = shooterToTarget.toTranslation2d().getNorm();
     ShotParams staticParams = getStaticShootingParams(distanceMeters);
     double staticExitVelocity =
-        ShootingCalculator.calculateExitVelocityMetersPerSecondFromRpm(staticParams.flywheelRpm);
+        calculateExitVelocityMetersPerSecondFromRpm(staticParams.flywheelRpm);
 
     double yaw = Math.atan2(shooterToTarget.getY(), shooterToTarget.getX());
     double pitchStatic = staticParams.hoodAngleRad;
@@ -332,7 +335,7 @@ public class ShootingManager {
     double finalPitch = Math.atan2(vFinal.getZ(), vFinal.toTranslation2d().getNorm());
     double clampedFinalPitch = MathUtil.clamp(finalPitch, minPitch, maxPitch);
     double finalExitVelocity = vFinal.getNorm();
-    double rawRpm = ShootingCalculator.calculateFlywheelRpmFromExitVelocity(finalExitVelocity);
+    double rawRpm = calculateFlywheelRpmFromExitVelocity(finalExitVelocity);
     double limitedRpm = limitRpm(rawRpm, Timer.getFPGATimestamp());
 
     double yawErrorMeters = distanceMeters * Math.abs(MathUtil.angleModulus(finalYaw - yaw));
@@ -386,7 +389,7 @@ public class ShootingManager {
     Translation3d origin = shooterPose.getTranslation();
 
     double exitVelocity =
-        ShootingCalculator.calculateExitVelocityMetersPerSecondFromRpm(solution.flywheelRpm);
+        calculateExitVelocityMetersPerSecondFromRpm(solution.flywheelRpm);
     double yaw = solution.drivetrainHeading.getRadians();
     double pitch = solution.hoodPitchRad;
 
@@ -550,5 +553,18 @@ public class ShootingManager {
       this.yawWithinTolerance = yawWithinTolerance;
       this.pitchWithinTolerance = pitchWithinTolerance;
     }
+  }
+
+  private double calculateFlywheelRpmFromExitVelocity(double exitVelocityMps) {
+    if (exitVelocityMps <= 0.0) {
+      return 0.0;
+    }
+    double omegaRadPerSec = exitVelocityMps / flywheelRadius.in(Meters);
+    return Units.radiansPerSecondToRotationsPerMinute(omegaRadPerSec);
+  }
+
+  private double calculateExitVelocityMetersPerSecondFromRpm(double flywheelRpm) {
+    double omegaRadPerSec = Units.rotationsPerMinuteToRadiansPerSecond(flywheelRpm);
+    return omegaRadPerSec * flywheelRadius.in(Meters);
   }
 }
