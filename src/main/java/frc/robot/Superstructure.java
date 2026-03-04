@@ -124,7 +124,8 @@ public class Superstructure extends SubsystemBase {
     }
 
     stateRequests.put(
-        ControllerLayout.intakeRequest.and(stateTriggers.get(State.idle)), State.holding);
+        ControllerLayout.intakeRequest.and(() -> state != State.climb && state != State.climbscore),
+        State.intake);
     stateRequests.put(
         ControllerLayout.intakeRequest.negate().and(stateTriggers.get(State.intake)),
         State.holding);
@@ -141,8 +142,6 @@ public class Superstructure extends SubsystemBase {
             .get(State.holding)
             .and(() -> FieldConstants.LinesVertical.inAllianceZone(drive.getPose())),
         State.shoot); // Save This one for later
-    stateRequests.put(
-        ControllerLayout.intakeRequest.and(stateTriggers.get(State.holding)), State.intake);
     stateRequests.put(ControllerLayout.climbRequest, State.climb);
     stateRequests.put(
         ControllerLayout.scoreRequest.and(stateTriggers.get(State.climb)), State.climbscore);

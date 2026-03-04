@@ -14,6 +14,7 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -61,15 +62,14 @@ import frc.robot.subsystems.shooter.ShooterConstants.FeederSetpoints;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.shooter.ShooterIOTalonFX;
-import frc.robot.subsystems.shooter.shooterUtil.LauncherCalculator;
-import frc.robot.subsystems.shooter.shooterUtil.LauncherCalculator.LaunchingParameters;
+import frc.robot.subsystems.shooter.shooterUtil.ShootingManager;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.AllianceFlipUtil;
+import frc.robot.util.FieldConstants;
 import java.util.function.Supplier;
-import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -97,6 +97,8 @@ public class RobotContainer {
 
   @SuppressWarnings("unused")
   private final Climb climb;
+
+  private final ShootingManager shootingManager;
 
   @SuppressWarnings("unused")
   // private final Superstructure superstructure;
@@ -190,13 +192,11 @@ public class RobotContainer {
         climb = new Climb(new ClimbIO() {});
         break;
     }
-
     automanager = new AutosManager(drive, shooter, indexer, intake, hood);
     AutoRoutines.setup(drive, automanager.machine);
     // Shooting manager uses drive pose/speeds for SOTM calculations
-    // shootingManager =
-    // new ShootingManager(drive::getPose, drive::getChassisSpeeds,
-    // drive::getRotation);
+    shootingManager =
+        new ShootingManager(drive::getPose, drive::getChassisSpeeds, drive::getRotation);
 
     Superstructure.ControllerLayout.scoreRequest = driver.rightTrigger();
     Superstructure.ControllerLayout.cancelRequest = driver.povLeft().or(operator.povLeft());
@@ -295,42 +295,77 @@ public class RobotContainer {
                 shooter.runFeed(-FeederSetpoints.run.in(Volts)),
                 shooter.setVoltage(12.0)));
 
+    // driver
+    //     .a()
+    //     .whileTrue(
+    //             LaunchingParameters parms =
+    // LauncherCalculator.getInstance().getParameters(drive::getPose, drive::getChassisSpeeds);
+    //             AngularVelocity speed = RadiansPerSecond.of(parms.flywheelSpeed());
+    //             shooter.setVelocitySetpoint(()-> speed);
+    //             LaunchingParameters parms =
+    // LauncherCalculator.getInstance().getParameters(drive::getPose, drive::getChassisSpeeds);
+    //             shooter.setVelocitySetpoint(()-> RadiansPerSecond.of(parms.flywheelSpeed()));
+    //             hood.setPosition(()-> parms.hoodAngle());
+    //         }, shooter)
+    //     );
+    // driver
+    //     .y()
+    //     .whileTrue(
+    //         DriveCommands.joystickDriveAtAngle(
+    //                 drive,
+    //                 () -> -driver.getLeftY(),
+    //                 () -> -driver.getLeftX(),
+    //                 () ->
+    //                     LauncherCalculator.getInstance()
+    //                         .getParameters(drive::getPose, drive::getChassisSpeeds)
+    //                         .driveAngle())
+    //             .alongWith(
+    //                 Commands.run(
+    //                     () -> {
+    //                       LaunchingParameters parms =
+    //                           LauncherCalculator.getInstance()
+    //                               .getParameters(drive::getPose, drive::getChassisSpeeds);
+    //                       shooter.setVelocitySetpoint(
+    //                           () -> RadiansPerSecond.of(parms.flywheelSpeed()));
+    //                       hood.setPosition(() -> parms.hoodAngle());
+
+    //                       Logger.recordOutput("Shoot Parms/ Hood Angle", parms.hoodAngle());
+    //                       Logger.recordOutput("Shoot Parms/ Drive Angle", parms.driveAngle());
+    //                       Logger.recordOutput("Shoot Parms/ Flywheel Speed",
+    // parms.flywheelSpeed());
+    //                     },
+    //                     shooter)));
     driver
-        .a()
+        .x()
         .whileTrue(
-            Commands.run(
-            ()->{
-                LaunchingParameters parms = LauncherCalculator.getInstance().getParameters(drive::getPose, drive::getChassisSpeeds);
-                shooter.setVelocitySetpoint(()-> RadiansPerSecond.of(parms.flywheelSpeed()));
-                hood.setPosition(()-> parms.hoodAngle());
-            }, shooter)
-        );
-    driver
-        .y()
-        .whileTrue(
-            DriveCommands.joystickDriveAtAngle(
+            Commands.parallel(
+                Commands.run(
+                    () -> {
+                      var sol =
+                          shootingManager.calculateShotSolution(
+                              drive.getPose(),
+                              drive.getChassisSpeeds(),
+                              FieldConstants.Hub.topCenterPoint,
+                              0.10,
+                              0.10);
+                      shooter.setVelocitySetpoint(
+                          () -> RotationsPerSecond.of(sol.flywheelRpm / 60));
+                      hood.setPosition(() -> sol.hoodPitchRad);
+                    },
+                    shooter,
+                    hood),
+                DriveCommands.joystickDriveAtAngle(
                     drive,
                     () -> -driver.getLeftY(),
                     () -> -driver.getLeftX(),
                     () ->
-                        LauncherCalculator.getInstance()
-                            .getParameters(drive::getPose, drive::getChassisSpeeds)
-                            .driveAngle())
-                .alongWith(
-                    Commands.run(
-                        () -> {
-                          LaunchingParameters parms =
-                              LauncherCalculator.getInstance()
-                                  .getParameters(drive::getPose, drive::getChassisSpeeds);
-                          shooter.setVelocitySetpoint(
-                              () -> RadiansPerSecond.of(parms.flywheelSpeed()));
-                          hood.setPosition(() -> parms.hoodAngle());
-
-                          Logger.recordOutput("Shoot Parms/ Hood Angle", parms.hoodAngle());
-                          Logger.recordOutput("Shoot Parms/ Drive Angle", parms.driveAngle());
-                          Logger.recordOutput("Shoot Parms/ Flywheel Speed", parms.flywheelSpeed());
-                        },
-                        shooter)));
+                        shootingManager.calculateShotSolution(
+                                drive.getPose(),
+                                drive.getChassisSpeeds(),
+                                FieldConstants.Hub.topCenterPoint,
+                                0.10,
+                                0.10)
+                            .drivetrainHeading)));
     // Operator Commands
     operator
         .povLeft()
@@ -340,7 +375,6 @@ public class RobotContainer {
                 shooter.setVoltage(12.0),
                 shooter.runFeed(-12.0)));
     operator.leftTrigger().onTrue(intake.setPosition(IntakeConstants.Setpoints.stowed));
-    operator.x().whileTrue(DriveCommands.recordData(drive, shooter, hood));
     operator
         .y()
         .whileTrue(

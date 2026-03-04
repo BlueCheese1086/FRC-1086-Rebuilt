@@ -4,7 +4,9 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.math.interpolation.Interpolator;
@@ -22,18 +24,18 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class ShootingManager {
-  public static final Translation3d[] CAMERA_X_Y_Z_OFFSETS =
-      new Translation3d[] {
-        new Translation3d(
-            Units.inchesToMeters(12.066),
-            Units.inchesToMeters(11.906),
-            Units.inchesToMeters(8.355)),
-        new Translation3d(
-            Units.inchesToMeters(12.066),
-            Units.inchesToMeters(-11.906),
-            Units.inchesToMeters(8.355)),
-        new Translation3d(
-            Units.inchesToMeters(7.0), Units.inchesToMeters(0.0), Units.inchesToMeters(10.0))
+  public static final Transform3d[] ROBOT_TO_PHOTON_CAMS =
+      new Transform3d[] {
+        new Transform3d(
+            -Units.inchesToMeters(12.0),
+            Units.inchesToMeters(12.0),
+            Units.inchesToMeters(6.0),
+            new Rotation3d(0.0, -Units.degreesToRadians(150.0), Units.degreesToRadians(0.0))),
+        new Transform3d(
+            -Units.inchesToMeters(12.0),
+            -Units.inchesToMeters(12.0),
+            Units.inchesToMeters(6.0),
+            new Rotation3d(0.0, -Units.degreesToRadians(150.0), Units.degreesToRadians(0.0)))
       };
 
   private static final InterpolatingTreeMap<Double, ShotParams> distanceToShotParams =
@@ -340,8 +342,8 @@ public class ShootingManager {
     Logger.recordOutput("ShootingManager/FinalPitchDeg", Units.radiansToDegrees(clampedFinalPitch));
     Logger.recordOutput(
         "ShootingManager/StaticPitchDeg", Units.radiansToDegrees(clampedPitchStatic));
-    Logger.recordOutput("ShootingManager/RawRpm", rawRpm);
-    Logger.recordOutput("ShootingManager/LimitedRpm", limitedRpm);
+    Logger.recordOutput("ShootingManager/RawRpm", rawRpm * (2 * Math.PI / 60));
+    Logger.recordOutput("ShootingManager/LimitedRpm", limitedRpm * (2 * Math.PI / 60));
     Logger.recordOutput("ShootingManager/HoodPitchDeg", Units.radiansToDegrees(finalPitch));
 
     return new ShotSolution(
