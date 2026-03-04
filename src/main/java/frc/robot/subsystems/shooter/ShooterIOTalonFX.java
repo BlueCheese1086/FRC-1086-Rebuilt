@@ -30,6 +30,7 @@ import frc.robot.RobotMap;
 public class ShooterIOTalonFX implements ShooterIO {
   private final TalonFX shooter;
   private final BangBangController bbController;
+  @SuppressWarnings("unused")
   private final VelocityVoltage velocityVoltage;
   private final MotionMagicVelocityVoltage motionMagic;
 
