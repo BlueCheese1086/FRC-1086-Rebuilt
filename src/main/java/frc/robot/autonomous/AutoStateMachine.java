@@ -1,6 +1,5 @@
 package frc.robot.autonomous;
 
-import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import choreo.Choreo;
@@ -170,19 +169,18 @@ public class AutoStateMachine {
         });
   }
 
-  public Command startFeeder() { //just spins up flywheel, TODO: make better
+  public Command startFeeder() { // just spins up flywheel, TODO: make better
     return Commands.runOnce(() -> shooter.setVoltage(12));
   }
 
-  public Command startShoot() { 
+  public Command startShoot() {
     return Commands.parallel(
-      shooter
-          .runFeed(ShooterConstants.FeederSetpoints.run.in(Volts))
-          /*.finallyDo(shooter.runFeederVoltage(0.0)::execute)*/,
-      indexer.setVoltage(IndexerConstants.Setpoints.feed),
-      Commands.repeatingSequence( //TODO: uhh probaly not gonna agitate
-          intake.setPosition(IntakeConstants.Setpoints.agitate),
-          intake.setPosition(IntakeConstants.Setpoints.deployed)));
+        shooter.runFeed(ShooterConstants.FeederSetpoints.run.in(Volts))
+        /*.finallyDo(shooter.runFeederVoltage(0.0)::execute)*/ ,
+        indexer.setVoltage(IndexerConstants.Setpoints.feed),
+        Commands.repeatingSequence( // TODO: uhh probaly not gonna agitate
+            intake.setPosition(IntakeConstants.Setpoints.agitate),
+            intake.setPosition(IntakeConstants.Setpoints.deployed)));
   }
 
   public Command stopShoot() {

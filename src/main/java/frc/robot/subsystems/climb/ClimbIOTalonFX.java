@@ -100,7 +100,7 @@ public class ClimbIOTalonFX implements ClimbIO {
   }
 
   @Override
-  public void updateInputs(ClimbIOInputsAutoLogged inputs) {
+  public void updateInputs(ClimbIOInputs inputs) {
     var status =
         BaseStatusSignal.refreshAll(angle, velocity, volts, temp, statorCurrent, supplyCurrent);
 

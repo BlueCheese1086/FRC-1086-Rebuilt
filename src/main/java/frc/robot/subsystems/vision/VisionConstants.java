@@ -10,7 +10,7 @@ import edu.wpi.first.math.util.Units;
 public class VisionConstants {
 
   // Basic filtering thresholds
-  public static double maxAmbiguity = 0.37; // 0.3d
+  public static double maxAmbiguity = 0.25; // 0.3d
   public static double maxZError = 0.19; // 0.75
 
   // Standard deviation baselines, for 1 meter distance and 1 tag

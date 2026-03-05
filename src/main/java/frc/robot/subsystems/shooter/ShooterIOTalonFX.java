@@ -6,10 +6,14 @@ package frc.robot.subsystems.shooter;
 
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static frc.robot.subsystems.intake.IntakeConstants.PID.kA;
+import static frc.robot.subsystems.intake.IntakeConstants.PID.kS;
+import static frc.robot.subsystems.intake.IntakeConstants.PID.kV;
 import static frc.robot.util.PhoenixUtil.tryUntilOk;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
@@ -30,6 +34,7 @@ import frc.robot.RobotMap;
 public class ShooterIOTalonFX implements ShooterIO {
   private final TalonFX shooter;
   private final BangBangController bbController;
+  @SuppressWarnings("unused")
   private final VelocityVoltage velocityVoltage;
   private final MotionMagicVelocityVoltage motionMagic;
 
@@ -104,6 +109,26 @@ public class ShooterIOTalonFX implements ShooterIO {
     inputs.setpoint = setpoint;
     inputs.atSetpoint = bbController.atSetpoint();
     this.bangBangVoltage = bbController.calculate(velocity.getValue().in(RotationsPerSecond));
+
+    if (kV.hasChanged(hashCode())) {
+      resetValues();
+    }
+
+    if (kS.hasChanged(hashCode())) {
+      resetValues();
+    }
+
+    if (kA.hasChanged(hashCode())) {
+      resetValues();
+    }
+  }
+
+    private void resetValues() {
+    Slot0Configs slot0Configs = new Slot0Configs();
+    slot0Configs.withKA(kA.getAsDouble());
+    slot0Configs.withKS(kS.getAsDouble());
+    slot0Configs.withKV(kV.getAsDouble());
+    shooter.getConfigurator().apply(slot0Configs, 0.25);
   }
 
   @Override
