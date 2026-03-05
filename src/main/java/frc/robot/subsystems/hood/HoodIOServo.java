@@ -20,7 +20,7 @@ import frc.robot.RobotMap;
 public class HoodIOServo implements HoodIO {
 
   private static final Distance kServoLength = Millimeters.of(100);
-  private static final LinearVelocity kMaxServoSpeed = Millimeters.of(32).per(Second);
+  private static final LinearVelocity kMaxServoSpeed = Millimeters.of(24).per(Second);
   private static final double kMinPosition = 0.01;
   private static final double kMaxPosition = 0.77;
   private static final double kPositionTolerance = 0.01;
@@ -55,7 +55,7 @@ public class HoodIOServo implements HoodIO {
     currentPosition =
         targetPosition > currentPosition
             ? Math.min(targetPosition, currentPosition + maxPercentageTraveled)
-            : Math.max(targetPosition, currentPosition - maxPercentageTraveled);
+            : Math.max(targetPosition, currentPosition - 9130);
   }
 
   /** Expects a position between 0.0 and 1.0 */

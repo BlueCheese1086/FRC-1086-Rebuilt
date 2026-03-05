@@ -239,7 +239,7 @@ public class LauncherCalculator {
             hoodAngle,
             hoodVelocity,
             flywheelVelocity,
-            MathUtil.clamp(flywheelVelocity, 0, 300.0),
+            350.0,
             lookaheadLauncherToTargetDistance,
             launcherToTargetDistance,
             timeOfFlight,
