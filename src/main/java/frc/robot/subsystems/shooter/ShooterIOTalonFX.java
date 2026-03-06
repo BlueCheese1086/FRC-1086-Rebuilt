@@ -34,8 +34,10 @@ import frc.robot.RobotMap;
 public class ShooterIOTalonFX implements ShooterIO {
   private final TalonFX shooter;
   private final BangBangController bbController;
+
   @SuppressWarnings("unused")
   private final VelocityVoltage velocityVoltage;
+
   private final MotionMagicVelocityVoltage motionMagic;
 
   // Status Signals
@@ -123,7 +125,7 @@ public class ShooterIOTalonFX implements ShooterIO {
     }
   }
 
-    private void resetValues() {
+  private void resetValues() {
     Slot0Configs slot0Configs = new Slot0Configs();
     slot0Configs.withKA(kA.getAsDouble());
     slot0Configs.withKS(kS.getAsDouble());
