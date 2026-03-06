@@ -1,6 +1,5 @@
 package frc.robot.autonomous;
 
-import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import choreo.Choreo;
@@ -170,17 +169,18 @@ public class AutoStateMachine {
         });
   }
 
-  public Command
-      startFeeder() { // START FEEDER DOES NOT ACTUALLY START THE FEEDER, IT SPINS UP THE FLYWHEELS
-    return shooter.setVelocity(() -> RadiansPerSecond.zero());
+  public Command startFeeder() { // just spins up flywheel, TODO: make better
+    return Commands.runOnce(() -> shooter.setVoltage(12));
   }
 
   public Command startShoot() {
-    return Commands.runOnce(
-        () ->
-            shooter.setVelocitySetpoint(
-                () -> RadiansPerSecond.of(ShooterConstants.Tuning.velocitySetpoint.getAsDouble())),
-        shooter);
+    return Commands.parallel(
+        shooter.runFeed(ShooterConstants.FeederSetpoints.run.in(Volts))
+        /*.finallyDo(shooter.runFeederVoltage(0.0)::execute)*/ ,
+        indexer.setVoltage(IndexerConstants.Setpoints.feed),
+        Commands.repeatingSequence( // TODO: uhh probaly not gonna agitate
+            intake.setPosition(IntakeConstants.Setpoints.agitate),
+            intake.setPosition(IntakeConstants.Setpoints.deployed)));
   }
 
   public Command stopShoot() {
@@ -196,7 +196,7 @@ public class AutoStateMachine {
   public Command startIntake() {
     return Commands.parallel(
         intake.setVoltage(IntakeConstants.Setpoints.run),
-        indexer.setVoltage(IndexerConstants.Setpoints.intake));
+        indexer.setVoltage(IndexerConstants.Setpoints.feed));
   }
 
   public Command stopIntake() {

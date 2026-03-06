@@ -13,7 +13,7 @@ import edu.wpi.first.units.measure.Voltage;
 /** Add your docs here. */
 public class IndexerConstants {
   public static class CurrentLimits {
-    public static final Current maxSupply = Amps.of(40);
+    public static final Current maxSupply = Amps.of(870);
     public static final Current maxStator = Amps.of(40.0); // a bit high imo
   }
 
@@ -23,7 +23,10 @@ public class IndexerConstants {
   }
 
   public static class Setpoints {
+<<<<<<< HEAD
     public static final Voltage intake = Volts.of(3);
+=======
+>>>>>>> fad1dfacb26679c88e0b1cca9dd5d71435026059
     public static final Voltage feed = Volts.of(12.0);
   }
 }

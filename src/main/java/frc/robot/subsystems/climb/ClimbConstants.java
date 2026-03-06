@@ -33,7 +33,7 @@ public class ClimbConstants {
   public static final InvertedValue invertedValue = InvertedValue.CounterClockwise_Positive;
   public static final NeutralModeValue neutralMode = NeutralModeValue.Brake;
 
-  private static final double maxHeight = 10.0;
+  private static final double maxHeight = Units.inchesToMeters(6.0);
 
   public static final double extendedHeight = maxHeight;
   public static final double retractedHeight = 0.0;

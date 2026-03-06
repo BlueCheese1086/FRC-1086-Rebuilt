@@ -5,6 +5,7 @@
 package frc.robot.subsystems.shooter;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
@@ -66,6 +67,7 @@ public class Shooter extends SubsystemBase {
     }
   }
 
+<<<<<<< HEAD
   public Command setVelocity(Supplier<AngularVelocity> radPerSec) {
     return this.run(
             () -> {
@@ -79,40 +81,74 @@ public class Shooter extends SubsystemBase {
             });
   }
 
+=======
+>>>>>>> fad1dfacb26679c88e0b1cca9dd5d71435026059
   public void setVelocitySetpoint(Supplier<AngularVelocity> radPerSec) {
     for (int i = 0; i < io.length; i++) {
       io[i].setVelocity(radPerSec.get());
     }
   }
 
-  public Command runFeederVoltage(double volts) {
-    return Commands.run(() -> feederIO.setFeedVoltage(volts), this);
+  public Command runFeed(double volts) {
+    return Commands.run(() -> feederIO.setFeedVoltage(volts), this).finallyDo(() -> stopFeeder());
   }
 
-  public void setVoltage(double volts) {
-    for (int i = 0; i < io.length; i++) {
-      io[i].setVoltage(volts);
-    }
+  public Command runShooter(Supplier<AngularVelocity> velocity) {
+    return Commands.run(() -> setVelocitySetpoint(velocity)).finallyDo(() -> stopShooter());
+  }
+
+  public Command stopShoot() {
+    return Commands.runOnce(() -> stopShooter());
+  }
+
+  public Command stopFeed() {
+    return Commands.runOnce(() -> stopFeed());
+  }
+
+  public Command stopEverything() {
+    return Commands.runOnce(() -> stopAll());
+  }
+
+  public Command setVoltage(double volts) {
+    return Commands.run(
+            () -> {
+              for (int i = 0; i < io.length; i++) {
+                io[i].setVoltage(volts);
+              }
+            })
+        .finallyDo(() -> stopShoot());
   }
 
   public void stopAll() {
+<<<<<<< HEAD
     // for (int i = 0; i < io.length; i++) {
     //   io[i].setVoltage(0.0);
     // }
+=======
+    for (int i = 0; i < io.length; i++) {
+      io[i].setVoltage(0.0);
+      io[i].setVelocity(RadiansPerSecond.of(0.0));
+    }
+>>>>>>> fad1dfacb26679c88e0b1cca9dd5d71435026059
     feederIO.setFeedVoltage(0.0);
   }
 
   public void stopShooter() {
     for (int i = 0; i < io.length; i++) {
       io[i].setVoltage(0.0);
+      io[i].setVelocity(RadiansPerSecond.of(0.0));
     }
+  }
+
+  public void stopFeeder() {
+    feederIO.setFeedVoltage(0.0);
   }
 
   /**
    * @return returns the setpoint of the MIDDLE SHOOTER, if that shooter is at the setpoint or not
    */
   public boolean atSetpoint() {
-    return inputs[1].atSetpoint;
+    return inputs[0].atSetpoint && inputs[1].atSetpoint && inputs[2].atSetpoint;
   }
 
   public void recordShot(Pose3d drivePose, Angle hoodAngle, double tof) {
@@ -142,7 +178,7 @@ public class Shooter extends SubsystemBase {
     }
   }
 
-  public Pose3d[] getShooterPoses(Pose2d robotPose) {
+  public static Pose3d[] getShooterPoses(Pose2d robotPose) {
     Pose3d robot3d = new Pose3d(robotPose);
     return new Pose3d[] {
       robot3d.transformBy(ShooterConstants.ShooterTransforms.leftShooter),

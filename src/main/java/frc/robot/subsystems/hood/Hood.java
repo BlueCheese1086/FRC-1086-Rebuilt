@@ -51,7 +51,6 @@ public class Hood extends SubsystemBase {
         .withTimeout(0.1);
   }
 
-  /* expects a value between 0 and 1 */
   public void setPosition(DoubleSupplier position) {
     Logger.recordOutput("/Hood/Map/0-1", AngleToPosition.get(position.getAsDouble()));
     Logger.recordOutput("/Hood/Map/key", position);

@@ -1,9 +1,6 @@
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -19,7 +16,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.ShotCalc;
 import frc.robot.subsystems.climb.Climb;
 import frc.robot.subsystems.climb.ClimbConstants;
 import frc.robot.subsystems.drive.Drive;
@@ -33,7 +29,6 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterConstants;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants;
-import frc.robot.util.FieldConstants.Hub;
 // import frc.robot.util.shooter.LauncherCalculator;
 // import frc.robot.util.shooter.LauncherCalculator.LaunchingParameters;
 import frc.robot.util.PoseMath;
@@ -129,7 +124,8 @@ public class Superstructure extends SubsystemBase {
     }
 
     stateRequests.put(
-        ControllerLayout.intakeRequest.and(stateTriggers.get(State.idle)), State.holding);
+        ControllerLayout.intakeRequest.and(() -> state != State.climb && state != State.climbscore),
+        State.intake);
     stateRequests.put(
         ControllerLayout.intakeRequest.negate().and(stateTriggers.get(State.intake)),
         State.holding);
@@ -139,15 +135,17 @@ public class Superstructure extends SubsystemBase {
         stateTriggers
             .get(State.shoot)
             .and(() -> !FieldConstants.LinesVertical.inAllianceZone(drive.getPose())),
-        State.holding); // Save This one for later
+        State.holding);
 
     stateRequests.put(
         stateTriggers
             .get(State.holding)
             .and(() -> FieldConstants.LinesVertical.inAllianceZone(drive.getPose())),
-        State.shoot); // Save This one for later
+        State.shoot);
     stateRequests.put(
-        ControllerLayout.intakeRequest.and(stateTriggers.get(State.holding)), State.intake);
+        ControllerLayout.intakeRequest.and(
+            stateTriggers.get(State.holding).or(stateTriggers.get(State.shoot))),
+        State.intake);
     stateRequests.put(ControllerLayout.climbRequest, State.climb);
     stateRequests.put(
         ControllerLayout.scoreRequest.and(stateTriggers.get(State.climb)), State.climbscore);
@@ -231,13 +229,13 @@ public class Superstructure extends SubsystemBase {
                 Commands.runOnce(() -> shooter.setVoltage(0.0)),
                 indexer.setVoltage(Volts.of(0.0)),
                 intake.setVoltage(Volts.of(0.0)),
-                shooter.runFeederVoltage(0.0)));
+                shooter.runFeed(0.0)));
     stateTriggers
         .get(State.intake)
         .whileTrue(
             Commands.parallel(
                 intake.setVoltage(Volts.of(12.0)),
-                indexer.setVoltage(IndexerConstants.Setpoints.intake)));
+                indexer.setVoltage(IndexerConstants.Setpoints.feed)));
 
     stateTriggers
         .get(State.intake)
@@ -260,8 +258,7 @@ public class Superstructure extends SubsystemBase {
         .and(ControllerLayout.scoreRequest)
         .whileTrue(
             Commands.parallel(
-                shooter.runFeederVoltage(8.0),
-                indexer.setVoltage(IndexerConstants.Setpoints.feed)));
+                shooter.runFeed(8.0), indexer.setVoltage(IndexerConstants.Setpoints.feed)));
   }
 
   private void setupTarget() {
@@ -293,18 +290,19 @@ public class Superstructure extends SubsystemBase {
                   this.useTargeting = !this.useTargeting;
                 }));
 
-    stateTriggers
-        .get(State.shoot)
-        .whileTrue(
-            Commands.parallel(
-                shooter.setVelocity(
-                    () -> {
-                      return RPM.of(
-                          ShotCalc.getShot(
-                                  Meters.of(
-                                      PoseMath.getDistanceToTarget(drive.getPose(), Hub.hubCenter)))
-                              .shooterRPM);
-                    })));
+    // stateTriggers
+    //     .get(State.shoot)
+    //     .whileTrue(
+    //         Commands.parallel(
+    //             shooter.setVelocity(
+    //                 () -> {
+    //                   return RPM.of(
+    //                       ShotCalc.getShot(
+    //                               Meters.of(
+    //                                   PoseMath.getDistanceToTarget(drive.getPose(),
+    // Hub.hubCenter)))
+    //                           .shooterRPM);
+    //                 })));
     // hood.setPosition(
     //     () -> {
     //       return ShotCalc.getShot(
@@ -328,7 +326,7 @@ public class Superstructure extends SubsystemBase {
                 hood.setAngle(
                     HoodConstants.Setpoints
                         .passAngle), // TODO make this target center of alliance zone.
-                shooter.setVelocity(() -> (RotationsPerSecond.of(300)))));
+                shooter.runShooter(() -> (RadiansPerSecond.of(300)))));
 
     stateTriggers
         .get(State.pass)
@@ -337,7 +335,7 @@ public class Superstructure extends SubsystemBase {
         .whileTrue(
             Commands.parallel(
                 indexer.setVoltage(IndexerConstants.Setpoints.feed),
-                shooter.runFeederVoltage(
+                shooter.runFeed(
                     ShooterConstants.FeederSetpoints.run.in(
                         Volts)))); // Continue Targetting & Flywheel set speed.
   }

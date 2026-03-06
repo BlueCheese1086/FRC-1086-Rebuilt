@@ -23,7 +23,6 @@ public class VisionIOPhotonVision implements VisionIO {
   protected final PhotonCamera camera;
   protected final Transform3d robotToCamera;
   private final AprilTagFieldLayout aprilTagFieldLayout;
-
   /**
    * Creates a new VisionIOPhotonVision.
    *

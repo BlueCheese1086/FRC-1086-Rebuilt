@@ -27,7 +27,7 @@ public interface ClimbIO {
 
   public default void setPosition(double position) {}
 
-  public default void updateInputs(ClimbIOInputsAutoLogged inputs) {}
+  public default void updateInputs(ClimbIOInputs inputs) {}
 
   public default void resetEncoder() {}
 

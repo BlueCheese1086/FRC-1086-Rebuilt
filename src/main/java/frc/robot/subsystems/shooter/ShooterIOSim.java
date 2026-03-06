@@ -12,7 +12,6 @@ import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
@@ -33,11 +32,7 @@ public class ShooterIOSim implements ShooterIO {
                 ShooterConstants.Mechanical.J.in(KilogramSquareMeters),
                 ShooterConstants.Mechanical.shooterWheelGearRatio),
             DCMotor.getKrakenX60Foc(1));
-    shooterFF =
-        new SimpleMotorFeedforward(
-            ShooterConstants.Tuning.kS,
-            12.0 / Units.rotationsPerMinuteToRadiansPerSecond(6000.0),
-            ShooterConstants.Tuning.kA);
+    shooterFF = new SimpleMotorFeedforward(0.06, 0.01910828025, 0.01);
     bbController = new BangBangController();
   }
 
