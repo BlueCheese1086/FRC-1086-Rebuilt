@@ -67,22 +67,6 @@ public class Shooter extends SubsystemBase {
     }
   }
 
-<<<<<<< HEAD
-  public Command setVelocity(Supplier<AngularVelocity> radPerSec) {
-    return this.run(
-            () -> {
-              for (int i = 0; i < io.length; i++) {
-                io[i].setVelocity(radPerSec.get());
-              }
-            })
-        .finallyDo(
-            () -> {
-              // stopShooter();
-            });
-  }
-
-=======
->>>>>>> fad1dfacb26679c88e0b1cca9dd5d71435026059
   public void setVelocitySetpoint(Supplier<AngularVelocity> radPerSec) {
     for (int i = 0; i < io.length; i++) {
       io[i].setVelocity(radPerSec.get());
@@ -120,16 +104,10 @@ public class Shooter extends SubsystemBase {
   }
 
   public void stopAll() {
-<<<<<<< HEAD
-    // for (int i = 0; i < io.length; i++) {
-    //   io[i].setVoltage(0.0);
-    // }
-=======
     for (int i = 0; i < io.length; i++) {
       io[i].setVoltage(0.0);
       io[i].setVelocity(RadiansPerSecond.of(0.0));
     }
->>>>>>> fad1dfacb26679c88e0b1cca9dd5d71435026059
     feederIO.setFeedVoltage(0.0);
   }
 

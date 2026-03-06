@@ -23,10 +23,6 @@ public class IndexerConstants {
   }
 
   public static class Setpoints {
-<<<<<<< HEAD
-    public static final Voltage intake = Volts.of(3);
-=======
->>>>>>> fad1dfacb26679c88e0b1cca9dd5d71435026059
     public static final Voltage feed = Volts.of(12.0);
   }
 }

@@ -8,6 +8,8 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Millimeters;
 import static edu.wpi.first.units.Units.Second;
 
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
@@ -30,6 +32,7 @@ public class HoodConstants {
   public static class Targeting {
     public static final double minAngleDeg = 54.0;
     public static final double maxAngleDeg = 81.0;
+    public static LoggedNetworkNumber hoodAngle = new LoggedNetworkNumber("Hood Angle", 54.0);
   }
 
   public static class Setpoints {
