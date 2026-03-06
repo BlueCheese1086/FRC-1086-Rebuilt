@@ -54,7 +54,7 @@ public class ShooterIOTalonFX implements ShooterIO {
 
   public ShooterIOTalonFX(int id, boolean inverted) {
     shooter = new TalonFX(id, RobotMap.systemBus);
-    bbController = new BangBangController(RadiansPerSecond.of(10.0).in(RotationsPerSecond)); // bang bang
+    bbController = new BangBangController(RadiansPerSecond.of(30.0).in(RotationsPerSecond));
 
     velocityVoltage = new VelocityVoltage(0.0).withEnableFOC(true);
     motionMagic = new MotionMagicVelocityVoltage(0.0).withEnableFOC(true).withSlot(0);
