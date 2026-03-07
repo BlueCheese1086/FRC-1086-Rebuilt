@@ -8,7 +8,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
@@ -105,6 +104,7 @@ public class ShootingManager {
     this.speedsSupplier = speedsSupplier;
     this.headingSupplier = headingSupplier;
   }
+
   public ShotParams getStaticShootingParams(double distanceMeters) {
     ShotParams params = distanceToShotParams.get(distanceMeters);
     double rpm = 0.0;
@@ -330,8 +330,7 @@ public class ShootingManager {
     lastShotTimestamp = timestampSec;
   }
 
-  public boolean canFire(
-      ShotSolution solution, boolean rpmStable, double timestampSec) {
+  public boolean canFire(ShotSolution solution, boolean rpmStable, double timestampSec) {
     boolean withinAngle = solution.yawWithinTolerance && solution.pitchWithinTolerance;
     boolean recovered = timestampSec - lastShotTimestamp >= RECOVERY_TIME_SEC;
     return withinAngle && rpmStable && recovered;

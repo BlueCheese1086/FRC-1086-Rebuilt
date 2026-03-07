@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -74,33 +75,17 @@ public class Shooter extends SubsystemBase {
   }
 
   public Command runFeed(double volts) {
-    return Commands.run(() -> feederIO.setFeedVoltage(volts), this).finallyDo(() -> stopFeeder());
-  }
-
-  public Command runShooter(Supplier<AngularVelocity> velocity) {
-    return Commands.run(() -> setVelocitySetpoint(velocity)).finallyDo(() -> stopShooter());
-  }
-
-  public Command stopShoot() {
-    return Commands.runOnce(() -> stopShooter());
-  }
-
-  public Command stopFeed() {
-    return Commands.runOnce(() -> stopFeed());
-  }
-
-  public Command stopEverything() {
-    return Commands.runOnce(() -> stopAll());
+    return Commands.run(() -> feederIO.setFeedVoltage(volts)).finallyDo(() -> stopFeeder());
   }
 
   public Command setVoltage(double volts) {
-    return Commands.run(
+    return this.run(
             () -> {
               for (int i = 0; i < io.length; i++) {
                 io[i].setVoltage(volts);
               }
             })
-        .finallyDo(() -> stopShoot());
+        .finallyDo(this::stopShooter);
   }
 
   public void stopAll() {
@@ -113,7 +98,7 @@ public class Shooter extends SubsystemBase {
 
   public void stopShooter() {
     for (int i = 0; i < io.length; i++) {
-      io[i].setVoltage(0.0);
+      // io[i].setVoltage(0.0);
       io[i].setVelocity(RadiansPerSecond.of(0.0));
     }
   }
@@ -190,7 +175,7 @@ public class Shooter extends SubsystemBase {
 
   public Command getShooterSysIdQuasistatic(Direction direction, int index, String name) {
     return new SysIdRoutine(
-            new SysIdRoutine.Config(null, Volts.of(4), null),
+            new SysIdRoutine.Config(Volts.of(2.0).per(Second), Volts.of(8.0), null),
             new SysIdRoutine.Mechanism(
                 volts -> io[index].setVoltage(volts.in(Volts)),
                 log -> {
@@ -205,7 +190,7 @@ public class Shooter extends SubsystemBase {
 
   public Command getShooterSysIdDynamic(Direction direction, int index, String name) {
     return new SysIdRoutine(
-            new SysIdRoutine.Config(null, Volts.of(4), null),
+            new SysIdRoutine.Config(Volts.of(2.0).per(Second), Volts.of(4), null),
             new SysIdRoutine.Mechanism(
                 volts -> io[index].setVoltage(volts.in(Volts)),
                 log -> {

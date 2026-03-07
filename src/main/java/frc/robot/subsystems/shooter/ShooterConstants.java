@@ -7,14 +7,11 @@ package frc.robot.subsystems.shooter;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.MomentOfInertia;
@@ -24,12 +21,13 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 /** Add your docs here. */
 public class ShooterConstants {
   public static class Tuning {
-    public static final double kS = 0.0;
-    public static final double kV =
-        12.0
-            / RadiansPerSecond.of(DCMotor.getKrakenX60Foc(1).freeSpeedRadPerSec)
-                .in(RotationsPerSecond); // 113.067;
-    public static final double kA = 0.0; // if its too much lower it if its not enough increase it
+    public static final double kS = 0.14819;
+    public static final double kV = 0.15;
+    // 12.0
+    //     / RadiansPerSecond.of(DCMotor.getKrakenX60Foc(1).freeSpeedRadPerSec)
+    //         .in(RotationsPerSecond); // 113.067;
+      public static final double kA =
+        0.0024824; // if its too much lower it if its not enough increase it
 
     public static final double cruiseVelocity = 6000.0 / 60.0; // ~ 600 rad per sec;
     public static final double acceleration =

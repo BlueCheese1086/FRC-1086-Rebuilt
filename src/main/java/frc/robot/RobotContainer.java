@@ -13,8 +13,6 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
@@ -30,8 +28,6 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.autonomous.AutosManager;
 import frc.robot.commands.AutoRoutines;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.ShotCalc;
-import frc.robot.commands.ShotCalc.Shot;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.climb.Climb;
 import frc.robot.subsystems.climb.ClimbConstants;
@@ -44,7 +40,6 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.hood.Hood;
-import frc.robot.subsystems.hood.HoodConstants;
 import frc.robot.subsystems.hood.HoodIO;
 import frc.robot.subsystems.hood.HoodIOServo;
 import frc.robot.subsystems.hood.HoodIOSim;
@@ -67,6 +62,8 @@ import frc.robot.subsystems.shooter.ShooterConstants.FeederSetpoints;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.shooter.ShooterIOTalonFX;
+import frc.robot.subsystems.shooter.shooterUtil.LauncherCalculator;
+import frc.robot.subsystems.shooter.shooterUtil.LauncherCalculator.LaunchingParameters;
 import frc.robot.subsystems.shooter.shooterUtil.ShootingManager;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
@@ -136,8 +133,8 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVision("backLeft", VisionConstants.robotToLeftCam),
-                new VisionIOPhotonVision("backRight", VisionConstants.robotToRightCam),
+                new VisionIOPhotonVision("backLeft", VisionConstants.robotToRightCam),
+                new VisionIOPhotonVision("backRight", VisionConstants.robotToLeftCam),
                 new VisionIOLimelight("limelight-marble", drive::getRotation));
 
         intake = new Intake(new IntakeIOTalonFX());
@@ -251,6 +248,7 @@ public class RobotContainer {
 
     autoChooser.addOption("Intake Pivot SysId", intake.sysId());
     autoChooser.addOption("Climb SysId", climb.sysId());
+    autoChooser.addOption("Shooter Sys id", shooter.sysid(5.0, 0, "shooter"));
 
     // Configure the button bindings
     configureButtonBindings();
@@ -262,9 +260,10 @@ public class RobotContainer {
         DriveCommands.joystickDrive(
             drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
 
-    hood.setDefaultCommand(
-        Commands.run(
-            () -> hood.setPosition(() -> HoodConstants.Targeting.hoodAngle.getAsDouble()), hood));
+    // hood.setDefaultCommand(
+    //     Commands.run(
+    //         () -> hood.setPosition(() -> HoodConstants.Targeting.hoodAngle.getAsDouble()),
+    // hood));
 
     driver
         .start()
@@ -281,8 +280,6 @@ public class RobotContainer {
         .leftTrigger()
         .whileTrue(
             Commands.parallel(
-                // DriveCommands.joystickDriveSyom(
-                // drive, ControllerLayout.joystickX, ControllerLayout.joystickY),
                 intake.setVoltage(IntakeConstants.Setpoints.run),
                 intake.setPosition(IntakeConstants.Setpoints.deployed)));
 
@@ -303,46 +300,24 @@ public class RobotContainer {
                 shooter.runFeed(-FeederSetpoints.run.in(Volts)),
                 shooter.setVoltage(12.0)));
 
-    // driver
-    //     .a()
-    //     .whileTrue(
-    //             LaunchingParameters parms =
-    // LauncherCalculator.getInstance().getParameters(drive::getPose, drive::getChassisSpeeds);
-    //             AngularVelocity speed = RadiansPerSecond.of(parms.flywheelSpeed());
-    //             shooter.setVelocitySetpoint(()-> speed);
-    //             LaunchingParameters parms =
-    // LauncherCalculator.getInstance().getParameters(drive::getPose, drive::getChassisSpeeds);
-    //             shooter.setVelocitySetpoint(()-> RadiansPerSecond.of(parms.flywheelSpeed()));
-    //             hood.setPosition(()-> parms.hoodAngle());
-    //         }, shooter)
-    //     );
-    // driver
-    //     .y()
-    //     .whileTrue(
-    //         DriveCommands.joystickDriveAtAngle(
-    //                 drive,
-    //                 () -> -driver.getLeftY(),
-    //                 () -> -driver.getLeftX(),
-    //                 () ->
-    //                     LauncherCalculator.getInstance()
-    //                         .getParameters(drive::getPose, drive::getChassisSpeeds)
-    //                         .driveAngle())
-    //             .alongWith(
-    //                 Commands.run(
-    //                     () -> {
-    //                       LaunchingParameters parms =
-    //                           LauncherCalculator.getInstance()
-    //                               .getParameters(drive::getPose, drive::getChassisSpeeds);
-    //                       shooter.setVelocitySetpoint(
-    //                           () -> RadiansPerSecond.of(parms.flywheelSpeed()));
-    //                       hood.setPosition(() -> parms.hoodAngle());
+    driver
+        .y()
+        .whileTrue(
+            Commands.run(
+                    () -> {
+                      LaunchingParameters parms =
+                          LauncherCalculator.getInstance()
+                              .getParameters(
+                                  drive::getPose, drive::getChassisSpeeds, drive::getRotation);
+                      shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(parms.flywheelSpeed()));
+                      hood.setPosition(() -> parms.hoodAngle());
 
-    //                       Logger.recordOutput("Shoot Parms/ Hood Angle", parms.hoodAngle());
-    //                       Logger.recordOutput("Shoot Parms/ Drive Angle", parms.driveAngle());
-    //                       Logger.recordOutput("Shoot Parms/ Flywheel Speed",
-    // parms.flywheelSpeed());
-    //                     },
-    //                     shooter)));
+                      Logger.recordOutput("Shoot Parms/ Hood Angle", parms.hoodAngle());
+                      Logger.recordOutput("Shoot Parms/ Drive Angle", parms.driveAngle());
+                      Logger.recordOutput("Shoot Parms/ Flywheel Speed", parms.flywheelSpeed());
+                    },
+                    shooter)
+                .finallyDo(shooter::stopShooter));
     driver
         .x()
         .whileTrue(
@@ -383,17 +358,28 @@ public class RobotContainer {
                 shooter.setVoltage(12.0),
                 shooter.runFeed(-12.0)));
     operator.leftTrigger().onTrue(intake.setPosition(IntakeConstants.Setpoints.stowed));
-    operator.x().whileTrue(DriveCommands.recordData(drive, shooter, hood));
     driver
         .a()
         .whileTrue(
-            shooter.runShooter(
-                () -> (RadiansPerSecond.of(ShooterConstants.Tuning.velocitySetpoint.get()))));
+            Commands.run(
+                () ->
+                    shooter.setVelocitySetpoint(
+                        () ->
+                            (RadiansPerSecond.of(
+                                ShooterConstants.Tuning.velocitySetpoint.getAsDouble()))),
+                shooter))
+        .onFalse(Commands.runOnce(shooter::stopShooter));
     operator
         .y()
         .whileTrue(
-            shooter.runShooter(
-                () -> RadiansPerSecond.of(ShooterConstants.Tuning.velocitySetpoint.getAsDouble())));
+            Commands.run(
+                () ->
+                    shooter.setVelocitySetpoint(
+                        () ->
+                            (RadiansPerSecond.of(
+                                ShooterConstants.Tuning.velocitySetpoint.getAsDouble()))),
+                shooter))
+        .onFalse(Commands.runOnce(shooter::stopShooter));
     operator
         .povDown()
         .onTrue(
@@ -413,9 +399,7 @@ public class RobotContainer {
 
     operator.povUp().onTrue(climb.setPosition(ClimbConstants.extendedHeight));
     operator.povDown().onTrue(climb.setPosition(ClimbConstants.retractedHeight));
-
   }
-
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
