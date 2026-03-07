@@ -76,12 +76,6 @@ public class ShootingManager {
   private double rpmStableSince = -Double.MAX_VALUE;
   private double lastCommandedRpm = 0.0;
   private double lastCommandTimestamp = -Double.MAX_VALUE;
-  private double lastHeadingRad = Double.NaN;
-  private double lastHeadingTimestamp = -Double.MAX_VALUE;
-
-  private final Supplier<Pose2d> poseSupplier;
-  private final Supplier<ChassisSpeeds> speedsSupplier;
-  private final Supplier<Rotation2d> headingSupplier;
 
   static {
     // TODO: Replace with calibrated distance->shot params (meters, RPM, hood angle deg)
@@ -100,9 +94,6 @@ public class ShootingManager {
       Supplier<Pose2d> poseSupplier,
       Supplier<ChassisSpeeds> speedsSupplier,
       Supplier<Rotation2d> headingSupplier) {
-    this.poseSupplier = poseSupplier;
-    this.speedsSupplier = speedsSupplier;
-    this.headingSupplier = headingSupplier;
   }
 
   public ShotParams getStaticShootingParams(double distanceMeters) {
@@ -176,25 +167,6 @@ public class ShootingManager {
   private static double blend(double a, double b, double weightB) {
     double clampedWeight = MathUtil.clamp(weightB, 0.0, 1.0);
     return a + (b - a) * clampedWeight;
-  }
-
-  private double estimateAngularVelocity(Rotation2d heading, double timestampSec) {
-    if (heading == null || !Double.isFinite(timestampSec)) {
-      return 0.0;
-    }
-    if (!Double.isFinite(lastHeadingTimestamp) || timestampSec <= lastHeadingTimestamp) {
-      lastHeadingRad = heading.getRadians();
-      lastHeadingTimestamp = timestampSec;
-      return 0.0;
-    }
-    double dt = timestampSec - lastHeadingTimestamp;
-    if (dt <= 1e-6) {
-      return 0.0;
-    }
-    double delta = MathUtil.angleModulus(heading.getRadians() - lastHeadingRad);
-    lastHeadingRad = heading.getRadians();
-    lastHeadingTimestamp = timestampSec;
-    return delta / dt;
   }
 
   public ShotSolution calculateShotSolution(
