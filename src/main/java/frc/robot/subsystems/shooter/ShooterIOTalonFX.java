@@ -6,9 +6,6 @@ package frc.robot.subsystems.shooter;
 
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static frc.robot.subsystems.intake.IntakeConstants.PID.kA;
-import static frc.robot.subsystems.intake.IntakeConstants.PID.kS;
-import static frc.robot.subsystems.intake.IntakeConstants.PID.kV;
 import static frc.robot.util.PhoenixUtil.tryUntilOk;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -28,14 +25,13 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.RobotController;
 import frc.robot.RobotMap;
 import frc.robot.util.LoggedTunableNumber;
 
 public class ShooterIOTalonFX implements ShooterIO {
   private final TalonFX shooter;
   private final BangBangController bbController;
-  @SuppressWarnings("unused")
+
   private final VelocityVoltage velocityVoltage;
   private final MotionMagicVelocityVoltage motionMagic;
 
@@ -49,12 +45,12 @@ public class ShooterIOTalonFX implements ShooterIO {
   private StatusSignal<Temperature> temp;
 
   private double setpoint = 0.0;
-  private final LoggedTunableNumber kv = new LoggedTunableNumber("/Shooter/Kv", 0.125);
-  private final LoggedTunableNumber ks = new LoggedTunableNumber("/Shooter/Ks", 0.14819);
-  private final LoggedTunableNumber ka = new LoggedTunableNumber("/Shooter/ka", 0.0024824);
+  private final LoggedTunableNumber kV = new LoggedTunableNumber("/Shooter/kV", 0.125);
+  private final LoggedTunableNumber kS = new LoggedTunableNumber("/Shooter/kS", 0.14819);
+  private final LoggedTunableNumber kA = new LoggedTunableNumber("/Shooter/kA", 0.0024824);
   private final LoggedTunableNumber kP = new LoggedTunableNumber("/Shooter/kP", 0.029853);
   private final LoggedTunableNumber kI = new LoggedTunableNumber("/Shooter/kI", 0.0);
-  private final LoggedTunableNumber kd = new LoggedTunableNumber("Tuning/Kd", 0.0);
+  private final LoggedTunableNumber kD = new LoggedTunableNumber("/Shooter/Kd", 0.0);
 
   public ShooterIOTalonFX(int id, boolean inverted) {
     shooter = new TalonFX(id, RobotMap.systemBus);
@@ -124,10 +120,25 @@ public class ShooterIOTalonFX implements ShooterIO {
     if (kA.hasChanged(hashCode())) {
       resetValues();
     }
+
+    if (kP.hasChanged(hashCode())) {
+      resetValues();
+    }
+
+    if (kI.hasChanged(hashCode())) {
+      resetValues();
+    }
+
+    if (kD.hasChanged(hashCode())) {
+      resetValues();
+    }
   }
 
-    private void resetValues() {
+  private void resetValues() {
     Slot0Configs slot0Configs = new Slot0Configs();
+    slot0Configs.withKP(kP.getAsDouble());
+    slot0Configs.withKI(kI.getAsDouble());
+    slot0Configs.withKD(kD.getAsDouble());
     slot0Configs.withKA(kA.getAsDouble());
     slot0Configs.withKS(kS.getAsDouble());
     slot0Configs.withKV(kV.getAsDouble());
