@@ -50,14 +50,7 @@ public class Climb extends SubsystemBase {
   }
 
   public Command setPosition(double position) {
-    return this.run(
-            () -> {
-              inputs.targetPosition = position;
-              io.setPosition(
-                  MathUtil.clamp(
-                      position, ClimbConstants.retractedHeight, ClimbConstants.extendedHeight));
-            })
-        .until(this::atSetpoint);
+    return setPositionDynamic(() -> position);
   }
 
   public Command setPositionDynamic(
