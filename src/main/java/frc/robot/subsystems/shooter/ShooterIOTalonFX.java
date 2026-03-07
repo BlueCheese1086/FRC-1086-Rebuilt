@@ -30,6 +30,7 @@ import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotController;
 import frc.robot.RobotMap;
+import frc.robot.util.LoggedTunableNumber;
 
 public class ShooterIOTalonFX implements ShooterIO {
   private final TalonFX shooter;
@@ -110,7 +111,7 @@ public class ShooterIOTalonFX implements ShooterIO {
     inputs.statorCurrent = statorCurrent.getValueAsDouble();
     inputs.supplyCurrent = supplyCurrent.getValueAsDouble();
     inputs.temp = temp.getValueAsDouble();
-    inputs.positionRadPerSec = position.getValueAsDouble()
+    inputs.positionRadPerSec = position.getValueAsDouble();
 
     if (kV.hasChanged(hashCode())) {
       resetValues();
