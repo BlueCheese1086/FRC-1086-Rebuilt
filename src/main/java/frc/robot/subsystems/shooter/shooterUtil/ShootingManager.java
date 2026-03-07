@@ -93,8 +93,7 @@ public class ShootingManager {
   public ShootingManager(
       Supplier<Pose2d> poseSupplier,
       Supplier<ChassisSpeeds> speedsSupplier,
-      Supplier<Rotation2d> headingSupplier) {
-  }
+      Supplier<Rotation2d> headingSupplier) {}
 
   public ShotParams getStaticShootingParams(double distanceMeters) {
     ShotParams params = distanceToShotParams.get(distanceMeters);
