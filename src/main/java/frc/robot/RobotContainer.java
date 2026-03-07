@@ -341,6 +341,8 @@ public class RobotContainer {
     // parms.flywheelSpeed());
     //                     },
     //                     shooter)));
+
+    // DONT DELETE THIS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     driver
         .x()
         .whileTrue(
@@ -387,21 +389,22 @@ public class RobotContainer {
         .whileTrue(
             shooter.runShooter(
                 () -> RadiansPerSecond.of(ShooterConstants.Tuning.velocitySetpoint.getAsDouble())));
-    operator
-        .povDown()
-        .onTrue(
-            Commands.sequence(
-                    Commands.runOnce(() -> backStartPose[0] = drive.getPose()),
-                    Commands.run(() -> drive.runVelocity(new ChassisSpeeds(-0.5, 0.0, 0.0)), drive)
-                        .until(
-                            () ->
-                                backStartPose[0] != null
-                                    && drive
-                                            .getPose()
-                                            .getTranslation()
-                                            .getDistance(backStartPose[0].getTranslation())
-                                        >= Units.inchesToMeters(5.0)))
-                .finallyDo(() -> drive.runVelocity(new ChassisSpeeds())));
+    // This is for getting data points
+    // operator
+    //     .povDown()
+    //     .onTrue(
+    //         Commands.sequence(
+    //                 Commands.runOnce(() -> backStartPose[0] = drive.getPose()),
+    //                 Commands.run(() -> drive.runVelocity(new ChassisSpeeds(-0.5, 0.0, 0.0)), drive)
+    //                     .until(
+    //                         () ->
+    //                             backStartPose[0] != null
+    //                                 && drive
+    //                                         .getPose()
+    //                                         .getTranslation()
+    //                                         .getDistance(backStartPose[0].getTranslation())
+    //                                     >= Units.inchesToMeters(5.0)))
+    //             .finallyDo(() -> drive.runVelocity(new ChassisSpeeds())));
 
     operator.povUp().onTrue(climb.setPosition(ClimbConstants.extendedHeight));
     operator.povDown().onTrue(climb.setPosition(ClimbConstants.retractedHeight));
