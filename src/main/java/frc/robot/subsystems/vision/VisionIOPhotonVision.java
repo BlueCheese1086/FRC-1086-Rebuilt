@@ -29,15 +29,14 @@ public class VisionIOPhotonVision implements VisionIO {
    * @param rotationSupplier The 3D position of the camera relative to the robot.
    */
   public VisionIOPhotonVision(
-      String name,
-      Transform3d robotToCamera,
-      Supplier<Rotation2d> rotationSupplier) {
+      String name, Transform3d robotToCamera, Supplier<Rotation2d> rotationSupplier) {
     camera = new PhotonCamera(name);
     this.robotToCamera = robotToCamera;
     this.aprilTagLayout = VisionConstants.fieldLayout;
     this.rotationSupplier = rotationSupplier;
     this.poseEstimator =
-        new PhotonPoseEstimator(VisionConstants.fieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, robotToCamera);
+        new PhotonPoseEstimator(
+            VisionConstants.fieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, robotToCamera);
     poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.PNP_DISTANCE_TRIG_SOLVE);
     camera.setDriverMode(false);
   }
