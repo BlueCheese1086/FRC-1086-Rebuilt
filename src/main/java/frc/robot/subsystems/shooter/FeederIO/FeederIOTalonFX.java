@@ -29,11 +29,10 @@ public class FeederIOTalonFX implements FeederIO {
     feedConfig = new TalonFXConfiguration();
 
     feedConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-    feedConfig.CurrentLimits.SupplyCurrentLimit = 80.0; // arbitury
+    feedConfig.CurrentLimits.SupplyCurrentLimit = 70.0; // arbitury
     feedConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-    feedConfig.CurrentLimits.StatorCurrentLimit = 60.0; // arbitury
+    feedConfig.CurrentLimits.StatorCurrentLimit = 200.0; // arbitury
 
-    feedConfig.Voltage.PeakForwardVoltage = 10.0;
     feedConfig.TorqueCurrent.PeakForwardTorqueCurrent =
         200.0; // In amps (estimated 200 amps is max it will ever
     // go)
@@ -64,7 +63,8 @@ public class FeederIOTalonFX implements FeederIO {
 
   @Override
   public void setFeedVoltage(double volts) {
-    feeder.setControl(voltageRequest.withOutput(volts));
+    // feeder.setControl(voltageRequest.withOutput(volts));
+    feeder.setVoltage(volts);
 
     if (volts == 0) {
       feeder.stopMotor();

@@ -70,6 +70,7 @@ import frc.robot.subsystems.shooter.ShooterIOTalonFX;
 import frc.robot.subsystems.shooter.shooterUtil.ShootingManager;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
+import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.AllianceFlipUtil;
@@ -136,7 +137,8 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOPhotonVision("backLeft", VisionConstants.robotToLeftCam),
-                new VisionIOPhotonVision("backRight", VisionConstants.robotToRightCam));
+                new VisionIOPhotonVision("backRight", VisionConstants.robotToRightCam),
+                new VisionIOLimelight("limelight-marble", drive::getRotation));
 
         intake = new Intake(new IntakeIOTalonFX());
         indexer = new Indexer(new IndexerIOTalonFX());
@@ -262,7 +264,7 @@ public class RobotContainer {
 
     hood.setDefaultCommand(
         Commands.run(
-            () -> hood.setPosition(() -> HoodConstants.Setpoints.hoodAngle.getAsDouble()), hood));
+            () -> hood.setPosition(() -> HoodConstants.Targeting.hoodAngle.getAsDouble()), hood));
 
     driver
         .start()
@@ -384,32 +386,38 @@ public class RobotContainer {
                 shooter.runFeed(-12.0)));
     operator.leftTrigger().onTrue(intake.setPosition(IntakeConstants.Setpoints.stowed));
     operator.x().whileTrue(DriveCommands.recordData(drive, shooter, hood));
+    driver
+        .a()
+        .whileTrue(
+            shooter.runShooter(
+                () -> (RadiansPerSecond.of(ShooterConstants.Tuning.velocitySetpoint.get()))));
     operator
         .y()
         .whileTrue(
             shooter.runShooter(
                 () -> RadiansPerSecond.of(ShooterConstants.Tuning.velocitySetpoint.getAsDouble())));
-    // This is for getting data points
-    // operator
-    //     .povDown()
-    //     .onTrue(
-    //         Commands.sequence(
-    //                 Commands.runOnce(() -> backStartPose[0] = drive.getPose()),
-    //                 Commands.run(() -> drive.runVelocity(new ChassisSpeeds(-0.5, 0.0, 0.0)), drive)
-    //                     .until(
-    //                         () ->
-    //                             backStartPose[0] != null
-    //                                 && drive
-    //                                         .getPose()
-    //                                         .getTranslation()
-    //                                         .getDistance(backStartPose[0].getTranslation())
-    //                                     >= Units.inchesToMeters(5.0)))
-    //             .finallyDo(() -> drive.runVelocity(new ChassisSpeeds())));
+    operator
+        .povDown()
+        .onTrue(
+            Commands.sequence(
+                    Commands.runOnce(() -> backStartPose[0] = drive.getPose()),
+                    Commands.run(() -> drive.runVelocity(new ChassisSpeeds(-0.5, 0.0, 0.0)), drive),
+                    Commands.run(() -> drive.runVelocity(new ChassisSpeeds(-0.5, 0.0, 0.0)), drive)
+                        .until(
+                            () ->
+                                backStartPose[0] != null
+                                    && drive
+                                            .getPose()
+                                            .getTranslation()
+                                            .getDistance(backStartPose[0].getTranslation())
+                                        >= Units.inchesToMeters(5.0)))
+                .finallyDo(() -> drive.runVelocity(new ChassisSpeeds())));
 
     operator.povUp().onTrue(climb.setPosition(ClimbConstants.extendedHeight));
     operator.povDown().onTrue(climb.setPosition(ClimbConstants.retractedHeight));
 
   }
+
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
