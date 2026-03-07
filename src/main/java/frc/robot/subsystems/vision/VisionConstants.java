@@ -16,7 +16,7 @@ public class VisionConstants {
   // Standard deviation baselines, for 1 meter distance and 1 tag
   // (Adjusted automatically based on distance and # of tags)
   public static double linearStdDevBaseline = 6.0; // Meters
-  public static double angularStdDevBaseline = Double.POSITIVE_INFINITY; // Radians
+  public static double angularStdDevBaseline = 4.5; // Radians
 
   // Standard deviation multipliers for each camera
   // (Adjust to trust some cameras more than others)
@@ -64,7 +64,7 @@ public class VisionConstants {
   public static double trigAngularStdDevBaseline = Double.POSITIVE_INFINITY; // Radians
 
   public static double multitagLinearStdDevBaseline = 0.07; // Meters
-  public static double multitagAngularStdDevBaseline = Double.POSITIVE_INFINITY; // Radians
+  public static double multitagAngularStdDevBaseline = 0.03; // Radians
 
   public static double averageTagDistance = 3.2;
 }
