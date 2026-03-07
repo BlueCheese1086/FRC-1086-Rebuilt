@@ -157,7 +157,7 @@ public class LauncherCalculator {
             .minus(launcherPosition.getTranslation())
             .getAngle();
     // target.minus(lookaheadPose.getTranslation()).getAngle().plus(Rotation2d.kPi);
-    double hoodAngle = hoodAngleMap.get(lookaheadLauncherToTargetDistance).getRadians();
+    double hoodAngle = hoodAngleMap.get(lookaheadLauncherToTargetDistance).getDegrees();
 
     if (lastDriveAngle == null) lastDriveAngle = driveAngle;
     if (Double.isNaN(lastHoodAngle)) lastHoodAngle = hoodAngle;

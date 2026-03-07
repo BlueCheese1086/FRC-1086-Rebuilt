@@ -24,7 +24,6 @@ public class ShooterIOSim implements ShooterIO {
   private double appliedVoltage = 0.0;
 
   public ShooterIOSim() {
-
     shooter =
         new FlywheelSim(
             LinearSystemId.createFlywheelSystem(
@@ -38,6 +37,7 @@ public class ShooterIOSim implements ShooterIO {
 
   @Override
   public void updateInputs(ShooterInputs inputs) {
+
     shooter.update(0.02);
 
     appliedVoltage =

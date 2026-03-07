@@ -26,7 +26,7 @@ public class ShooterConstants {
     // 12.0
     //     / RadiansPerSecond.of(DCMotor.getKrakenX60Foc(1).freeSpeedRadPerSec)
     //         .in(RotationsPerSecond); // 113.067;
-      public static final double kA =
+    public static final double kA =
         0.0024824; // if its too much lower it if its not enough increase it
 
     public static final double cruiseVelocity = 6000.0 / 60.0; // ~ 600 rad per sec;
