@@ -143,9 +143,7 @@ public class Superstructure extends SubsystemBase {
             .and(() -> FieldConstants.LinesVertical.inAllianceZone(drive.getPose())),
         State.shoot);
     stateRequests.put(
-        ControllerLayout.intakeRequest.and(
-            stateTriggers.get(State.holding).or(stateTriggers.get(State.shoot))),
-        State.intake);
+        ControllerLayout.intakeRequest.and(stateTriggers.get(State.holding).or(stateTriggers.get(State.shoot))), State.intake);
     stateRequests.put(ControllerLayout.climbRequest, State.climb);
     stateRequests.put(
         ControllerLayout.scoreRequest.and(stateTriggers.get(State.climb)), State.climbscore);
@@ -325,8 +323,8 @@ public class Superstructure extends SubsystemBase {
             Commands.parallel(
                 hood.setAngle(
                     HoodConstants.Setpoints
-                        .passAngle))); // TODO make this target center of alliance zone.
-    // shooter.runShooter(() -> (RadiansPerSecond.of(300)))));
+                        .passAngle), // TODO make this target center of alliance zone.
+                shooter.runShooter(() -> (RadiansPerSecond.of(300)))));
 
     stateTriggers
         .get(State.pass)

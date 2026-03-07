@@ -30,8 +30,8 @@ public class IntakeConstants {
   }
 
   public static class CurrentLimits {
-    public static final Current maxSupply = Amps.of(50);
-    public static final Current maxStator = Amps.of(40.0);
+    public static final Current maxSupply = Amps.of(60);
+    public static final Current maxStator = Amps.of(50.0);
   }
 
   public static class VoltageLimits {

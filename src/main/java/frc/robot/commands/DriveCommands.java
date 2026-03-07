@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.hood.Hood;
+import frc.robot.subsystems.hood.HoodConstants;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterConstants;
 import frc.robot.util.AllianceFlipUtil;
@@ -124,7 +125,7 @@ public class DriveCommands {
               shooter.setVelocitySetpoint(
                   () ->
                       RadiansPerSecond.of(ShooterConstants.Tuning.velocitySetpoint.getAsDouble()));
-              // hood.setPosition(() -> hoodAngle.getAsDouble());
+              hood.setPosition(() -> HoodConstants.Setpoints.hoodAngle.getAsDouble());
             },
             () -> {
               time.stop();

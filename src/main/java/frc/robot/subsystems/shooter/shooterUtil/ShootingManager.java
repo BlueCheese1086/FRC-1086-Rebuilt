@@ -1,13 +1,11 @@
 package frc.robot.subsystems.shooter.shooterUtil;
 
-import static edu.wpi.first.units.Units.Meters;
-import static frc.robot.subsystems.shooter.ShooterConstants.Mechanical.flywheelRadius;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
@@ -18,10 +16,15 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.subsystems.hood.HoodConstants;
 import frc.robot.subsystems.shooter.ShooterConstants.Mechanical;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
+
+import static edu.wpi.first.units.Units.Meters;
+import static frc.robot.subsystems.shooter.ShooterConstants.Mechanical.flywheelRadius;;
 
 public class ShootingManager {
   public static final Transform3d[] ROBOT_TO_PHOTON_CAMS =
@@ -64,6 +67,14 @@ public class ShootingManager {
   public static final double MAX_ACCEL = 8.0;
   public static final double MAX_VELOCITY = 8.0;
 
+  private static final double POSE_BUFFER_SECONDS = 1.0;
+  private static final double ODOM_BASE_FOM = 1.0;
+  private static final double ODOM_DRIFT_FOM_PER_SEC = 0.15;
+  private static final double COLLISION_FOM_SPIKE = 5.0;
+  private static final double VISION_BASE_FOM = 1.5;
+  private static final double VISION_ROT_FOM_PER_RAD = 0.4;
+  private static final double VISION_OFFSET_FOM_PER_DEG = 0.05;
+  private static final double VISION_DIST_FOM_PER_M = 0.1;
   private static final double GRAVITY_MPS2 = 9.80665;
   private static final double MAX_FLYWHEEL_RPM = 6271.0;
   private static final double RPM_RATE_LIMIT = 600.0;
@@ -72,10 +83,20 @@ public class ShootingManager {
   private static final double STABLE_RPM_TIME_SEC = 0.15;
   private static final double RECOVERY_TIME_SEC = 0.25;
 
+  private final Deque<PoseSample> poseBuffer = new ArrayDeque<>();
+  private Pose2d estimatedPose = Pose2d.kZero;
+  private double odomFoM = ODOM_BASE_FOM;
+  private double lastVisionTimestamp = 0.0;
   private double lastShotTimestamp = -Double.MAX_VALUE;
   private double rpmStableSince = -Double.MAX_VALUE;
   private double lastCommandedRpm = 0.0;
   private double lastCommandTimestamp = -Double.MAX_VALUE;
+  private double lastHeadingRad = Double.NaN;
+  private double lastHeadingTimestamp = -Double.MAX_VALUE;
+
+  private final Supplier<Pose2d> poseSupplier;
+  private final Supplier<ChassisSpeeds> speedsSupplier;
+  private final Supplier<Rotation2d> headingSupplier;
 
   static {
     // TODO: Replace with calibrated distance->shot params (meters, RPM, hood angle deg)
@@ -93,7 +114,98 @@ public class ShootingManager {
   public ShootingManager(
       Supplier<Pose2d> poseSupplier,
       Supplier<ChassisSpeeds> speedsSupplier,
-      Supplier<Rotation2d> headingSupplier) {}
+      Supplier<Rotation2d> headingSupplier) {
+    this.poseSupplier = poseSupplier;
+    this.speedsSupplier = speedsSupplier;
+    this.headingSupplier = headingSupplier;
+  }
+
+  public void updateFromSuppliers() {
+    if (poseSupplier == null || speedsSupplier == null) {
+      return;
+    }
+    updateOdometry(poseSupplier.get(), speedsSupplier.get(), Timer.getFPGATimestamp());
+  }
+
+  public void addVisionMeasurement(Pose2d visionPose, double timestampSec) {
+    double angularVelocity = 0.0;
+    if (speedsSupplier != null) {
+      angularVelocity = speedsSupplier.get().omegaRadiansPerSecond;
+    } else if (headingSupplier != null) {
+      angularVelocity = estimateAngularVelocity(headingSupplier.get(), timestampSec);
+    }
+    addVisionObservation(visionPose, timestampSec, angularVelocity, 0.0, 0, 0.0);
+  }
+
+  public void updateOdometry(Pose2d pose, ChassisSpeeds robotRelativeSpeeds, double timestampSec) {
+    estimatedPose = pose;
+    odomFoM = ODOM_BASE_FOM + (timestampSec - lastVisionTimestamp) * ODOM_DRIFT_FOM_PER_SEC;
+    poseBuffer.addLast(new PoseSample(pose, robotRelativeSpeeds, timestampSec));
+    trimPoseBuffer(timestampSec);
+  }
+
+  public void recordCollision(double accelG) {
+    if (accelG > 2.0) {
+      odomFoM += COLLISION_FOM_SPIKE;
+    }
+  }
+
+  public void recordSkid(boolean skidding) {
+    if (skidding) {
+      odomFoM += COLLISION_FOM_SPIKE;
+    }
+  }
+
+  // public void addVisionObservation(
+  //     VisionInputs inputs, double robotAngularVelocityRadPerSec, double targetYawDeg) {
+  //   addVisionObservation(
+  //       inputs.pose,
+  //       inputs.timestamp,
+  //       robotAngularVelocityRadPerSec,
+  //       targetYawDeg,
+  //       inputs.tagCount,
+  //       inputs.averageDistance);
+  // }
+
+  public void addVisionObservation(
+      Pose2d visionPose,
+      double timestampSec,
+      double robotAngularVelocityRadPerSec,
+      double targetYawDeg,
+      int tagCount,
+      double avgDistance) {
+    PoseSample sample = getPoseSampleAt(timestampSec);
+    if (sample == null) {
+      return;
+    }
+
+    double visionFoM =
+        VISION_BASE_FOM
+            + Math.abs(robotAngularVelocityRadPerSec) * VISION_ROT_FOM_PER_RAD
+            + Math.abs(targetYawDeg) * VISION_OFFSET_FOM_PER_DEG
+            + Math.abs(avgDistance) * VISION_DIST_FOM_PER_M;
+
+    if (tagCount <= 0) {
+      visionFoM += 2.0;
+    }
+
+    Pose2d fusedAtTimestamp = blendPoses(sample.pose, visionPose, odomFoM, visionFoM);
+    applyPoseCorrection(timestampSec, new Transform2d(sample.pose, fusedAtTimestamp));
+    lastVisionTimestamp = timestampSec;
+    odomFoM = ODOM_BASE_FOM;
+
+    Logger.recordOutput("ShootingManager/FoM/Odometry", odomFoM);
+    Logger.recordOutput("ShootingManager/FoM/Vision", visionFoM);
+    Logger.recordOutput("ShootingManager/Pose/Fused", estimatedPose);
+  }
+
+  public Pose2d getEstimatedPose() {
+    return estimatedPose;
+  }
+
+  public double getPoseFoM() {
+    return odomFoM;
+  }
 
   public ShotParams getStaticShootingParams(double distanceMeters) {
     ShotParams params = distanceToShotParams.get(distanceMeters);
@@ -166,6 +278,25 @@ public class ShootingManager {
   private static double blend(double a, double b, double weightB) {
     double clampedWeight = MathUtil.clamp(weightB, 0.0, 1.0);
     return a + (b - a) * clampedWeight;
+  }
+
+  private double estimateAngularVelocity(Rotation2d heading, double timestampSec) {
+    if (heading == null || !Double.isFinite(timestampSec)) {
+      return 0.0;
+    }
+    if (!Double.isFinite(lastHeadingTimestamp) || timestampSec <= lastHeadingTimestamp) {
+      lastHeadingRad = heading.getRadians();
+      lastHeadingTimestamp = timestampSec;
+      return 0.0;
+    }
+    double dt = timestampSec - lastHeadingTimestamp;
+    if (dt <= 1e-6) {
+      return 0.0;
+    }
+    double delta = MathUtil.angleModulus(heading.getRadians() - lastHeadingRad);
+    lastHeadingRad = heading.getRadians();
+    lastHeadingTimestamp = timestampSec;
+    return delta / dt;
   }
 
   public ShotSolution calculateShotSolution(
@@ -257,7 +388,8 @@ public class ShootingManager {
     Pose3d shooterPose = new Pose3d(robotPose).plus(Mechanical.shooterPose);
     Translation3d origin = shooterPose.getTranslation();
 
-    double exitVelocity = calculateExitVelocityMetersPerSecondFromRpm(solution.flywheelRpm);
+    double exitVelocity =
+        calculateExitVelocityMetersPerSecondFromRpm(solution.flywheelRpm);
     double yaw = solution.drivetrainHeading.getRadians();
     double pitch = solution.hoodPitchRad;
 
@@ -301,14 +433,92 @@ public class ShootingManager {
     lastShotTimestamp = timestampSec;
   }
 
-  public boolean canFire(ShotSolution solution, boolean rpmStable, double timestampSec) {
+  public boolean canFire(
+      ShotSolution solution, double poseFoMThreshold, boolean rpmStable, double timestampSec) {
+    boolean poseTrusted = odomFoM <= poseFoMThreshold;
     boolean withinAngle = solution.yawWithinTolerance && solution.pitchWithinTolerance;
     boolean recovered = timestampSec - lastShotTimestamp >= RECOVERY_TIME_SEC;
-    return withinAngle && rpmStable && recovered;
+    return poseTrusted && withinAngle && rpmStable && recovered;
   }
 
   public double getCurrentTime() {
     return Timer.getFPGATimestamp();
+  }
+
+  private void trimPoseBuffer(double timestampSec) {
+    while (!poseBuffer.isEmpty()
+        && timestampSec - poseBuffer.peekFirst().timestampSec > POSE_BUFFER_SECONDS) {
+      poseBuffer.removeFirst();
+    }
+  }
+
+  private PoseSample getPoseSampleAt(double timestampSec) {
+    if (poseBuffer.isEmpty()) {
+      return null;
+    }
+
+    PoseSample previous = null;
+    for (PoseSample sample : poseBuffer) {
+      if (sample.timestampSec >= timestampSec) {
+        if (previous == null) {
+          return sample;
+        }
+        double t =
+            (timestampSec - previous.timestampSec)
+                / Math.max(1e-6, sample.timestampSec - previous.timestampSec);
+        Pose2d interpolated = previous.pose.interpolate(sample.pose, t);
+        return new PoseSample(interpolated, sample.robotRelativeSpeeds, timestampSec);
+      }
+      previous = sample;
+    }
+    return poseBuffer.peekLast();
+  }
+
+  private void applyPoseCorrection(double timestampSec, Transform2d correction) {
+    if (correction == null) {
+      return;
+    }
+    Deque<PoseSample> corrected = new ArrayDeque<>();
+    for (PoseSample sample : poseBuffer) {
+      Pose2d pose = sample.pose;
+      if (sample.timestampSec >= timestampSec) {
+        pose = pose.transformBy(correction);
+      }
+      corrected.addLast(new PoseSample(pose, sample.robotRelativeSpeeds, sample.timestampSec));
+    }
+    poseBuffer.clear();
+    poseBuffer.addAll(corrected);
+    if (!poseBuffer.isEmpty()) {
+      estimatedPose = poseBuffer.peekLast().pose;
+    } else {
+      estimatedPose = estimatedPose.transformBy(correction);
+    }
+  }
+
+  private Pose2d blendPoses(Pose2d odomPose, Pose2d visionPose, double odomFom, double visionFom) {
+    double odomWeight = 1.0 / Math.max(1e-6, odomFom);
+    double visionWeight = 1.0 / Math.max(1e-6, visionFom);
+    double totalWeight = odomWeight + visionWeight;
+
+    double x = (odomPose.getX() * odomWeight + visionPose.getX() * visionWeight) / totalWeight;
+    double y = (odomPose.getY() * odomWeight + visionPose.getY() * visionWeight) / totalWeight;
+    double rot =
+        (odomPose.getRotation().getRadians() * odomWeight
+                + visionPose.getRotation().getRadians() * visionWeight)
+            / totalWeight;
+    return new Pose2d(x, y, Rotation2d.fromRadians(rot));
+  }
+
+  private static class PoseSample {
+    private final Pose2d pose;
+    private final ChassisSpeeds robotRelativeSpeeds;
+    private final double timestampSec;
+
+    private PoseSample(Pose2d pose, ChassisSpeeds robotRelativeSpeeds, double timestampSec) {
+      this.pose = pose;
+      this.robotRelativeSpeeds = robotRelativeSpeeds;
+      this.timestampSec = timestampSec;
+    }
   }
 
   public static class ShotParams {

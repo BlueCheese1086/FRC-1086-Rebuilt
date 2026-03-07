@@ -49,6 +49,8 @@ public final class ChoreoVars {
         public static final Pose2d ot = new Pose2d(4.6, 0.6, Rotation2d.kZero);
         public static final Pose2d ots = new Pose2d(3.6, 0.5, Rotation2d.kZero);
         public static final Pose2d otsr = new Pose2d(3.6, 0.5, Rotation2d.fromRadians(3.142));
+        /**ERROR: Can only use letters, 0-9, and _. Can't use \. Rename it in the Choreo app to fix this error.*/
+	public static final Pose2d dc\ = new Pose2d(3.624, 4.132, Rotation2d.kZero);
 
         private Poses() {}
     }

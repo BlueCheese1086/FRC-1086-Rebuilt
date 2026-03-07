@@ -36,5 +36,7 @@ public class HoodConstants {
 
   public static class Setpoints {
     public static final Angle passAngle = Degrees.of(60.0);
+    public static final LoggedNetworkNumber hoodAngle =
+        new LoggedNetworkNumber("/Tuning/Hood Setpoint", 55.0);
   }
 }

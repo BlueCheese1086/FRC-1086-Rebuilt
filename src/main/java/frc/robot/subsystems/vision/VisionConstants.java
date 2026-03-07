@@ -16,7 +16,7 @@ public class VisionConstants {
 
   // Standard deviation baselines, for 1 meter distance and 1 tag
   // (Adjusted automatically based on distance and # of tags)
-  public static double linearStdDevBaseline = 6.0; // Meters
+  public static double linearStdDevBaseline = 4.0; // Meters
   public static double angularStdDevBaseline = 4.5; // Radians
 
   // Standard deviation multipliers for each camera
@@ -50,16 +50,16 @@ public class VisionConstants {
 
   public static Transform3d robotToLeftCam =
       new Transform3d(
-          -Units.inchesToMeters(12),
-          -Units.inchesToMeters(12),
-          Units.inchesToMeters(9.85),
-          new Rotation3d(0.0, Units.degreesToRadians(150.0), Units.degreesToRadians(0)));
+          -Units.inchesToMeters(12.0),
+          Units.inchesToMeters(12.0),
+          Units.inchesToMeters(6.0),
+          new Rotation3d(0.0, -Units.degreesToRadians(150.0), Units.degreesToRadians(0)));
   public static Transform3d robotToRightCam =
       new Transform3d(
-          -Units.inchesToMeters(12),
-          Units.inchesToMeters(12),
-          Units.inchesToMeters(9.85),
-          new Rotation3d(0.0, Units.degreesToRadians(150.0), Units.degreesToRadians(0)));
+          -Units.inchesToMeters(12.0),
+          -Units.inchesToMeters(12.0),
+          Units.inchesToMeters(6.0),
+          new Rotation3d(0.0, -Units.degreesToRadians(150.0), Units.degreesToRadians(0)));
 
   public static double trigLinearStdDevBaseline = 0.35; // Meters
   public static double trigAngularStdDevBaseline = Double.POSITIVE_INFINITY; // Radians
