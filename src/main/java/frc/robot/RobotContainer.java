@@ -130,11 +130,13 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
+
+        // vision = new Vision(drive::addVisionMeasurement, new VisionIO() {});
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVision("backLeft", VisionConstants.robotToRightCam),
-                new VisionIOPhotonVision("backRight", VisionConstants.robotToLeftCam),
+                new VisionIOPhotonVision("backLeft", VisionConstants.robotToLeftCam),
+                new VisionIOPhotonVision("backRight", VisionConstants.robotToRightCam),
                 new VisionIOLimelight("limelight-marble", drive::getRotation));
 
         intake = new Intake(new IntakeIOTalonFX());
