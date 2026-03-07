@@ -1,17 +1,18 @@
 package frc.robot.subsystems.vision;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Filesystem;
+import java.io.IOException;
 
 /** Add your docs here. */
 public class VisionConstants {
 
   // Basic filtering thresholds
-  public static double maxAmbiguity = 0.25; // 0.3d
-  public static double maxZError = 0.19; // 0.75
+  public static double maxAmbiguity = 0.3; // 0.3d
+  public static double maxZError = 0.75; // 0.75
 
   // Standard deviation baselines, for 1 meter distance and 1 tag
   // (Adjusted automatically based on distance and # of tags)
@@ -32,20 +33,20 @@ public class VisionConstants {
       Double.POSITIVE_INFINITY; // No rotation data available
   //   public static AprilTagFieldLayout fieldLayout =
   //       AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
-  public static AprilTagFieldLayout fieldLayout =
-      AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
+  public static AprilTagFieldLayout fieldLayout;
+  //   AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
 
-  // static {
-  //   try {
-  //     fieldLayout =
-  //         new AprilTagFieldLayout(
-  //             Filesystem.getDeployDirectory()
-  //                 .toPath()
-  //                 .resolve("fields/1086_Regency_Field3-5.json"));
-  //   } catch (IOException e) {
-  //     throw new RuntimeException("Failed to load AprilTag field layout", e);
-  //   }
-  // }
+  static {
+    try {
+      fieldLayout =
+          new AprilTagFieldLayout(
+              Filesystem.getDeployDirectory()
+                  .toPath()
+                  .resolve("fields/1086_Regency_Field3-5.json"));
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to load AprilTag field layout", e);
+    }
+  }
 
   public static Transform3d robotToLeftCam =
       new Transform3d(

@@ -45,11 +45,10 @@ public class ShooterIOTalonFX implements ShooterIO {
   private StatusSignal<Temperature> temp;
 
   private double setpoint = 0.0;
-  private double chessyVolts = 0.0;
-  private final LoggedTunableNumber kv = new LoggedTunableNumber("/Shooter/Kv", 0.01910828025);
+  private final LoggedTunableNumber kv = new LoggedTunableNumber("/Shooter/Kv", 0.125);
   private final LoggedTunableNumber ks = new LoggedTunableNumber("/Shooter/Ks", 0.14819);
   private final LoggedTunableNumber ka = new LoggedTunableNumber("/Shooter/ka", 0.0024824);
-  private final LoggedTunableNumber kP = new LoggedTunableNumber("/Shooter/kP", 0.0);
+  private final LoggedTunableNumber kP = new LoggedTunableNumber("/Shooter/kP", 0.029853);
   private final LoggedTunableNumber kI = new LoggedTunableNumber("/Shooter/kI", 0.0);
   private final LoggedTunableNumber kd = new LoggedTunableNumber("Tuning/Kd", 0.0);
 
@@ -111,7 +110,6 @@ public class ShooterIOTalonFX implements ShooterIO {
     inputs.temp = temp.getValueAsDouble();
     inputs.positionRadPerSec = position.getValueAsDouble();
     inputs.setpoint = setpoint;
-    this.chessyVolts = setpoint - velocity.getValue().in(RadiansPerSecond) >= 50.0 ? 12.0 : 0.0;
 
     if (kd.hasChanged(hashCode())) {
       resetValues();
@@ -152,7 +150,7 @@ public class ShooterIOTalonFX implements ShooterIO {
   @Override
   public void setVelocity(AngularVelocity velocity) {
     this.setpoint = velocity.in(RadiansPerSecond);
-    shooter.setControl(motionMagic.withVelocity(velocity).withFeedForward(chessyVolts));
+    shooter.setControl(velocityVoltage.withVelocity(velocity));
     if (velocity.in(RadiansPerSecond) == 0.0) {
       shooter.stopMotor();
     }
