@@ -5,6 +5,7 @@
 package frc.robot.subsystems.shooter;
 
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static frc.robot.subsystems.shooter.ShooterConstants.Tuning.*;
 import static frc.robot.util.PhoenixUtil.tryUntilOk;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -24,7 +25,6 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.RobotMap;
-import frc.robot.util.LoggedTunableNumber;
 import org.littletonrobotics.junction.Logger;
 
 public class ShooterIOTalonFX implements ShooterIO {
@@ -45,12 +45,6 @@ public class ShooterIOTalonFX implements ShooterIO {
   private StatusSignal<Temperature> temp;
 
   private double setpoint = 0.0;
-  private final LoggedTunableNumber kv = new LoggedTunableNumber("/Shooter/Kv", 0.125);
-  private final LoggedTunableNumber ks = new LoggedTunableNumber("/Shooter/Ks", 0.14819);
-  private final LoggedTunableNumber ka = new LoggedTunableNumber("/Shooter/ka", 0.0024824);
-  private final LoggedTunableNumber kP = new LoggedTunableNumber("/Shooter/kP", 0.029853);
-  private final LoggedTunableNumber kI = new LoggedTunableNumber("/Shooter/kI", 0.0);
-  private final LoggedTunableNumber kd = new LoggedTunableNumber("Tuning/Kd", 0.0);
 
   public ShooterIOTalonFX(int id, boolean inverted) {
     shooter = new TalonFX(id, RobotMap.systemBus);
