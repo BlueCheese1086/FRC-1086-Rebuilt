@@ -12,7 +12,6 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -46,8 +45,10 @@ public class ShooterIOTalonFX implements ShooterIO {
 
   public ShooterIOTalonFX(int id, boolean inverted) {
     shooter = new TalonFX(id, RobotMap.systemBus);
-    // added .withUseTimesync(true) to velocity voltage, but not sure if it will cause issues with the way we are using them, will test and remove if it does
-    velocityVoltage = new VelocityVoltage(0.0).withEnableFOC(true).withSlot(0).withUseTimesync(true);
+    // added .withUseTimesync(true) to velocity voltage, but not sure if it will cause issues with
+    // the way we are using them, will test and remove if it does
+    velocityVoltage =
+        new VelocityVoltage(0.0).withEnableFOC(true).withSlot(0).withUseTimesync(true);
 
     TalonFXConfiguration config = new TalonFXConfiguration();
     config.Slot0.kS = ks.getAsDouble();

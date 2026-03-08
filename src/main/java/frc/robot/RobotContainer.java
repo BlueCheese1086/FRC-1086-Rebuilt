@@ -385,34 +385,36 @@ public class RobotContainer {
                                 .driveAngle()))
                 .finallyDo(shooter::stopShooter));
     driver
-            .x()
+        .x()
         .whileTrue(
-                    Commands.parallel(
-                            Commands.run(
-                                    () -> {
-                                        var sol = shootingManager.calculateShotSolution(
-                                                drive.getPose(),
-                                                drive.getChassisSpeeds(),
-                                                FieldConstants.Hub.topCenterPoint,
-                                                0.10,
-                                                0.10);
-                                        shooter.setVelocitySetpoint(
-                                                () -> RotationsPerSecond.of(sol.flywheelRpm /
-    60));
-                                        hood.setPosition(() -> sol.hoodPitchRad);
-                                    },
-                                    shooter,
-                                    hood),
-                            DriveCommands.joystickDriveAtAngle(
-                                    drive,
-                                    () -> -driver.getLeftY(),
-                                    () -> -driver.getLeftX(),
-                                    () -> shootingManager.calculateShotSolution(
-                                            drive.getPose(),
-                                            drive.getChassisSpeeds(),
-                                            FieldConstants.Hub.topCenterPoint,
-                                            0.10,
-                                            0.10).drivetrainHeading)));
+            Commands.parallel(
+                Commands.run(
+                    () -> {
+                      var sol =
+                          shootingManager.calculateShotSolution(
+                              drive.getPose(),
+                              drive.getChassisSpeeds(),
+                              FieldConstants.Hub.topCenterPoint,
+                              0.10,
+                              0.10);
+                      shooter.setVelocitySetpoint(
+                          () -> RotationsPerSecond.of(sol.flywheelRpm / 60));
+                      hood.setPosition(() -> sol.hoodPitchRad);
+                    },
+                    shooter,
+                    hood),
+                DriveCommands.joystickDriveAtAngle(
+                    drive,
+                    () -> -driver.getLeftY(),
+                    () -> -driver.getLeftX(),
+                    () ->
+                        shootingManager.calculateShotSolution(
+                                drive.getPose(),
+                                drive.getChassisSpeeds(),
+                                FieldConstants.Hub.topCenterPoint,
+                                0.10,
+                                0.10)
+                            .drivetrainHeading)));
 
     // Operator Commands
     operator.leftTrigger().onTrue(intake.setVoltage(IntakeConstants.Setpoints.run));
