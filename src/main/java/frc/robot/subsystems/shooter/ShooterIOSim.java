@@ -47,7 +47,6 @@ public class ShooterIOSim implements ShooterIO {
             + (shooterFF.calculate(shooter.getAngularVelocityRadPerSec()));
 
     shooter.setInputVoltage(MathUtil.clamp(appliedVoltage, -12.0, 12.0));
-    Logger.recordOutput("DEBUG/AppliedVoltage", appliedVoltage);
     inputs.velocity = shooter.getAngularVelocityRadPerSec();
     inputs.appliedVoltage = shooter.getInputVoltage();
     inputs.statorCurrent = shooter.getCurrentDrawAmps();

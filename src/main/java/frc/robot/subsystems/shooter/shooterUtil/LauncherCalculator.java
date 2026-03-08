@@ -22,7 +22,6 @@ import frc.robot.util.FieldConstants;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
-/** Add your docs here. */
 public class LauncherCalculator {
   private static LauncherCalculator instance;
 
@@ -80,7 +79,7 @@ public class LauncherCalculator {
     flywheelSpeedMap.put(3.048, Units.rotationsPerMinuteToRadiansPerSecond(3437.76));
     flywheelSpeedMap.put(5.334, Units.rotationsPerMinuteToRadiansPerSecond(3819.71));
 
-    timeOfFlightMap.put(5.68, 1.16);
+    // timeOfFlightMap.put(5.68, 1.16);
     timeOfFlightMap.put(4.55, 1.12);
     timeOfFlightMap.put(3.15, 1.11);
     timeOfFlightMap.put(1.88, 1.09);

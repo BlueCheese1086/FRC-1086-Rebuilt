@@ -221,7 +221,7 @@ public class ShootingManager {
 
     return new ShotSolution(
         Rotation2d.fromRadians(finalYaw),
-        clampedFinalPitch,
+        Units.radiansToDegrees(clampedFinalPitch),
         limitedRpm,
         distanceMeters,
         yawErrorMeters <= headingToleranceMeters,

@@ -386,7 +386,8 @@ public class DriveCommands {
       Drive drive,
       DoubleSupplier xSupplier,
       DoubleSupplier ySupplier,
-      Supplier<Pose2d> targetSupplier) {
+      Supplier<Pose2d> targetSupplier,
+      Supplier<Rotation2d> rotationSupplier) {
 
     // Create PID controller for heading
     ProfiledPIDController angleController =
@@ -403,6 +404,7 @@ public class DriveCommands {
             () -> {
               Pose2d robotPose = drive.getPose();
               Pose2d targetPose = targetSupplier.get();
+              Rotation2d angle = rotationSupplier.get();
 
               // Get raw field-relative velocity from joysticks
               Translation2d rawVelocity =
@@ -436,7 +438,7 @@ public class DriveCommands {
               // new Rotation2d(targetHeading.getRadians() + Units.degreesToRadians(15.0));
               double omega =
                   angleController.calculate(
-                      drive.getRotation().getRadians(), targetHeading.getRadians());
+                      drive.getRotation().getRadians(), angle.getRadians());
 
               // Convert to field relative speeds & send command
               ChassisSpeeds speeds =
