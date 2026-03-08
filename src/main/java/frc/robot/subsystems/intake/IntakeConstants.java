@@ -35,8 +35,7 @@ public class IntakeConstants {
   }
 
   public static class VoltageLimits {
-    public static final Voltage peakForwardVoltage =
-        Volts.of(12); // is this rollers or is this pivot, both - martin
+    public static final Voltage peakForwardVoltage = Volts.of(12); // is this rollers or is this pivot, both - martin
     public static final Voltage peakReverseVoltage = Volts.of(-12);
   }
 
