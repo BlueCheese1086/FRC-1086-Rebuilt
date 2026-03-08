@@ -42,7 +42,7 @@ public class VisionConstants {
           new AprilTagFieldLayout(
               Filesystem.getDeployDirectory()
                   .toPath()
-                  .resolve("fields/1086_Regency_Field3-5.json"));
+                  .resolve("fields/1086_Regency_Field3-7.json"));
     } catch (IOException e) {
       throw new RuntimeException("Failed to load AprilTag field layout", e);
     }

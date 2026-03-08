@@ -79,10 +79,10 @@ public class ShootingManager {
 
   static {
     // TODO: Replace with calibrated distance->shot params (meters, RPM, hood angle deg)
-    addShotParams(2.43, 3342.253805, 68.0);
     addShotParams(1.581, 3342.253805, 78.0);
     addShotParams(1.94, 3342.253805, 74.0);
     addShotParams(2.414, 3342.253805, 72.0);
+    addShotParams(2.43, 3342.253805, 68.0);
     addShotParams(2.75, 3342.253805, 67.0);
     addShotParams(3.11, 3342.253805, 64.0);
   }
