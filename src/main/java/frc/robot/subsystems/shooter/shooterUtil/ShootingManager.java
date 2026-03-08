@@ -215,8 +215,8 @@ public class ShootingManager {
     Logger.recordOutput("ShootingManager/FinalPitchDeg", Units.radiansToDegrees(clampedFinalPitch));
     Logger.recordOutput(
         "ShootingManager/StaticPitchDeg", Units.radiansToDegrees(clampedPitchStatic));
-    Logger.recordOutput("ShootingManager/RawRpm", rawRpm * (2 * Math.PI / 60));
-    Logger.recordOutput("ShootingManager/LimitedRpm", limitedRpm * (2 * Math.PI / 60));
+    Logger.recordOutput("ShootingManager/RawRadPerSec", rawRpm * (2 * Math.PI / 60));
+    Logger.recordOutput("ShootingManager/LimitedRadPerSec", limitedRpm * (2 * Math.PI / 60));
     Logger.recordOutput("ShootingManager/HoodPitchDeg", Units.radiansToDegrees(finalPitch));
 
     return new ShotSolution(
