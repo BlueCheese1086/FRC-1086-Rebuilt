@@ -27,7 +27,7 @@ public class ShooterConstants {
     public static final LoggedTunableNumber ka = new LoggedTunableNumber("/Shooter/ka", 0.0024824);
     public static final LoggedTunableNumber kP = new LoggedTunableNumber("/Shooter/kP", 0.029853);
     public static final LoggedTunableNumber kI = new LoggedTunableNumber("/Shooter/kI", 0.0);
-    public static final LoggedTunableNumber kd = new LoggedTunableNumber("Tuning/Kd", 0.0);
+    public static final LoggedTunableNumber kd = new LoggedTunableNumber("/Shooter/kd", 0.0005);
     public static final LoggedNetworkNumber velocitySetpoint =
         new LoggedNetworkNumber("/Tuning/Velocity Setpoint", 350.0);
     public static final LoggedNetworkNumber voltageSetpoint =
