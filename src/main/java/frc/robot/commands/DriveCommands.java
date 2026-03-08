@@ -107,6 +107,11 @@ public class DriveCommands {
           boolean isFlipped =
               DriverStation.getAlliance().isPresent()
                   && DriverStation.getAlliance().get() == Alliance.Red;
+          Translation2d robotVector =
+              new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
+          if (robotVector.getNorm() <= 0.2) {
+            drive.stopWithX();
+          }
           drive.runVelocity(
               ChassisSpeeds.fromFieldRelativeSpeeds(
                   speeds,
