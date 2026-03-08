@@ -33,8 +33,6 @@ public class ShooterIOTalonFX implements ShooterIO {
   @SuppressWarnings("unused")
   private final VelocityVoltage velocityVoltage;
 
-  private final MotionMagicVelocityVoltage motionMagic;
-
   // Status Signals
   private StatusSignal<AngularVelocity> velocity;
   private StatusSignal<AngularAcceleration> acceleration;
@@ -48,9 +46,8 @@ public class ShooterIOTalonFX implements ShooterIO {
 
   public ShooterIOTalonFX(int id, boolean inverted) {
     shooter = new TalonFX(id, RobotMap.systemBus);
-    velocityVoltage = new VelocityVoltage(0.0).withEnableFOC(true).withSlot(0);
-    motionMagic =
-        new MotionMagicVelocityVoltage(0.0).withEnableFOC(true).withSlot(0).withUseTimesync(true);
+    // added .withUseTimesync(true) to velocity voltage, but not sure if it will cause issues with the way we are using them, will test and remove if it does
+    velocityVoltage = new VelocityVoltage(0.0).withEnableFOC(true).withSlot(0).withUseTimesync(true);
 
     TalonFXConfiguration config = new TalonFXConfiguration();
     config.Slot0.kS = ks.getAsDouble();
@@ -70,9 +67,6 @@ public class ShooterIOTalonFX implements ShooterIO {
     config.CurrentLimits.StatorCurrentLimit = 120.0; // arbittury
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
     config.CurrentLimits.SupplyCurrentLimit = 80.0; // arbittury
-
-    config.MotionMagic.MotionMagicJerk = 0.0;
-    config.MotionMagic.MotionMagicAcceleration = 2500.0;
 
     tryUntilOk(5, () -> shooter.getConfigurator().apply(config));
 
