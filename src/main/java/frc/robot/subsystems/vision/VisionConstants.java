@@ -50,13 +50,13 @@ public class VisionConstants {
 
   public static Transform3d robotToLeftCam =
       new Transform3d(
-          -Units.inchesToMeters(12),
+          -Units.inchesToMeters(12.5),
           -Units.inchesToMeters(12),
           Units.inchesToMeters(9.85),
           new Rotation3d(0.0, Units.degreesToRadians(165.0), Units.degreesToRadians(0)));
   public static Transform3d robotToRightCam =
       new Transform3d(
-          -Units.inchesToMeters(12),
+          -Units.inchesToMeters(12.5),
           Units.inchesToMeters(12),
           Units.inchesToMeters(9.85),
           new Rotation3d(0.0, Units.degreesToRadians(165.0), Units.degreesToRadians(0)));
