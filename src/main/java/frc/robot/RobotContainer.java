@@ -13,6 +13,7 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Radian;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
@@ -308,18 +309,35 @@ public class RobotContainer {
                                 indexer.setVoltage(IndexerConstants.Setpoints.feed),
                                 intake.setVoltage(IntakeConstants.Setpoints.run)));
 
-        driver
-                .povLeft()
-                .whileTrue(
-                        Commands.parallel(
-                                intake.setVoltage(IntakeConstants.Setpoints.run.negate()),
-                                indexer.setVoltage(IndexerConstants.Setpoints.feed.negate()),
-                                shooter.runFeed(-FeederSetpoints.run.in(Volts)),
-                                shooter.setVoltage(12.0)));
+        driver.povRight().whileTrue(
+                Commands.parallel(
+                        intake.setVoltage(IntakeConstants.Setpoints.run.negate()),
+                        indexer.setVoltage(IndexerConstants.Setpoints.feed.negate()),
+                        shooter.runFeed(-FeederSetpoints.run.in(Volts)),
+                        shooter.setVoltage(12.0).finallyDo(shooter::stopShooter)));
+        driver.povDown().whileTrue(
+                Commands.parallel(
+                        indexer.setVoltage(IndexerConstants.Setpoints.feed.negate()),
+                        shooter.setVoltage(12.0),
+                        shooter.runFeed(-12.0).finallyDo(shooter::stopShooter)));
+                        
+        // Known Tower Shot
+        driver.a().whileTrue(
+                Commands.parallel(
+                        Commands.run(()-> shooter.setVelocitySetpoint(()-> RadiansPerSecond.of(350.0)), shooter).finallyDo(shooter::stopShooter),
+                        Commands.runOnce(()-> hood.setPosition(()-> 64.0))
+                )
+        );
 
-        driver
-                .y()
-                .whileTrue(
+        // Passing
+        driver.b().whileTrue(
+                Commands.parallel(
+                        Commands.run(()-> shooter.setVelocitySetpoint(()-> RadiansPerSecond.of(350.0)), shooter).finallyDo(shooter::stopShooter),
+                        Commands.runOnce(()-> hood.setPosition(()-> 54.0))
+                )
+        );
+
+        driver.y().whileTrue(
                         Commands.parallel(
                                 Commands.run(
                                         () -> {
@@ -353,46 +371,40 @@ public class RobotContainer {
                                                                 drive::getChassisSpeeds, drive::getRotation)
                                                         .driveAngle()))
                                 .finallyDo(shooter::stopShooter));
-        driver
-                .x()
-                .whileTrue(
-                        Commands.parallel(
-                                Commands.run(
-                                        () -> {
-                                            var sol = shootingManager.calculateShotSolution(
-                                                    drive.getPose(),
-                                                    drive.getChassisSpeeds(),
-                                                    FieldConstants.Hub.topCenterPoint,
-                                                    0.10,
-                                                    0.10);
-                                            shooter.setVelocitySetpoint(
-                                                    () -> RotationsPerSecond.of(sol.flywheelRpm / 60));
-                                            hood.setPosition(() -> sol.hoodPitchRad);
-                                        },
-                                        shooter,
-                                        hood),
-                                DriveCommands.joystickDriveAtAngle(
-                                        drive,
-                                        () -> -driver.getLeftY(),
-                                        () -> -driver.getLeftX(),
-                                        () -> shootingManager.calculateShotSolution(
-                                                drive.getPose(),
-                                                drive.getChassisSpeeds(),
-                                                FieldConstants.Hub.topCenterPoint,
-                                                0.10,
-                                                0.10).drivetrainHeading)));
+        // driver
+        //         .x()
+        //         .whileTrue(
+        //                 Commands.parallel(
+        //                         Commands.run(
+        //                                 () -> {
+        //                                     var sol = shootingManager.calculateShotSolution(
+        //                                             drive.getPose(),
+        //                                             drive.getChassisSpeeds(),
+        //                                             FieldConstants.Hub.topCenterPoint,
+        //                                             0.10,
+        //                                             0.10);
+        //                                     shooter.setVelocitySetpoint(
+        //                                             () -> RotationsPerSecond.of(sol.flywheelRpm / 60));
+        //                                     hood.setPosition(() -> sol.hoodPitchRad);
+        //                                 },
+        //                                 shooter,
+        //                                 hood),
+        //                         DriveCommands.joystickDriveAtAngle(
+        //                                 drive,
+        //                                 () -> -driver.getLeftY(),
+        //                                 () -> -driver.getLeftX(),
+        //                                 () -> shootingManager.calculateShotSolution(
+        //                                         drive.getPose(),
+        //                                         drive.getChassisSpeeds(),
+        //                                         FieldConstants.Hub.topCenterPoint,
+        //                                         0.10,
+        //                                         0.10).drivetrainHeading)));
+
 
         // Operator Commands
+        operator.leftTrigger().onTrue(intake.setVoltage(IntakeConstants.Setpoints.run));
         operator
-                .povLeft()
-                .whileTrue(
-                        Commands.parallel(
-                                indexer.setVoltage(IndexerConstants.Setpoints.feed.negate()),
-                                shooter.setVoltage(12.0),
-                                shooter.runFeed(-12.0)));
-        operator.leftTrigger().onTrue(intake.setPosition(IntakeConstants.Setpoints.stowed));
-        driver
-                .a()
+                .rightTrigger()
                 .whileTrue(
                         Commands.run(
                                 () -> shooter.setVelocitySetpoint(
@@ -400,31 +412,11 @@ public class RobotContainer {
                                                 ShooterConstants.Tuning.velocitySetpoint.getAsDouble()))),
                                 shooter))
                 .onFalse(Commands.runOnce(shooter::stopShooter));
-        operator
-                .y()
-                .whileTrue(
-                        Commands.run(
-                                () -> shooter.setVelocitySetpoint(
-                                        () -> (RadiansPerSecond.of(
-                                                ShooterConstants.Tuning.velocitySetpoint.getAsDouble()))),
-                                shooter))
-                .onFalse(Commands.runOnce(shooter::stopShooter));
-        operator
-                .povDown()
-                .onTrue(
-                        Commands.sequence(
-                                Commands.runOnce(() -> backStartPose[0] = drive.getPose()),
-                                Commands.run(() -> drive.runVelocity(new ChassisSpeeds(-0.5, 0.0, 0.0)), drive),
-                                Commands.run(() -> drive.runVelocity(new ChassisSpeeds(-0.5, 0.0, 0.0)), drive)
-                                        .until(
-                                                () -> backStartPose[0] != null
-                                                        && drive
-                                                                .getPose()
-                                                                .getTranslation()
-                                                                .getDistance(backStartPose[0].getTranslation()) >= Units
-                                                                        .inchesToMeters(5.0)))
-                                .finallyDo(() -> drive.runVelocity(new ChassisSpeeds())));
 
+        operator.b().whileTrue(indexer.setVoltage(IndexerConstants.Setpoints.feed));
+        operator.y().whileTrue(shooter.runFeed(ShooterConstants.FeederSetpoints.run.in(Volts)));
+        operator.leftBumper().whileTrue(intake.setPosition(IntakeConstants.Setpoints.deployed));
+        operator.rightBumper().whileTrue(intake.setPosition(IntakeConstants.Setpoints.stowed));
         operator.povUp().onTrue(climb.setPosition(ClimbConstants.extendedHeight));
         operator.povDown().onTrue(climb.setPosition(ClimbConstants.retractedHeight));
     }
