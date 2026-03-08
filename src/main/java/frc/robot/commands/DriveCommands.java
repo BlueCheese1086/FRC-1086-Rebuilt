@@ -437,8 +437,7 @@ public class DriveCommands {
               // Rotation2d finalWithOffset =
               // new Rotation2d(targetHeading.getRadians() + Units.degreesToRadians(15.0));
               double omega =
-                  angleController.calculate(
-                      drive.getRotation().getRadians(), angle.getRadians());
+                  angleController.calculate(drive.getRotation().getRadians(), angle.getRadians());
 
               // Convert to field relative speeds & send command
               ChassisSpeeds speeds =

@@ -16,7 +16,6 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
-import org.littletonrobotics.junction.Logger;
 
 public class ShooterIOSim implements ShooterIO {
   private final FlywheelSim shooter;
