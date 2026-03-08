@@ -33,7 +33,7 @@ public class ShooterIOTalonFX implements ShooterIO {
   @SuppressWarnings("unused")
   private final VelocityVoltage velocityVoltage;
 
-  // private final MotionMagicVelocityVoltage motionMagic;
+  private final MotionMagicVelocityVoltage motionMagic;
 
   // Status Signals
   private StatusSignal<AngularVelocity> velocity;
