@@ -12,7 +12,6 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
-import frc.robot.util.LoggedTunableNumber;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 /** Add your docs here. */
@@ -32,7 +31,7 @@ public class HoodConstants {
   public static class Targeting {
     public static final double minAngleDeg = 54.0;
     public static final double maxAngleDeg = 81.0;
-    public static LoggedTunableNumber hoodAngle = new LoggedTunableNumber("Hood/Hood Angle", 54.0);
+    public static LoggedNetworkNumber hoodAngle = new LoggedNetworkNumber("Hood Angle", 54.0);
   }
 
   public static class Setpoints {

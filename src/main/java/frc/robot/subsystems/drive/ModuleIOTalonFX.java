@@ -1,4 +1,4 @@
-// Copyright (c) 2021-2026 Littleton Robotics
+// Copyright (c) 2021-2025 Littleton Robotics
 // http://github.com/Mechanical-Advantage
 //
 // Use of this source code is governed by a BSD
@@ -54,7 +54,7 @@ public class ModuleIOTalonFX implements ModuleIO {
   private final CANcoder cancoder;
 
   // Voltage control requests
-  private final VoltageOut voltageRequest = new VoltageOut(0).withEnableFOC(true);
+  private final VoltageOut voltageRequest = new VoltageOut(0);
   private final PositionVoltage positionVoltageRequest =
       new PositionVoltage(0.0).withEnableFOC(true);
   private final VelocityVoltage velocityVoltageRequest =
@@ -172,10 +172,9 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     // Configure periodic frames
     BaseStatusSignal.setUpdateFrequencyForAll(
-        Drive.ODOMETRY_FREQUENCY, drivePosition, turnPosition);
+        Drive.ODOMETRY_FREQUENCY, driveVelocity, drivePosition, turnPosition);
     BaseStatusSignal.setUpdateFrequencyForAll(
         50.0,
-        driveVelocity,
         driveAppliedVolts,
         driveCurrent,
         turnAbsolutePosition,
