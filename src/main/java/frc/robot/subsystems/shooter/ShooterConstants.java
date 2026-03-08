@@ -56,7 +56,7 @@ public class ShooterConstants {
   }
 
   public static class FeederSetpoints {
-    public static final Voltage run = Volts.of(12);
+    public static final Voltage run = Volts.of(8);
   }
 
   public static class Mechanical {

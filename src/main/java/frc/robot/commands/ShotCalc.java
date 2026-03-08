@@ -42,6 +42,10 @@ public class ShotCalc {
     // addShotParams(2.054, 3151.267873, 75.0);
     // addShotParams(3.048, 3437.746771, 65.0);
     // addShotParams(5.334, 3819.718634, 55.0)
+
+    // table
+    // Dist, RPM, Angle, Pose
+    // 2.430, 350, 68.274, (2.288, 4.753, -17.44)
   }
 
   public static Shot getShot(Distance distance) {

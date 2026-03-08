@@ -5,10 +5,6 @@
 package frc.robot.subsystems.shooter;
 
 import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static frc.robot.subsystems.intake.IntakeConstants.PID.kA;
-import static frc.robot.subsystems.intake.IntakeConstants.PID.kS;
-import static frc.robot.subsystems.intake.IntakeConstants.PID.kV;
 import static frc.robot.util.PhoenixUtil.tryUntilOk;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -21,21 +17,22 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
-import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.RobotController;
 import frc.robot.RobotMap;
+import frc.robot.util.LoggedTunableNumber;
+import org.littletonrobotics.junction.Logger;
 
 public class ShooterIOTalonFX implements ShooterIO {
   private final TalonFX shooter;
-  private final BangBangController bbController;
+
   @SuppressWarnings("unused")
   private final VelocityVoltage velocityVoltage;
+
   private final MotionMagicVelocityVoltage motionMagic;
 
   // Status Signals
@@ -48,19 +45,26 @@ public class ShooterIOTalonFX implements ShooterIO {
   private StatusSignal<Temperature> temp;
 
   private double setpoint = 0.0;
-  private double bangBangVoltage = 0.0;
+  private final LoggedTunableNumber kv = new LoggedTunableNumber("/Shooter/Kv", 0.125);
+  private final LoggedTunableNumber ks = new LoggedTunableNumber("/Shooter/Ks", 0.14819);
+  private final LoggedTunableNumber ka = new LoggedTunableNumber("/Shooter/ka", 0.0024824);
+  private final LoggedTunableNumber kP = new LoggedTunableNumber("/Shooter/kP", 0.029853);
+  private final LoggedTunableNumber kI = new LoggedTunableNumber("/Shooter/kI", 0.0);
+  private final LoggedTunableNumber kd = new LoggedTunableNumber("Tuning/Kd", 0.0);
 
   public ShooterIOTalonFX(int id, boolean inverted) {
     shooter = new TalonFX(id, RobotMap.systemBus);
-    bbController = new BangBangController(RadiansPerSecond.of(30.0).in(RotationsPerSecond));
-
-    velocityVoltage = new VelocityVoltage(0.0).withEnableFOC(true);
-    motionMagic = new MotionMagicVelocityVoltage(0.0).withEnableFOC(true).withSlot(0);
+    velocityVoltage = new VelocityVoltage(0.0).withEnableFOC(true).withSlot(0);
+    motionMagic =
+        new MotionMagicVelocityVoltage(0.0).withEnableFOC(true).withSlot(0).withUseTimesync(true);
 
     TalonFXConfiguration config = new TalonFXConfiguration();
-    config.Slot0.kS = ShooterConstants.Tuning.kS;
-    config.Slot0.kV = ShooterConstants.Tuning.kV;
-    config.Slot0.kA = ShooterConstants.Tuning.kA;
+    config.Slot0.kS = ks.getAsDouble();
+    config.Slot0.kV = kv.getAsDouble();
+    config.Slot0.kA = ka.getAsDouble();
+    config.Slot0.kD = kd.getAsDouble();
+    config.Slot0.kP = kP.getAsDouble();
+    config.Slot0.kI = kI.getAsDouble();
 
     config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
     config.MotorOutput.Inverted =
@@ -71,12 +75,10 @@ public class ShooterIOTalonFX implements ShooterIO {
     config.CurrentLimits.StatorCurrentLimitEnable = true;
     config.CurrentLimits.StatorCurrentLimit = 120.0; // arbittury
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
-    config.CurrentLimits.SupplyCurrentLimit = 70.0; // arbittury
+    config.CurrentLimits.SupplyCurrentLimit = 80.0; // arbittury
 
     config.MotionMagic.MotionMagicJerk = 0.0;
-    config.MotionMagic.MotionMagicAcceleration = 500.0;
-
-    config.ClosedLoopRamps.VoltageClosedLoopRampPeriod = 0.1;
+    config.MotionMagic.MotionMagicAcceleration = 2500.0;
 
     tryUntilOk(5, () -> shooter.getConfigurator().apply(config));
 
@@ -93,6 +95,7 @@ public class ShooterIOTalonFX implements ShooterIO {
     BaseStatusSignal.setUpdateFrequencyForAll(
         50.0, acceleration, position, statorCurrent, supplyCurrent, temp, volts);
     shooter.optimizeBusUtilization();
+    Logger.recordOutput("Robot Map/Shooter Pro", shooter.getIsProLicensed().getValueAsDouble());
   }
 
   @Override
@@ -107,44 +110,55 @@ public class ShooterIOTalonFX implements ShooterIO {
     inputs.temp = temp.getValueAsDouble();
     inputs.positionRadPerSec = position.getValueAsDouble();
     inputs.setpoint = setpoint;
-    inputs.atSetpoint = bbController.atSetpoint();
-    this.bangBangVoltage = bbController.calculate(velocity.getValue().in(RotationsPerSecond));
 
-    if (kV.hasChanged(hashCode())) {
+    if (kd.hasChanged(hashCode())) {
       resetValues();
     }
 
-    if (kS.hasChanged(hashCode())) {
+    if (kv.hasChanged(hashCode())) {
       resetValues();
     }
 
-    if (kA.hasChanged(hashCode())) {
+    if (kI.hasChanged(hashCode())) {
+      resetValues();
+    }
+
+    if (ka.hasChanged(hashCode())) {
+      resetValues();
+    }
+
+    if (ks.hasChanged(hashCode())) {
+      resetValues();
+    }
+
+    if (kP.hasChanged(hashCode())) {
       resetValues();
     }
   }
 
-    private void resetValues() {
+  private void resetValues() {
     Slot0Configs slot0Configs = new Slot0Configs();
-    slot0Configs.withKA(kA.getAsDouble());
-    slot0Configs.withKS(kS.getAsDouble());
-    slot0Configs.withKV(kV.getAsDouble());
-    shooter.getConfigurator().apply(slot0Configs, 0.25);
+    slot0Configs.withKP(kP.getAsDouble());
+    slot0Configs.withKI(kI.getAsDouble());
+    slot0Configs.withKD(kd.getAsDouble());
+    slot0Configs.withKV(kv.getAsDouble());
+    slot0Configs.withKA(ka.getAsDouble());
+    slot0Configs.withKS(ks.getAsDouble());
+    shooter.getConfigurator().apply(slot0Configs, 0.2);
   }
 
   @Override
   public void setVelocity(AngularVelocity velocity) {
     this.setpoint = velocity.in(RadiansPerSecond);
-    bbController.setSetpoint(velocity.in(RotationsPerSecond));
-    shooter.setControl(
-        motionMagic
-            .withVelocity(velocity)
-            .withFeedForward(bangBangVoltage * RobotController.getBatteryVoltage()));
+    shooter.setControl(velocityVoltage.withVelocity(velocity));
+    if (velocity.in(RadiansPerSecond) == 0.0) {
+      shooter.stopMotor();
+    }
   }
 
   @Override
   public void setVoltage(double volts) {
     shooter.setVoltage(volts);
-    bbController.setSetpoint(0.0);
     if (volts == 0) {
       shooter.stopMotor();
     }

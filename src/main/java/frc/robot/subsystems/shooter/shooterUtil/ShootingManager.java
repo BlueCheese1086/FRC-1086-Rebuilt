@@ -1,5 +1,8 @@
 package frc.robot.subsystems.shooter.shooterUtil;
 
+import static edu.wpi.first.units.Units.Meters;
+import static frc.robot.subsystems.shooter.ShooterConstants.Mechanical.flywheelRadius;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -22,9 +25,6 @@ import java.util.Deque;
 import java.util.List;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
-
-import static edu.wpi.first.units.Units.Meters;
-import static frc.robot.subsystems.shooter.ShooterConstants.Mechanical.flywheelRadius;;
 
 public class ShootingManager {
   public static final Transform3d[] ROBOT_TO_PHOTON_CAMS =
@@ -388,8 +388,7 @@ public class ShootingManager {
     Pose3d shooterPose = new Pose3d(robotPose).plus(Mechanical.shooterPose);
     Translation3d origin = shooterPose.getTranslation();
 
-    double exitVelocity =
-        calculateExitVelocityMetersPerSecondFromRpm(solution.flywheelRpm);
+    double exitVelocity = calculateExitVelocityMetersPerSecondFromRpm(solution.flywheelRpm);
     double yaw = solution.drivetrainHeading.getRadians();
     double pitch = solution.hoodPitchRad;
 
