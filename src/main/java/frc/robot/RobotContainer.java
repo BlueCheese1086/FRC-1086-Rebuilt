@@ -414,8 +414,7 @@ public class RobotContainer {
                           () -> RotationsPerSecond.of(sol.flywheelRpm / 60));
                       hood.setPosition(() -> sol.hoodPitchRad);
                     },
-                    shooter,
-                    hood),
+                    shooter),
                 DriveCommands.joystickDriveAtAngle(
                     drive,
                     () -> -driver.getLeftY(),
