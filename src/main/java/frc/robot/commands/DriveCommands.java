@@ -109,7 +109,7 @@ public class DriveCommands {
                   && DriverStation.getAlliance().get() == Alliance.Red;
           Translation2d robotVector =
               new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
-          if (robotVector.getNorm() <= 0.2) {
+          if (robotVector.getNorm() <= 1e-2) {
             drive.stopWithX();
           }
           drive.runVelocity(
