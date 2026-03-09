@@ -31,7 +31,7 @@ public class HoodConstants {
   public static class Targeting {
     public static final double minAngleDeg = 54.0;
     public static final double maxAngleDeg = 81.0;
-    public static LoggedTunableNumber hoodAngle = new LoggedTunableNumber("Hood/Hood Angle", 54.0);
+    public static LoggedTunableNumber hoodAngle = new LoggedTunableNumber("Hood/Hood Angle", 64.0);
   }
 
   public static class Setpoints {

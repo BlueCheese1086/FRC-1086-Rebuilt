@@ -39,6 +39,7 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.hood.Hood;
+import frc.robot.subsystems.hood.HoodConstants;
 import frc.robot.subsystems.hood.HoodIO;
 import frc.robot.subsystems.hood.HoodIOServo;
 import frc.robot.subsystems.hood.HoodIOSim;
@@ -266,11 +267,9 @@ public class RobotContainer {
         DriveCommands.joystickDrive(
             drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
 
-    // hood.setDefaultCommand(
-    // Commands.run(
-    // () -> hood.setPosition(() ->
-    // HoodConstants.Targeting.hoodAngle.getAsDouble()),
-    // hood));
+    hood.setDefaultCommand(
+        Commands.run(
+            () -> hood.setPosition(() -> HoodConstants.Targeting.hoodAngle.getAsDouble()), hood));
 
     driver
         .start()
@@ -291,26 +290,40 @@ public class RobotContainer {
                 intake.setPosition(IntakeConstants.Setpoints.deployed)));
 
     driver
+        .leftTrigger()
+        .and(driver.rightBumper())
+        .whileTrue(
+            Commands.parallel(
+                intake.setVoltage(IntakeConstants.Setpoints.run),
+                intake.setPosition(IntakeConstants.Setpoints.deployed),
+                DriveCommands.joystickDriveSyom(
+                    drive, () -> -driver.getLeftY(), () -> -driver.getLeftX())));
+    driver
         .rightTrigger()
         .whileTrue(
             Commands.parallel(
                 shooter.runFeed(FeederSetpoints.run.in(Volts)),
                 indexer.setVoltage(IndexerConstants.Setpoints.feed),
-                intake.setVoltage(IntakeConstants.Setpoints.run)));
+                intake.setVoltage(IntakeConstants.Setpoints.run),
+                Commands.waitSeconds(1.5)
+                    .andThen(
+                        Commands.repeatingSequence(
+                            intake.setPosition(IntakeConstants.Setpoints.agitate),
+                            intake.setPosition(IntakeConstants.Setpoints.deployed)))));
 
     driver
         .povRight()
         .whileTrue(
             Commands.parallel(
-                intake.setVoltage(IntakeConstants.Setpoints.run.negate()),
-                indexer.setVoltage(IndexerConstants.Setpoints.feed.negate()),
-                shooter.runFeed(-FeederSetpoints.run.in(Volts)),
+                intake.setVoltage(IntakeConstants.Setpoints.run.unaryMinus()),
+                indexer.setVoltage(IndexerConstants.Setpoints.feed.unaryMinus()),
+                shooter.runFeed(FeederSetpoints.run.unaryMinus().in(Volts)),
                 shooter.setVoltage(12.0).finallyDo(shooter::stopShooter)));
     driver
         .povDown()
         .whileTrue(
             Commands.parallel(
-                indexer.setVoltage(IndexerConstants.Setpoints.feed.negate()),
+                indexer.setVoltage(IndexerConstants.Setpoints.feed.unaryMinus()),
                 shooter.setVoltage(12.0),
                 shooter.runFeed(-12.0).finallyDo(shooter::stopShooter)));
 
