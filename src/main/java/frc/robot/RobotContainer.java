@@ -83,6 +83,7 @@ import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -245,14 +246,15 @@ public class RobotContainer {
     autoChooser.addDefaultOption("left Side Auto", this.pathFindToStart("left"));
     // autoChooser.addOption("right Side Auto", this.pathFindToStart("rightauto"));
 
-    NamedCommands.registerCommand("IntakeRun", intake.setVoltage(IntakeConstants.Setpoints.run));
-    new PathPlannerAuto("left")
-        .event("Shoot")
-        .onTrue(ppCommands.aimAndShoot(drive, shooter, hood, indexer))
-        .onFalse(Commands.runOnce(shooter::stopAll));
-    new PathPlannerAuto("left")
-        .event("IntakeDown")
-        .onTrue(intake.setPosition(IntakeConstants.Setpoints.deployed));
+    //     NamedCommands.registerCommand("IntakeRun",
+    // intake.setVoltage(IntakeConstants.Setpoints.run));
+    //     new PathPlannerAuto("left")
+    //         .event("Shoot")
+    //         .onTrue(ppCommands.aimAndShoot(drive, shooter, hood, indexer))
+    //         .onFalse(Commands.runOnce(shooter::stopAll));
+    //     new PathPlannerAuto("left")
+    //         .event("IntakeDown")
+    //         .onTrue(intake.setPosition(IntakeConstants.Setpoints.deployed));
 
     // // autoChooser.addOption("Swiper's Auto", new PathPlannerAuto("Swiper
     // Auto"));
@@ -418,7 +420,7 @@ public class RobotContainer {
                                               .toPose2d()),
                                       drive::getChassisSpeeds,
                                       drive::getRotation);
-                          shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(350.0));
+                          //   shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(350.0));
                           shooter.setVelocitySetpoint(
                               () -> RadiansPerSecond.of(parms.flywheelSpeed()));
                           hood.setPosition(() -> parms.hoodAngle());
@@ -426,6 +428,7 @@ public class RobotContainer {
                           Logger.recordOutput("Shoot Parms/ Hood Angle", parms.hoodAngle());
                           Logger.recordOutput("Shoot Parms/ Drive Angle", parms.driveAngle());
                           Logger.recordOutput("Shoot Parms/ Flywheel Speed", parms.flywheelSpeed());
+                          Logger.recordOutput("Shoot Parms/Distance", parms.distance());
                         },
                         shooter),
                     DriveCommands.joystickDriveLockRadiusToTarget(
@@ -506,10 +509,20 @@ public class RobotContainer {
     return autoChooser.get();
   }
 
+  @AutoLogOutput(key = "Targetting/Distance")
+  private double getDist() {
+    return new Pose3d(drive.getPose())
+        .transformBy(ShooterConstants.ShooterTransforms.centerShooter)
+        .toPose2d()
+        .relativeTo(FieldConstants.Hub.hubCenter)
+        .getTranslation()
+        .getNorm();
+  }
+
   public Command pathFindToStart(String pathName) {
     Command pathFind =
         AutoBuilder.pathfindToPose(
-            AllianceFlipUtil.apply(new PathPlannerAuto(pathName).getStartingPose()),
+            new PathPlannerAuto(pathName).getStartingPose(),
             new PathConstraints(
                 MetersPerSecond.of(drive.getMaxLinearSpeedMetersPerSec()),
                 MetersPerSecondPerSecond.of(Math.pow(drive.getMaxLinearSpeedMetersPerSec(), 2)),

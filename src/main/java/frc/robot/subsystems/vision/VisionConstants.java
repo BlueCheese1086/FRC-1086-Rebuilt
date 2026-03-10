@@ -65,5 +65,5 @@ public class VisionConstants {
   public static double multitagLinearStdDevBaseline = 0.6858; // Meters
   public static double multitagAngularStdDevBaseline = 0.03; // Radians
 
-  public static double averageTagDistance = 3.2;
+  public static double averageTagDistance = 2.28;
 }

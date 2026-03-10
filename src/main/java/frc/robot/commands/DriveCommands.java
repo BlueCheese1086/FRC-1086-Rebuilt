@@ -42,8 +42,8 @@ import org.littletonrobotics.junction.Logger;
 
 public class DriveCommands {
   private static final double DEADBAND = 0.1;
-  private static final double ANGLE_KP = 10.0;
-  private static final double ANGLE_KD = 0.4;
+  private static final double ANGLE_KP = 5.0;
+  private static final double ANGLE_KD = 0.0;
 
   // Lock Radius
   private static final double LOCK_RADIUS_KP = 1.5; // normalized output per meter error

@@ -37,10 +37,10 @@ public class IndexerIOTalonFX implements IndexerIO {
   public IndexerIOTalonFX() {
     talon = new TalonFX(RobotMap.indexer, RobotMap.systemBus);
     config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    config.CurrentLimits.StatorCurrentLimitEnable = true;
     config.CurrentLimits.StatorCurrentLimit = IndexerConstants.CurrentLimits.maxStator.in(Amps);
-    config.CurrentLimits.StatorCurrentLimitEnable = false;
-    config.CurrentLimits.SupplyCurrentLimit = IndexerConstants.CurrentLimits.maxSupply.in(Amps);
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
+    config.CurrentLimits.SupplyCurrentLimit = IndexerConstants.CurrentLimits.maxSupply.in(Amps);
 
     config.Voltage.PeakForwardVoltage = IndexerConstants.VoltageLimits.peakForwardVoltage.in(Volts);
     config.Voltage.PeakReverseVoltage = IndexerConstants.VoltageLimits.peakReverseVoltage.in(Volts);
@@ -48,7 +48,7 @@ public class IndexerIOTalonFX implements IndexerIO {
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
-    PhoenixUtil.tryUntilOk(5, () -> (talon.getConfigurator().apply(config)));
+    PhoenixUtil.tryUntilOk(15, () -> (talon.getConfigurator().apply(config)));
 
     velocity = talon.getVelocity();
     appliedVoltage = talon.getMotorVoltage();
