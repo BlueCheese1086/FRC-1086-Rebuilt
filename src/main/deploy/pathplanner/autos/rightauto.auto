@@ -7,13 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Path1"
+            "pathName": null
           }
         },
         {
           "type": "named",
           "data": {
             "name": "IntakeDown"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": null
           }
         },
         {
@@ -27,9 +33,9 @@
                 }
               },
               {
-                "type": "path",
+                "type": "named",
                 "data": {
-                  "pathName": "Path2"
+                  "name": "Index"
                 }
               }
             ]
@@ -42,7 +48,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Index"
+                  "name": "Shoot"
                 }
               },
               {
@@ -52,9 +58,9 @@
                 }
               },
               {
-                "type": "named",
+                "type": "wait",
                 "data": {
-                  "name": "Shoot"
+                  "waitTime": 1.5
                 }
               }
             ]
@@ -63,25 +69,26 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Path3"
+            "pathName": null
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "TimedIntakeRun"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Path4"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "TimedIntakeRun"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "IntakeRun"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Index"
+                }
+              }
+            ]
           }
         },
         {
@@ -97,7 +104,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Index"
+                  "name": "Shoot"
                 }
               },
               {
@@ -107,24 +114,12 @@
                 }
               },
               {
-                "type": "named",
+                "type": "wait",
                 "data": {
-                  "name": "Shoot"
+                  "waitTime": 1.5
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Path7"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Climb"
           }
         }
       ]

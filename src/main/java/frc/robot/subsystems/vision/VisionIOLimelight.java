@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 /** IO implementation for real Limelight hardware. */
 public class VisionIOLimelight implements VisionIO {
@@ -77,6 +78,7 @@ public class VisionIOLimelight implements VisionIO {
       for (int i = 11; i < rawSample.value.length; i += 7) {
         tagIds.add((int) rawSample.value[i]);
       }
+      Logger.recordOutput("Vision/Limelight/AverageTagDistance", rawSample.value[7]);
       poseObservations.add(
           new PoseObservation(
               // Timestamp, based on server timestamp of publish and latency
@@ -98,6 +100,7 @@ public class VisionIOLimelight implements VisionIO {
               // Observation type
               PoseObservationType.MEGATAG_1));
     }
+
     //
 
     // Save pose observations to inputs object

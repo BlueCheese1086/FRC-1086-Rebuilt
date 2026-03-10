@@ -32,7 +32,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.autonomous.Autos;
 import frc.robot.autonomous.AutosManager;
+import frc.robot.autonomous.PathPlannerCommands;
 import frc.robot.commands.AutoRoutines;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
@@ -112,6 +114,7 @@ public class RobotContainer {
   private final Climb climb;
 
   private final ShootingManager shootingManager;
+  private final PathPlannerCommands ppCommands;
 
   @SuppressWarnings("unused")
   private Supplier<Rotation2d> driveAngle = () -> Rotation2d.kZero;
@@ -211,6 +214,8 @@ public class RobotContainer {
         climb = new Climb(new ClimbIO() {});
         break;
     }
+    
+    Autos.setup(drive, intake);
     automanager = new AutosManager(drive, shooter, indexer, intake, hood);
     AutoRoutines.setup(drive, automanager.machine);
     // Shooting manager uses drive pose/speeds for SOTM calculations
@@ -219,7 +224,7 @@ public class RobotContainer {
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices");
-
+    ppCommands = new PathPlannerCommands();
     // Set up SysId routines
     autoChooser.addOption(
         "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
@@ -240,8 +245,17 @@ public class RobotContainer {
     autoChooser.addOption("Intake Pivot SysId", intake.sysId());
     autoChooser.addOption("Climb SysId", climb.sysId());
     autoChooser.addOption("Shooter Sys id", shooter.sysid(5.0, 0, "shooter"));
-    autoChooser.addOption("Right Side Auto", this.pathFindToStart(false));
-    autoChooser.addOption("Left Side Auto", this.pathFindToStart(true));
+    autoChooser.addDefaultOption("left Side Auto", this.pathFindToStart("left"));
+    // autoChooser.addOption("right Side Auto", this.pathFindToStart("rightauto"));
+
+    NamedCommands.registerCommand("IntakeRun", intake.setVoltage(IntakeConstants.Setpoints.run));
+    new PathPlannerAuto("left")
+        .event("Shoot")
+        .onTrue(ppCommands.aimAndShoot(drive, shooter, hood, indexer))
+        .onFalse(Commands.runOnce(shooter::stopAll));
+    new PathPlannerAuto("left")
+        .event("IntakeDown")
+        .onTrue(intake.setPosition(IntakeConstants.Setpoints.deployed));
 
     // // autoChooser.addOption("Swiper's Auto", new PathPlannerAuto("Swiper
     // Auto"));
@@ -289,6 +303,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("Feed", Commands.none());
     NamedCommands.registerCommand("Shoot", Commands.none());
     NamedCommands.registerCommand("TimedIntakeRun", Commands.none());
+    autoChooser.addOption("Auto Path 1", Autos.runAutonomous("morepaths/Path1"));
 
     // Configure the button bindings
     configureButtonBindings();
@@ -408,8 +423,8 @@ public class RobotContainer {
                                       drive::getChassisSpeeds,
                                       drive::getRotation);
                           shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(350.0));
-                          shooter.setVelocitySetpoint(()->
-                          RadiansPerSecond.of(parms.flywheelSpeed()));
+                          shooter.setVelocitySetpoint(
+                              () -> RadiansPerSecond.of(parms.flywheelSpeed()));
                           hood.setPosition(() -> parms.hoodAngle());
 
                           Logger.recordOutput("Shoot Parms/ Hood Angle", parms.hoodAngle());
@@ -495,16 +510,16 @@ public class RobotContainer {
     return autoChooser.get();
   }
 
-  public Command pathFindToStart(boolean mirror) {
+  public Command pathFindToStart(String pathName) {
     Command pathFind =
         AutoBuilder.pathfindToPose(
-            new PathPlannerAuto("path", mirror).getStartingPose(),
+            AllianceFlipUtil.apply(new PathPlannerAuto(pathName).getStartingPose()),
             new PathConstraints(
                 MetersPerSecond.of(drive.getMaxLinearSpeedMetersPerSec()),
                 MetersPerSecondPerSecond.of(Math.pow(drive.getMaxLinearSpeedMetersPerSec(), 2)),
                 RadiansPerSecond.of(drive.getMaxAngularSpeedRadPerSec()),
                 RadiansPerSecondPerSecond.of(Math.pow(drive.getMaxAngularSpeedRadPerSec(), 2)),
                 Volts.of(RobotController.getBatteryVoltage())));
-    return Commands.sequence(pathFind, new PathPlannerAuto("path", mirror));
+    return Commands.sequence(pathFind, new PathPlannerAuto(pathName));
   }
 }
