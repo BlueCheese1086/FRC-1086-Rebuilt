@@ -15,7 +15,6 @@ import frc.robot.RobotMap;
 
 public class FeederIOTalonFX implements FeederIO {
   private TalonFX feeder;
-  private VoltageOut voltageRequest;
   private TalonFXConfiguration feedConfig;
 
   private StatusSignal<Voltage> volts;
@@ -25,7 +24,7 @@ public class FeederIOTalonFX implements FeederIO {
 
   public FeederIOTalonFX(int feedID) {
     feeder = new TalonFX(feedID, RobotMap.systemBus);
-    voltageRequest = new VoltageOut(0.0).withEnableFOC(true);
+    new VoltageOut(0.0).withEnableFOC(true);
     feedConfig = new TalonFXConfiguration();
 
     feedConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
