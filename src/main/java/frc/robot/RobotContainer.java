@@ -408,8 +408,8 @@ public class RobotContainer {
                                       drive::getChassisSpeeds,
                                       drive::getRotation);
                           shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(350.0));
-                          shooter.setVelocitySetpoint(()->
-                          RadiansPerSecond.of(parms.flywheelSpeed()));
+                          shooter.setVelocitySetpoint(
+                              () -> RadiansPerSecond.of(parms.flywheelSpeed()));
                           hood.setPosition(() -> parms.hoodAngle());
 
                           Logger.recordOutput("Shoot Parms/ Hood Angle", parms.hoodAngle());
