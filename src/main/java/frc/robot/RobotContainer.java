@@ -32,6 +32,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.autonomous.Autos;
 import frc.robot.autonomous.AutosManager;
 import frc.robot.autonomous.PathPlannerCommands;
 import frc.robot.commands.AutoRoutines;
@@ -214,6 +215,8 @@ public class RobotContainer {
         climb = new Climb(new ClimbIO() {});
         break;
     }
+    
+    Autos.setup(drive, intake);
     automanager = new AutosManager(drive, shooter, indexer, intake, hood);
     AutoRoutines.setup(drive, automanager.machine);
     // Shooting manager uses drive pose/speeds for SOTM calculations
@@ -302,6 +305,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("Feed", Commands.none());
     NamedCommands.registerCommand("Shoot", Commands.none());
     NamedCommands.registerCommand("TimedIntakeRun", Commands.none());
+    autoChooser.addOption("Auto Path 1", Autos.runAutonomous("morepaths/Path1"));
 
     // Configure the button bindings
     configureButtonBindings();

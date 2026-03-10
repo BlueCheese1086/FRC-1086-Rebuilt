@@ -174,6 +174,7 @@ public class DriveCommands {
             });
   }
 
+  @SuppressWarnings("resource")
   public static Command joystickDriveAtAngle(Drive drive, Supplier<Rotation2d> rotationSupplier) {
     // Create PID controller
     PIDController angleController = new PIDController(ANGLE_KP, 0.0, ANGLE_KD);
@@ -419,6 +420,7 @@ public class DriveCommands {
    * Field relative drive command that removes radial motion to a target (locks radius), while using
    * PID to continuously face the target.
    */
+  @SuppressWarnings("unused")
   public static Command joystickDriveLockRadiusToTarget(
       Drive drive,
       DoubleSupplier xSupplier,
