@@ -17,6 +17,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -99,6 +100,7 @@ public class ShooterIOTalonFX implements ShooterIO {
     inputs.temp = temp.getValueAsDouble();
     inputs.positionRadPerSec = position.getValueAsDouble();
     inputs.setpoint = setpoint;
+    inputs.atSetpoint = MathUtil.isNear(setpoint, velocity.getValue().in(RadiansPerSecond), 20.0);
 
     if (kd.hasChanged(hashCode())) {
       resetValues();

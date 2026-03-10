@@ -174,6 +174,38 @@ public class DriveCommands {
             });
   }
 
+  public static Command joystickDriveAtAngle(Drive drive, Supplier<Rotation2d> rotationSupplier) {
+    // Create PID controller
+    PIDController angleController = new PIDController(ANGLE_KP, 0.0, ANGLE_KD);
+    angleController.enableContinuousInput(-Math.PI, Math.PI);
+
+    // Construct command
+    return Commands.run(
+            () -> {
+
+              // Calculate angular speed
+              double omega =
+                  angleController.calculate(
+                      drive.getRotation().getRadians(), rotationSupplier.get().getRadians());
+
+              // Convert to field relative speeds & send command
+              ChassisSpeeds speeds = new ChassisSpeeds(0.0, 0.0, omega);
+              boolean isFlipped =
+                  DriverStation.getAlliance().isPresent()
+                      && DriverStation.getAlliance().get() == Alliance.Red;
+              drive.runVelocity(
+                  ChassisSpeeds.fromFieldRelativeSpeeds(
+                      speeds,
+                      isFlipped
+                          ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                          : drive.getRotation()));
+            },
+            drive)
+
+        // Reset PID controller when command starts
+        .beforeStarting(() -> angleController.reset());
+  }
+
   /**
    * Field relative drive command using joystick for linear control and PID for angular control.
    * Possible use cases include snapping to an angle, aiming at a vision target, or controlling

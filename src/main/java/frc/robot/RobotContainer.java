@@ -33,6 +33,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.autonomous.AutosManager;
+import frc.robot.autonomous.PathPlannerCommands;
 import frc.robot.commands.AutoRoutines;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
@@ -112,6 +113,7 @@ public class RobotContainer {
   private final Climb climb;
 
   private final ShootingManager shootingManager;
+  private final PathPlannerCommands ppCommands;
 
   @SuppressWarnings("unused")
   private Supplier<Rotation2d> driveAngle = () -> Rotation2d.kZero;
@@ -219,7 +221,7 @@ public class RobotContainer {
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices");
-
+    ppCommands = new PathPlannerCommands();
     // Set up SysId routines
     autoChooser.addOption(
         "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
@@ -240,8 +242,17 @@ public class RobotContainer {
     autoChooser.addOption("Intake Pivot SysId", intake.sysId());
     autoChooser.addOption("Climb SysId", climb.sysId());
     autoChooser.addOption("Shooter Sys id", shooter.sysid(5.0, 0, "shooter"));
-    autoChooser.addOption("Right Side Auto", this.pathFindToStart(false));
-    autoChooser.addOption("Left Side Auto", this.pathFindToStart(true));
+    autoChooser.addDefaultOption("left Side Auto", this.pathFindToStart("left"));
+    // autoChooser.addOption("right Side Auto", this.pathFindToStart("rightauto"));
+
+    NamedCommands.registerCommand("IntakeRun", intake.setVoltage(IntakeConstants.Setpoints.run));
+    new PathPlannerAuto("left")
+        .event("Shoot")
+        .onTrue(ppCommands.aimAndShoot(drive, shooter, hood, indexer))
+        .onFalse(Commands.runOnce(shooter::stopAll));
+    new PathPlannerAuto("left")
+        .event("IntakeDown")
+        .onTrue(intake.setPosition(IntakeConstants.Setpoints.deployed));
 
     // // autoChooser.addOption("Swiper's Auto", new PathPlannerAuto("Swiper
     // Auto"));
@@ -495,16 +506,16 @@ public class RobotContainer {
     return autoChooser.get();
   }
 
-  public Command pathFindToStart(boolean mirror) {
+  public Command pathFindToStart(String pathName) {
     Command pathFind =
         AutoBuilder.pathfindToPose(
-            new PathPlannerAuto("path", mirror).getStartingPose(),
+            AllianceFlipUtil.apply(new PathPlannerAuto(pathName).getStartingPose()),
             new PathConstraints(
                 MetersPerSecond.of(drive.getMaxLinearSpeedMetersPerSec()),
                 MetersPerSecondPerSecond.of(Math.pow(drive.getMaxLinearSpeedMetersPerSec(), 2)),
                 RadiansPerSecond.of(drive.getMaxAngularSpeedRadPerSec()),
                 RadiansPerSecondPerSecond.of(Math.pow(drive.getMaxAngularSpeedRadPerSec(), 2)),
                 Volts.of(RobotController.getBatteryVoltage())));
-    return Commands.sequence(pathFind, new PathPlannerAuto("path", mirror));
+    return Commands.sequence(pathFind, new PathPlannerAuto(pathName));
   }
 }
