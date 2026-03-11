@@ -70,23 +70,26 @@ public class AutoStateMachine {
 
     double estimatedTime = 0.0;
 
-    // PRELOAD SHOOT
+    //shoot preload
     if (!preloadShootPos.equals("none")) {
       String path = currentLocation + "_" + preloadShootPos;
       estimatedTime += addPathToPreview(path, previewPoses);
 
       autoCommands =
           autoCommands.andThen(
-              // Using the marker-aware path runner
-              Commands.deadline(AutoRoutines.runPath(path, true), stopIntake()),
+              Commands.parallel(
+                  AutoRoutines.runPath(path, true),
+                  startFeeder(),
+                  stopIntake()),
               startShoot().withTimeout(shootTime));
+      
       estimatedTime += shootTime;
       currentLocation = preloadShootPos;
     }
 
     boolean isFirstPath = currentLocation.equals(startPos);
 
-    // INTAKE SEQUENCE
+    //intake
     if (intakePos.endsWith("i")) {
       String path = currentLocation + "_" + intakePos;
       estimatedTime += addPathToPreview(path, previewPoses);
@@ -111,7 +114,7 @@ public class AutoStateMachine {
       currentLocation = intakePos;
     }
 
-    // FINAL SHOOT SEQUENCE
+    //final shoot
     if (intakePos.endsWith("n")) {
       String exitPath = currentLocation + "_" + nzExit;
       String safePath = nzExit + "_" + nzExit + "s";
@@ -125,7 +128,10 @@ public class AutoStateMachine {
           autoCommands.andThen(
               Commands.deadline(AutoRoutines.runPath(exitPath, false), stopIntake()),
               AutoRoutines.runPath(safePath, false),
-              AutoRoutines.runPath(shootPath, false),
+              Commands.parallel(
+                  AutoRoutines.runPath(shootPath, false),
+                  startFeeder()
+              ),
               startShoot().withTimeout(shootTime));
       estimatedTime += shootTime;
       currentLocation = finalShootPos;
@@ -135,7 +141,11 @@ public class AutoStateMachine {
 
       autoCommands =
           autoCommands.andThen(
-              Commands.deadline(AutoRoutines.runPath(shootPath, false), stopIntake()),
+              Commands.parallel(
+                  AutoRoutines.runPath(shootPath, false),
+                  startFeeder(),
+                  stopIntake()
+              ),
               startShoot().withTimeout(shootTime));
       estimatedTime += shootTime;
       currentLocation = finalShootPos;
@@ -147,7 +157,7 @@ public class AutoStateMachine {
       autoCommands =
           autoCommands.andThen(
               AutoRoutines.runPath(climbPath, false)
-              // TODO: do climb stuff later
+              //TODO: climb commands
               );
     }
 
@@ -160,18 +170,16 @@ public class AutoStateMachine {
           drive.stop();
           stopShoot();
           stopIntake();
-          // TODO: add more stops if needed
         });
   }
 
-  public Command startFeeder() { // just spins up flywheel, TODO: make better
-    return Commands.runOnce(() -> shooter.setVoltage(12));
+  public Command startFeeder() { //should actually be startFlywheel
+    return Commands.run(() -> shooter.setVoltage(12), shooter);
   }
 
   public Command startShoot() {
     return Commands.parallel(
-        shooter.runFeed(ShooterConstants.FeederSetpoints.run.in(Volts))
-        /*.finallyDo(shooter.runFeederVoltage(0.0)::execute)*/ ,
+        shooter.runFeed(ShooterConstants.FeederSetpoints.run.in(Volts)),
         indexer.setVoltage(IndexerConstants.Setpoints.feed),
         Commands.repeatingSequence(
             intake.setPosition(IntakeConstants.Setpoints.agitate),
