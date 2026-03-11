@@ -71,9 +71,7 @@ public class AutoStateMachine {
     double estimatedTime = 0.0;
 
     // PRELOAD SHOOT
-    if (startPos.endsWith("r")) {
-      autoCommands = autoCommands.andThen(startShoot(), Commands.waitSeconds(0.5), stopShoot());
-    } else if (!preloadShootPos.equals("none")) {
+    if (!preloadShootPos.equals("none")) {
       String path = currentLocation + "_" + preloadShootPos;
       estimatedTime += addPathToPreview(path, previewPoses);
 
@@ -81,8 +79,7 @@ public class AutoStateMachine {
           autoCommands.andThen(
               // Using the marker-aware path runner
               Commands.deadline(AutoRoutines.runPath(path, true), stopIntake()),
-              startShoot(),
-              Commands.waitSeconds(shootTime));
+              startShoot().withTimeout(shootTime));
       estimatedTime += shootTime;
       currentLocation = preloadShootPos;
     }
@@ -129,8 +126,7 @@ public class AutoStateMachine {
               Commands.deadline(AutoRoutines.runPath(exitPath, false), stopIntake()),
               AutoRoutines.runPath(safePath, false),
               AutoRoutines.runPath(shootPath, false),
-              startShoot(),
-              Commands.waitSeconds(shootTime));
+              startShoot().withTimeout(shootTime));
       estimatedTime += shootTime;
       currentLocation = finalShootPos;
     } else {
@@ -140,8 +136,7 @@ public class AutoStateMachine {
       autoCommands =
           autoCommands.andThen(
               Commands.deadline(AutoRoutines.runPath(shootPath, false), stopIntake()),
-              startShoot(),
-              Commands.waitSeconds(shootTime));
+              startShoot().withTimeout(shootTime));
       estimatedTime += shootTime;
       currentLocation = finalShootPos;
     }
@@ -178,7 +173,7 @@ public class AutoStateMachine {
         shooter.runFeed(ShooterConstants.FeederSetpoints.run.in(Volts))
         /*.finallyDo(shooter.runFeederVoltage(0.0)::execute)*/ ,
         indexer.setVoltage(IndexerConstants.Setpoints.feed),
-        Commands.repeatingSequence( // TODO: uhh probaly not gonna agitate
+        Commands.repeatingSequence(
             intake.setPosition(IntakeConstants.Setpoints.agitate),
             intake.setPosition(IntakeConstants.Setpoints.deployed)));
   }
