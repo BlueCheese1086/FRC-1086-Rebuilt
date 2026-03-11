@@ -16,7 +16,6 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.math.interpolation.InverseInterpolator;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.util.Units;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants;
 import java.util.function.Supplier;
@@ -66,24 +65,36 @@ public class LauncherCalculator {
     maxDistance = 5.60;
     phaseDelay = 0.03;
 
-    hoodAngleMap.put(2.43, Rotation2d.fromDegrees(68.0));
-    hoodAngleMap.put(1.581, Rotation2d.fromDegrees(78.0));
-    hoodAngleMap.put(1.94, Rotation2d.fromDegrees(74.0));
-    hoodAngleMap.put(2.414, Rotation2d.fromDegrees(72.0));
-    hoodAngleMap.put(2.85, Rotation2d.fromDegrees(67.0));
-    hoodAngleMap.put(3.11, Rotation2d.fromDegrees(64.0));
+    hoodAngleMap.put(1.99, Rotation2d.fromDegrees(80.0));
+    hoodAngleMap.put(2.48, Rotation2d.fromDegrees(75.0));
+    hoodAngleMap.put(3.069, Rotation2d.fromDegrees(70.0));
+    hoodAngleMap.put(3.289, Rotation2d.fromDegrees(68.0));
+    hoodAngleMap.put(3.725, Rotation2d.fromDegrees(65.0));
+    hoodAngleMap.put(5.205, Rotation2d.fromDegrees(60.0));
 
-    flywheelSpeedMap.put(1.4478, Units.rotationsPerMinuteToRadiansPerSecond(3351.0));
-    flywheelSpeedMap.put(1.8, Units.rotationsPerMinuteToRadiansPerSecond(3351.803));
-    flywheelSpeedMap.put(2.054, Units.rotationsPerMinuteToRadiansPerSecond(3351.803));
-    flywheelSpeedMap.put(3.048, Units.rotationsPerMinuteToRadiansPerSecond(3437.76));
-    flywheelSpeedMap.put(5.334, Units.rotationsPerMinuteToRadiansPerSecond(3819.71));
+    flywheelSpeedMap.put(1.99, 375.0);
+    flywheelSpeedMap.put(2.48, 375.0);
+    flywheelSpeedMap.put(3.069, 375.0);
+    flywheelSpeedMap.put(3.289, 375.0);
+    flywheelSpeedMap.put(3.725, 375.0);
+    flywheelSpeedMap.put(5.205, 415.0);
 
-    // timeOfFlightMap.put(5.68, 1.16);
+    timeOfFlightMap.put(5.68, 1.16);
     timeOfFlightMap.put(4.55, 1.12);
     timeOfFlightMap.put(3.15, 1.11);
     timeOfFlightMap.put(1.88, 1.09);
     timeOfFlightMap.put(1.38, 0.90);
+
+    // Variable Hood Stuff & Shooter
+    // hoodAngleMap.put(1.516, Rotation2d.fromDegrees(80.0));
+    // hoodAngleMap.put(2.439, Rotation2d.fromDegrees(77.0));
+    // hoodAngleMap.put(3.6097, Rotation2d.fromDegrees(73.0));
+    // hoodAngleMap.put(4.569, Rotation2d.fromDegrees(65.0));
+
+    // flywheelSpeedMap.put(1.516, 350.0);
+    // flywheelSpeedMap.put(2.439, 375.0);
+    // flywheelSpeedMap.put(3.6097, 380.0);
+    // flywheelSpeedMap.put(4.569, 410.0);
   }
 
   public static double getMinTimeOfFlight() {
