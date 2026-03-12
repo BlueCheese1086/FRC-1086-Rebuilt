@@ -1,7 +1,8 @@
 {
   "download": {
     "deleteAfter": false,
-    "localDir": "C:\\Users\\Blue Cheese\\Documents",
+    "localDir": "F:\\dklafjlksd",
+    "remoteDir": "/home/lvuser/deploy",
     "serverTeam": "1086"
   },
   "output": {
