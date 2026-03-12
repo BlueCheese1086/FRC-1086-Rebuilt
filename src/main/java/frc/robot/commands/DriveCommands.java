@@ -45,6 +45,9 @@ public class DriveCommands {
   private static final double DEADBAND = 0.1;
   private static final double ANGLE_KP = angleKP.getAsDouble();
   private static final double ANGLE_KD = angleKd.getAsDouble();
+  private static final double SOTM_ANGLE_KP = 10.0;
+  private static final double SOTM_ANGLE_KD = 0.35;
+  private static final double SOTM_MAX_OMEGA_SCALE = 1.0;
 
   // Lock Radius
   private static final double LOCK_RADIUS_KP = 1.5; // normalized output per meter error
@@ -222,33 +225,81 @@ public class DriveCommands {
 
     // Construct command
     return Commands.run(
-        () -> {
-          // Get linear velocity
-          Translation2d linearVelocity = getLinearVelocityFromJoysticks(xSupplier.getAsDouble(),
-              ySupplier.getAsDouble());
+            () -> {
+              // Get linear velocity
+              Translation2d linearVelocity =
+                  getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
 
-          // Calculate angular speed
-          double omega = angleController.calculate(
-              drive.getRotation().getRadians(), rotationSupplier.get().getRadians());
+              // Calculate angular speed
+              double omega =
+                  angleController.calculate(
+                      drive.getRotation().getRadians(), rotationSupplier.get().getRadians());
 
-          // Convert to field relative speeds & send command
-          ChassisSpeeds speeds = new ChassisSpeeds(
-              linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
-              linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
-              omega);
-          boolean isFlipped = DriverStation.getAlliance().isPresent()
-              && DriverStation.getAlliance().get() == Alliance.Red;
-          drive.runVelocity(
-              ChassisSpeeds.fromFieldRelativeSpeeds(
-                  speeds,
-                  isFlipped
-                      ? drive.getRotation().plus(new Rotation2d(Math.PI))
-                      : drive.getRotation()));
-        },
-        drive)
+              // Convert to field relative speeds & send command
+              ChassisSpeeds speeds =
+                  new ChassisSpeeds(
+                      linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
+                      linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
+                      omega);
+              boolean isFlipped =
+                  DriverStation.getAlliance().isPresent()
+                      && DriverStation.getAlliance().get() == Alliance.Red;
+              drive.runVelocity(
+                  ChassisSpeeds.fromFieldRelativeSpeeds(
+                      speeds,
+                      isFlipped
+                          ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                          : drive.getRotation()));
+            },
+            drive)
 
         // Reset PID controller when command starts
         .beforeStarting(() -> angleController.reset());
+  }
+
+  /**
+   * Faster angle-hold variant for SOTM. Uses more aggressive gains and clamps output to max drive
+   * angular speed so lead snaps harder in motion.
+   */
+  @SuppressWarnings("resource")
+  public static Command joystickDriveAtAngleFast(
+      Drive drive,
+      DoubleSupplier xSupplier,
+      DoubleSupplier ySupplier,
+      Supplier<Rotation2d> rotationSupplier) {
+
+    PIDController angleController = new PIDController(SOTM_ANGLE_KP, 0.0, SOTM_ANGLE_KD);
+    angleController.enableContinuousInput(-Math.PI, Math.PI);
+
+    return Commands.run(
+            () -> {
+              Translation2d linearVelocity =
+                  getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
+
+              double omegaCommand =
+                  angleController.calculate(
+                      drive.getRotation().getRadians(), rotationSupplier.get().getRadians());
+              double maxOmega = drive.getMaxAngularSpeedRadPerSec() * SOTM_MAX_OMEGA_SCALE;
+              double omega = MathUtil.clamp(omegaCommand, -maxOmega, maxOmega);
+
+              ChassisSpeeds speeds =
+                  new ChassisSpeeds(
+                      linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
+                      linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
+                      omega);
+
+              boolean isFlipped =
+                  DriverStation.getAlliance().isPresent()
+                      && DriverStation.getAlliance().get() == Alliance.Red;
+              drive.runVelocity(
+                  ChassisSpeeds.fromFieldRelativeSpeeds(
+                      speeds,
+                      isFlipped
+                          ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                          : drive.getRotation()));
+            },
+            drive)
+        .beforeStarting(angleController::reset);
   }
 
   /**
