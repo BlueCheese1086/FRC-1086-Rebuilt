@@ -1,9 +1,11 @@
 package frc.robot.autonomous;
 
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import choreo.Choreo;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -18,9 +20,14 @@ import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeConstants;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterConstants;
+import frc.robot.subsystems.shooter.ShooterConstants.ShooterTransforms;
+import frc.robot.subsystems.shooter.shooterUtil.LauncherCalculator;
+import frc.robot.subsystems.shooter.shooterUtil.LauncherCalculator.LaunchingParameters;
 import frc.robot.util.AllianceFlipUtil;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.littletonrobotics.junction.Logger;
 
 public class AutoStateMachine {
   private final Drive drive;
@@ -72,7 +79,7 @@ public class AutoStateMachine {
 
     // PRELOAD SHOOT
     if (startPos.endsWith("r")) {
-      autoCommands = autoCommands.andThen(startShoot(), Commands.waitSeconds(0.5), stopShoot());
+      autoCommands = autoCommands.andThen(startShoot(shootTime), Commands.waitSeconds(0.5), stopShoot());
     } else if (!preloadShootPos.equals("none")) {
       String path = currentLocation + "_" + preloadShootPos;
       estimatedTime += addPathToPreview(path, previewPoses);
@@ -80,8 +87,8 @@ public class AutoStateMachine {
       autoCommands =
           autoCommands.andThen(
               // Using the marker-aware path runner
-              Commands.deadline(AutoRoutines.runPath(path, true), stopIntake()),
-              startShoot(),
+              Commands.deadline(AutoRoutines.runPath(path, true)),
+              startShoot(shootTime),
               Commands.waitSeconds(shootTime));
       estimatedTime += shootTime;
       currentLocation = preloadShootPos;
@@ -95,7 +102,7 @@ public class AutoStateMachine {
       estimatedTime += addPathToPreview(path, previewPoses);
       autoCommands =
           autoCommands.andThen(
-              Commands.deadline(AutoRoutines.runPath(path, isFirstPath), startIntake()),
+              Commands.deadline(AutoRoutines.runPath(path, isFirstPath), intake()),
               Commands.waitSeconds(intakeTime));
       estimatedTime += intakeTime;
       currentLocation = intakePos;
@@ -108,7 +115,7 @@ public class AutoStateMachine {
       autoCommands =
           autoCommands.andThen(
               AutoRoutines.runPath(entryPath, isFirstPath),
-              Commands.deadline(AutoRoutines.runPath(intakePath, false), startIntake()),
+              Commands.deadline(AutoRoutines.runPath(intakePath, false), intake()),
               Commands.waitSeconds(intakeTime));
       estimatedTime += intakeTime;
       currentLocation = intakePos;
@@ -126,11 +133,10 @@ public class AutoStateMachine {
 
       autoCommands =
           autoCommands.andThen(
-              Commands.deadline(AutoRoutines.runPath(exitPath, false), stopIntake()),
+              Commands.deadline(AutoRoutines.runPath(exitPath, false)),
               AutoRoutines.runPath(safePath, false),
               AutoRoutines.runPath(shootPath, false),
-              startShoot(),
-              Commands.waitSeconds(shootTime));
+              startShoot(shootTime));
       estimatedTime += shootTime;
       currentLocation = finalShootPos;
     } else {
@@ -139,9 +145,9 @@ public class AutoStateMachine {
 
       autoCommands =
           autoCommands.andThen(
-              Commands.deadline(AutoRoutines.runPath(shootPath, false), stopIntake()),
-              startShoot(),
-              Commands.waitSeconds(shootTime));
+              Commands.deadline(AutoRoutines.runPath(shootPath, false)),
+              startShoot(shootTime),
+              stopShoot());
       estimatedTime += shootTime;
       currentLocation = finalShootPos;
     }
@@ -164,7 +170,6 @@ public class AutoStateMachine {
         () -> {
           drive.stop();
           stopShoot();
-          stopIntake();
           // TODO: add more stops if needed
         });
   }
@@ -173,18 +178,47 @@ public class AutoStateMachine {
     return Commands.runOnce(() -> shooter.setVoltage(12));
   }
 
-  public Command startShoot() {
+  public Command startShoot(double shootTime) {
     return Commands.parallel(
-        shooter.runFeed(ShooterConstants.FeederSetpoints.run.in(Volts))
+      Commands.waitSeconds(2.0).andThen(
+        Commands.parallel(
+          shooter.runFeed(ShooterConstants.FeederSetpoints.run.in(Volts))
         /*.finallyDo(shooter.runFeederVoltage(0.0)::execute)*/ ,
         indexer.setVoltage(IndexerConstants.Setpoints.feed),
         Commands.repeatingSequence( // TODO: uhh probaly not gonna agitate
             intake.setPosition(IntakeConstants.Setpoints.agitate),
-            intake.setPosition(IntakeConstants.Setpoints.deployed)));
+            intake.setPosition(IntakeConstants.Setpoints.deployed))
+        )
+      ),
+      runFlywheel()
+    ).withTimeout(shootTime);
+  }
+
+  public Command runFlywheel() {
+    return Commands.run(() -> {
+      LaunchingParameters parms =
+                              LauncherCalculator.getInstance()
+                                  .getParameters(
+                                      () ->
+                                          (new Pose3d(drive.getPose())
+                                              .transformBy(ShooterTransforms.centerShooter)
+                                              .toPose2d()),
+                                      drive::getChassisSpeeds,
+                                      drive::getRotation);
+                          //   shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(350.0));
+                          shooter.setVelocitySetpoint(
+                              () -> RadiansPerSecond.of(parms.flywheelSpeed()));
+                          hood.setPosition(() -> parms.hoodAngle());
+
+                          Logger.recordOutput("Shoot Parms/ Hood Angle", parms.hoodAngle());
+                          Logger.recordOutput("Shoot Parms/ Drive Angle", parms.driveAngle());
+                          Logger.recordOutput("Shoot Parms/ Flywheel Speed", parms.flywheelSpeed());
+                          Logger.recordOutput("Shoot Parms/Distance", parms.distance());
+    });
   }
 
   public Command stopShoot() {
-    return Commands.runOnce(shooter::stopAll)
+    return Commands.run(shooter::stopAll).withTimeout(0.01)
         .andThen(indexer.setVoltage(Volts.zero()))
         .andThen(hood.setAngle(HoodConstants.Setpoints.passAngle));
   }
@@ -193,15 +227,13 @@ public class AutoStateMachine {
     return intake.setPosition(IntakeConstants.Setpoints.deployed);
   }
 
-  public Command startIntake() {
+  public Command intake() {
     return Commands.parallel(
         intake.setVoltage(IntakeConstants.Setpoints.run),
         indexer.setVoltage(IndexerConstants.Setpoints.feed));
   }
 
-  public Command stopIntake() {
-    return Commands.sequence(
-        intake.setPosition(IntakeConstants.Setpoints.stowed),
-        Commands.parallel(intake.setVoltage(Volts.zero()), indexer.setVoltage(Volts.zero())));
+  public Command retractIntake() {
+    return intake.setPosition(IntakeConstants.Setpoints.stowed);
   }
 }

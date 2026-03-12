@@ -40,7 +40,7 @@
       "minWaypointRelativePos": 0.04591492234976105,
       "maxWaypointRelativePos": 1.0,
       "constraints": {
-        "maxVelocity": 2.0,
+        "maxVelocity": 3.0,
         "maxAcceleration": 3.0,
         "maxAngularVelocity": 340.0,
         "maxAngularAcceleration": 720.0,
@@ -50,19 +50,7 @@
     }
   ],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "IntakeRun",
-      "waypointRelativePos": 0.0,
-      "endWaypointRelativePos": 1.0,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "IntakeRun"
-        }
-      }
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,
@@ -73,7 +61,7 @@
   },
   "goalEndState": {
     "velocity": 5.0,
-    "rotation": -175.97173633351483
+    "rotation": -87.06432655357906
   },
   "reversed": false,
   "folder": "left paths",

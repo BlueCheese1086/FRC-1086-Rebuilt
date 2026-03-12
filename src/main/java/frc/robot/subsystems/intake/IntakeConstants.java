@@ -7,7 +7,6 @@ package frc.robot.subsystems.intake;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.units.measure.Angle;
@@ -55,7 +54,7 @@ public class IntakeConstants {
   public static class Mechanical { // TODO: Update all of these with the actual values
     public static final Distance intakeLength = Inches.of(14);
     public static final double gearing = 50.0;
-    public static final Angle kPositionTolerance = Radians.of(0.125);
+    public static final Angle kPositionTolerance = Degrees.of(1.0);
     // all of these are in cad right
   }
 }
