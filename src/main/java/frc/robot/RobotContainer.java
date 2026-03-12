@@ -50,7 +50,6 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.hood.Hood;
-import frc.robot.subsystems.hood.HoodConstants;
 import frc.robot.subsystems.hood.HoodIO;
 import frc.robot.subsystems.hood.HoodIOServo;
 import frc.robot.subsystems.hood.HoodIOSim;
@@ -149,10 +148,8 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVision(
-                    "backLeft", VisionConstants.robotToLeftCam, drive::getRotation),
-                new VisionIOPhotonVision(
-                    "backRight", VisionConstants.robotToRightCam, drive::getRotation),
+                new VisionIOPhotonVision("backLeft", VisionConstants.robotToLeftCam, drive::getRotation),
+                new VisionIOPhotonVision("backRight", VisionConstants.robotToRightCam, drive::getRotation),
                 new VisionIOLimelight("limelight-marble", drive::getRotation));
 
         intake = new Intake(new IntakeIOTalonFX());
@@ -206,10 +203,8 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVision(
-                    "left", VisionConstants.robotToLeftCam, drive::getRotation),
-                new VisionIOPhotonVision(
-                    "right", VisionConstants.robotToRightCam, drive::getRotation));
+                new VisionIOPhotonVision("left", VisionConstants.robotToLeftCam, drive::getRotation),
+                new VisionIOPhotonVision("right", VisionConstants.robotToRightCam, drive::getRotation));
         shooter = new Shooter(new FeederIO() {}, new ShooterIO() {});
         intake = new Intake(new IntakeIO() {});
         indexer = new Indexer(new IndexerIO() {});
@@ -250,7 +245,7 @@ public class RobotContainer {
     autoChooser.addOption("Shooter Sys id", shooter.sysid(5.0, 0, "shooter"));
     autoChooser.addOption("left Side Auto", this.pathFindToStart("left", false));
     autoChooser.addOption("right Side Auto", this.pathFindToStart("left", true));
-
+    autoChooser.addOption("Move Back Auto", new PathPlannerAuto("MoveBackAuto"));
     autoChooser.addOption("Auto Path 1", Autos.runAutonomous("morepaths/Path1"));
 
     // Configure the button bindings
@@ -263,14 +258,15 @@ public class RobotContainer {
         DriveCommands.joystickDrive(
             drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
 
-    hood.setDefaultCommand(
-        Commands.run(
-            () -> hood.setPosition(() -> HoodConstants.Targeting.hoodAngle.getAsDouble()), hood));
+    // hood.setDefaultCommand(
+    //     Commands.run(
+    //         () -> hood.setPosition(() -> HoodConstants.Targeting.hoodAngle.getAsDouble()),
+    // hood));
 
     driver
         .start()
         .onTrue(
-            Commands.runOnce(
+            Commands.run(
                     () ->
                         drive.setPose(
                             new Pose2d(
@@ -358,6 +354,24 @@ public class RobotContainer {
     driver
         .y()
         .whileTrue(
+            Commands.run(
+                    () -> {
+                      LaunchingParameters parms =
+                          LauncherCalculator.getInstance()
+                              .getParameters(
+                                  drive::getPose, drive::getChassisSpeeds, drive::getRotation);
+                      shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(parms.flywheelSpeed()));
+                      hood.setPosition(() -> parms.hoodAngle());
+
+                      Logger.recordOutput("Shoot Parms/ Hood Angle", parms.hoodAngle());
+                      Logger.recordOutput("Shoot Parms/ Drive Angle", parms.driveAngle());
+                      Logger.recordOutput("Shoot Parms/ Flywheel Speed", parms.flywheelSpeed());
+                    },
+                    shooter)
+                .finallyDo(shooter::stopShooter));
+    driver
+        .x()
+        .whileTrue(
             Commands.parallel(
                     Commands.run(
                         () -> {
@@ -377,8 +391,7 @@ public class RobotContainer {
 
                           Logger.recordOutput("Shoot Parms/ Hood Angle", parms.hoodAngle());
                           Logger.recordOutput("Shoot Parms/ Drive Angle", parms.driveAngle());
-                          Logger.recordOutput("Shoot Parms/ Flywheel Speed",
-    parms.flywheelSpeed());
+                          Logger.recordOutput("Shoot Parms/ Flywheel Speed", parms.flywheelSpeed());
                           Logger.recordOutput("Shoot Parms/Distance", parms.distance());
                         },
                         shooter),
@@ -430,7 +443,7 @@ public class RobotContainer {
 
     // Operator Commands
     operator.leftTrigger().onTrue(intake.setVoltage(IntakeConstants.Setpoints.run));
-    driver
+    operator
         .y()
         .whileTrue(
             Commands.run(

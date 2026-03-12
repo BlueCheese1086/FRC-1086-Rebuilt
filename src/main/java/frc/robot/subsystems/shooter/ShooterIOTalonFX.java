@@ -141,7 +141,7 @@ public class ShooterIOTalonFX implements ShooterIO {
   @Override
   public void setVelocity(AngularVelocity velocity) {
     this.setpoint = velocity.in(RadiansPerSecond);
-    shooter.setControl(velocityVoltage.withVelocity(velocity));
+    shooter.setControl(motionMagic.withVelocity(velocity).withFeedForward(chessyVolts));
     if (velocity.in(RadiansPerSecond) == 0.0) {
       shooter.stopMotor();
     }
