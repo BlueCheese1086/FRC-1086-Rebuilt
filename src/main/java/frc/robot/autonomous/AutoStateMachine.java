@@ -1,9 +1,11 @@
 package frc.robot.autonomous;
 
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import choreo.Choreo;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -18,9 +20,14 @@ import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeConstants;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterConstants;
+import frc.robot.subsystems.shooter.ShooterConstants.ShooterTransforms;
+import frc.robot.subsystems.shooter.shooterUtil.LauncherCalculator;
+import frc.robot.subsystems.shooter.shooterUtil.LauncherCalculator.LaunchingParameters;
 import frc.robot.util.AllianceFlipUtil;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.littletonrobotics.junction.Logger;
 
 public class AutoStateMachine {
   private final Drive drive;
@@ -188,8 +195,7 @@ public class AutoStateMachine {
                         Commands.repeatingSequence( // TODO: uhh probaly not gonna agitate
                             intake.setPosition(IntakeConstants.Setpoints.agitate),
                             intake.setPosition(IntakeConstants.Setpoints.deployed)))),
-            runFlywheel())
-        .withTimeout(shootTime);
+            runFlywheel());
   }
 
   public Command runFlywheel() {
