@@ -76,6 +76,8 @@ public class ShootingManager {
   private static final double LEAD_PHASE_DELAY_SEC = 0.03;
   private static final int LEAD_LOOKAHEAD_ITERATIONS = 20;
   private static final double LEAD_SCALE = 0.9;
+  private static final double LEAD_YAW_TOLERANCE_RAD = Units.degreesToRadians(0.75);
+  private static final double HOOD_PITCH_TOLERANCE_RAD = Units.degreesToRadians(0.5);
 
   private static final double RPM_TOLERANCE = 50.0;
   private static final double STABLE_RPM_TIME_SEC = 0.15;
@@ -85,6 +87,8 @@ public class ShootingManager {
   private double rpmStableSince = -Double.MAX_VALUE;
   private double lastCommandedRpm = 0.0;
   private double lastCommandTimestamp = -Double.MAX_VALUE;
+  private double lastFilteredYawRad = Double.NaN;
+  private double lastFilteredPitchRad = Double.NaN;
 
   static {
     // TODO: Replace with calibrated distance->shot params (meters, RPM, hood angle deg)
@@ -231,8 +235,8 @@ public class ShootingManager {
     Translation2d directVector2d = target2d.minus(launcherPosition.getTranslation());
     Translation2d leadVector2d = virtualTarget2d.minus(launcherPosition.getTranslation());
 
-    double yaw = directVector2d.getAngle().getRadians();
-    double finalYaw = leadVector2d.getAngle().getRadians();
+  double yaw = directVector2d.getAngle().getRadians();
+  double finalYaw = leadVector2d.getAngle().getRadians();
 
     ShotParams ledStaticParams = getStaticShootingParams(lookaheadLauncherToTargetDistance);
     double ledExitVelocity =
@@ -242,11 +246,9 @@ public class ShootingManager {
     double maxPitch = Units.degreesToRadians(HoodConstants.Targeting.maxAngleDeg);
     double clampedPitchStatic = MathUtil.clamp(pitchStatic, minPitch, maxPitch);
 
-    Translation3d shooterPosition =
-        new Pose3d(estimatedRobotPose).plus(Mechanical.shooterPose).getTranslation();
     Translation3d virtualTarget3d =
         new Translation3d(virtualTarget2d.getX(), virtualTarget2d.getY(), fixedTarget.getZ());
-    Translation3d shooterToVirtualTarget = virtualTarget3d.minus(shooterPosition);
+    // Translation3d shooterToVirtualTarget = virtualTarget3d.minus(shooterPosition);
 
     Translation3d vStatic =
         new Translation3d(
@@ -259,8 +261,24 @@ public class ShootingManager {
     Translation3d vFinal = vStatic.minus(vRobot);
     double finalPitch =
         Math.atan2(
-            shooterToVirtualTarget.getZ(), shooterToVirtualTarget.toTranslation2d().getNorm());
+            vFinal.getZ(), vFinal.toTranslation2d().getNorm());
     double clampedFinalPitch = MathUtil.clamp(finalPitch, minPitch, maxPitch);
+
+    // Apply deadband tolerances to reduce jitter from vision/pose noise.
+    if (Double.isFinite(lastFilteredYawRad)) {
+      double yawDelta = MathUtil.angleModulus(finalYaw - lastFilteredYawRad);
+      if (Math.abs(yawDelta) < LEAD_YAW_TOLERANCE_RAD) {
+        finalYaw = lastFilteredYawRad;
+      }
+    }
+    if (Double.isFinite(lastFilteredPitchRad)) {
+      double pitchDelta = clampedFinalPitch - lastFilteredPitchRad;
+      if (Math.abs(pitchDelta) < HOOD_PITCH_TOLERANCE_RAD) {
+        clampedFinalPitch = lastFilteredPitchRad;
+      }
+    }
+    lastFilteredYawRad = finalYaw;
+    lastFilteredPitchRad = clampedFinalPitch;
     double finalExitVelocity = vFinal.getNorm();
     double rawRpm = calculateFlywheelRpmFromExitVelocity(finalExitVelocity);
     double limitedRpm = limitRpm(rawRpm, Timer.getFPGATimestamp());
@@ -278,7 +296,9 @@ public class ShootingManager {
             new Rotation3d());
 
     Logger.recordOutput("ShootingManager/LeadYawDeg", Units.radiansToDegrees(finalYaw - yaw));
-    Logger.recordOutput("ShootingManager/FinalPitchDeg", Units.radiansToDegrees(clampedFinalPitch));
+  Logger.recordOutput("ShootingManager/FinalPitchDeg", Units.radiansToDegrees(clampedFinalPitch));
+  Logger.recordOutput("ShootingManager/LeadYawToleranceDeg", Units.radiansToDegrees(LEAD_YAW_TOLERANCE_RAD));
+  Logger.recordOutput("ShootingManager/HoodPitchToleranceDeg", Units.radiansToDegrees(HOOD_PITCH_TOLERANCE_RAD));
     Logger.recordOutput(
         "ShootingManager/StaticPitchDeg", Units.radiansToDegrees(clampedPitchStatic));
     Logger.recordOutput(
