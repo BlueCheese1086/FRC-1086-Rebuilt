@@ -83,6 +83,7 @@ import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants;
+import java.util.Set;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -246,65 +247,9 @@ public class RobotContainer {
     autoChooser.addOption("Intake Pivot SysId", intake.sysId());
     autoChooser.addOption("Climb SysId", climb.sysId());
     autoChooser.addOption("Shooter Sys id", shooter.sysid(5.0, 0, "shooter"));
-    autoChooser.addDefaultOption("left Side Auto", this.pathFindToStart("left"));
-    // autoChooser.addOption("right Side Auto", this.pathFindToStart("rightauto"));
+    autoChooser.addOption("left Side Auto", this.pathFindToStart("left", false));
+    autoChooser.addOption("right Side Auto", this.pathFindToStart("left", true));
 
-    //     NamedCommands.registerCommand("IntakeRun",
-    // intake.setVoltage(IntakeConstants.Setpoints.run));
-    //     new PathPlannerAuto("left")
-    //         .event("Shoot")
-    //         .onTrue(ppCommands.aimAndShoot(drive, shooter, hood, indexer))
-    //         .onFalse(Commands.runOnce(shooter::stopAll));
-    //     new PathPlannerAuto("left")
-    //         .event("IntakeDown")
-    //         .onTrue(intake.setPosition(IntakeConstants.Setpoints.deployed));
-
-    // // autoChooser.addOption("Swiper's Auto", new PathPlannerAuto("Swiper
-    // Auto"));
-    // NamedCommands.registerCommand(
-    // "IntakeDown",
-    // intake.setPosition(IntakeConstants.Setpoints.deployed).withTimeout(0.5));
-    // NamedCommands.registerCommand(
-    // "IntakeUp",
-    // intake.setPosition(IntakeConstants.Setpoints.stowed).withTimeout(0.5));
-    // NamedCommands.registerCommand(
-    // "IntakeRun",
-    // intake.setVoltage(IntakeConstants.Setpoints.run).withTimeout(2.4));
-    // NamedCommands.registerCommand(
-    // "TimedIntakeRun",
-    // intake.setVoltage(IntakeConstants.Setpoints.run).withTimeout(1.5));
-    // NamedCommands.registerCommand(
-    // "Shoot",
-    // shooter
-    // .runShooter(() -> RadiansPerSecond.of(350))
-    // .withTimeout(1.5)); // Broken: Crazy Oscilation + ending/averaging @ 100
-    // velocity for
-    // some reason
-    // NamedCommands.registerCommand(
-    // "Feed",
-    // shooter
-    // .runFeed(ShooterConstants.FeederSetpoints.run.in(Volts))
-    // .withTimeout(1.5));
-    // NamedCommands.registerCommand(
-    // "Index",
-    // indexer
-    // .setVoltage(IndexerConstants.Setpoints.feed)
-    // .withTimeout(1.5));
-    // NamedCommands.registerCommand(
-    // "Climb",
-    // AutoClimb()); //Climb is not working :(
-    // NamedCommands.registerCommand("IntakeStop",
-    // intake.setVoltage(IntakeConstants.Setpoints.stop));
-
-    NamedCommands.registerCommand("Climb", Commands.none());
-    NamedCommands.registerCommand("IntakeUp", Commands.none());
-    NamedCommands.registerCommand("IntakeDown", Commands.none());
-    NamedCommands.registerCommand("IntakeStop", Commands.none());
-    NamedCommands.registerCommand("IntakeRun", Commands.none());
-    NamedCommands.registerCommand("Index", Commands.none());
-    NamedCommands.registerCommand("Feed", Commands.none());
-    NamedCommands.registerCommand("Shoot", Commands.none());
-    NamedCommands.registerCommand("TimedIntakeRun", Commands.none());
     autoChooser.addOption("Auto Path 1", Autos.runAutonomous("morepaths/Path1"));
 
     // Configure the button bindings
@@ -424,7 +369,7 @@ public class RobotContainer {
                                               .toPose2d()),
                                       drive::getChassisSpeeds,
                                       drive::getRotation);
-                          //   shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(350.0));
+                          // shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(350.0));
                           shooter.setVelocitySetpoint(
                               () -> RadiansPerSecond.of(parms.flywheelSpeed()));
                           hood.setPosition(() -> parms.hoodAngle());
@@ -522,16 +467,58 @@ public class RobotContainer {
         .getNorm();
   }
 
-  public Command pathFindToStart(String pathName) {
+  public Command pathFindToStart(String pathName, boolean flip) {
+    NamedCommands.registerCommand(
+        "IntakeDown", intake.setPosition(IntakeConstants.Setpoints.deployed));
+    NamedCommands.registerCommand("IntakeRun", intake.setVoltage(IntakeConstants.Setpoints.run));
+    NamedCommands.registerCommand(
+        "RunupShooter",
+        Commands.run(
+                () -> {
+                  LaunchingParameters parms =
+                      LauncherCalculator.getInstance()
+                          .getParameters(
+                              () ->
+                                  (new Pose3d(drive.getPose())
+                                      .transformBy(ShooterTransforms.centerShooter)
+                                      .toPose2d()),
+                              drive::getChassisSpeeds,
+                              drive::getRotation);
+                  shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(parms.flywheelSpeed()));
+                  hood.setPosition(() -> parms.hoodAngle());
+                })
+            .until(shooter::atSetpoint));
+    NamedCommands.registerCommand(
+        "LoadUp",
+        Commands.parallel(
+                shooter.runFeed(ShooterConstants.FeederSetpoints.run.in(Volts)),
+                indexer.setVoltage(IndexerConstants.Setpoints.feed),
+                intake.setVoltage(IntakeConstants.Setpoints.run))
+            .finallyDo(shooter::stopAll));
+    NamedCommands.registerCommand("IntakeUp", intake.setPosition(IntakeConstants.Setpoints.stowed));
     Command pathFind =
         AutoBuilder.pathfindToPose(
-            new PathPlannerAuto(pathName).getStartingPose(),
+            AllianceFlipUtil.apply(new PathPlannerAuto(pathName, flip).getStartingPose()),
             new PathConstraints(
                 MetersPerSecond.of(drive.getMaxLinearSpeedMetersPerSec()),
                 MetersPerSecondPerSecond.of(Math.pow(drive.getMaxLinearSpeedMetersPerSec(), 2)),
                 RadiansPerSecond.of(drive.getMaxAngularSpeedRadPerSec()),
                 RadiansPerSecondPerSecond.of(Math.pow(drive.getMaxAngularSpeedRadPerSec(), 2)),
                 Volts.of(RobotController.getBatteryVoltage())));
-    return Commands.sequence(pathFind, new PathPlannerAuto(pathName));
+    return Commands.sequence(
+        Commands.defer(
+            () ->
+                AutoBuilder.pathfindToPose(
+                    AllianceFlipUtil.apply(new PathPlannerAuto(pathName, flip).getStartingPose()),
+                    new PathConstraints(
+                        MetersPerSecond.of(drive.getMaxLinearSpeedMetersPerSec()),
+                        MetersPerSecondPerSecond.of(
+                            Math.pow(drive.getMaxLinearSpeedMetersPerSec(), 2)),
+                        RadiansPerSecond.of(drive.getMaxAngularSpeedRadPerSec()),
+                        RadiansPerSecondPerSecond.of(
+                            Math.pow(drive.getMaxAngularSpeedRadPerSec(), 2)),
+                        Volts.of(RobotController.getBatteryVoltage()))),
+            Set.of(drive)),
+        new PathPlannerAuto(pathName, flip));
   }
 }

@@ -88,12 +88,10 @@ public class ShootingManager {
 
   static {
     // TODO: Replace with calibrated distance->shot params (meters, RPM, hood angle deg)
-    addShotParams(1.581, 3342.253805, 78.0);
-    addShotParams(1.94, 3342.253805, 74.0);
-    addShotParams(2.414, 3342.253805, 72.0);
-    addShotParams(2.43, 3342.253805, 68.0);
-    addShotParams(2.75, 3342.253805, 67.0);
-    addShotParams(3.11, 3342.253805, 64.0);
+    addShotParams(1.516, Units.radiansPerSecondToRotationsPerMinute(350), 80.0);
+    addShotParams(2.439, Units.radiansPerSecondToRotationsPerMinute(375), 77.0);
+    addShotParams(3.6097, Units.radiansPerSecondToRotationsPerMinute(380), 73.0);
+    addShotParams(4.569, Units.radiansPerSecondToRotationsPerMinute(410), 65.0);
 
     // Match LauncherCalculator time-of-flight map so lead displacement is equally aggressive.
     timeOfFlightMap.put(1.38, 0.90);

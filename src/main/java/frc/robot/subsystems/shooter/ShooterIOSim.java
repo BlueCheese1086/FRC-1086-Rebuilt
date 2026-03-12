@@ -31,8 +31,9 @@ public class ShooterIOSim implements ShooterIO {
                 ShooterConstants.Mechanical.J.in(KilogramSquareMeters),
                 ShooterConstants.Mechanical.shooterWheelGearRatio),
             DCMotor.getKrakenX60Foc(1));
-    shooterFF = new SimpleMotorFeedforward(ks.getAsDouble(), kv.getAsDouble(), ka.getAsDouble());
-    pidController = new PIDController(kP.getAsDouble(), 0.0, 0.0);
+    shooterFF = new SimpleMotorFeedforward(0.0, 0.019, 0.0);
+    pidController = new PIDController(0.01, 0.0, 0.0);
+    pidController.setTolerance(30.0);
   }
 
   @Override
@@ -51,6 +52,7 @@ public class ShooterIOSim implements ShooterIO {
     inputs.statorCurrent = shooter.getCurrentDrawAmps();
     inputs.positionRadPerSec = 0.0;
     inputs.setpoint = pidController.getSetpoint();
+    inputs.atSetpoint = pidController.atSetpoint();
 
     if (kP.hasChanged(hashCode())
         || kI.hasChanged(hashCode())
