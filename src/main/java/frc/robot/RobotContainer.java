@@ -215,7 +215,7 @@ public class RobotContainer {
         climb = new Climb(new ClimbIO() {});
         break;
     }
-    
+
     Autos.setup(drive, intake);
     automanager = new AutosManager(drive, shooter, indexer, intake, hood);
     AutoRoutines.setup(drive, automanager.machine);
@@ -435,11 +435,10 @@ public class RobotContainer {
                           Logger.recordOutput("Shoot Parms/Distance", parms.distance());
                         },
                         shooter),
-                    DriveCommands.joystickDriveLockRadiusToTarget(
+                    DriveCommands.joystickDriveAtAngle(
                         drive,
                         () -> -driver.getLeftY(),
                         () -> -driver.getLeftX(),
-                        () -> FieldConstants.Hub.hubCenter,
                         () ->
                             LauncherCalculator.getInstance()
                                 .getParameters(
@@ -466,10 +465,10 @@ public class RobotContainer {
                               0.10);
                       shooter.setVelocitySetpoint(
                           () -> RotationsPerSecond.of(sol.flywheelRpm / 60));
-                      hood.setPosition(() -> sol.hoodPitchRad);
+                      hood.setPosition(() -> Math.toDegrees(sol.hoodPitchRad));
                     },
                     shooter),
-                DriveCommands.joystickDriveAtAngle(
+                DriveCommands.joystickDriveAtAngleFast(
                     drive,
                     () -> -driver.getLeftY(),
                     () -> -driver.getLeftX(),

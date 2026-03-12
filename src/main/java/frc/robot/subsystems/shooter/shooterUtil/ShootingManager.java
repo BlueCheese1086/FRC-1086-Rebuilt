@@ -8,8 +8,12 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.geometry.Twist2d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.math.interpolation.Interpolator;
 import edu.wpi.first.math.interpolation.InverseInterpolator;
@@ -47,6 +51,8 @@ public class ShootingManager {
                       .interpolate(startValue.flywheelRpm, endValue.flywheelRpm, t),
                   Interpolator.forDouble()
                       .interpolate(startValue.hoodAngleRad, endValue.hoodAngleRad, t)));
+  private static final InterpolatingDoubleTreeMap timeOfFlightMap =
+      new InterpolatingDoubleTreeMap();
 
   // TODO: Replace with new coefficients for RPM = a + b*x + c*x^2 + d*x^3 where x is distance
   // meters
@@ -69,6 +75,7 @@ public class ShootingManager {
   private static final double RPM_RATE_LIMIT = 600.0;
   private static final double LEAD_PHASE_DELAY_SEC = 0.03;
   private static final int LEAD_LOOKAHEAD_ITERATIONS = 20;
+  private static final double LEAD_SCALE = 0.9;
 
   private static final double RPM_TOLERANCE = 50.0;
   private static final double STABLE_RPM_TIME_SEC = 0.15;
@@ -87,6 +94,12 @@ public class ShootingManager {
     addShotParams(2.43, 3342.253805, 68.0);
     addShotParams(2.75, 3342.253805, 67.0);
     addShotParams(3.11, 3342.253805, 64.0);
+
+    // Match LauncherCalculator time-of-flight map so lead displacement is equally aggressive.
+    timeOfFlightMap.put(1.38, 0.90);
+    timeOfFlightMap.put(1.88, 1.09);
+    timeOfFlightMap.put(3.15, 1.11);
+    timeOfFlightMap.put(4.55, 1.12);
   }
 
   public ShootingManager() {
@@ -177,87 +190,115 @@ public class ShootingManager {
       Translation3d fixedTarget,
       double headingToleranceMeters,
       double pitchToleranceMeters) {
-  Pose2d estimatedRobotPose =
-    robotPose.exp(
-      new edu.wpi.first.math.geometry.Twist2d(
-        robotRelativeSpeeds.vxMetersPerSecond * LEAD_PHASE_DELAY_SEC,
-        robotRelativeSpeeds.vyMetersPerSecond * LEAD_PHASE_DELAY_SEC,
-        robotRelativeSpeeds.omegaRadiansPerSecond * LEAD_PHASE_DELAY_SEC));
+    Pose2d estimatedRobotPose =
+        robotPose.exp(
+            new Twist2d(
+                robotRelativeSpeeds.vxMetersPerSecond * LEAD_PHASE_DELAY_SEC,
+                robotRelativeSpeeds.vyMetersPerSecond * LEAD_PHASE_DELAY_SEC,
+                robotRelativeSpeeds.omegaRadiansPerSecond * LEAD_PHASE_DELAY_SEC));
 
-  Pose3d shooterPose = new Pose3d(estimatedRobotPose).plus(Mechanical.shooterPose);
-  Translation3d shooterToTarget = fixedTarget.minus(shooterPose.getTranslation());
+    Translation2d target2d = fixedTarget.toTranslation2d();
+    Pose2d launcherPosition =
+        estimatedRobotPose.transformBy(
+            new Transform2d(
+                new Translation2d(Mechanical.shooterPose.getX(), Mechanical.shooterPose.getY()),
+                robotPose.getRotation()));
+    double launcherToTargetDistance = target2d.getDistance(launcherPosition.getTranslation());
 
-  double distanceMeters = shooterToTarget.toTranslation2d().getNorm();
-  ShotParams staticParams = getStaticShootingParams(distanceMeters);
-  double staticExitVelocity =
-    calculateExitVelocityMetersPerSecondFromRpm(staticParams.flywheelRpm);
+    ChassisSpeeds fieldRelative =
+        ChassisSpeeds.fromRobotRelativeSpeeds(robotRelativeSpeeds, robotPose.getRotation());
+    double launcherVelocityX = fieldRelative.vxMetersPerSecond;
+    double launcherVelocityY = fieldRelative.vyMetersPerSecond;
 
-  ChassisSpeeds fieldSpeeds =
-    ChassisSpeeds.fromRobotRelativeSpeeds(robotRelativeSpeeds, estimatedRobotPose.getRotation());
-  Translation3d fieldVelocity =
-    new Translation3d(fieldSpeeds.vxMetersPerSecond, fieldSpeeds.vyMetersPerSecond, 0.0);
+    double timeOfFlightSec = getNaiveTimeOfFlightSec(launcherToTargetDistance);
+    Pose2d lookaheadPose = launcherPosition;
+    double lookaheadLauncherToTargetDistance = launcherToTargetDistance;
 
-  Translation3d lookaheadShooterPosition = shooterPose.getTranslation();
-  Translation3d lookaheadVector = shooterToTarget;
-  double lookaheadDistanceMeters = distanceMeters;
-  double timeOfFlightSec = Math.max(0.0, distanceMeters / Math.max(1e-6, staticExitVelocity));
+    for (int i = 0; i < LEAD_LOOKAHEAD_ITERATIONS; i++) {
+      timeOfFlightSec = getNaiveTimeOfFlightSec(lookaheadLauncherToTargetDistance);
+      double offsetX = launcherVelocityX * timeOfFlightSec * LEAD_SCALE;
+      double offsetY = launcherVelocityY * timeOfFlightSec * LEAD_SCALE;
+      lookaheadPose =
+          new Pose2d(
+              launcherPosition.getTranslation().plus(new Translation2d(offsetX, offsetY)),
+              launcherPosition.getRotation());
+      lookaheadLauncherToTargetDistance = target2d.getDistance(lookaheadPose.getTranslation());
+    }
 
-  for (int i = 0; i < LEAD_LOOKAHEAD_ITERATIONS; i++) {
-    ShotParams iterParams = getStaticShootingParams(lookaheadDistanceMeters);
-    double iterExitVelocity = calculateExitVelocityMetersPerSecondFromRpm(iterParams.flywheelRpm);
-    timeOfFlightSec = lookaheadDistanceMeters / Math.max(1e-6, iterExitVelocity);
+    Translation2d virtualTarget2d =
+        target2d.minus(
+            new Translation2d(
+                launcherVelocityX * timeOfFlightSec * LEAD_SCALE,
+                launcherVelocityY * timeOfFlightSec * LEAD_SCALE));
+    Translation2d directVector2d = target2d.minus(launcherPosition.getTranslation());
+    Translation2d leadVector2d = virtualTarget2d.minus(launcherPosition.getTranslation());
 
-    Translation3d offset = fieldVelocity.times(timeOfFlightSec);
-    lookaheadShooterPosition = shooterPose.getTranslation().plus(offset);
-    lookaheadVector = fixedTarget.minus(lookaheadShooterPosition);
-    lookaheadDistanceMeters = lookaheadVector.toTranslation2d().getNorm();
-  }
+    double yaw = directVector2d.getAngle().getRadians();
+    double finalYaw = leadVector2d.getAngle().getRadians();
 
-  ShotParams ledStaticParams = getStaticShootingParams(lookaheadDistanceMeters);
-  double ledExitVelocity = calculateExitVelocityMetersPerSecondFromRpm(ledStaticParams.flywheelRpm);
-
-  double yaw = Math.atan2(shooterToTarget.getY(), shooterToTarget.getX());
-  double finalYaw = Math.atan2(lookaheadVector.getY(), lookaheadVector.getX());
-  double pitchStatic = ledStaticParams.hoodAngleRad;
+    ShotParams ledStaticParams = getStaticShootingParams(lookaheadLauncherToTargetDistance);
+    double ledExitVelocity =
+        calculateExitVelocityMetersPerSecondFromRpm(ledStaticParams.flywheelRpm);
+    double pitchStatic = ledStaticParams.hoodAngleRad;
     double minPitch = Units.degreesToRadians(HoodConstants.Targeting.minAngleDeg);
     double maxPitch = Units.degreesToRadians(HoodConstants.Targeting.maxAngleDeg);
     double clampedPitchStatic = MathUtil.clamp(pitchStatic, minPitch, maxPitch);
 
+    Translation3d shooterPosition =
+        new Pose3d(estimatedRobotPose).plus(Mechanical.shooterPose).getTranslation();
+    Translation3d virtualTarget3d =
+        new Translation3d(virtualTarget2d.getX(), virtualTarget2d.getY(), fixedTarget.getZ());
+    Translation3d shooterToVirtualTarget = virtualTarget3d.minus(shooterPosition);
+
     Translation3d vStatic =
         new Translation3d(
-      ledExitVelocity * Math.cos(clampedPitchStatic) * Math.cos(finalYaw),
-      ledExitVelocity * Math.cos(clampedPitchStatic) * Math.sin(finalYaw),
-      ledExitVelocity * Math.sin(clampedPitchStatic));
+            ledExitVelocity * Math.cos(clampedPitchStatic) * Math.cos(finalYaw),
+            ledExitVelocity * Math.cos(clampedPitchStatic) * Math.sin(finalYaw),
+            ledExitVelocity * Math.sin(clampedPitchStatic));
 
-  Translation3d vRobot = fieldVelocity;
+    Translation3d vRobot = new Translation3d(launcherVelocityX, launcherVelocityY, 0.0);
 
     Translation3d vFinal = vStatic.minus(vRobot);
-    double finalPitch = Math.atan2(vFinal.getZ(), vFinal.toTranslation2d().getNorm());
+    double finalPitch =
+        Math.atan2(
+            shooterToVirtualTarget.getZ(), shooterToVirtualTarget.toTranslation2d().getNorm());
     double clampedFinalPitch = MathUtil.clamp(finalPitch, minPitch, maxPitch);
     double finalExitVelocity = vFinal.getNorm();
     double rawRpm = calculateFlywheelRpmFromExitVelocity(finalExitVelocity);
     double limitedRpm = limitRpm(rawRpm, Timer.getFPGATimestamp());
 
-  double yawErrorMeters =
-    lookaheadDistanceMeters * Math.abs(MathUtil.angleModulus(finalYaw - yaw));
-  double pitchErrorMeters =
-    lookaheadDistanceMeters * Math.abs(clampedFinalPitch - clampedPitchStatic);
+    double yawErrorMeters =
+        lookaheadLauncherToTargetDistance * Math.abs(MathUtil.angleModulus(finalYaw - yaw));
+    double pitchErrorMeters =
+        lookaheadLauncherToTargetDistance * Math.abs(clampedFinalPitch - clampedPitchStatic);
+
+    Pose3d virtualTargetPose =
+        new Pose3d(
+            virtualTarget3d.getX(),
+            virtualTarget3d.getY(),
+            virtualTarget3d.getZ(),
+            new Rotation3d());
 
     Logger.recordOutput("ShootingManager/LeadYawDeg", Units.radiansToDegrees(finalYaw - yaw));
     Logger.recordOutput("ShootingManager/FinalPitchDeg", Units.radiansToDegrees(clampedFinalPitch));
     Logger.recordOutput(
         "ShootingManager/StaticPitchDeg", Units.radiansToDegrees(clampedPitchStatic));
-  Logger.recordOutput("ShootingManager/LookaheadDistanceMeters", lookaheadDistanceMeters);
-  Logger.recordOutput("ShootingManager/TimeOfFlightSec", timeOfFlightSec);
+    Logger.recordOutput(
+        "ShootingManager/LookaheadDistanceMeters", lookaheadLauncherToTargetDistance);
+    Logger.recordOutput("ShootingManager/TimeOfFlightSec", timeOfFlightSec);
+    Logger.recordOutput("ShootingManager/LeadScale", LEAD_SCALE);
+    Logger.recordOutput("ShootingManager/VirtualTargetX", virtualTarget2d.getX());
+    Logger.recordOutput("ShootingManager/VirtualTargetY", virtualTarget2d.getY());
+    Logger.recordOutput("ShootingManager/VirtualTarget", virtualTargetPose);
     Logger.recordOutput("ShootingManager/RawRadPerSec", rawRpm * (2 * Math.PI / 60));
     Logger.recordOutput("ShootingManager/LimitedRadPerSec", limitedRpm * (2 * Math.PI / 60));
-    Logger.recordOutput("ShootingManager/HoodPitchDeg", Units.radiansToDegrees(finalPitch));
+    Logger.recordOutput("ShootingManager/HoodPitchDeg", Units.radiansToDegrees(clampedFinalPitch));
 
     return new ShotSolution(
         Rotation2d.fromRadians(finalYaw),
-        Units.radiansToDegrees(clampedFinalPitch),
+        clampedFinalPitch,
         limitedRpm,
-    lookaheadDistanceMeters,
+        lookaheadLauncherToTargetDistance,
         yawErrorMeters <= headingToleranceMeters,
         pitchErrorMeters <= pitchToleranceMeters);
   }
@@ -391,5 +432,16 @@ public class ShootingManager {
   private double calculateExitVelocityMetersPerSecondFromRpm(double flywheelRpm) {
     double omegaRadPerSec = Units.rotationsPerMinuteToRadiansPerSecond(flywheelRpm);
     return omegaRadPerSec * flywheelRadius.in(Meters);
+  }
+
+  private double getNaiveTimeOfFlightSec(double distanceMeters) {
+    Double mapped = timeOfFlightMap.get(distanceMeters);
+    if (mapped != null && Double.isFinite(mapped) && mapped > 0.0) {
+      return mapped;
+    }
+
+    double rpm = getStaticShootingParams(distanceMeters).flywheelRpm;
+    double exitVelocity = calculateExitVelocityMetersPerSecondFromRpm(rpm);
+    return distanceMeters / Math.max(1e-6, exitVelocity);
   }
 }
