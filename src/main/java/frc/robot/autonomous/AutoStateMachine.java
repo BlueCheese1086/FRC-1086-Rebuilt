@@ -26,7 +26,6 @@ import frc.robot.subsystems.shooter.shooterUtil.LauncherCalculator.LaunchingPara
 import frc.robot.util.AllianceFlipUtil;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.littletonrobotics.junction.Logger;
 
 public class AutoStateMachine {
@@ -77,26 +76,23 @@ public class AutoStateMachine {
 
     double estimatedTime = 0.0;
 
-    //shoot preload
+    // shoot preload
     if (!preloadShootPos.equals("none")) {
       String path = currentLocation + "_" + preloadShootPos;
       estimatedTime += addPathToPreview(path, previewPoses);
 
       autoCommands =
           autoCommands.andThen(
-              Commands.parallel(
-                  AutoRoutines.runPath(path, true),
-                  runFlywheel(),
-                  retractIntake()),
+              Commands.parallel(AutoRoutines.runPath(path, true), runFlywheel(), retractIntake()),
               startShoot(shootTime));
-      
+
       estimatedTime += shootTime;
       currentLocation = preloadShootPos;
     }
 
     boolean isFirstPath = currentLocation.equals(startPos);
 
-    //intake
+    // intake
     if (intakePos.endsWith("i")) {
       String path = currentLocation + "_" + intakePos;
       estimatedTime += addPathToPreview(path, previewPoses);
@@ -121,7 +117,7 @@ public class AutoStateMachine {
       currentLocation = intakePos;
     }
 
-    //final shoot
+    // final shoot
     if (intakePos.endsWith("n")) {
       String exitPath = currentLocation + "_" + nzExit;
       String safePath = nzExit + "_" + nzExit + "s";
@@ -135,10 +131,7 @@ public class AutoStateMachine {
           autoCommands.andThen(
               Commands.deadline(AutoRoutines.runPath(exitPath, false), retractIntake()),
               AutoRoutines.runPath(safePath, false),
-              Commands.parallel(
-                  AutoRoutines.runPath(shootPath, false),
-                  runFlywheel()
-              ),
+              Commands.parallel(AutoRoutines.runPath(shootPath, false), runFlywheel()),
               startShoot(shootTime));
       estimatedTime += shootTime;
       currentLocation = finalShootPos;
@@ -149,10 +142,7 @@ public class AutoStateMachine {
       autoCommands =
           autoCommands.andThen(
               Commands.parallel(
-                  AutoRoutines.runPath(shootPath, false),
-                  runFlywheel(),
-                  retractIntake()
-              ),
+                  AutoRoutines.runPath(shootPath, false), runFlywheel(), retractIntake()),
               startShoot(shootTime));
       estimatedTime += shootTime;
       currentLocation = finalShootPos;
@@ -164,7 +154,7 @@ public class AutoStateMachine {
       autoCommands =
           autoCommands.andThen(
               AutoRoutines.runPath(climbPath, false)
-              //TODO: climb commands
+              // TODO: climb commands
               );
     }
 

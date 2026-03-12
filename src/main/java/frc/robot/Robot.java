@@ -24,7 +24,6 @@ import edu.wpi.first.wpilibj.Watchdog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.vision.VisionConstants;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;

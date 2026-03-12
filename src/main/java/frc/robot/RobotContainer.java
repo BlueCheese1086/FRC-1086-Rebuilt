@@ -148,8 +148,10 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVision("backLeft", VisionConstants.robotToLeftCam, drive::getRotation),
-                new VisionIOPhotonVision("backRight", VisionConstants.robotToRightCam, drive::getRotation),
+                new VisionIOPhotonVision(
+                    "backLeft", VisionConstants.robotToLeftCam, drive::getRotation),
+                new VisionIOPhotonVision(
+                    "backRight", VisionConstants.robotToRightCam, drive::getRotation),
                 new VisionIOLimelight("limelight-marble", drive::getRotation));
 
         intake = new Intake(new IntakeIOTalonFX());
@@ -203,8 +205,10 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVision("left", VisionConstants.robotToLeftCam, drive::getRotation),
-                new VisionIOPhotonVision("right", VisionConstants.robotToRightCam, drive::getRotation));
+                new VisionIOPhotonVision(
+                    "left", VisionConstants.robotToLeftCam, drive::getRotation),
+                new VisionIOPhotonVision(
+                    "right", VisionConstants.robotToRightCam, drive::getRotation));
         shooter = new Shooter(new FeederIO() {}, new ShooterIO() {});
         intake = new Intake(new IntakeIO() {});
         indexer = new Indexer(new IndexerIO() {});
