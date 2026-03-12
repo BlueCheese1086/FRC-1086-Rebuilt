@@ -58,8 +58,8 @@ public class FeederIOTalonFX implements FeederIO {
 
   @Override
   public void setFeedVoltage(double volts) {
-    feeder.setControl(voltageRequest.withOutput(volts));
-
+    // feeder.setControl(voltageRequest.withOutput(volts));
+    feeder.setVoltage(volts);
     if (volts == 0) {
       feeder.stopMotor();
     }

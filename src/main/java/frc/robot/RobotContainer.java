@@ -27,6 +27,7 @@ import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -147,8 +148,10 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVision("backLeft", VisionConstants.robotToLeftCam, drive::getRotation),
-                new VisionIOPhotonVision("backRight", VisionConstants.robotToRightCam, drive::getRotation),
+                new VisionIOPhotonVision(
+                    "backLeft", VisionConstants.robotToLeftCam, drive::getRotation),
+                new VisionIOPhotonVision(
+                    "backRight", VisionConstants.robotToRightCam, drive::getRotation),
                 new VisionIOLimelight("limelight-marble", drive::getRotation));
 
         intake = new Intake(new IntakeIOTalonFX());
@@ -202,8 +205,10 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVision("left", VisionConstants.robotToLeftCam, drive::getRotation),
-                new VisionIOPhotonVision("right", VisionConstants.robotToRightCam, drive::getRotation));
+                new VisionIOPhotonVision(
+                    "left", VisionConstants.robotToLeftCam, drive::getRotation),
+                new VisionIOPhotonVision(
+                    "right", VisionConstants.robotToRightCam, drive::getRotation));
         shooter = new Shooter(new FeederIO() {}, new ShooterIO() {});
         intake = new Intake(new IntakeIO() {});
         indexer = new Indexer(new IndexerIO() {});
@@ -244,7 +249,7 @@ public class RobotContainer {
     autoChooser.addOption("Shooter Sys id", shooter.sysid(5.0, 0, "shooter"));
     autoChooser.addOption("left Side Auto", this.pathFindToStart("left", false));
     autoChooser.addOption("right Side Auto", this.pathFindToStart("left", true));
-
+    autoChooser.addOption("Move Back Auto", new PathPlannerAuto("MoveBackAuto"));
     autoChooser.addOption("Auto Path 1", Autos.runAutonomous("morepaths/Path1"));
 
     // Configure the button bindings
@@ -424,7 +429,7 @@ public class RobotContainer {
                               0.10);
                       shooter.setVelocitySetpoint(
                           () -> RotationsPerSecond.of(sol.flywheelRpm / 60));
-                      hood.setPosition(() -> Math.toDegrees(sol.hoodPitchRad));
+                      hood.setPosition(() -> Units.radiansToDegrees(sol.hoodPitchRad));
                     },
                     shooter),
                 DriveCommands.joystickDriveAtAngleFast(
