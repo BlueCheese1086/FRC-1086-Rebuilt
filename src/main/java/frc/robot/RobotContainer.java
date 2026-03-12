@@ -249,7 +249,7 @@ public class RobotContainer {
     autoChooser.addOption("Shooter Sys id", shooter.sysid(5.0, 0, "shooter"));
     autoChooser.addOption("left Side Auto", this.pathFindToStart("left", false));
     autoChooser.addOption("right Side Auto", this.pathFindToStart("left", true));
-
+    autoChooser.addOption("Move Back Auto", new PathPlannerAuto("MoveBackAuto"));
     autoChooser.addOption("Auto Path 1", Autos.runAutonomous("morepaths/Path1"));
 
     // Configure the button bindings
