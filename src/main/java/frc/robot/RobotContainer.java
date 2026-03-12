@@ -264,7 +264,8 @@ public class RobotContainer {
                     },
                     drive)
                 .finallyDo(drive::stopWithX)
-                .withTimeout(0.5),
+                .withTimeout(0.75),
+            intake.setPosition(IntakeConstants.Setpoints.deployed),
             getShootCommand()));
     autoChooser.addOption("Auto Path 1", Autos.runAutonomous("morepaths/Path1"));
 
@@ -553,7 +554,7 @@ public class RobotContainer {
                               drive::getChassisSpeeds,
                               drive::getRotation);
                   //   shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(350.0));
-                  shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(350.0));
+                  shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(365.0));
                   hood.setPosition(() -> parms.hoodAngle());
 
                   Logger.recordOutput("Shoot Parms/ Hood Angle", parms.hoodAngle());
@@ -565,8 +566,15 @@ public class RobotContainer {
             .finallyDo(shooter::stopShooter),
         Commands.waitSeconds(1.0)
             .andThen(
-                shooter
-                    .runFeed(ShooterConstants.FeederSetpoints.run.in(Volts))
-                    .finallyDo(shooter::stopFeeder)));
+                Commands.parallel(
+                    shooter
+                        .runFeed(ShooterConstants.FeederSetpoints.run.in(Volts))
+                        .finallyDo(shooter::stopFeeder),
+                    indexer.setVoltage(IndexerConstants.Setpoints.feed),
+                    Commands.repeatingSequence(
+                        intake.setPosition(IntakeConstants.Setpoints.agitate),
+                        Commands.waitSeconds(0.2),
+                        intake.setPosition(IntakeConstants.Setpoints.deployed),
+                        Commands.waitSeconds(0.2)))));
   }
 }
