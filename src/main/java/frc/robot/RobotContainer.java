@@ -27,6 +27,7 @@ import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -249,7 +250,22 @@ public class RobotContainer {
     autoChooser.addOption("Shooter Sys id", shooter.sysid(5.0, 0, "shooter"));
     autoChooser.addOption("left Side Auto", this.pathFindToStart("left", false));
     autoChooser.addOption("right Side Auto", this.pathFindToStart("left", true));
-
+    autoChooser.addOption(
+        "Basic Shooting Auto",
+        Commands.sequence(
+            Commands.run(
+                    () -> {
+                      drive.runVelocity(
+                          ChassisSpeeds.fromFieldRelativeSpeeds(
+                              AllianceFlipUtil.shouldFlip() ? 0.5 : -0.5,
+                              0.0,
+                              0.0,
+                              drive.getRotation()));
+                    },
+                    drive)
+                .finallyDo(drive::stopWithX)
+                .withTimeout(0.5),
+            getShootCommand()));
     autoChooser.addOption("Auto Path 1", Autos.runAutonomous("morepaths/Path1"));
 
     // Configure the button bindings
@@ -521,5 +537,36 @@ public class RobotContainer {
                         Volts.of(RobotController.getBatteryVoltage()))),
             Set.of(drive)),
         new PathPlannerAuto(pathName, flip));
+  }
+
+  private Command getShootCommand() {
+    return Commands.parallel(
+        Commands.run(
+                () -> {
+                  LaunchingParameters parms =
+                      LauncherCalculator.getInstance()
+                          .getParameters(
+                              () ->
+                                  (new Pose3d(drive.getPose())
+                                      .transformBy(ShooterTransforms.centerShooter)
+                                      .toPose2d()),
+                              drive::getChassisSpeeds,
+                              drive::getRotation);
+                  //   shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(350.0));
+                  shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(350.0));
+                  hood.setPosition(() -> parms.hoodAngle());
+
+                  Logger.recordOutput("Shoot Parms/ Hood Angle", parms.hoodAngle());
+                  Logger.recordOutput("Shoot Parms/ Drive Angle", parms.driveAngle());
+                  Logger.recordOutput("Shoot Parms/ Flywheel Speed", parms.flywheelSpeed());
+                  Logger.recordOutput("Shoot Parms/Distance", parms.distance());
+                },
+                shooter)
+            .finallyDo(shooter::stopShooter),
+        Commands.waitSeconds(1.0)
+            .andThen(
+                shooter
+                    .runFeed(ShooterConstants.FeederSetpoints.run.in(Volts))
+                    .finallyDo(shooter::stopFeeder)));
   }
 }
