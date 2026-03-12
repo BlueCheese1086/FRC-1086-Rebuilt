@@ -42,7 +42,7 @@ public final class ChoreoVars {
         public static final Pose2d ofrn = new Pose2d(8.7, 1.6, Rotation2d.fromRadians(-0.79));
         public static final Pose2d ofs = new Pose2d(0.6, 0.6, Rotation2d.fromRadians(0.7));
         public static final Pose2d ofsn = new Pose2d(7.7, 2, Rotation2d.fromRadians(0.4));
-        public static final Pose2d oi = new Pose2d(0.5, 0.6, Rotation2d.fromRadians(3.14));
+        public static final Pose2d oi = new Pose2d(0.5, 0.6, Rotation2d.fromRadians(1.55));
         public static final Pose2d onrn = new Pose2d(8.7, 2.8, Rotation2d.fromRadians(-0.79));
         public static final Pose2d ons = new Pose2d(3.6, 0.5, Rotation2d.fromRadians(1.28));
         public static final Pose2d onsn = new Pose2d(7.7, 3.4, Rotation2d.fromRadians(0.4));

@@ -32,7 +32,7 @@ public class VisionIOLimelight implements VisionIO {
   private final DoubleSubscriber txSubscriber;
   private final DoubleSubscriber tySubscriber;
   private final DoubleArraySubscriber megatag1Subscriber;
-  // private final DoubleArraySubscriber megatag2Subscriber;
+  private final DoubleArraySubscriber megatag2Subscriber;
 
   /**
    * Creates a new VisionIOLimelight.
@@ -48,8 +48,8 @@ public class VisionIOLimelight implements VisionIO {
     txSubscriber = table.getDoubleTopic("tx").subscribe(0.0);
     tySubscriber = table.getDoubleTopic("ty").subscribe(0.0);
     megatag1Subscriber = table.getDoubleArrayTopic("botpose_wpiblue").subscribe(new double[] {});
-    // megatag2Subscriber =
-    //     table.getDoubleArrayTopic("botpose_orb_wpiblue").subscribe(new double[] {});
+    megatag2Subscriber =
+        table.getDoubleArrayTopic("botpose_orb_wpiblue").subscribe(new double[] {});
   }
 
   @Override

@@ -25,7 +25,6 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -68,7 +67,6 @@ import frc.robot.subsystems.shooter.FeederIO.FeederIOTalonFX;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterConstants;
 import frc.robot.subsystems.shooter.ShooterConstants.FeederSetpoints;
-import frc.robot.subsystems.shooter.ShooterConstants.ShooterTransforms;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.shooter.ShooterIOTalonFX;
@@ -147,10 +145,8 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVision(
-                    "backLeft", VisionConstants.robotToLeftCam, drive::getRotation),
-                new VisionIOPhotonVision(
-                    "backRight", VisionConstants.robotToRightCam, drive::getRotation),
+                new VisionIOPhotonVision("backLeft", VisionConstants.robotToLeftCam, drive::getRotation),
+                new VisionIOPhotonVision("backRight", VisionConstants.robotToRightCam, drive::getRotation),
                 new VisionIOLimelight("limelight-marble", drive::getRotation));
 
         intake = new Intake(new IntakeIOTalonFX());
@@ -204,10 +200,8 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVision(
-                    "left", VisionConstants.robotToLeftCam, drive::getRotation),
-                new VisionIOPhotonVision(
-                    "right", VisionConstants.robotToRightCam, drive::getRotation));
+                new VisionIOPhotonVision("left", VisionConstants.robotToLeftCam, drive::getRotation),
+                new VisionIOPhotonVision("right", VisionConstants.robotToRightCam, drive::getRotation));
         shooter = new Shooter(new FeederIO() {}, new ShooterIO() {});
         intake = new Intake(new IntakeIO() {});
         indexer = new Indexer(new IndexerIO() {});
@@ -269,7 +263,7 @@ public class RobotContainer {
     driver
         .start()
         .onTrue(
-            Commands.runOnce(
+            Commands.run(
                     () ->
                         drive.setPose(
                             new Pose2d(
@@ -356,6 +350,24 @@ public class RobotContainer {
 
     driver
         .y()
+        .whileTrue(
+            Commands.run(
+                    () -> {
+                      LaunchingParameters parms =
+                          LauncherCalculator.getInstance()
+                              .getParameters(
+                                  drive::getPose, drive::getChassisSpeeds, drive::getRotation);
+                      shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(parms.flywheelSpeed()));
+                      hood.setPosition(() -> parms.hoodAngle());
+
+                      Logger.recordOutput("Shoot Parms/ Hood Angle", parms.hoodAngle());
+                      Logger.recordOutput("Shoot Parms/ Drive Angle", parms.driveAngle());
+                      Logger.recordOutput("Shoot Parms/ Flywheel Speed", parms.flywheelSpeed());
+                    },
+                    shooter)
+                .finallyDo(shooter::stopShooter));
+    driver
+        .x()
         .whileTrue(
             Commands.parallel(
                     Commands.run(

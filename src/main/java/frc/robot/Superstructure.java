@@ -325,8 +325,8 @@ public class Superstructure extends SubsystemBase {
             Commands.parallel(
                 hood.setAngle(
                     HoodConstants.Setpoints
-                        .passAngle))); // TODO make this target center of alliance zone.
-    // shooter.runShooter(() -> (RadiansPerSecond.of(300)))));
+                        .passAngle), // TODO make this target center of alliance zone.
+                shooter.runShooter(() -> (RadiansPerSecond.of(300)))));
 
     stateTriggers
         .get(State.pass)
