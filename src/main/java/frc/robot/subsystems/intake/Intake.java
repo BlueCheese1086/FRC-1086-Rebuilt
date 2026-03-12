@@ -53,7 +53,7 @@ public class Intake extends SubsystemBase {
   }
 
   public Command setPosition(Angle newPos) {
-    return Commands.run(
+    return Commands.runOnce(
             () -> {
               setpoint = newPos.in(Radians);
               io.setPosition(newPos);

@@ -112,6 +112,8 @@ public class Robot extends LoggedRobot {
     }
     CommandScheduler.getInstance().setPeriod(0.2);
 
+    DriverStation.silenceJoystickConnectionWarning(true);
+
     // Check for valid swerve config
     var modules =
         new SwerveModuleConstants[] {

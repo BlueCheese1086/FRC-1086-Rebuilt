@@ -19,25 +19,20 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.Voltage;
+import frc.robot.util.LoggedTunableNumber;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 /** Add your docs here. */
 public class ShooterConstants {
   public static class Tuning {
-    public static final double kS = 0.0;
-    public static final double kV =
-        12.0
-            / RadiansPerSecond.of(DCMotor.getKrakenX60Foc(1).freeSpeedRadPerSec)
-                .in(RotationsPerSecond); // 113.067;
-    public static final double kA = 0.0; // if its too much lower it if its not enough increase it
-
-    public static final double cruiseVelocity = 6000.0 / 60.0; // ~ 600 rad per sec;
-    public static final double acceleration =
-        cruiseVelocity
-            / 0.5; // Cruise velocity / spin up time estimated, low numbers equal more brownouts,
-    // and high numbers more stable.
+    public static final LoggedTunableNumber kv = new LoggedTunableNumber("/Shooter/Kv", 0.125);
+    public static final LoggedTunableNumber ks = new LoggedTunableNumber("/Shooter/Ks", 0.14819);
+    public static final LoggedTunableNumber ka = new LoggedTunableNumber("/Shooter/ka", 0.0024824);
+    public static final LoggedTunableNumber kP = new LoggedTunableNumber("/Shooter/kP", 0.029853);
+    public static final LoggedTunableNumber kI = new LoggedTunableNumber("/Shooter/kI", 0.0);
+    public static final LoggedTunableNumber kd = new LoggedTunableNumber("/Shooter/kd", 0.0);
     public static final LoggedNetworkNumber velocitySetpoint =
-        new LoggedNetworkNumber("/Tuning/Velocity Setpoint", 300.0);
+        new LoggedNetworkNumber("/Tuning/Velocity Setpoint", 350.0);
     public static final LoggedNetworkNumber voltageSetpoint =
         new LoggedNetworkNumber("/Tuning/Voltage Setpoint", 4.5);
   }

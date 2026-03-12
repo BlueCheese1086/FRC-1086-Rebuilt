@@ -99,7 +99,7 @@ public class Vision extends SubsystemBase {
                     && observation.ambiguity() > maxAmbiguity) // Cannot be high ambiguity
                 || Math.abs(observation.pose().getZ())
                     > maxZError // Must have realistic Z coordinate
-
+                || observation.averageTagDistance() >= averageTagDistance
                 // Must be within the field boundaries
                 || observation.pose().getX() < 0.0
                 || observation.pose().getX() > VisionConstants.fieldLayout.getFieldLength()
@@ -122,12 +122,21 @@ public class Vision extends SubsystemBase {
         // Calculate standard deviations
         double stdDevFactor =
             Math.pow(observation.averageTagDistance(), 2.0) / observation.tagCount();
-        double linearStdDev = linearStdDevBaseline * stdDevFactor;
-        double angularStdDev = angularStdDevBaseline * stdDevFactor;
+        double linearStdDev =
+            (observation.type() == PoseObservationType.PHOTONVISION
+                    ? trigLinearStdDevBaseline
+                    : multitagLinearStdDevBaseline)
+                * stdDevFactor;
+        double angularStdDev =
+            (observation.type() == PoseObservationType.PHOTONVISION
+                    ? trigAngularStdDevBaseline
+                    : multitagAngularStdDevBaseline)
+                * stdDevFactor;
         if (observation.type() == PoseObservationType.MEGATAG_2) {
           linearStdDev *= linearStdDevMegatag2Factor;
           angularStdDev *= angularStdDevMegatag2Factor;
         }
+
         if (cameraIndex < cameraStdDevFactors.length) {
           linearStdDev *= cameraStdDevFactors[cameraIndex];
           angularStdDev *= cameraStdDevFactors[cameraIndex];

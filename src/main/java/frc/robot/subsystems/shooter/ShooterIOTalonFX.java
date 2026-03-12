@@ -5,18 +5,19 @@
 package frc.robot.subsystems.shooter;
 
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static frc.robot.subsystems.shooter.ShooterConstants.Tuning.*;
 import static frc.robot.util.PhoenixUtil.tryUntilOk;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -24,7 +25,6 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.RobotMap;
-import frc.robot.util.LoggedTunableNumber;
 import org.littletonrobotics.junction.Logger;
 
 public class ShooterIOTalonFX implements ShooterIO {
@@ -32,8 +32,6 @@ public class ShooterIOTalonFX implements ShooterIO {
 
   @SuppressWarnings("unused")
   private final VelocityVoltage velocityVoltage;
-
-  private final MotionMagicVelocityVoltage motionMagic;
 
   // Status Signals
   private StatusSignal<AngularVelocity> velocity;
@@ -45,19 +43,13 @@ public class ShooterIOTalonFX implements ShooterIO {
   private StatusSignal<Temperature> temp;
 
   private double setpoint = 0.0;
-  private double chessyVolts = 0.0;
-  private final LoggedTunableNumber kv = new LoggedTunableNumber("/Shooter/Kv", 0.01910828025);
-  private final LoggedTunableNumber ks = new LoggedTunableNumber("/Shooter/Ks", 0.14819);
-  private final LoggedTunableNumber ka = new LoggedTunableNumber("/Shooter/ka", 0.0024824);
-  private final LoggedTunableNumber kP = new LoggedTunableNumber("/Shooter/kP", 0.0);
-  private final LoggedTunableNumber kI = new LoggedTunableNumber("/Shooter/kI", 0.0);
-  private final LoggedTunableNumber kd = new LoggedTunableNumber("Tuning/Kd", 0.0);
 
   public ShooterIOTalonFX(int id, boolean inverted) {
     shooter = new TalonFX(id, RobotMap.systemBus);
-    velocityVoltage = new VelocityVoltage(0.0).withEnableFOC(true).withSlot(0);
-    motionMagic =
-        new MotionMagicVelocityVoltage(0.0).withEnableFOC(true).withSlot(0).withUseTimesync(true);
+    // added .withUseTimesync(true) to velocity voltage, but not sure if it will cause issues with
+    // the way we are using them, will test and remove if it does
+    velocityVoltage =
+        new VelocityVoltage(0.0).withEnableFOC(true).withSlot(0).withUseTimesync(true);
 
     TalonFXConfiguration config = new TalonFXConfiguration();
     config.Slot0.kS = ks.getAsDouble();
@@ -77,9 +69,6 @@ public class ShooterIOTalonFX implements ShooterIO {
     config.CurrentLimits.StatorCurrentLimit = 120.0; // arbittury
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
     config.CurrentLimits.SupplyCurrentLimit = 80.0; // arbittury
-
-    config.MotionMagic.MotionMagicJerk = 0.0;
-    config.MotionMagic.MotionMagicAcceleration = 2500.0;
 
     tryUntilOk(5, () -> shooter.getConfigurator().apply(config));
 
@@ -111,7 +100,7 @@ public class ShooterIOTalonFX implements ShooterIO {
     inputs.temp = temp.getValueAsDouble();
     inputs.positionRadPerSec = position.getValueAsDouble();
     inputs.setpoint = setpoint;
-    this.chessyVolts = setpoint - velocity.getValue().in(RadiansPerSecond) >= 50.0 ? 12.0 : 0.0;
+    inputs.atSetpoint = MathUtil.isNear(setpoint, velocity.getValue().in(RadiansPerSecond), 20.0);
 
     if (kd.hasChanged(hashCode())) {
       resetValues();

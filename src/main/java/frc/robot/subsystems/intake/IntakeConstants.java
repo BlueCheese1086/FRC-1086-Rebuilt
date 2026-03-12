@@ -7,7 +7,6 @@ package frc.robot.subsystems.intake;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.units.measure.Angle;
@@ -43,19 +42,19 @@ public class IntakeConstants {
   public static class Setpoints {
     public static final Angle stowed = Degrees.of(115.0);
     public static final Angle homed = Degrees.of(110.0);
-    public static final Angle agitate = Degrees.of(20.0);
-    public static final Angle deployed = Degrees.of(-6.0);
+    public static final Angle agitate = Degrees.of(30.0);
+    public static final Angle deployed = Degrees.of(4.0);
     // im js letting yall know i might have a funny idea for agitation while shooting so js be
     // prepared for that
     // i wanna try slowly moving intake up to homed or stowed while shooting cuz pumping will toss
     // but not compress them towards shooter that well
-    public static final Voltage run = Volts.of(12.0);
+    public static final Voltage run = Volts.of(10.0);
   }
 
   public static class Mechanical { // TODO: Update all of these with the actual values
     public static final Distance intakeLength = Inches.of(14);
     public static final double gearing = 50.0;
-    public static final Angle kPositionTolerance = Radians.of(0.125);
+    public static final Angle kPositionTolerance = Degrees.of(1.0);
     // all of these are in cad right
   }
 }

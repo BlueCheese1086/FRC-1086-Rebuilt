@@ -15,7 +15,6 @@ import frc.robot.RobotMap;
 
 public class FeederIOTalonFX implements FeederIO {
   private TalonFX feeder;
-  private VoltageOut voltageRequest;
   private TalonFXConfiguration feedConfig;
 
   private StatusSignal<Voltage> volts;
@@ -25,17 +24,12 @@ public class FeederIOTalonFX implements FeederIO {
 
   public FeederIOTalonFX(int feedID) {
     feeder = new TalonFX(feedID, RobotMap.systemBus);
-    voltageRequest = new VoltageOut(0.0).withEnableFOC(true);
+    new VoltageOut(0.0).withEnableFOC(true);
     feedConfig = new TalonFXConfiguration();
 
     feedConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-    feedConfig.CurrentLimits.SupplyCurrentLimit = 80.0; // arbitury
-    feedConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-    feedConfig.CurrentLimits.StatorCurrentLimit = 60.0; // arbitury
+    feedConfig.CurrentLimits.SupplyCurrentLimit = 40.0; // arbitury
 
-    feedConfig.Voltage.PeakForwardVoltage = 10.0;
-    feedConfig.TorqueCurrent.PeakForwardTorqueCurrent =
-        200.0; // In amps (estimated 200 amps is max it will ever
     // go)
     feedConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 

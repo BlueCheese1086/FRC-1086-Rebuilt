@@ -6,21 +6,21 @@ package frc.robot.subsystems.shooter;
 
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static frc.robot.subsystems.shooter.ShooterConstants.Tuning.*;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.BangBangController;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
-import org.littletonrobotics.junction.Logger;
 
 public class ShooterIOSim implements ShooterIO {
   private final FlywheelSim shooter;
   private final SimpleMotorFeedforward shooterFF;
-  private final BangBangController bbController;
+  private final PIDController pidController;
   private double appliedVoltage = 0.0;
 
   public ShooterIOSim() {
@@ -32,8 +32,9 @@ public class ShooterIOSim implements ShooterIO {
                 ShooterConstants.Mechanical.J.in(KilogramSquareMeters),
                 ShooterConstants.Mechanical.shooterWheelGearRatio),
             DCMotor.getKrakenX60Foc(1));
-    shooterFF = new SimpleMotorFeedforward(0.06, 0.01910828025, 0.01);
-    bbController = new BangBangController();
+    shooterFF = new SimpleMotorFeedforward(0.0, 0.019, 0.0);
+    pidController = new PIDController(0.01, 0.0, 0.0);
+    pidController.setTolerance(30.0);
   }
 
   @Override
@@ -41,17 +42,35 @@ public class ShooterIOSim implements ShooterIO {
     shooter.update(0.02);
 
     appliedVoltage =
-        (bbController.calculate(shooter.getAngularVelocityRadPerSec())
+        (pidController.calculate(shooter.getAngularVelocityRadPerSec())
                 * RobotController.getBatteryVoltage())
             + (shooterFF.calculate(shooter.getAngularVelocityRadPerSec()));
 
     shooter.setInputVoltage(MathUtil.clamp(appliedVoltage, -12.0, 12.0));
-    Logger.recordOutput("DEBUG/AppliedVoltage", appliedVoltage);
     inputs.velocity = shooter.getAngularVelocityRadPerSec();
     inputs.appliedVoltage = shooter.getInputVoltage();
     inputs.statorCurrent = shooter.getCurrentDrawAmps();
     inputs.positionRadPerSec = 0.0;
-    inputs.setpoint = bbController.getSetpoint();
+    inputs.setpoint = pidController.getSetpoint();
+    inputs.atSetpoint = pidController.atSetpoint();
+
+    if (kP.hasChanged(hashCode())
+        || kI.hasChanged(hashCode())
+        || kd.hasChanged(hashCode())
+        || kv.hasChanged(hashCode())
+        || ka.hasChanged(hashCode())
+        || ks.hasChanged(hashCode())) {
+      updateClosedLoop();
+    }
+  }
+
+  private void updateClosedLoop() {
+    shooterFF.setKa(ka.getAsDouble());
+    shooterFF.setKv(kv.getAsDouble());
+    shooterFF.setKs(ks.getAsDouble());
+    pidController.setP(kP.getAsDouble());
+    pidController.setI(kI.getAsDouble());
+    pidController.setD(kd.getAsDouble());
   }
 
   @Override
@@ -61,6 +80,6 @@ public class ShooterIOSim implements ShooterIO {
 
   @Override
   public void setVelocity(AngularVelocity velocityRadPerSec) {
-    bbController.setSetpoint(velocityRadPerSec.in(RadiansPerSecond));
+    pidController.setSetpoint(velocityRadPerSec.in(RadiansPerSecond));
   }
 }
