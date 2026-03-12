@@ -86,9 +86,9 @@ public class AutoStateMachine {
           autoCommands.andThen(
               Commands.parallel(
                   AutoRoutines.runPath(path, true),
-                  startFeeder(),
-                  stopIntake()),
-              startShoot().withTimeout(shootTime));
+                  runFlywheel(),
+                  retractIntake()),
+              startShoot(shootTime));
       
       estimatedTime += shootTime;
       currentLocation = preloadShootPos;
@@ -102,7 +102,7 @@ public class AutoStateMachine {
       estimatedTime += addPathToPreview(path, previewPoses);
       autoCommands =
           autoCommands.andThen(
-              Commands.deadline(AutoRoutines.runPath(path, isFirstPath), startIntake()),
+              Commands.deadline(AutoRoutines.runPath(path, isFirstPath), deployIntake(), intake()),
               Commands.waitSeconds(intakeTime));
       estimatedTime += intakeTime;
       currentLocation = intakePos;
@@ -115,7 +115,7 @@ public class AutoStateMachine {
       autoCommands =
           autoCommands.andThen(
               AutoRoutines.runPath(entryPath, isFirstPath),
-              Commands.deadline(AutoRoutines.runPath(intakePath, false), startIntake()),
+              Commands.deadline(AutoRoutines.runPath(intakePath, false), deployIntake(), intake()),
               Commands.waitSeconds(intakeTime));
       estimatedTime += intakeTime;
       currentLocation = intakePos;
@@ -133,13 +133,13 @@ public class AutoStateMachine {
 
       autoCommands =
           autoCommands.andThen(
-              Commands.deadline(AutoRoutines.runPath(exitPath, false), stopIntake()),
+              Commands.deadline(AutoRoutines.runPath(exitPath, false), retractIntake()),
               AutoRoutines.runPath(safePath, false),
               Commands.parallel(
                   AutoRoutines.runPath(shootPath, false),
-                  startFeeder()
+                  runFlywheel()
               ),
-              startShoot().withTimeout(shootTime));
+              startShoot(shootTime));
       estimatedTime += shootTime;
       currentLocation = finalShootPos;
     } else {
@@ -150,10 +150,10 @@ public class AutoStateMachine {
           autoCommands.andThen(
               Commands.parallel(
                   AutoRoutines.runPath(shootPath, false),
-                  startFeeder(),
-                  stopIntake()
+                  runFlywheel(),
+                  retractIntake()
               ),
-              startShoot().withTimeout(shootTime));
+              startShoot(shootTime));
       estimatedTime += shootTime;
       currentLocation = finalShootPos;
     }
@@ -176,15 +176,11 @@ public class AutoStateMachine {
         () -> {
           drive.stop();
           stopShoot();
-          stopIntake();
+          retractIntake();
         });
   }
 
-  public Command startFeeder() { // just spins up flywheel, TODO: make better
-    return Commands.runOnce(() -> shooter.runFeed(12).execute());
-  }
-
-  public Command startShoot() {
+  public Command startShoot(double shootTime) {
     return Commands.parallel(
             Commands.waitSeconds(2.0)
                 .andThen(
@@ -195,7 +191,8 @@ public class AutoStateMachine {
                         Commands.repeatingSequence( // TODO: uhh probaly not gonna agitate
                             intake.setPosition(IntakeConstants.Setpoints.agitate),
                             intake.setPosition(IntakeConstants.Setpoints.deployed)))),
-            runFlywheel());
+            runFlywheel())
+        .withTimeout(shootTime);
   }
 
   public Command runFlywheel() {
@@ -232,15 +229,13 @@ public class AutoStateMachine {
     return intake.setPosition(IntakeConstants.Setpoints.deployed);
   }
 
-  public Command startIntake() {
+  public Command intake() {
     return Commands.parallel(
         intake.setVoltage(IntakeConstants.Setpoints.run),
         indexer.setVoltage(IndexerConstants.Setpoints.feed));
   }
 
-  public Command stopIntake() {
-    return Commands.sequence(
-        intake.setPosition(IntakeConstants.Setpoints.stowed),
-        Commands.parallel(intake.setVoltage(Volts.zero()), indexer.setVoltage(Volts.zero())));
+  public Command retractIntake() {
+    return intake.setPosition(IntakeConstants.Setpoints.stowed);
   }
 }
