@@ -369,14 +369,15 @@ public class RobotContainer {
                                               .toPose2d()),
                                       drive::getChassisSpeeds,
                                       drive::getRotation);
-                          // shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(350.0));
+                          //   shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(350.0));
                           shooter.setVelocitySetpoint(
                               () -> RadiansPerSecond.of(parms.flywheelSpeed()));
                           hood.setPosition(() -> parms.hoodAngle());
 
                           Logger.recordOutput("Shoot Parms/ Hood Angle", parms.hoodAngle());
                           Logger.recordOutput("Shoot Parms/ Drive Angle", parms.driveAngle());
-                          Logger.recordOutput("Shoot Parms/ Flywheel Speed", parms.flywheelSpeed());
+                          Logger.recordOutput("Shoot Parms/ Flywheel Speed",
+    parms.flywheelSpeed());
                           Logger.recordOutput("Shoot Parms/Distance", parms.distance());
                         },
                         shooter),
@@ -428,8 +429,8 @@ public class RobotContainer {
 
     // Operator Commands
     operator.leftTrigger().onTrue(intake.setVoltage(IntakeConstants.Setpoints.run));
-    operator
-        .rightTrigger()
+    driver
+        .y()
         .whileTrue(
             Commands.run(
                 () ->

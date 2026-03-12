@@ -28,12 +28,8 @@ public class FeederIOTalonFX implements FeederIO {
     feedConfig = new TalonFXConfiguration();
 
     feedConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-    feedConfig.CurrentLimits.SupplyCurrentLimit = 70.0; // arbitury
-    feedConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-    feedConfig.CurrentLimits.StatorCurrentLimit = 200.0; // arbitury
+    feedConfig.CurrentLimits.SupplyCurrentLimit = 40.0; // arbitury
 
-    feedConfig.TorqueCurrent.PeakForwardTorqueCurrent =
-        200.0; // In amps (estimated 200 amps is max it will ever
     // go)
     feedConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 

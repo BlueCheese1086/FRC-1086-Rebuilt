@@ -37,11 +37,14 @@ import java.util.List;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class DriveCommands {
+  private static LoggedNetworkNumber angleKP = new LoggedNetworkNumber("Angle/kp", 4.0);
+  private static LoggedNetworkNumber angleKd = new LoggedNetworkNumber("Angle/kd", 0.0);
   private static final double DEADBAND = 0.1;
-  private static final double ANGLE_KP = 5.0;
-  private static final double ANGLE_KD = 0.0;
+  private static final double ANGLE_KP = angleKP.getAsDouble();
+  private static final double ANGLE_KD = angleKd.getAsDouble();
   private static final double SOTM_ANGLE_KP = 10.0;
   private static final double SOTM_ANGLE_KD = 0.35;
   private static final double SOTM_MAX_OMEGA_SCALE = 1.0;
