@@ -40,6 +40,7 @@ public class IndexerIOTalonFX implements IndexerIO {
     config.CurrentLimits.StatorCurrentLimitEnable = true;
     config.CurrentLimits.StatorCurrentLimit = IndexerConstants.CurrentLimits.maxStator.in(Amps);
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
+    config.CurrentLimits.SupplyCurrentLowerTime = 0.0;
     config.CurrentLimits.SupplyCurrentLimit = IndexerConstants.CurrentLimits.maxSupply.in(Amps);
 
     config.Voltage.PeakForwardVoltage = IndexerConstants.VoltageLimits.peakForwardVoltage.in(Volts);

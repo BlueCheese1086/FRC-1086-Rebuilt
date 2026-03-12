@@ -69,12 +69,9 @@ import frc.robot.subsystems.shooter.FeederIO.FeederIOTalonFX;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterConstants;
 import frc.robot.subsystems.shooter.ShooterConstants.FeederSetpoints;
-import frc.robot.subsystems.shooter.ShooterConstants.ShooterTransforms;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.shooter.ShooterIOTalonFX;
-import frc.robot.subsystems.shooter.shooterUtil.LauncherCalculator;
-import frc.robot.subsystems.shooter.shooterUtil.LauncherCalculator.LaunchingParameters;
 import frc.robot.subsystems.shooter.shooterUtil.ShootingManager;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
@@ -85,7 +82,6 @@ import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
-import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -215,7 +211,7 @@ public class RobotContainer {
         climb = new Climb(new ClimbIO() {});
         break;
     }
-    
+
     Autos.setup(drive, intake);
     automanager = new AutosManager(drive, shooter, indexer, intake, hood);
     AutoRoutines.setup(drive, automanager.machine);
@@ -409,48 +405,49 @@ public class RobotContainer {
                     .finallyDo(shooter::stopShooter),
                 Commands.runOnce(() -> hood.setPosition(() -> 54.0))));
 
-    driver
-        .y()
-        .whileTrue(
-            Commands.parallel(
-                    Commands.run(
-                        () -> {
-                          LaunchingParameters parms =
-                              LauncherCalculator.getInstance()
-                                  .getParameters(
-                                      () ->
-                                          (new Pose3d(drive.getPose())
-                                              .transformBy(ShooterTransforms.centerShooter)
-                                              .toPose2d()),
-                                      drive::getChassisSpeeds,
-                                      drive::getRotation);
-                          //   shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(350.0));
-                          shooter.setVelocitySetpoint(
-                              () -> RadiansPerSecond.of(parms.flywheelSpeed()));
-                          hood.setPosition(() -> parms.hoodAngle());
+    // driver
+    //     .y()
+    //     .whileTrue(
+    //         Commands.parallel(
+    //                 Commands.run(
+    //                     () -> {
+    //                       LaunchingParameters parms =
+    //                           LauncherCalculator.getInstance()
+    //                               .getParameters(
+    //                                   () ->
+    //                                       (new Pose3d(drive.getPose())
+    //                                           .transformBy(ShooterTransforms.centerShooter)
+    //                                           .toPose2d()),
+    //                                   drive::getChassisSpeeds,
+    //                                   drive::getRotation);
+    //                       //   shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(350.0));
+    //                       shooter.setVelocitySetpoint(
+    //                           () -> RadiansPerSecond.of(parms.flywheelSpeed()));
+    //                       hood.setPosition(() -> parms.hoodAngle());
 
-                          Logger.recordOutput("Shoot Parms/ Hood Angle", parms.hoodAngle());
-                          Logger.recordOutput("Shoot Parms/ Drive Angle", parms.driveAngle());
-                          Logger.recordOutput("Shoot Parms/ Flywheel Speed", parms.flywheelSpeed());
-                          Logger.recordOutput("Shoot Parms/Distance", parms.distance());
-                        },
-                        shooter),
-                    DriveCommands.joystickDriveLockRadiusToTarget(
-                        drive,
-                        () -> -driver.getLeftY(),
-                        () -> -driver.getLeftX(),
-                        () -> FieldConstants.Hub.hubCenter,
-                        () ->
-                            LauncherCalculator.getInstance()
-                                .getParameters(
-                                    () ->
-                                        new Pose3d(drive.getPose())
-                                            .transformBy(ShooterTransforms.centerShooter)
-                                            .toPose2d(),
-                                    drive::getChassisSpeeds,
-                                    drive::getRotation)
-                                .driveAngle()))
-                .finallyDo(shooter::stopShooter));
+    //                       Logger.recordOutput("Shoot Parms/ Hood Angle", parms.hoodAngle());
+    //                       Logger.recordOutput("Shoot Parms/ Drive Angle", parms.driveAngle());
+    //                       Logger.recordOutput("Shoot Parms/ Flywheel Speed",
+    // parms.flywheelSpeed());
+    //                       Logger.recordOutput("Shoot Parms/Distance", parms.distance());
+    //                     },
+    //                     shooter),
+    //                 DriveCommands.joystickDriveLockRadiusToTarget(
+    //                     drive,
+    //                     () -> -driver.getLeftY(),
+    //                     () -> -driver.getLeftX(),
+    //                     () -> FieldConstants.Hub.hubCenter,
+    //                     () ->
+    //                         LauncherCalculator.getInstance()
+    //                             .getParameters(
+    //                                 () ->
+    //                                     new Pose3d(drive.getPose())
+    //                                         .transformBy(ShooterTransforms.centerShooter)
+    //                                         .toPose2d(),
+    //                                 drive::getChassisSpeeds,
+    //                                 drive::getRotation)
+    //                             .driveAngle()))
+    //             .finallyDo(shooter::stopShooter));
     driver
         .x()
         .whileTrue(
@@ -484,8 +481,8 @@ public class RobotContainer {
 
     // Operator Commands
     operator.leftTrigger().onTrue(intake.setVoltage(IntakeConstants.Setpoints.run));
-    operator
-        .rightTrigger()
+    driver
+        .y()
         .whileTrue(
             Commands.run(
                 () ->
