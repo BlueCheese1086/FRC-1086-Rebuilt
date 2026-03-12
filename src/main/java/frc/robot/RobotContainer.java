@@ -215,7 +215,7 @@ public class RobotContainer {
         climb = new Climb(new ClimbIO() {});
         break;
     }
-    
+
     Autos.setup(drive, intake);
     automanager = new AutosManager(drive, shooter, indexer, intake, hood);
     AutoRoutines.setup(drive, automanager.machine);
