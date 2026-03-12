@@ -59,11 +59,11 @@ public class ShootingManager {
   // TODO: Replace with new coefficients for RPM = a + b*x + c*x^2 + d*x^3 where x is distance
   // meters
   private static final double[] LOOKUP_TABLE_POLYNOMIAL =
-      new double[] {3.34225381e+03, -3.57277105e-11, 1.40317141e-11, -1.76224478e-12};
+      new double[] {1581.2855209, 1995.45539188, -661.82335317, 73.73303471};
   // TODO: Replace with new coefficients for hood angle deg = a + b*x + c*x^2 + d*x^3 where x is
   // distance meters
   private static final double[] LOOKUP_TABLE_HOOD_POLYNOMIAL =
-      new double[] {108.40639278, -29.73013306, 8.33220425, -1.08310321};
+      new double[] {94.38932795, -16.07376701, 5.44989017, -0.73094887};
   private static final double POLY_RPM_WEIGHT =
       0.5; // 0 = use map only, 1 = use poly only, 0.5 = blend both
   private static final double POLY_HOOD_WEIGHT =
