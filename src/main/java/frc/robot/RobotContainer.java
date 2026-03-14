@@ -33,7 +33,6 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.autonomous.Autos;
 import frc.robot.autonomous.AutosManager;
 import frc.robot.autonomous.PathPlannerCommands;
@@ -51,6 +50,7 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.hood.Hood;
+import frc.robot.subsystems.hood.HoodConstants;
 import frc.robot.subsystems.hood.HoodIO;
 import frc.robot.subsystems.hood.HoodIOServo;
 import frc.robot.subsystems.hood.HoodIOSim;
@@ -229,20 +229,20 @@ public class RobotContainer {
     autoChooser = new LoggedDashboardChooser<>("Auto Choices");
     ppCommands = new PathPlannerCommands();
     // Set up SysId routines
-    autoChooser.addOption(
-        "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
-    autoChooser.addOption(
-        "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
-    autoChooser.addOption(
-        "Drive SysId (Quasistatic Forward)",
-        drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Drive SysId (Quasistatic Reverse)",
-        drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-        "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    // autoChooser.addOption(
+    //     "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
+    // autoChooser.addOption(
+    //     "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
+    // autoChooser.addOption(
+    //     "Drive SysId (Quasistatic Forward)",
+    //     drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+    // autoChooser.addOption(
+    //     "Drive SysId (Quasistatic Reverse)",
+    //     drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+    // autoChooser.addOption(
+    //     "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
+    // autoChooser.addOption(
+    //     "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     autoChooser.addOption("auto builder", automanager.getSelectedAuto());
 
     autoChooser.addOption("Intake Pivot SysId", intake.sysId());
@@ -266,8 +266,41 @@ public class RobotContainer {
                 .finallyDo(drive::stopWithX)
                 .withTimeout(0.75),
             intake.setPosition(IntakeConstants.Setpoints.deployed),
-            getShootCommand()));
+            Commands.parallel(
+                Commands.run(
+                        () -> {
+                          LaunchingParameters parms =
+                              LauncherCalculator.getInstance()
+                                  .getParameters(
+                                      () ->
+                                          (new Pose3d(drive.getPose())
+                                              .transformBy(ShooterTransforms.centerShooter)
+                                              .toPose2d()),
+                                      drive::getChassisSpeeds,
+                                      drive::getRotation);
+                          shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(365.0));
+                          hood.setPosition(() -> 80.0);
+                          Logger.recordOutput("Shoot Parms/ Hood Angle", parms.hoodAngle());
+                          Logger.recordOutput("Shoot Parms/ Drive Angle", parms.driveAngle());
+                          Logger.recordOutput("Shoot Parms/ Flywheel Speed", parms.flywheelSpeed());
+                          Logger.recordOutput("Shoot Parms/Distance", parms.distance());
+                        },
+                        shooter)
+                    .finallyDo(shooter::stopShooter),
+                Commands.waitSeconds(1.0)
+                    .andThen(
+                        Commands.parallel(
+                            shooter
+                                .runFeed(ShooterConstants.FeederSetpoints.run.in(Volts))
+                                .finallyDo(shooter::stopFeeder),
+                            indexer.setVoltage(IndexerConstants.Setpoints.feed),
+                            Commands.repeatingSequence(
+                                intake.setPosition(IntakeConstants.Setpoints.agitate),
+                                Commands.waitSeconds(0.2),
+                                intake.setPosition(IntakeConstants.Setpoints.deployed),
+                                Commands.waitSeconds(0.2)))))));
     autoChooser.addOption("Auto Path 1", Autos.runAutonomous("morepaths/Path1"));
+    autoChooser.addOption("Outpost 1", this.pathFindToStart("outpost", false));
 
     // Configure the button bindings
     configureButtonBindings();
@@ -279,10 +312,9 @@ public class RobotContainer {
         DriveCommands.joystickDrive(
             drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
 
-    // hood.setDefaultCommand(
-    //     Commands.run(
-    //         () -> hood.setPosition(() -> HoodConstants.Targeting.hoodAngle.getAsDouble()),
-    // hood));
+    hood.setDefaultCommand(
+        Commands.run(
+            () -> hood.setPosition(() -> HoodConstants.Targeting.hoodAngle.getAsDouble()), hood));
 
     driver
         .start()
@@ -514,6 +546,7 @@ public class RobotContainer {
                 intake.setVoltage(IntakeConstants.Setpoints.run))
             .finallyDo(shooter::stopAll));
     NamedCommands.registerCommand("IntakeUp", intake.setPosition(IntakeConstants.Setpoints.stowed));
+    NamedCommands.registerCommand("ShootNow", getShootCommand());
     Command pathFind =
         AutoBuilder.pathfindToPose(
             AllianceFlipUtil.apply(new PathPlannerAuto(pathName, flip).getStartingPose()),
@@ -553,10 +586,8 @@ public class RobotContainer {
                                       .toPose2d()),
                               drive::getChassisSpeeds,
                               drive::getRotation);
-                  //   shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(350.0));
-                  shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(365.0));
+                  shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(parms.flywheelSpeed()));
                   hood.setPosition(() -> parms.hoodAngle());
-
                   Logger.recordOutput("Shoot Parms/ Hood Angle", parms.hoodAngle());
                   Logger.recordOutput("Shoot Parms/ Drive Angle", parms.driveAngle());
                   Logger.recordOutput("Shoot Parms/ Flywheel Speed", parms.flywheelSpeed());
@@ -570,11 +601,9 @@ public class RobotContainer {
                     shooter
                         .runFeed(ShooterConstants.FeederSetpoints.run.in(Volts))
                         .finallyDo(shooter::stopFeeder),
-                    indexer.setVoltage(IndexerConstants.Setpoints.feed),
-                    Commands.repeatingSequence(
-                        intake.setPosition(IntakeConstants.Setpoints.agitate),
-                        Commands.waitSeconds(0.2),
-                        intake.setPosition(IntakeConstants.Setpoints.deployed),
-                        Commands.waitSeconds(0.2)))));
+                    indexer.setVoltage(IndexerConstants.Setpoints.feed))),
+    Commands.repeatingSequence(
+        intake.setPosition(IntakeConstants.Setpoints.agitate),
+        intake.setPosition(IntakeConstants.Setpoints.deployed)));
   }
 }

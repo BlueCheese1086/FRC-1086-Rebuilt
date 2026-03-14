@@ -42,8 +42,8 @@ public class IntakeConstants {
   public static class Setpoints {
     public static final Angle stowed = Degrees.of(115.0);
     public static final Angle homed = Degrees.of(110.0);
-    public static final Angle agitate = Degrees.of(30.0);
-    public static final Angle deployed = Degrees.of(4.0);
+    public static final Angle agitate = Degrees.of(35.0);
+    public static final Angle deployed = Degrees.of(6.7);
     // im js letting yall know i might have a funny idea for agitation while shooting so js be
     // prepared for that
     // i wanna try slowly moving intake up to homed or stowed while shooting cuz pumping will toss

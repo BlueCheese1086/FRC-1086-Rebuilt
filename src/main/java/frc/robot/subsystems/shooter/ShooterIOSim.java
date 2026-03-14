@@ -32,7 +32,7 @@ public class ShooterIOSim implements ShooterIO {
                 ShooterConstants.Mechanical.shooterWheelGearRatio),
             DCMotor.getKrakenX60Foc(1));
     shooterFF = new SimpleMotorFeedforward(0.0, 0.019, 0.0);
-    pidController = new PIDController(0.01, 0.0, 0.0);
+    pidController = new PIDController(0.02, 0.0, 0.0);
     pidController.setTolerance(30.0);
   }
 

@@ -1,11 +1,10 @@
 package frc.robot.subsystems.vision;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.Filesystem;
-import java.io.IOException;
 
 /** Add your docs here. */
 public class VisionConstants {
@@ -29,22 +28,10 @@ public class VisionConstants {
   public static double linearStdDevMegatag2Factor = 0.5; // More stable than full 3D solve
   public static double angularStdDevMegatag2Factor =
       Double.POSITIVE_INFINITY; // No rotation data available
-  //   public static AprilTagFieldLayout fieldLayout =
-  //       AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
-  public static AprilTagFieldLayout fieldLayout;
+  public static AprilTagFieldLayout fieldLayout =
+      AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
+  // public static AprilTagFieldLayout fieldLayout;
   //   AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
-
-  static {
-    try {
-      fieldLayout =
-          new AprilTagFieldLayout(
-              Filesystem.getDeployDirectory()
-                  .toPath()
-                  .resolve("fields/1086_Regency_Field3-7.json"));
-    } catch (IOException e) {
-      throw new RuntimeException("Failed to load AprilTag field layout", e);
-    }
-  }
 
   public static Transform3d robotToLeftCam =
       new Transform3d(
@@ -65,5 +52,5 @@ public class VisionConstants {
   public static double multitagLinearStdDevBaseline = 0.6858; // Meters
   public static double multitagAngularStdDevBaseline = 0.03; // Radians
 
-  public static double averageTagDistance = 2.28;
+  public static double averageTagDistance = 2.91;
 }
