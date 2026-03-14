@@ -17,7 +17,6 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -28,7 +27,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -445,36 +443,36 @@ public class RobotContainer {
                                     drive::getRotation)
                                 .driveAngle()))
                 .finallyDo(shooter::stopShooter));
-    driver
-        .x()
-        .whileTrue(
-            Commands.parallel(
-                Commands.run(
-                    () -> {
-                      var sol =
-                          shootingManager.calculateShotSolution(
-                              drive.getPose(),
-                              drive.getChassisSpeeds(),
-                              FieldConstants.Hub.topCenterPoint,
-                              0.10,
-                              0.10);
-                      shooter.setVelocitySetpoint(
-                          () -> RotationsPerSecond.of(sol.flywheelRpm / 60));
-                      hood.setPosition(() -> Units.radiansToDegrees(sol.hoodPitchRad));
-                    },
-                    shooter),
-                DriveCommands.joystickDriveAtAngleFast(
-                    drive,
-                    () -> -driver.getLeftY(),
-                    () -> -driver.getLeftX(),
-                    () ->
-                        shootingManager.calculateShotSolution(
-                                drive.getPose(),
-                                drive.getChassisSpeeds(),
-                                FieldConstants.Hub.topCenterPoint,
-                                0.10,
-                                0.10)
-                            .drivetrainHeading)));
+    // driver
+    //     .x()
+    //     .whileTrue(
+    //         Commands.parallel(
+    //             Commands.run(
+    //                 () -> {
+    //                   var sol =
+    //                       shootingManager.calculateShotSolution(
+    //                           drive.getPose(),
+    //                           drive.getChassisSpeeds(),
+    //                           FieldConstants.Hub.topCenterPoint,
+    //                           0.10,
+    //                           0.10);
+    //                   shooter.setVelocitySetpoint(
+    //                       () -> RotationsPerSecond.of(sol.flywheelRpm / 60));
+    //                   hood.setPosition(() -> Units.radiansToDegrees(sol.hoodPitchRad));
+    //                 },
+    //                 shooter),
+    //             DriveCommands.joystickDriveAtAngleFast(
+    //                 drive,
+    //                 () -> -driver.getLeftY(),
+    //                 () -> -driver.getLeftX(),
+    //                 () ->
+    //                     shootingManager.calculateShotSolution(
+    //                             drive.getPose(),
+    //                             drive.getChassisSpeeds(),
+    //                             FieldConstants.Hub.topCenterPoint,
+    //                             0.10,
+    //                             0.10)
+    //                         .drivetrainHeading)));
 
     // Operator Commands
     operator.leftTrigger().onTrue(intake.setVoltage(IntakeConstants.Setpoints.run));
@@ -602,8 +600,8 @@ public class RobotContainer {
                         .runFeed(ShooterConstants.FeederSetpoints.run.in(Volts))
                         .finallyDo(shooter::stopFeeder),
                     indexer.setVoltage(IndexerConstants.Setpoints.feed))),
-    Commands.repeatingSequence(
-        intake.setPosition(IntakeConstants.Setpoints.agitate),
-        intake.setPosition(IntakeConstants.Setpoints.deployed)));
+        Commands.repeatingSequence(
+            intake.setPosition(IntakeConstants.Setpoints.agitate),
+            intake.setPosition(IntakeConstants.Setpoints.deployed)));
   }
 }

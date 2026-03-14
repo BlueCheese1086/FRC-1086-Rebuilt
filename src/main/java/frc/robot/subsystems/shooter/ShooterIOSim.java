@@ -32,7 +32,7 @@ public class ShooterIOSim implements ShooterIO {
                 ShooterConstants.Mechanical.shooterWheelGearRatio),
             DCMotor.getKrakenX60Foc(1));
     shooterFF = new SimpleMotorFeedforward(0.0, 0.019, 0.0);
-    pidController = new PIDController(0.02, 0.0, 0.0);
+    pidController = new PIDController(0.01, 0.0, 0.0);
     pidController.setTolerance(30.0);
   }
 
@@ -54,14 +54,14 @@ public class ShooterIOSim implements ShooterIO {
     inputs.setpoint = pidController.getSetpoint();
     inputs.atSetpoint = pidController.atSetpoint();
 
-    if (kP.hasChanged(hashCode())
-        || kI.hasChanged(hashCode())
-        || kd.hasChanged(hashCode())
-        || kv.hasChanged(hashCode())
-        || ka.hasChanged(hashCode())
-        || ks.hasChanged(hashCode())) {
-      updateClosedLoop();
-    }
+    // if (kP.hasChanged(hashCode())
+    //     || kI.hasChanged(hashCode())
+    //     || kd.hasChanged(hashCode())
+    //     || kv.hasChanged(hashCode())
+    //     || ka.hasChanged(hashCode())
+    //     || ks.hasChanged(hashCode())) {
+    //   updateClosedLoop();
+    // }
   }
 
   private void updateClosedLoop() {
