@@ -38,7 +38,6 @@ import frc.robot.commands.AutoRoutines;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.climb.Climb;
-import frc.robot.subsystems.climb.ClimbConstants;
 import frc.robot.subsystems.climb.ClimbIO;
 import frc.robot.subsystems.climb.ClimbIOSim;
 import frc.robot.subsystems.drive.Drive;
@@ -48,7 +47,6 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.hood.Hood;
-import frc.robot.subsystems.hood.HoodConstants;
 import frc.robot.subsystems.hood.HoodIO;
 import frc.robot.subsystems.hood.HoodIOServo;
 import frc.robot.subsystems.hood.HoodIOSim;
@@ -310,9 +308,10 @@ public class RobotContainer {
         DriveCommands.joystickDrive(
             drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
 
-    hood.setDefaultCommand(
-        Commands.run(
-            () -> hood.setPosition(() -> HoodConstants.Targeting.hoodAngle.getAsDouble()), hood));
+    // hood.setDefaultCommand(
+    //     Commands.run(
+    //         () -> hood.setPosition(() -> HoodConstants.Targeting.hoodAngle.getAsDouble()),
+    // hood));
 
     driver
         .start()
@@ -480,20 +479,15 @@ public class RobotContainer {
         .y()
         .whileTrue(
             Commands.run(
-                () ->
-                    shooter.setVelocitySetpoint(
-                        () ->
-                            (RadiansPerSecond.of(
-                                ShooterConstants.Tuning.velocitySetpoint.getAsDouble()))),
-                shooter))
+                () -> shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(375.0)), shooter))
         .onFalse(Commands.runOnce(shooter::stopShooter));
 
     operator.b().whileTrue(indexer.setVoltage(IndexerConstants.Setpoints.feed));
     operator.y().whileTrue(shooter.runFeed(ShooterConstants.FeederSetpoints.run.in(Volts)));
     operator.leftBumper().whileTrue(intake.setPosition(IntakeConstants.Setpoints.deployed));
     operator.rightBumper().whileTrue(intake.setPosition(IntakeConstants.Setpoints.stowed));
-    operator.povUp().onTrue(climb.setPosition(ClimbConstants.extendedHeight));
-    operator.povDown().onTrue(climb.setPosition(ClimbConstants.retractedHeight));
+    // operator.povUp().onTrue(climb.setPosition(ClimbConstants.extendedHeight));
+    // operator.povDown().onTrue(climb.setPosition(ClimbConstants.retractedHeight));
   }
 
   /**
