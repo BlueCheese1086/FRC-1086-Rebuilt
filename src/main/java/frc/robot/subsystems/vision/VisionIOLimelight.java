@@ -59,6 +59,8 @@ public class VisionIOLimelight implements VisionIO {
     inputs.connected =
         ((RobotController.getFPGATime() - latencySubscriber.getLastChange()) / 1000) < 250;
 
+    inputs.cameraName = "Limelight-marble";
+
     // Update target observation
     inputs.latestTargetObservation =
         new TargetObservation(

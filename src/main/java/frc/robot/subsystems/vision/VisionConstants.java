@@ -11,7 +11,7 @@ public class VisionConstants {
 
   // Basic filtering thresholds
   public static double maxAmbiguity = 0.3; // 0.3d
-  public static double maxZError = 0.75; // 0.75
+  public static double maxZError = 1.245; // 0.75
 
   // Standard deviation baselines, for 1 meter distance and 1 tag
   // (Adjusted automatically based on distance and # of tags)
@@ -21,7 +21,8 @@ public class VisionConstants {
   public static double[] cameraStdDevFactors =
       new double[] {
         1.0, // Camera 0
-        1.0 // Camera 1
+        1.0, // Camera 1
+        0.8
       };
 
   // Multipliers to apply for MegaTag 2 observations
@@ -46,11 +47,11 @@ public class VisionConstants {
           Units.inchesToMeters(9.85),
           new Rotation3d(0.0, Units.degreesToRadians(165.0), Units.degreesToRadians(0)));
 
-  public static double trigLinearStdDevBaseline = 0.381; // Meters
+  public static double trigLinearStdDevBaseline = 2.55;
   public static double trigAngularStdDevBaseline = Double.POSITIVE_INFINITY; // Radians
 
   public static double multitagLinearStdDevBaseline = 0.6858; // Meters
   public static double multitagAngularStdDevBaseline = 0.03; // Radians
 
-  public static double averageTagDistance = 2.91;
+  public static double averageTagDistance = 4.5;
 }

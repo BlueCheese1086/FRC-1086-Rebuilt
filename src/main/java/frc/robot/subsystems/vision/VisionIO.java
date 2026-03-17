@@ -18,6 +18,7 @@ public interface VisionIO {
     public TargetObservation latestTargetObservation =
         new TargetObservation(Rotation2d.kZero, Rotation2d.kZero);
     public PoseObservation[] poseObservations = new PoseObservation[0];
+    public String cameraName = new String();
     public int[] tagIds = new int[0];
   }
 

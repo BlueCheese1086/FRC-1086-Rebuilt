@@ -9,7 +9,6 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -28,20 +27,6 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class ShootingManager {
-  public static final Transform3d[] ROBOT_TO_PHOTON_CAMS =
-      new Transform3d[] {
-        new Transform3d(
-            -Units.inchesToMeters(12.0),
-            Units.inchesToMeters(12.0),
-            Units.inchesToMeters(6.0),
-            new Rotation3d(0.0, -Units.degreesToRadians(150.0), Units.degreesToRadians(0.0))),
-        new Transform3d(
-            -Units.inchesToMeters(12.0),
-            -Units.inchesToMeters(12.0),
-            Units.inchesToMeters(6.0),
-            new Rotation3d(0.0, -Units.degreesToRadians(150.0), Units.degreesToRadians(0.0)))
-      };
-
   private static final InterpolatingTreeMap<Double, ShotParams> distanceToShotParams =
       new InterpolatingTreeMap<>(
           InverseInterpolator.forDouble(),
@@ -257,9 +242,7 @@ public class ShootingManager {
     Translation3d vRobot = new Translation3d(launcherVelocityX, launcherVelocityY, 0.0);
 
     Translation3d vFinal = vStatic.minus(vRobot);
-    double finalPitch =
-        Math.atan2(
-            shooterToVirtualTarget.getZ(), shooterToVirtualTarget.toTranslation2d().getNorm());
+    double finalPitch = Math.atan2(vStatic.getZ(), vStatic.toTranslation2d().getNorm());
     double clampedFinalPitch = MathUtil.clamp(finalPitch, minPitch, maxPitch);
     double finalExitVelocity = vFinal.getNorm();
     double rawRpm = calculateFlywheelRpmFromExitVelocity(finalExitVelocity);
