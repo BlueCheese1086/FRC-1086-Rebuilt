@@ -27,6 +27,7 @@ import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -245,60 +246,59 @@ public class RobotContainer {
     // autoChooser.addOption("Intake Pivot SysId", intake.sysId());
     // autoChooser.addOption("Climb SysId", climb.sysId());
     // autoChooser.addOption("Shooter Sys id", shooter.sysid(5.0, 0, "shooter"));
-    // autoChooser.addOption("Left Bump Auto", this.pathFindToStart("left1", false));
-    // autoChooser.addOption("Right Bump Auto", this.pathFindToStart("left1", true));
-    // autoChooser.addOption("Right Bump Auto (w/ outpost)", this.pathFindToStart("right1", false));
-    // autoChooser.addOption(
-    //     "Basic Shooting Auto",
-    //     Commands.sequence(
-    //         Commands.run(
-    //                 () -> {
-    //                   drive.runVelocity(
-    //                       ChassisSpeeds.fromFieldRelativeSpeeds(
-    //                           AllianceFlipUtil.shouldFlip() ? 0.5 : -0.5,
-    //                           0.0,
-    //                           0.0,
-    //                           drive.getRotation()));
-    //                 },
-    //                 drive)
-    //             .finallyDo(drive::stopWithX)
-    //             .withTimeout(0.75),
-    //         intake.setPosition(IntakeConstants.Setpoints.deployed),
-    //         Commands.parallel(
-    //             Commands.run(
-    //                     () -> {
-    //                       LaunchingParameters parms =
-    //                           LauncherCalculator.getInstance()
-    //                               .getParameters(
-    //                                   () ->
-    //                                       (new Pose3d(drive.getPose())
-    //                                           .transformBy(ShooterTransforms.centerShooter)
-    //                                           .toPose2d()),
-    //                                   drive::getChassisSpeeds,
-    //                                   drive::getRotation);
-    //                       shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(365.0));
-    //                       hood.setPosition(() -> 80.0);
-    //                       Logger.recordOutput("Shoot Parms/ Hood Angle", parms.hoodAngle());
-    //                       Logger.recordOutput("Shoot Parms/ Drive Angle", parms.driveAngle());
-    //                       Logger.recordOutput("Shoot Parms/ Flywheel Speed",
-    // parms.flywheelSpeed());
-    //                       Logger.recordOutput("Shoot Parms/ Distance", parms.distance());
-    //                     },
-    //                     shooter)
-    //                 .finallyDo(shooter::stopShooter),
-    //             Commands.waitSeconds(1.0)
-    //                 .andThen(
-    //                     Commands.parallel(
-    //                         shooter
-    //                             .runFeed(ShooterConstants.FeederSetpoints.run.in(Volts))
-    //                             .finallyDo(shooter::stopFeeder),
-    //                         indexer.setVoltage(IndexerConstants.Setpoints.feed),
-    //                         Commands.repeatingSequence(
-    //                             intake.setPosition(IntakeConstants.Setpoints.agitate),
-    //                             Commands.waitSeconds(0.2),
-    //                             intake.setPosition(IntakeConstants.Setpoints.deployed),
-    //                             Commands.waitSeconds(0.2)))))));
-    // autoChooser.addOption("Outpost 1", this.pathFindToStart("outpost", false));
+    autoChooser.addOption("Left Bump Auto", this.pathFindToStart("left1", false));
+    autoChooser.addOption("Right Bump Auto", this.pathFindToStart("left1", true));
+    autoChooser.addOption("Right Bump Auto (w/ outpost)", this.pathFindToStart("right1", false));
+    autoChooser.addOption(
+        "Basic Shooting Auto",
+        Commands.sequence(
+            Commands.run(
+                    () -> {
+                      drive.runVelocity(
+                          ChassisSpeeds.fromFieldRelativeSpeeds(
+                              AllianceFlipUtil.shouldFlip() ? 0.5 : -0.5,
+                              0.0,
+                              0.0,
+                              drive.getRotation()));
+                    },
+                    drive)
+                .finallyDo(drive::stopWithX)
+                .withTimeout(0.75),
+            intake.setPosition(IntakeConstants.Setpoints.deployed),
+            Commands.parallel(
+                Commands.run(
+                        () -> {
+                          LaunchingParameters parms =
+                              LauncherCalculator.getInstance()
+                                  .getParameters(
+                                      () ->
+                                          (new Pose3d(drive.getPose())
+                                              .transformBy(ShooterTransforms.centerShooter)
+                                              .toPose2d()),
+                                      drive::getChassisSpeeds,
+                                      drive::getRotation);
+                          shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(365.0));
+                          hood.setPosition(() -> 80.0);
+                          Logger.recordOutput("Shoot Parms/ Hood Angle", parms.hoodAngle());
+                          Logger.recordOutput("Shoot Parms/ Drive Angle", parms.driveAngle());
+                          Logger.recordOutput("Shoot Parms/ Flywheel Speed", parms.flywheelSpeed());
+                          Logger.recordOutput("Shoot Parms/ Distance", parms.distance());
+                        },
+                        shooter)
+                    .finallyDo(shooter::stopShooter),
+                Commands.waitSeconds(1.0)
+                    .andThen(
+                        Commands.parallel(
+                            shooter
+                                .runFeed(ShooterConstants.FeederSetpoints.run.in(Volts))
+                                .finallyDo(shooter::stopFeeder),
+                            indexer.setVoltage(IndexerConstants.Setpoints.feed),
+                            Commands.repeatingSequence(
+                                intake.setPosition(IntakeConstants.Setpoints.agitate),
+                                Commands.waitSeconds(0.2),
+                                intake.setPosition(IntakeConstants.Setpoints.deployed),
+                                Commands.waitSeconds(0.2)))))));
+    autoChooser.addOption("Outpost 1", this.pathFindToStart("outpost", false));
 
     // Configure the button bindings
     configureButtonBindings();
@@ -392,8 +392,7 @@ public class RobotContainer {
                     .finallyDo(shooter::stopShooter),
                 Commands.runOnce(() -> hood.setPosition(() -> 64.0))));
 
-    // What i think is better and safer is a known trench shot. like 1678, they cant be defended
-    // there
+    // What i think is better and safer is a known trench shot. like 1678, they cant be defended there
     // driver
     //     .a()
     //     .whileTrue(
@@ -590,43 +589,44 @@ public class RobotContainer {
 
   private Command sotm() {
     return Commands.parallel(
-        Commands.run(
-            () -> {
-              var sol =
-                  shootingManager.calculateShotSolution(
-                      drive.getPose(),
-                      drive.getChassisSpeeds(),
-                      FieldConstants.Hub.topCenterPoint,
-                      0.10,
-                      0.10);
-              shooter.setVelocitySetpoint(() -> RotationsPerSecond.of(sol.flywheelRpm / 60));
-              hood.setPosition(() -> Units.radiansToDegrees(sol.hoodPitchRad));
-            },
-            shooter),
-        DriveCommands.joystickDriveAtAngleFast(
-            drive,
-            () -> -driver.getLeftY(),
-            () -> -driver.getLeftX(),
-            () ->
-                shootingManager.calculateShotSolution(
-                        drive.getPose(),
-                        drive.getChassisSpeeds(),
-                        FieldConstants.Hub.topCenterPoint,
-                        0.10,
-                        0.10)
-                    .drivetrainHeading),
-        Commands.waitSeconds(1.0)
-            .andThen(
-                Commands.parallel(
-                    shooter
-                        .runFeed(ShooterConstants.FeederSetpoints.run.in(Volts))
-                        .finallyDo(shooter::stopFeeder),
-                    indexer.setVoltage(IndexerConstants.Setpoints.feed),
-                    intake.setVoltage(IntakeConstants.Setpoints.run))),
-        Commands.repeatingSequence(
-            intake.setPosition(IntakeConstants.Setpoints.agitate),
-            Commands.waitSeconds(0.4),
-            intake.setPosition(IntakeConstants.Setpoints.deployed),
-            Commands.waitSeconds(0.4)));
+                Commands.run(
+                    () -> {
+                      var sol =
+                          shootingManager.calculateShotSolution(
+                              drive.getPose(),
+                              drive.getChassisSpeeds(),
+                              FieldConstants.Hub.topCenterPoint,
+                              0.10,
+                              0.10);
+                      shooter.setVelocitySetpoint(
+                          () -> RotationsPerSecond.of(sol.flywheelRpm / 60));
+                      hood.setPosition(() -> Units.radiansToDegrees(sol.hoodPitchRad));
+                    },
+                    shooter),
+                DriveCommands.joystickDriveAtAngleFast(
+                    drive,
+                    () -> -driver.getLeftY(),
+                    () -> -driver.getLeftX(),
+                    () ->
+                        shootingManager.calculateShotSolution(
+                                drive.getPose(),
+                                drive.getChassisSpeeds(),
+                                FieldConstants.Hub.topCenterPoint,
+                                0.10,
+                                0.10)
+                            .drivetrainHeading),
+                Commands.waitSeconds(1.0)
+                    .andThen(
+                        Commands.parallel(
+                            shooter
+                                .runFeed(ShooterConstants.FeederSetpoints.run.in(Volts))
+                                .finallyDo(shooter::stopFeeder),
+                            indexer.setVoltage(IndexerConstants.Setpoints.feed),
+                            intake.setVoltage(IntakeConstants.Setpoints.run))),
+                Commands.repeatingSequence(
+                    intake.setPosition(IntakeConstants.Setpoints.agitate),
+                    Commands.waitSeconds(0.4),
+                    intake.setPosition(IntakeConstants.Setpoints.deployed),
+                    Commands.waitSeconds(0.4)));
   }
 }
