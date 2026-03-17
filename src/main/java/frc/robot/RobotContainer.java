@@ -392,7 +392,8 @@ public class RobotContainer {
                     .finallyDo(shooter::stopShooter),
                 Commands.runOnce(() -> hood.setPosition(() -> 64.0))));
 
-    // What i think is better and safer is a known trench shot. like 1678, they cant be defended there
+    // What i think is better and safer is a known trench shot. like 1678, they cant be defended
+    // there
     // driver
     //     .a()
     //     .whileTrue(
@@ -589,44 +590,43 @@ public class RobotContainer {
 
   private Command sotm() {
     return Commands.parallel(
-                Commands.run(
-                    () -> {
-                      var sol =
-                          shootingManager.calculateShotSolution(
-                              drive.getPose(),
-                              drive.getChassisSpeeds(),
-                              FieldConstants.Hub.topCenterPoint,
-                              0.10,
-                              0.10);
-                      shooter.setVelocitySetpoint(
-                          () -> RotationsPerSecond.of(sol.flywheelRpm / 60));
-                      hood.setPosition(() -> Units.radiansToDegrees(sol.hoodPitchRad));
-                    },
-                    shooter),
-                DriveCommands.joystickDriveAtAngleFast(
-                    drive,
-                    () -> -driver.getLeftY(),
-                    () -> -driver.getLeftX(),
-                    () ->
-                        shootingManager.calculateShotSolution(
-                                drive.getPose(),
-                                drive.getChassisSpeeds(),
-                                FieldConstants.Hub.topCenterPoint,
-                                0.10,
-                                0.10)
-                            .drivetrainHeading),
-                Commands.waitSeconds(1.0)
-                    .andThen(
-                        Commands.parallel(
-                            shooter
-                                .runFeed(ShooterConstants.FeederSetpoints.run.in(Volts))
-                                .finallyDo(shooter::stopFeeder),
-                            indexer.setVoltage(IndexerConstants.Setpoints.feed),
-                            intake.setVoltage(IntakeConstants.Setpoints.run))),
-                Commands.repeatingSequence(
-                    intake.setPosition(IntakeConstants.Setpoints.agitate),
-                    Commands.waitSeconds(0.4),
-                    intake.setPosition(IntakeConstants.Setpoints.deployed),
-                    Commands.waitSeconds(0.4)));
+        Commands.run(
+            () -> {
+              var sol =
+                  shootingManager.calculateShotSolution(
+                      drive.getPose(),
+                      drive.getChassisSpeeds(),
+                      FieldConstants.Hub.topCenterPoint,
+                      0.10,
+                      0.10);
+              shooter.setVelocitySetpoint(() -> RotationsPerSecond.of(sol.flywheelRpm / 60));
+              hood.setPosition(() -> Units.radiansToDegrees(sol.hoodPitchRad));
+            },
+            shooter),
+        DriveCommands.joystickDriveAtAngleFast(
+            drive,
+            () -> -driver.getLeftY(),
+            () -> -driver.getLeftX(),
+            () ->
+                shootingManager.calculateShotSolution(
+                        drive.getPose(),
+                        drive.getChassisSpeeds(),
+                        FieldConstants.Hub.topCenterPoint,
+                        0.10,
+                        0.10)
+                    .drivetrainHeading),
+        Commands.waitSeconds(1.0)
+            .andThen(
+                Commands.parallel(
+                    shooter
+                        .runFeed(ShooterConstants.FeederSetpoints.run.in(Volts))
+                        .finallyDo(shooter::stopFeeder),
+                    indexer.setVoltage(IndexerConstants.Setpoints.feed),
+                    intake.setVoltage(IntakeConstants.Setpoints.run))),
+        Commands.repeatingSequence(
+            intake.setPosition(IntakeConstants.Setpoints.agitate),
+            Commands.waitSeconds(0.4),
+            intake.setPosition(IntakeConstants.Setpoints.deployed),
+            Commands.waitSeconds(0.4)));
   }
 }
