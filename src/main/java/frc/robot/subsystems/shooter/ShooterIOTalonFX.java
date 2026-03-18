@@ -30,7 +30,6 @@ import org.littletonrobotics.junction.Logger;
 public class ShooterIOTalonFX implements ShooterIO {
   private final TalonFX shooter;
 
-  @SuppressWarnings("unused")
   private final VelocityVoltage velocityVoltage;
 
   // Status Signals
