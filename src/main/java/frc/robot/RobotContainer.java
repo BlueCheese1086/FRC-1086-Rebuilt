@@ -248,7 +248,7 @@ public class RobotContainer {
     // autoChooser.addOption("Shooter Sys id", shooter.sysid(5.0, 0, "shooter"));
     autoChooser.addOption("Left Bump Auto", this.pathFindToStart("left1", false));
     autoChooser.addOption("Right Bump Auto", this.pathFindToStart("left1", true));
-    autoChooser.addOption("Right Bump Auto (w/ outpost)", this.pathFindToStart("right1", false));
+    // autoChooser.addOption("Right Bump Auto (w/ outpost)", this.pathFindToStart("right1", false));
     autoChooser.addOption(
         "Basic Shooting Auto",
         Commands.sequence(
@@ -392,7 +392,8 @@ public class RobotContainer {
                     .finallyDo(shooter::stopShooter),
                 Commands.runOnce(() -> hood.setPosition(() -> 64.0))));
 
-    // What i think is better and safer is a known trench shot. like 1678, they cant be defended there
+    // What i think is better and safer is a known trench shot. like 1678, they cant be defended
+    // there
     // driver
     //     .a()
     //     .whileTrue(
@@ -589,44 +590,43 @@ public class RobotContainer {
 
   private Command sotm() {
     return Commands.parallel(
-                Commands.run(
-                    () -> {
-                      var sol =
-                          shootingManager.calculateShotSolution(
-                              drive.getPose(),
-                              drive.getChassisSpeeds(),
-                              FieldConstants.Hub.topCenterPoint,
-                              0.10,
-                              0.10);
-                      shooter.setVelocitySetpoint(
-                          () -> RotationsPerSecond.of(sol.flywheelRpm / 60));
-                      hood.setPosition(() -> Units.radiansToDegrees(sol.hoodPitchRad));
-                    },
-                    shooter),
-                DriveCommands.joystickDriveAtAngleFast(
-                    drive,
-                    () -> -driver.getLeftY(),
-                    () -> -driver.getLeftX(),
-                    () ->
-                        shootingManager.calculateShotSolution(
-                                drive.getPose(),
-                                drive.getChassisSpeeds(),
-                                FieldConstants.Hub.topCenterPoint,
-                                0.10,
-                                0.10)
-                            .drivetrainHeading),
-                Commands.waitSeconds(1.0)
-                    .andThen(
-                        Commands.parallel(
-                            shooter
-                                .runFeed(ShooterConstants.FeederSetpoints.run.in(Volts))
-                                .finallyDo(shooter::stopFeeder),
-                            indexer.setVoltage(IndexerConstants.Setpoints.feed),
-                            intake.setVoltage(IntakeConstants.Setpoints.run))),
-                Commands.repeatingSequence(
-                    intake.setPosition(IntakeConstants.Setpoints.agitate),
-                    Commands.waitSeconds(0.4),
-                    intake.setPosition(IntakeConstants.Setpoints.deployed),
-                    Commands.waitSeconds(0.4)));
+        Commands.run(
+            () -> {
+              var sol =
+                  shootingManager.calculateShotSolution(
+                      drive.getPose(),
+                      drive.getChassisSpeeds(),
+                      FieldConstants.Hub.topCenterPoint,
+                      0.10,
+                      0.10);
+              shooter.setVelocitySetpoint(() -> RotationsPerSecond.of(sol.flywheelRpm / 60));
+              hood.setPosition(() -> Units.radiansToDegrees(sol.hoodPitchRad));
+            },
+            shooter),
+        DriveCommands.joystickDriveAtAngleFast(
+            drive,
+            () -> -driver.getLeftY(),
+            () -> -driver.getLeftX(),
+            () ->
+                shootingManager.calculateShotSolution(
+                        drive.getPose(),
+                        drive.getChassisSpeeds(),
+                        FieldConstants.Hub.topCenterPoint,
+                        0.10,
+                        0.10)
+                    .drivetrainHeading),
+        Commands.waitSeconds(1.0)
+            .andThen(
+                Commands.parallel(
+                    shooter
+                        .runFeed(ShooterConstants.FeederSetpoints.run.in(Volts))
+                        .finallyDo(shooter::stopFeeder),
+                    indexer.setVoltage(IndexerConstants.Setpoints.feed),
+                    intake.setVoltage(IntakeConstants.Setpoints.run))),
+        Commands.repeatingSequence(
+            intake.setPosition(IntakeConstants.Setpoints.agitate),
+            Commands.waitSeconds(0.4),
+            intake.setPosition(IntakeConstants.Setpoints.deployed),
+            Commands.waitSeconds(0.4)));
   }
 }

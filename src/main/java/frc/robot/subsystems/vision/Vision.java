@@ -100,6 +100,7 @@ public class Vision extends SubsystemBase {
                 || Math.abs(observation.pose().getZ())
                     > maxZError // Must have realistic Z coordinate
                 || observation.averageTagDistance() >= averageTagDistance
+                || (observation.tagCount() == 1 && observation.averageTagDistance() >= 2.5)
                 // Must be within the field boundaries
                 || observation.pose().getX() <= 0.0
                 || observation.pose().getX() >= VisionConstants.fieldLayout.getFieldLength()
