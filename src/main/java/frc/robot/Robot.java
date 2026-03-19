@@ -19,6 +19,7 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants.DriveMotorArrangement;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerMotorArrangement;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.IterativeRobotBase;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj.Watchdog;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -50,7 +51,7 @@ public class Robot extends LoggedRobot {
   private RobotContainer robotContainer;
 
   private static final boolean IS_PRACTICE = !DriverStation.isFMSAttached();
-  private static final String LOG_DIRECTORY = "/u/logs";
+  private static final String LOG_DIRECTORY = "/U/logs";
   private static final long MIN_FREE_SPACE =
       IS_PRACTICE
           ? 100000000
@@ -80,9 +81,14 @@ public class Robot extends LoggedRobot {
     switch (Constants.currentMode) {
       case REAL:
         // Running on a real robot, log to a USB stick ("/U/logs")
-        Logger.addDataReceiver(new WPILOGWriter(LOG_DIRECTORY));
+        File file = new File(LOG_DIRECTORY);
+        System.out.println(
+            file.exists() && file.isDirectory() ? "Logging to USB Drive" : "Logging to RoboRio");
+        Logger.addDataReceiver(
+            new WPILOGWriter(
+                file.exists() && file.isDirectory() ? LOG_DIRECTORY : "home/lvuser/logs"));
         Logger.addDataReceiver(new NT4Publisher());
-        setupLog();
+        // setupLog();
         break;
 
       case SIM:
@@ -131,6 +137,8 @@ public class Robot extends LoggedRobot {
             "You are using an unsupported swerve configuration, which this template does not support without manual customization. The 2025 release of Phoenix supports some swerve configurations which were not available during 2025 beta testing, preventing any development and support from the AdvantageKit developers.");
       }
     }
+
+    RobotController.setBrownoutVoltage(5.5);
 
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.

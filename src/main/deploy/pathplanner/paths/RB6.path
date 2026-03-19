@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.0,
-        "y": 7.0
+        "x": 0.5878192771084336,
+        "y": 0.6364819277108438
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.0729724457653136,
-        "y": 6.727163467473656
+        "x": 0.9165704212432297,
+        "y": 1.3106843591208377
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "RB5"
     },
     {
       "anchor": {
-        "x": 2.3570328102710407,
-        "y": 4.701340941512126
+        "x": 1.5494578313253013,
+        "y": 1.4451325301204816
       },
       "prevControl": {
-        "x": 2.298443125570515,
-        "y": 5.015159262822645
+        "x": 0.7979745162600979,
+        "y": 0.9107850302233487
       },
       "nextControl": null,
       "isLocked": false,
@@ -31,26 +31,7 @@
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "FeedTest",
-      "waypointRelativePos": 1.0,
-      "endWaypointRelativePos": null,
-      "command": null
-    },
-    {
-      "name": "IndexTest",
-      "waypointRelativePos": 1.0,
-      "endWaypointRelativePos": null,
-      "command": null
-    },
-    {
-      "name": "ShootTest",
-      "waypointRelativePos": 1.0,
-      "endWaypointRelativePos": null,
-      "command": null
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,
@@ -61,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 40.29982884140442
   },
   "reversed": false,
   "folder": "right paths",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }

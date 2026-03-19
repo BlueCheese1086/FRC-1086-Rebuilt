@@ -36,7 +36,7 @@ import org.littletonrobotics.junction.Logger;
 
 /** Add your docs here. */
 public class IntakeIOTalonFX implements IntakeIO {
-  private final VoltageOut applyVoltage = new VoltageOut(0.0);
+  private final VoltageOut applyVoltage = new VoltageOut(0.0).withEnableFOC(true);
   private final VoltageOut applyPivotVoltage = new VoltageOut(0.0);
   private final TorqueCurrentFOC applyCurrent = new TorqueCurrentFOC(0.0);
   private final MotionMagicVoltage motionMagic = new MotionMagicVoltage(0.0).withEnableFOC(true);
@@ -71,7 +71,14 @@ public class IntakeIOTalonFX implements IntakeIO {
 
     config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
     config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+
+    config.CurrentLimits.SupplyCurrentLimit = IntakeConstants.CurrentLimits.maxSupply.in(Amps);
+    config.CurrentLimits.SupplyCurrentLimitEnable = true;
+
     PhoenixUtil.tryUntilOk(5, () -> (roller.getConfigurator().apply(config, 5)));
+
+    config.CurrentLimits.StatorCurrentLimit = IntakeConstants.CurrentLimits.maxStator.in(Amps);
+    config.CurrentLimits.StatorCurrentLimitEnable = true;
 
     // TODO: PID STUFF
     config.Slot0.kP = IntakeConstants.PID.kP.get();
@@ -89,10 +96,6 @@ public class IntakeIOTalonFX implements IntakeIO {
     config.MotionMagic.MotionMagicAcceleration =
         maxPivotVelocity.per(Second).in(RotationsPerSecondPerSecond);
     config.MotionMagic.MotionMagicCruiseVelocity = maxPivotVelocity.in(RotationsPerSecond);
-    config.CurrentLimits.StatorCurrentLimit = IntakeConstants.CurrentLimits.maxStator.in(Amps);
-    config.CurrentLimits.StatorCurrentLimitEnable = true;
-    config.CurrentLimits.SupplyCurrentLimit = IntakeConstants.CurrentLimits.maxSupply.in(Amps);
-    config.CurrentLimits.SupplyCurrentLimitEnable = true;
 
     PhoenixUtil.tryUntilOk(5, () -> (pivot.getConfigurator().apply(config, 5)));
 
@@ -143,33 +146,33 @@ public class IntakeIOTalonFX implements IntakeIO {
         pivotStator,
         pivotTemperature);
 
-    if (kP.hasChanged(hashCode())) {
-      resetValues();
-    }
+    // if (kP.hasChanged(hashCode())) {
+    //   resetValues();
+    // }
 
-    if (kI.hasChanged(hashCode())) {
-      resetValues();
-    }
+    // if (kI.hasChanged(hashCode())) {
+    //   resetValues();
+    // }
 
-    if (kD.hasChanged(hashCode())) {
-      resetValues();
-    }
+    // if (kD.hasChanged(hashCode())) {
+    //   resetValues();
+    // }
 
-    if (kV.hasChanged(hashCode())) {
-      resetValues();
-    }
+    // if (kV.hasChanged(hashCode())) {
+    //   resetValues();
+    // }
 
-    if (kS.hasChanged(hashCode())) {
-      resetValues();
-    }
+    // if (kS.hasChanged(hashCode())) {
+    //   resetValues();
+    // }
 
-    if (kA.hasChanged(hashCode())) {
-      resetValues();
-    }
+    // if (kA.hasChanged(hashCode())) {
+    //   resetValues();
+    // }
 
-    if (kG.hasChanged(hashCode())) {
-      resetValues();
-    }
+    // if (kG.hasChanged(hashCode())) {
+    //   resetValues();
+    // }
 
     inputs.rollerConnected =
         StatusSignal.isAllGood(
@@ -191,6 +194,7 @@ public class IntakeIOTalonFX implements IntakeIO {
     inputs.pivotTemp = pivotTemperature.getValue();
   }
 
+  @SuppressWarnings("unused")
   private void resetValues() {
     Slot0Configs slot0Configs = new Slot0Configs();
     slot0Configs.withKP(kP.getAsDouble());

@@ -30,7 +30,6 @@ import org.littletonrobotics.junction.Logger;
 public class ShooterIOTalonFX implements ShooterIO {
   private final TalonFX shooter;
 
-  @SuppressWarnings("unused")
   private final VelocityVoltage velocityVoltage;
 
   // Status Signals
@@ -100,31 +99,7 @@ public class ShooterIOTalonFX implements ShooterIO {
     inputs.temp = temp.getValueAsDouble();
     inputs.positionRadPerSec = position.getValueAsDouble();
     inputs.setpoint = setpoint;
-    inputs.atSetpoint = MathUtil.isNear(setpoint, velocity.getValue().in(RadiansPerSecond), 30.0);
-
-    if (kd.hasChanged(hashCode())) {
-      resetValues();
-    }
-
-    if (kv.hasChanged(hashCode())) {
-      resetValues();
-    }
-
-    if (kI.hasChanged(hashCode())) {
-      resetValues();
-    }
-
-    if (ka.hasChanged(hashCode())) {
-      resetValues();
-    }
-
-    if (ks.hasChanged(hashCode())) {
-      resetValues();
-    }
-
-    if (kP.hasChanged(hashCode())) {
-      resetValues();
-    }
+    inputs.atSetpoint = MathUtil.isNear(setpoint, velocity.getValue().in(RadiansPerSecond), 25.0);
   }
 
   private void resetValues() {
