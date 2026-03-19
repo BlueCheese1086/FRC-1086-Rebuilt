@@ -602,8 +602,8 @@ public class RobotContainer {
                         .runFeed(ShooterConstants.FeederSetpoints.run.in(Volts))
                         .finallyDo(shooter::stopFeeder),
                     indexer.setVoltage(IndexerConstants.Setpoints.feed))),
-    Commands.repeatingSequence(
-        intake.setPosition(IntakeConstants.Setpoints.agitate),
-        intake.setPosition(IntakeConstants.Setpoints.deployed)));
+        Commands.repeatingSequence(
+            intake.setPosition(IntakeConstants.Setpoints.agitate),
+            intake.setPosition(IntakeConstants.Setpoints.deployed)));
   }
 }

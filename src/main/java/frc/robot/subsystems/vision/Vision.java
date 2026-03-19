@@ -62,7 +62,7 @@ public class Vision extends SubsystemBase {
   public void periodic() {
     for (int i = 0; i < io.length; i++) {
       io[i].updateInputs(inputs[i]);
-      Logger.processInputs("Vision/Camera" + Integer.toString(i), inputs[i]);
+      Logger.processInputs("Vision/Camera" + inputs[i].cameraName, inputs[i]);
     }
 
     // Initialize logging values
@@ -99,12 +99,13 @@ public class Vision extends SubsystemBase {
                     && observation.ambiguity() > maxAmbiguity) // Cannot be high ambiguity
                 || Math.abs(observation.pose().getZ())
                     > maxZError // Must have realistic Z coordinate
-                // || observation.averageTagDistance() >= averageTagDistance
+                || observation.averageTagDistance() >= averageTagDistance
+                || (observation.tagCount() == 1 && observation.averageTagDistance() >= 2.5)
                 // Must be within the field boundaries
-                || observation.pose().getX() < 0.0
-                || observation.pose().getX() > VisionConstants.fieldLayout.getFieldLength()
-                || observation.pose().getY() < 0.0
-                || observation.pose().getY() > VisionConstants.fieldLayout.getFieldWidth();
+                || observation.pose().getX() <= 0.0
+                || observation.pose().getX() >= VisionConstants.fieldLayout.getFieldLength()
+                || observation.pose().getY() <= 0.0
+                || observation.pose().getY() >= VisionConstants.fieldLayout.getFieldWidth();
 
         // Add pose to log
         robotPoses.add(observation.pose());
@@ -151,16 +152,16 @@ public class Vision extends SubsystemBase {
 
       // Log camera metadata
       Logger.recordOutput(
-          "Vision/Camera" + Integer.toString(cameraIndex) + "/TagPoses",
+          "Vision/Camera" + inputs[cameraIndex].cameraName + "/TagPoses",
           tagPoses.toArray(new Pose3d[0]));
       Logger.recordOutput(
-          "Vision/Camera" + Integer.toString(cameraIndex) + "/RobotPoses",
+          "Vision/Camera" + inputs[cameraIndex].cameraName + "/RobotPoses",
           robotPoses.toArray(new Pose3d[0]));
       Logger.recordOutput(
-          "Vision/Camera" + Integer.toString(cameraIndex) + "/RobotPosesAccepted",
+          "Vision/Camera" + inputs[cameraIndex].cameraName + "/RobotPosesAccepted",
           robotPosesAccepted.toArray(new Pose3d[0]));
       Logger.recordOutput(
-          "Vision/Camera" + Integer.toString(cameraIndex) + "/RobotPosesRejected",
+          "Vision/Camera" + inputs[cameraIndex].cameraName + "/RobotPosesRejected",
           robotPosesRejected.toArray(new Pose3d[0]));
       allTagPoses.addAll(tagPoses);
       allRobotPoses.addAll(robotPoses);

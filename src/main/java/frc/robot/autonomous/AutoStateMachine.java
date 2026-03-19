@@ -169,27 +169,27 @@ public class AutoStateMachine {
           retractIntake();
         });
   }
-  
+
   public Command startShoot(double shootTime) {
     return getShootCommand().withTimeout(shootTime);
   }
 
   public Command runFlywheel() {
-    return  Commands.run(
-                () -> {
-                  LaunchingParameters parms =
-                      LauncherCalculator.getInstance()
-                          .getParameters(
-                              () ->
-                                  (new Pose3d(drive.getPose())
-                                      .transformBy(ShooterTransforms.centerShooter)
-                                      .toPose2d()),
-                              drive::getChassisSpeeds,
-                              drive::getRotation);
-                  shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(parms.flywheelSpeed()));
-                  hood.setPosition(() -> parms.hoodAngle());
-                })
-            .until(shooter::atSetpoint);
+    return Commands.run(
+            () -> {
+              LaunchingParameters parms =
+                  LauncherCalculator.getInstance()
+                      .getParameters(
+                          () ->
+                              (new Pose3d(drive.getPose())
+                                  .transformBy(ShooterTransforms.centerShooter)
+                                  .toPose2d()),
+                          drive::getChassisSpeeds,
+                          drive::getRotation);
+              shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(parms.flywheelSpeed()));
+              hood.setPosition(() -> parms.hoodAngle());
+            })
+        .until(shooter::atSetpoint);
   }
 
   public Command stopShoot() {
@@ -240,8 +240,8 @@ public class AutoStateMachine {
                         .runFeed(ShooterConstants.FeederSetpoints.run.in(Volts))
                         .finallyDo(shooter::stopFeeder),
                     indexer.setVoltage(IndexerConstants.Setpoints.feed))),
-    Commands.repeatingSequence(
-        intake.setPosition(IntakeConstants.Setpoints.agitate),
-        intake.setPosition(IntakeConstants.Setpoints.deployed)));
+        Commands.repeatingSequence(
+            intake.setPosition(IntakeConstants.Setpoints.agitate),
+            intake.setPosition(IntakeConstants.Setpoints.deployed)));
   }
 }
