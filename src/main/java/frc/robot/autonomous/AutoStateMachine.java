@@ -239,9 +239,12 @@ public class AutoStateMachine {
                     shooter
                         .runFeed(ShooterConstants.FeederSetpoints.run.in(Volts))
                         .finallyDo(shooter::stopFeeder),
-                    indexer.setVoltage(IndexerConstants.Setpoints.feed))),
+                    indexer.setVoltage(IndexerConstants.Setpoints.feed),
+                    intake.setVoltage(IntakeConstants.Setpoints.run))),
         Commands.repeatingSequence(
             intake.setPosition(IntakeConstants.Setpoints.agitate),
-            intake.setPosition(IntakeConstants.Setpoints.deployed)));
+            Commands.waitSeconds(0.2),
+            intake.setPosition(IntakeConstants.Setpoints.deployed),
+            Commands.waitSeconds(0.2)));
   }
 }
