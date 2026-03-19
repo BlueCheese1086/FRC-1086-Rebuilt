@@ -95,32 +95,23 @@ public class AutoRoutines {
   public static Command runPath(String pathName, boolean resetPose) {
     try {
       PathPlannerPath path = PathPlannerPath.fromChoreoTrajectory(pathName);
-
       return Commands.runOnce(
               () -> {
-                // 1. Get the raw pose from the file (Blue Alliance coordinates)
                 Pose2d startPose =
                     path.getStartingHolonomicPose()
                         .orElseGet(() -> new Pose2d(path.getPoint(0).position, new Rotation2d()));
-
                 if (resetPose) {
-                  // 2. Check alliance manually for the initial setPose
                   boolean isRed = DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red;
-
                   if (isRed) {
-                    // 3. Flip the starting pose so the robot knows it is on the Red side
                     startPose = AllianceFlipUtil.apply(startPose);
                   }
-
                   kDrive.setPose(startPose);
                 }
 
                 Logger.recordOutput(
                     "Autos/Selected Path", path.getPathPoses().toArray(new Pose2d[0]));
               })
-          .andThen(
-              AutoBuilder.followPath(
-                  path)) // AutoBuilder will handle the flipping of the actual driving logic
+          .andThen(AutoBuilder.followPath(path))
           .finallyDo(kDrive::stop);
 
     } catch (Exception e) {
