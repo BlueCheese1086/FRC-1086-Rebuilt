@@ -3,6 +3,7 @@
   "robotLength": 0.811,
   "holonomicMode": true,
   "pathFolders": [
+    "autogen",
     "left paths",
     "right paths"
   ],

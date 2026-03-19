@@ -11,10 +11,12 @@ import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
-import choreo.Choreo;
 import choreo.auto.AutoFactory;
 import choreo.trajectory.SwerveSample;
 // import dev.doglog.DogLog;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -31,6 +33,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism;
 import frc.robot.autonomous.AutoStateMachine;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.util.AllianceFlipUtil;
 import java.util.function.Consumer;
 // import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
@@ -44,8 +47,8 @@ public class AutoRoutines {
     kDrive = drive;
     factory = new AutoFactory(drive::getPose, drive::setPose, run(), true, drive);
 
-    // factory.bind("startFeeder", asm.startFeeder());
-    // factory.bind("deployIntake", asm.deployIntake());
+    NamedCommands.registerCommand("deployIntake", Commands.print("Passed marker!"));
+    NamedCommands.registerCommand("startFeeder", Commands.print("Passed marker!"));
   }
   // private static final DoubleSupplier[] xSuppliers = new DoubleSupplier[]
   // {DogLog.tunable("Autos/X/P", Preferences.getDouble("Autos_X_P",
@@ -89,32 +92,69 @@ public class AutoRoutines {
     };
   }
 
-  public static Command runPath(String trajectory, boolean resetPose) {
-    return (Commands.runOnce(
-                () -> {
-                  System.out.println(trajectory);
-                  Logger.recordOutput(
-                      "Autos/Selected Path", Choreo.loadTrajectory(trajectory).get().getPoses());
-                  if (resetPose) {
-                    kDrive.setPose(
-                        Choreo.loadTrajectory(trajectory)
-                            .get()
-                            .getInitialPose(
-                                DriverStation.getAlliance()
-                                    .orElse(Alliance.Red)
-                                    .equals(Alliance.Red))
-                            .get());
+  public static Command runPath(String pathName, boolean resetPose) {
+    try {
+      PathPlannerPath path = PathPlannerPath.fromChoreoTrajectory(pathName);
+
+      return Commands.runOnce(
+              () -> {
+                // 1. Get the raw pose from the file (Blue Alliance coordinates)
+                Pose2d startPose =
+                    path.getStartingHolonomicPose()
+                        .orElseGet(() -> new Pose2d(path.getPoint(0).position, new Rotation2d()));
+
+                if (resetPose) {
+                  // 2. Check alliance manually for the initial setPose
+                  boolean isRed = DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red;
+
+                  if (isRed) {
+                    // 3. Flip the starting pose so the robot knows it is on the Red side
+                    startPose = AllianceFlipUtil.apply(startPose);
                   }
-                })
-            .andThen(factory.trajectoryCmd(trajectory)))
-        .finallyDo(
-            () -> {
-              xControl.reset();
-              yControl.reset();
-              rotControl.reset();
-              kDrive.stop();
-            });
+
+                  kDrive.setPose(startPose);
+                }
+
+                Logger.recordOutput(
+                    "Autos/Selected Path", path.getPathPoses().toArray(new Pose2d[0]));
+              })
+          .andThen(
+              AutoBuilder.followPath(
+                  path)) // AutoBuilder will handle the flipping of the actual driving logic
+          .finallyDo(kDrive::stop);
+
+    } catch (Exception e) {
+      DriverStation.reportError("Choreo Path Error: " + pathName, e.getStackTrace());
+      return Commands.none();
+    }
   }
+
+  /*public static Command runPath(String trajectory, boolean resetPose) {
+  return (Commands.runOnce(
+              () -> {
+                System.out.println(trajectory);
+                Logger.recordOutput(
+                    "Autos/Selected Path", Choreo.loadTrajectory(trajectory).get().getPoses());
+                if (resetPose) {
+                  kDrive.setPose(
+                      Choreo.loadTrajectory(trajectory)
+                          .get()
+                          .getInitialPose(
+                              DriverStation.getAlliance()
+                                  .orElse(Alliance.Red)
+                                  .equals(Alliance.Red))
+                          .get());
+                }
+              })
+          .andThen(factory.trajectoryCmd(trajectory)))
+      .finallyDo(
+          () -> {
+            xControl.reset();
+            yControl.reset();
+            rotControl.reset();
+            kDrive.stop();
+          });
+    }*/
 
   private static boolean hasWarned = false;
 
