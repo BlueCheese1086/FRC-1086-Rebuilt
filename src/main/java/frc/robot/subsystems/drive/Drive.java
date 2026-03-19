@@ -249,9 +249,10 @@ public class Drive extends SubsystemBase {
     Rotation2d[] headings = new Rotation2d[4];
     for (int i = 0; i < 4; i++) {
       headings[i] = getModuleTranslations()[i].getAngle();
+      // modules[i].runSetpoint(new SwerveModuleState(MetersPerSecond.of(1.0),
+      // Rotation2d.kCCW_Pi_2));
     }
     kinematics.resetHeadings(headings);
-    stop();
   }
 
   /** Returns a command to run a quasistatic test in the specified direction. */

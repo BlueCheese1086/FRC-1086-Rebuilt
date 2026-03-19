@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.5878192771084336,
-        "y": 0.6364819277108438
+        "x": 0.6750071326676175,
+        "y": 0.6515406562054205
       },
       "prevControl": null,
       "nextControl": {
-        "x": 0.9165704212432297,
-        "y": 1.3106843591208377
+        "x": 2.5511126961483592,
+        "y": 2.864051355206848
       },
       "isLocked": false,
       "linkedName": "RB5"
     },
     {
       "anchor": {
-        "x": 1.5494578313253013,
-        "y": 1.4451325301204816
+        "x": 2.5122967189728955,
+        "y": 2.9287446504992873
       },
       "prevControl": {
-        "x": 0.7979745162600979,
-        "y": 0.9107850302233487
+        "x": 1.5832212268679753,
+        "y": 1.9372462195618656
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,8 +33,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
+    "maxVelocity": 4.75,
+    "maxAcceleration": 4.2,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -42,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 40.29982884140442
+    "rotation": 29.939764149180824
   },
   "reversed": false,
   "folder": "right paths",

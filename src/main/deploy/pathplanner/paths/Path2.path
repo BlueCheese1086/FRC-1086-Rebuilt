@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.078,
-        "y": 5.645179775280899
+        "x": 7.7265763195435095,
+        "y": 6.810342368045649
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.9893010069210435,
-        "y": 5.1547970511245795
+        "x": 8.166490727532096,
+        "y": 6.473937232524964
       },
       "isLocked": false,
-      "linkedName": "left1"
+      "linkedName": "left11"
     },
     {
       "anchor": {
-        "x": 7.750258426966292,
-        "y": 3.5764044943820226
+        "x": 7.920656205420826,
+        "y": 4.093223965763196
       },
       "prevControl": {
-        "x": 7.571577201570167,
-        "y": 4.1964701305106615
+        "x": 7.990588829531157,
+        "y": 4.36543080533083
       },
       "nextControl": null,
       "isLocked": false,
@@ -30,17 +30,17 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.8390041493775904,
-      "rotationDegrees": -90.73281130010803
+      "waypointRelativePos": 0.16844349680170978,
+      "rotationDegrees": -125.55577445813947
     }
   ],
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 0.04591492234976105,
-      "maxWaypointRelativePos": 1.0,
+      "minWaypointRelativePos": 0.0,
+      "maxWaypointRelativePos": 0.9,
       "constraints": {
-        "maxVelocity": 1.5,
+        "maxVelocity": 0.5,
         "maxAcceleration": 1.5,
         "maxAngularVelocity": 340.0,
         "maxAngularAcceleration": 720.0,
@@ -52,8 +52,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
+    "maxVelocity": 4.75,
+    "maxAcceleration": 4.2,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -61,7 +61,7 @@
   },
   "goalEndState": {
     "velocity": 5.0,
-    "rotation": 175.6645639631217
+    "rotation": -126.1581854398084
   },
   "reversed": false,
   "folder": "left paths",

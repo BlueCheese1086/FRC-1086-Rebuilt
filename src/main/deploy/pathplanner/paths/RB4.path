@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.4618072289156623,
-        "y": 2.5488313253012054
+        "x": 3.379186875891583,
+        "y": 2.4758915834522113
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.7184013075725795,
-        "y": 1.9433360498856538
+        "x": 2.5658409908453206,
+        "y": 1.9323169551261152
       },
       "isLocked": false,
       "linkedName": "RB3"
@@ -20,8 +20,8 @@
         "y": 1.1500843373493967
       },
       "prevControl": {
-        "x": 1.1027321563724684,
-        "y": 1.0263703353760603
+        "x": 1.0439716637728487,
+        "y": 0.9782723923019191
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,22 +33,22 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 2.0,
-    "maxAcceleration": 1.0,
+    "maxVelocity": 4.75,
+    "maxAcceleration": 4.2,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0.5,
-    "rotation": 41.065217943630564
+    "velocity": 4.0,
+    "rotation": -156.92600052318866
   },
   "reversed": false,
   "folder": "right paths",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 54.064189908125144
+    "rotation": 54.06418990812515
   },
-  "useDefaultConstraints": false
+  "useDefaultConstraints": true
 }

@@ -248,7 +248,7 @@ public class RobotContainer {
     // autoChooser.addOption("Shooter Sys id", shooter.sysid(5.0, 0, "shooter"));
     autoChooser.addOption("Left Bump Auto", this.pathFindToStart("left1", false));
     autoChooser.addOption("Right Bump Auto", this.pathFindToStart("left1", true));
-    // autoChooser.addOption("Right Bump Auto (w/ outpost)", this.pathFindToStart("right1", false));
+    autoChooser.addOption("Right Bump Auto (w/ outpost)", this.pathFindToStart("right1", false));
     autoChooser.addOption(
         "Basic Shooting Auto",
         Commands.sequence(
@@ -456,7 +456,7 @@ public class RobotContainer {
                                     drive::getRotation)
                                 .driveAngle()))
                 .finallyDo(shooter::stopShooter));
-    driver.x().whileTrue(sotm());
+    // driver.x().whileTrue(sotm());
 
     // Operator Commands
     operator.leftTrigger().onTrue(intake.setVoltage(IntakeConstants.Setpoints.run));
@@ -482,6 +482,7 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     return autoChooser.get();
+    // return this.pathFindToStart("right1", false);
   }
 
   @AutoLogOutput(key = "Targetting/Distance")
@@ -492,6 +493,15 @@ public class RobotContainer {
         .relativeTo(FieldConstants.Hub.hubCenter)
         .getTranslation()
         .getNorm();
+  }
+
+  public void periodic() {
+    Logger.recordOutput(
+        "Vision Transforms/Left",
+        new Pose3d(drive.getPose()).transformBy(VisionConstants.robotToLeftCam));
+    Logger.recordOutput(
+        "Vision Transforms/Right",
+        new Pose3d(drive.getPose()).transformBy(VisionConstants.robotToRightCam));
   }
 
   public Command pathFindToStart(String pathName, boolean flip) {
@@ -524,7 +534,7 @@ public class RobotContainer {
             .finallyDo(shooter::stopAll));
     NamedCommands.registerCommand("IntakeUp", intake.setPosition(IntakeConstants.Setpoints.stowed));
     NamedCommands.registerCommand("ShootNow", getShootCommand());
-    NamedCommands.registerCommand("SOTM", sotm());
+    // NamedCommands.registerCommand("SOTM", sotm());
     Command pathFind =
         AutoBuilder.pathfindToPose(
             AllianceFlipUtil.apply(new PathPlannerAuto(pathName, flip).getStartingPose()),

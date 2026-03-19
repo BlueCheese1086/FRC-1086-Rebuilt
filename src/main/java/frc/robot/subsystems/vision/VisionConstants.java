@@ -37,15 +37,21 @@ public class VisionConstants {
   public static Transform3d robotToLeftCam =
       new Transform3d(
           -Units.inchesToMeters(12.5),
-          -Units.inchesToMeters(12),
+          Units.inchesToMeters(12),
           Units.inchesToMeters(9.85),
-          new Rotation3d(Units.degreesToRadians(180.0), -Units.degreesToRadians(165.0), Units.degreesToRadians(0)));
+          new Rotation3d(
+              Units.degreesToRadians(0.0),
+              -Units.degreesToRadians(15.0),
+              Units.degreesToRadians(180.0)));
   public static Transform3d robotToRightCam =
       new Transform3d(
           -Units.inchesToMeters(12.5),
-          Units.inchesToMeters(12),
+          -Units.inchesToMeters(12),
           Units.inchesToMeters(9.85),
-          new Rotation3d(Units.degreesToRadians(180.0), -Units.degreesToRadians(165.0), Units.degreesToRadians(0)));
+          new Rotation3d(
+              Units.degreesToRadians(0.0),
+              -Units.degreesToRadians(15.0),
+              Units.degreesToRadians(180.0)));
 
   public static double trigLinearStdDevBaseline = 2.55;
   public static double trigAngularStdDevBaseline = Double.POSITIVE_INFINITY; // Radians
