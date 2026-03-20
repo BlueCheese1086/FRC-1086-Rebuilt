@@ -74,19 +74,19 @@
           }
         },
         {
-          "type": "sequential",
+          "type": "race",
           "data": {
             "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "RB5"
-                }
-              },
               {
                 "type": "wait",
                 "data": {
                   "waitTime": 2.5
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "IntakeRun"
                 }
               }
             ]

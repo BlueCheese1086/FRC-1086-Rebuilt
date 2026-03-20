@@ -456,7 +456,7 @@ public class RobotContainer {
                                     drive::getRotation)
                                 .driveAngle()))
                 .finallyDo(shooter::stopShooter));
-    // driver.x().whileTrue(sotm());
+    driver.x().whileTrue(sotm());
 
     // Operator Commands
     operator.leftTrigger().onTrue(intake.setVoltage(IntakeConstants.Setpoints.run));
@@ -601,18 +601,19 @@ public class RobotContainer {
   private Command sotm() {
     return Commands.parallel(
         Commands.run(
-            () -> {
-              var sol =
-                  shootingManager.calculateShotSolution(
-                      drive.getPose(),
-                      drive.getChassisSpeeds(),
-                      FieldConstants.Hub.topCenterPoint,
-                      0.10,
-                      0.10);
-              shooter.setVelocitySetpoint(() -> RotationsPerSecond.of(sol.flywheelRpm / 60));
-              hood.setPosition(() -> Units.radiansToDegrees(sol.hoodPitchRad));
-            },
-            shooter),
+                () -> {
+                  var sol =
+                      shootingManager.calculateShotSolution(
+                          drive.getPose(),
+                          drive.getChassisSpeeds(),
+                          FieldConstants.Hub.topCenterPoint,
+                          0.10,
+                          0.10);
+                  shooter.setVelocitySetpoint(() -> RotationsPerSecond.of(sol.flywheelRpm / 60));
+                  hood.setPosition(() -> Units.radiansToDegrees(sol.hoodPitchRad));
+                },
+                shooter)
+            .finallyDo(shooter::stopShooter),
         DriveCommands.joystickDriveAtAngleFast(
             drive,
             () -> -driver.getLeftY(),
