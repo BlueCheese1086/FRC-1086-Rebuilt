@@ -98,9 +98,9 @@ public class AutoStateMachine {
       estimatedTime += addPathToPreview(path, previewPoses);
       autoCommands =
           autoCommands.andThen(
-              AutoRoutines.runPath(path, isFirstPath).deadlineFor(deployIntake(), intake()),
-              Commands.waitSeconds(intakeTime));
-      estimatedTime += intakeTime;
+              AutoRoutines.runPath(path, isFirstPath).deadlineFor(deployIntake(), intake()));
+              //Commands.waitSeconds(intakeTime));
+      //estimatedTime += intakeTime;
       currentLocation = intakePos;
     } else {
       String entryPath = currentLocation + "_" + nzEntry;
@@ -111,9 +111,9 @@ public class AutoStateMachine {
       autoCommands =
           autoCommands.andThen(
               AutoRoutines.runPath(entryPath, isFirstPath),
-              AutoRoutines.runPath(intakePath, false).deadlineFor(deployIntake(), intake()),
-              Commands.waitSeconds(intakeTime));
-      estimatedTime += intakeTime;
+              AutoRoutines.runPath(intakePath, false).deadlineFor(deployIntake(), intake()));
+              //Commands.waitSeconds(intakeTime));
+      //estimatedTime += intakeTime;
       currentLocation = intakePos;
     }
 
