@@ -258,7 +258,7 @@ public record ChoreoTraj(
 	public static final ChoreoTraj db_crn = new ChoreoTraj(
 	    "db_crn",
 	    OptionalInt.empty(),
-	    1.9291,
+	    2.01252,
 	    new Pose2d(4.6, 5.5, Rotation2d.fromRadians(-0.79)),
 	    new Pose2d(8.7, 4, Rotation2d.fromRadians(-0.79))
 	);
@@ -272,7 +272,7 @@ public record ChoreoTraj(
 	public static final ChoreoTraj db_dcn = new ChoreoTraj(
 	    "db_dcn",
 	    OptionalInt.empty(),
-	    0.52311,
+	    0.67467,
 	    new Pose2d(4.6, 5.5, Rotation2d.fromRadians(-0.79)),
 	    new Pose2d(6, 5.5, Rotation2d.fromRadians(3.14))
 	);
@@ -293,7 +293,7 @@ public record ChoreoTraj(
 	public static final ChoreoTraj db_dnrn = new ChoreoTraj(
 	    "db_dnrn",
 	    OptionalInt.empty(),
-	    1.52423,
+	    1.73964,
 	    new Pose2d(4.6, 5.5, Rotation2d.fromRadians(-0.79)),
 	    new Pose2d(8.7, 5.2, Rotation2d.fromRadians(-0.79))
 	);
@@ -307,35 +307,35 @@ public record ChoreoTraj(
 	public static final ChoreoTraj db_ocn = new ChoreoTraj(
 	    "db_ocn",
 	    OptionalInt.empty(),
-	    1.12461,
+	    1.2372,
 	    new Pose2d(4.6, 5.5, Rotation2d.fromRadians(-0.79)),
 	    new Pose2d(6, 2.5, Rotation2d.fromRadians(3.14))
 	);
 	public static final ChoreoTraj db_ofrn = new ChoreoTraj(
 	    "db_ofrn",
 	    OptionalInt.empty(),
-	    2.55492,
+	    2.66576,
 	    new Pose2d(4.6, 5.5, Rotation2d.fromRadians(-0.79)),
 	    new Pose2d(8.7, 1.6, Rotation2d.fromRadians(-0.79))
 	);
 	public static final ChoreoTraj db_ofsn = new ChoreoTraj(
 	    "db_ofsn",
 	    OptionalInt.empty(),
-	    1.33452,
+	    1.81477,
 	    new Pose2d(4.6, 5.5, Rotation2d.fromRadians(-0.79)),
 	    new Pose2d(7.7, 2, Rotation2d.fromRadians(0.4))
 	);
 	public static final ChoreoTraj db_onrn = new ChoreoTraj(
 	    "db_onrn",
 	    OptionalInt.empty(),
-	    2.21687,
+	    2.32311,
 	    new Pose2d(4.6, 5.5, Rotation2d.fromRadians(-0.79)),
 	    new Pose2d(8.7, 2.8, Rotation2d.fromRadians(-0.79))
 	);
 	public static final ChoreoTraj db_onsn = new ChoreoTraj(
 	    "db_onsn",
 	    OptionalInt.empty(),
-	    1.02993,
+	    1.53143,
 	    new Pose2d(4.6, 5.5, Rotation2d.fromRadians(-0.79)),
 	    new Pose2d(7.7, 3.4, Rotation2d.fromRadians(0.4))
 	);
@@ -839,14 +839,14 @@ public record ChoreoTraj(
 	public static final ChoreoTraj dt_crn = new ChoreoTraj(
 	    "dt_crn",
 	    OptionalInt.empty(),
-	    1.83252,
+	    2.01873,
 	    new Pose2d(4.6, 7.4, Rotation2d.fromRadians(0)),
 	    new Pose2d(8.7, 4, Rotation2d.fromRadians(-0.79))
 	);
 	public static final ChoreoTraj dt_dcn = new ChoreoTraj(
 	    "dt_dcn",
 	    OptionalInt.empty(),
-	    0.99269,
+	    1.05614,
 	    new Pose2d(4.6, 7.4, Rotation2d.fromRadians(0)),
 	    new Pose2d(6, 5.5, Rotation2d.fromRadians(3.14))
 	);
@@ -860,21 +860,21 @@ public record ChoreoTraj(
 	public static final ChoreoTraj dt_dfsn = new ChoreoTraj(
 	    "dt_dfsn",
 	    OptionalInt.empty(),
-	    0.84563,
+	    1.27015,
 	    new Pose2d(4.6, 7.4, Rotation2d.fromRadians(0)),
 	    new Pose2d(7.7, 6, Rotation2d.fromRadians(-0.4))
 	);
 	public static final ChoreoTraj dt_dnrn = new ChoreoTraj(
 	    "dt_dnrn",
 	    OptionalInt.empty(),
-	    1.42806,
+	    1.70925,
 	    new Pose2d(4.6, 7.4, Rotation2d.fromRadians(0)),
 	    new Pose2d(8.7, 5.2, Rotation2d.fromRadians(-0.79))
 	);
 	public static final ChoreoTraj dt_dnsn = new ChoreoTraj(
 	    "dt_dnsn",
 	    OptionalInt.empty(),
-	    1.09574,
+	    1.57509,
 	    new Pose2d(4.6, 7.4, Rotation2d.fromRadians(0)),
 	    new Pose2d(7.7, 4.6, Rotation2d.fromRadians(-0.4))
 	);
@@ -888,35 +888,35 @@ public record ChoreoTraj(
 	public static final ChoreoTraj dt_ocn = new ChoreoTraj(
 	    "dt_ocn",
 	    OptionalInt.empty(),
-	    1.68891,
+	    1.73231,
 	    new Pose2d(4.6, 7.4, Rotation2d.fromRadians(0)),
 	    new Pose2d(6, 2.5, Rotation2d.fromRadians(3.14))
 	);
 	public static final ChoreoTraj dt_ofrn = new ChoreoTraj(
 	    "dt_ofrn",
 	    OptionalInt.empty(),
-	    2.2226,
+	    2.38479,
 	    new Pose2d(4.6, 7.4, Rotation2d.fromRadians(0)),
 	    new Pose2d(8.7, 1.6, Rotation2d.fromRadians(-0.79))
 	);
 	public static final ChoreoTraj dt_ofsn = new ChoreoTraj(
 	    "dt_ofsn",
 	    OptionalInt.empty(),
-	    1.85596,
+	    4.03618,
 	    new Pose2d(4.6, 7.4, Rotation2d.fromRadians(0)),
 	    new Pose2d(7.7, 2, Rotation2d.fromRadians(0.4))
 	);
 	public static final ChoreoTraj dt_onrn = new ChoreoTraj(
 	    "dt_onrn",
 	    OptionalInt.empty(),
-	    1.95957,
+	    2.13459,
 	    new Pose2d(4.6, 7.4, Rotation2d.fromRadians(0)),
 	    new Pose2d(8.7, 2.8, Rotation2d.fromRadians(-0.79))
 	);
 	public static final ChoreoTraj dt_onsn = new ChoreoTraj(
 	    "dt_onsn",
 	    OptionalInt.empty(),
-	    1.5116,
+	    2.0299,
 	    new Pose2d(4.6, 7.4, Rotation2d.fromRadians(0)),
 	    new Pose2d(7.7, 3.4, Rotation2d.fromRadians(0.4))
 	);
@@ -1231,42 +1231,42 @@ public record ChoreoTraj(
 	public static final ChoreoTraj ob_crn = new ChoreoTraj(
 	    "ob_crn",
 	    OptionalInt.empty(),
-	    1.72031,
+	    1.98403,
 	    new Pose2d(4.6, 2.5, Rotation2d.fromRadians(0.79)),
 	    new Pose2d(8.7, 4, Rotation2d.fromRadians(-0.79))
 	);
 	public static final ChoreoTraj ob_dcn = new ChoreoTraj(
 	    "ob_dcn",
 	    OptionalInt.empty(),
-	    1.12493,
+	    1.19254,
 	    new Pose2d(4.6, 2.5, Rotation2d.fromRadians(0.79)),
 	    new Pose2d(6, 5.5, Rotation2d.fromRadians(3.14))
 	);
 	public static final ChoreoTraj ob_dfrn = new ChoreoTraj(
 	    "ob_dfrn",
 	    OptionalInt.empty(),
-	    2.1771,
+	    2.47785,
 	    new Pose2d(4.6, 2.5, Rotation2d.fromRadians(0.79)),
 	    new Pose2d(8.7, 6.4, Rotation2d.fromRadians(-0.79))
 	);
 	public static final ChoreoTraj ob_dfsn = new ChoreoTraj(
 	    "ob_dfsn",
 	    OptionalInt.empty(),
-	    1.28886,
+	    1.71591,
 	    new Pose2d(4.6, 2.5, Rotation2d.fromRadians(0.79)),
 	    new Pose2d(7.7, 6, Rotation2d.fromRadians(-0.4))
 	);
 	public static final ChoreoTraj ob_dnrn = new ChoreoTraj(
 	    "ob_dnrn",
 	    OptionalInt.empty(),
-	    1.99588,
+	    2.27209,
 	    new Pose2d(4.6, 2.5, Rotation2d.fromRadians(0.79)),
 	    new Pose2d(8.7, 5.2, Rotation2d.fromRadians(-0.79))
 	);
 	public static final ChoreoTraj ob_dnsn = new ChoreoTraj(
 	    "ob_dnsn",
 	    OptionalInt.empty(),
-	    0.992,
+	    1.34706,
 	    new Pose2d(4.6, 2.5, Rotation2d.fromRadians(0.79)),
 	    new Pose2d(7.7, 4.6, Rotation2d.fromRadians(-0.4))
 	);
@@ -1280,7 +1280,7 @@ public record ChoreoTraj(
 	public static final ChoreoTraj ob_ocn = new ChoreoTraj(
 	    "ob_ocn",
 	    OptionalInt.empty(),
-	    0.52339,
+	    0.77143,
 	    new Pose2d(4.6, 2.5, Rotation2d.fromRadians(0.79)),
 	    new Pose2d(6, 2.5, Rotation2d.fromRadians(3.14))
 	);
@@ -1301,7 +1301,7 @@ public record ChoreoTraj(
 	public static final ChoreoTraj ob_onrn = new ChoreoTraj(
 	    "ob_onrn",
 	    OptionalInt.empty(),
-	    1.48511,
+	    1.75351,
 	    new Pose2d(4.6, 2.5, Rotation2d.fromRadians(0.79)),
 	    new Pose2d(8.7, 2.8, Rotation2d.fromRadians(-0.79))
 	);
@@ -1812,49 +1812,49 @@ public record ChoreoTraj(
 	public static final ChoreoTraj ot_crn = new ChoreoTraj(
 	    "ot_crn",
 	    OptionalInt.empty(),
-	    1.64271,
+	    2.03452,
 	    new Pose2d(4.6, 0.6, Rotation2d.fromRadians(0)),
 	    new Pose2d(8.7, 4, Rotation2d.fromRadians(-0.79))
 	);
 	public static final ChoreoTraj ot_dcn = new ChoreoTraj(
 	    "ot_dcn",
 	    OptionalInt.empty(),
-	    1.63039,
+	    1.69544,
 	    new Pose2d(4.6, 0.6, Rotation2d.fromRadians(0)),
 	    new Pose2d(6, 5.5, Rotation2d.fromRadians(3.14))
 	);
 	public static final ChoreoTraj ot_dfrn = new ChoreoTraj(
 	    "ot_dfrn",
 	    OptionalInt.empty(),
-	    2.17885,
+	    2.59743,
 	    new Pose2d(4.6, 0.6, Rotation2d.fromRadians(0)),
 	    new Pose2d(8.7, 6.4, Rotation2d.fromRadians(-0.79))
 	);
 	public static final ChoreoTraj ot_dfsn = new ChoreoTraj(
 	    "ot_dfsn",
 	    OptionalInt.empty(),
-	    1.84927,
+	    2.21727,
 	    new Pose2d(4.6, 0.6, Rotation2d.fromRadians(0)),
 	    new Pose2d(7.7, 6, Rotation2d.fromRadians(-0.4))
 	);
 	public static final ChoreoTraj ot_dnrn = new ChoreoTraj(
 	    "ot_dnrn",
 	    OptionalInt.empty(),
-	    1.96323,
+	    2.33111,
 	    new Pose2d(4.6, 0.6, Rotation2d.fromRadians(0)),
 	    new Pose2d(8.7, 5.2, Rotation2d.fromRadians(-0.79))
 	);
 	public static final ChoreoTraj ot_dnsn = new ChoreoTraj(
 	    "ot_dnsn",
 	    OptionalInt.empty(),
-	    1.47222,
+	    2.04009,
 	    new Pose2d(4.6, 0.6, Rotation2d.fromRadians(0)),
 	    new Pose2d(7.7, 4.6, Rotation2d.fromRadians(-0.4))
 	);
 	public static final ChoreoTraj ot_ocn = new ChoreoTraj(
 	    "ot_ocn",
 	    OptionalInt.empty(),
-	    0.9374,
+	    1.06108,
 	    new Pose2d(4.6, 0.6, Rotation2d.fromRadians(0)),
 	    new Pose2d(6, 2.5, Rotation2d.fromRadians(3.14))
 	);
@@ -1868,21 +1868,21 @@ public record ChoreoTraj(
 	public static final ChoreoTraj ot_ofsn = new ChoreoTraj(
 	    "ot_ofsn",
 	    OptionalInt.empty(),
-	    0.85476,
+	    1.27498,
 	    new Pose2d(4.6, 0.6, Rotation2d.fromRadians(0)),
 	    new Pose2d(7.7, 2, Rotation2d.fromRadians(0.4))
 	);
 	public static final ChoreoTraj ot_onrn = new ChoreoTraj(
 	    "ot_onrn",
 	    OptionalInt.empty(),
-	    1.32794,
+	    1.69984,
 	    new Pose2d(4.6, 0.6, Rotation2d.fromRadians(0)),
 	    new Pose2d(8.7, 2.8, Rotation2d.fromRadians(-0.79))
 	);
 	public static final ChoreoTraj ot_onsn = new ChoreoTraj(
 	    "ot_onsn",
 	    OptionalInt.empty(),
-	    1.09271,
+	    1.68592,
 	    new Pose2d(4.6, 0.6, Rotation2d.fromRadians(0)),
 	    new Pose2d(7.7, 3.4, Rotation2d.fromRadians(0.4))
 	);
