@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.564051355206847,
-        "y": 2.7734807417974334
+        "x": 2.344,
+        "y": 2.67
       },
       "prevControl": null,
       "nextControl": {
-        "x": -0.11652191624973751,
-        "y": 1.02770476356276
+        "x": -0.3365732714565848,
+        "y": 0.9242240217653266
       },
       "isLocked": false,
       "linkedName": "RB3"
@@ -53,7 +53,7 @@
   "folder": "right paths",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 39.42780219603621
+    "rotation": 31.534999999999997
   },
   "useDefaultConstraints": true
 }

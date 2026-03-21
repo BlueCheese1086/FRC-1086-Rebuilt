@@ -66,9 +66,6 @@ public class IntakeIOTalonFX implements IntakeIO {
     pivot = new TalonFX(RobotMap.IntakeMap.pivot, RobotMap.systemBus);
     roller = new TalonFX(RobotMap.IntakeMap.roller, RobotMap.systemBus);
 
-    config.Voltage.PeakForwardVoltage = IntakeConstants.VoltageLimits.peakForwardVoltage.in(Volts);
-    config.Voltage.PeakReverseVoltage = IntakeConstants.VoltageLimits.peakReverseVoltage.in(Volts);
-
     config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
     config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
@@ -92,6 +89,8 @@ public class IntakeIOTalonFX implements IntakeIO {
     config.Feedback.SensorToMechanismRatio = IntakeConstants.Mechanical.gearing;
     config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
     config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    config.Voltage.PeakForwardVoltage = IntakeConstants.VoltageLimits.peakForwardVoltage.in(Volts);
+    config.Voltage.PeakReverseVoltage = IntakeConstants.VoltageLimits.peakReverseVoltage.in(Volts);
 
     config.MotionMagic.MotionMagicAcceleration =
         maxPivotVelocity.per(Second).in(RotationsPerSecondPerSecond);
@@ -147,31 +146,31 @@ public class IntakeIOTalonFX implements IntakeIO {
         pivotTemperature);
 
     // if (kP.hasChanged(hashCode())) {
-    //   resetValues();
+    // resetValues();
     // }
 
     // if (kI.hasChanged(hashCode())) {
-    //   resetValues();
+    // resetValues();
     // }
 
     // if (kD.hasChanged(hashCode())) {
-    //   resetValues();
+    // resetValues();
     // }
 
     // if (kV.hasChanged(hashCode())) {
-    //   resetValues();
+    // resetValues();
     // }
 
     // if (kS.hasChanged(hashCode())) {
-    //   resetValues();
+    // resetValues();
     // }
 
     // if (kA.hasChanged(hashCode())) {
-    //   resetValues();
+    // resetValues();
     // }
 
     // if (kG.hasChanged(hashCode())) {
-    //   resetValues();
+    // resetValues();
     // }
 
     inputs.rollerConnected =

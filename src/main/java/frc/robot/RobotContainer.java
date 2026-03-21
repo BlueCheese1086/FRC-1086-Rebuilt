@@ -126,7 +126,7 @@ public class RobotContainer {
 
   private final CommandXboxController operator = new CommandXboxController(1);
 
-  private Pose2d[] backStartPose = new Pose2d[1];
+  //   private Pose2d[] backStartPose = new Pose2d[1];
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -262,7 +262,7 @@ public class RobotContainer {
                               drive.getRotation()));
                     },
                     drive)
-                .finallyDo(drive::stopWithX)
+                .finallyDo(drive::stop)
                 .withTimeout(0.75),
             intake.setPosition(IntakeConstants.Setpoints.deployed),
             Commands.parallel(
@@ -456,7 +456,7 @@ public class RobotContainer {
                                     drive::getRotation)
                                 .driveAngle()))
                 .finallyDo(shooter::stopShooter));
-    driver.x().whileTrue(sotm());
+    // driver.x().whileTrue(sotm());
 
     // Operator Commands
     operator.leftTrigger().onTrue(intake.setVoltage(IntakeConstants.Setpoints.run));
@@ -482,7 +482,6 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     return autoChooser.get();
-    // return this.pathFindToStart("right1", false);
   }
 
   @AutoLogOutput(key = "Targetting/Distance")

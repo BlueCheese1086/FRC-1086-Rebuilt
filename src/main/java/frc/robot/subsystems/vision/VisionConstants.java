@@ -26,14 +26,14 @@ public class VisionConstants {
       };
 
   // Multipliers to apply for MegaTag 2 observations
-  public static double linearStdDevMegatag2Factor = 0.5; // More stable than full 3D solve
+  public static double linearStdDevMegatag2Factor = 0.45; // More stable than full 3D solve
   public static double angularStdDevMegatag2Factor =
       Double.POSITIVE_INFINITY; // No rotation data available
   public static AprilTagFieldLayout fieldLayout =
       AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
   // public static AprilTagFieldLayout fieldLayout;
   //   AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
-//hi
+  // hi
   public static Transform3d robotToLeftCam =
       new Transform3d(
           -Units.inchesToMeters(12.5),
@@ -56,7 +56,7 @@ public class VisionConstants {
   public static double trigLinearStdDevBaseline = 2.55;
   public static double trigAngularStdDevBaseline = Double.POSITIVE_INFINITY; // Radians
 
-  public static double multitagLinearStdDevBaseline = 0.6858; // Meters
+  public static double multitagLinearStdDevBaseline = 1.5; // Meters
   public static double multitagAngularStdDevBaseline = 0.03; // Radians
 
   public static double averageTagDistance = 4.5;
