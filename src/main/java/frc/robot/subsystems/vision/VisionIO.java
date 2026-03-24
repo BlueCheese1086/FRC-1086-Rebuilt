@@ -22,6 +22,20 @@ public interface VisionIO {
     public int[] tagIds = new int[0];
   }
 
+  // public static record rejectionReason(
+  //     boolean tagCount,
+  //     boolean singleTagMaxAmbiguity,
+  //     boolean ZLimits,
+  //     boolean averageDist,
+  //     boolean singleTagDist,
+  //     boolean farOffFieldX,
+  //     boolean farOffFieldY,
+  //     boolean behindDriverX,
+  //     boolean behindDriverY,
+  //     boolean timestamp,
+  //     PoseObservationType type,
+  //     Pose3d pose) {}
+
   /** Represents the angle to a simple target, not used for pose estimation. */
   public static record TargetObservation(Rotation2d tx, Rotation2d ty) {}
 

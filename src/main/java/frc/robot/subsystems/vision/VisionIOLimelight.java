@@ -32,7 +32,7 @@ public class VisionIOLimelight implements VisionIO {
   private final DoubleSubscriber tySubscriber;
   private final DoubleArraySubscriber megatag1Subscriber;
   private final DoubleArraySubscriber megatag2Subscriber;
-
+  private final String name;
   /**
    * Creates a new VisionIOLimelight.
    *
@@ -49,12 +49,14 @@ public class VisionIOLimelight implements VisionIO {
     megatag1Subscriber = table.getDoubleArrayTopic("botpose_wpiblue").subscribe(new double[] {});
     megatag2Subscriber =
         table.getDoubleArrayTopic("botpose_orb_wpiblue").subscribe(new double[] {});
+    this.name = name;
   }
 
   @Override
   public void updateInputs(VisionIOInputs inputs) {
     // Update connection status based on whether an update has been seen in the last
     // 250ms
+    inputs.cameraName = name;
     inputs.connected =
         ((RobotController.getFPGATime() - latencySubscriber.getLastChange()) / 1000) < 250;
 

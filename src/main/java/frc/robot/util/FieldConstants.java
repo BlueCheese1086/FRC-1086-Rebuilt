@@ -18,6 +18,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 
 /**
@@ -56,10 +57,10 @@ public class FieldConstants {
         defaultAprilTagType.getTagPose(4).get().getX() + Hub.width / 2.0;
     public static final double oppAllianceZone = defaultAprilTagType.getTagPose(10).get().getX();
 
-    public static boolean inAllianceZone(Pose2d pose) {
+    public static boolean inAllianceZone(Supplier<Pose2d> pose) {
       return AllianceFlipUtil.shouldFlip()
-          ? pose.getX() > allianceZone
-          : pose.getX() < allianceZone;
+          ? pose.get().getX() > allianceZone
+          : pose.get().getX() < allianceZone;
     }
   }
 
