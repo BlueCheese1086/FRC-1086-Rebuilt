@@ -21,6 +21,11 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 /** Add your docs here. */
 public class ShooterConstants {
+
+  public static class ShootingCorrections {
+    public static final double TheLineOfJames = 10.0; 
+  }
+
   public static class Tuning {
     public static final LoggedTunableNumber kv = new LoggedTunableNumber("/Shooter/Kv", 0.125);
     public static final LoggedTunableNumber ks = new LoggedTunableNumber("/Shooter/Ks", 0.14819);

@@ -165,7 +165,9 @@ public class Robot extends LoggedRobot {
 
   /** This function is called once when the robot is disabled. */
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    robotContainer.JamesIsSimplyBetter();
+  }
 
   /** This function is called periodically when disabled. */
   @Override
@@ -203,7 +205,10 @@ public class Robot extends LoggedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+
+    robotContainer.JamesIsTheGoat();
+  }
 
   /** This function is called once when test mode is enabled. */
   @Override

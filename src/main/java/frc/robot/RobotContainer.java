@@ -83,6 +83,9 @@ import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants;
+import frc.robot.util.PoseMath;
+
+import java.lang.reflect.Field;
 import java.util.Set;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -125,6 +128,8 @@ public class RobotContainer {
   private final CommandXboxController driver = new CommandXboxController(0);
 
   private final CommandXboxController operator = new CommandXboxController(1);
+
+  private boolean WeLikeJames = true;
 
   private Pose2d[] backStartPose = new Pose2d[1];
 
@@ -417,10 +422,21 @@ public class RobotContainer {
 
     driver
         .y()
+        .whileFalse(
+            Commands.parallel(
+                Commands.run(
+                    () -> {
+                      WeLikeJames = true;
+                    })));
+    
+   
+    driver
+        .y()
         .whileTrue(
             Commands.parallel(
                     Commands.run(
                         () -> {
+                          WeLikeJames = false;
                           LaunchingParameters parms =
                               LauncherCalculator.getInstance()
                                   .getParameters(
@@ -431,8 +447,12 @@ public class RobotContainer {
                                       drive::getChassisSpeeds,
                                       drive::getRotation);
                           //   shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(350.0));
+                          if (PoseMath.getDistanceToTarget(drive.getPose(), FieldConstants.Hub.hubCenter) > ShooterConstants.ShootingCorrections.TheLineOfJames) {
+                            shooter.setVelocitySetpoint(
+                              () -> RadiansPerSecond.of(parms.flywheelSpeed() + 10));
+                          } else {
                           shooter.setVelocitySetpoint(
-                              () -> RadiansPerSecond.of(parms.flywheelSpeed()));
+                              () -> RadiansPerSecond.of(parms.flywheelSpeed())); }
                           hood.setPosition(() -> parms.hoodAngle());
 
                           Logger.recordOutput("Shoot Parms/ Hood Angle", parms.hoodAngle());
@@ -493,6 +513,43 @@ public class RobotContainer {
         .relativeTo(FieldConstants.Hub.hubCenter)
         .getTranslation()
         .getNorm();
+  }
+
+  public void JamesIsSimplyBetter() {
+    shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(0));
+  }
+
+  public void JamesIsTheGoat() {
+    if (FieldConstants.LinesVertical.inAllianceZone(drive.getPose())) {
+      LaunchingParameters parms =
+          LauncherCalculator.getInstance()
+              .getParameters(
+                  () ->
+                      (new Pose3d(drive.getPose())
+                          .transformBy(ShooterTransforms.centerShooter)
+                          .toPose2d()),
+                  drive::getChassisSpeeds,
+                  drive::getRotation);
+      if (WeLikeJames) {
+        shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(100));
+      }
+      hood.setPosition(() -> parms.hoodAngle());
+    } else {
+      if (!WeLikeJames) {
+        LaunchingParameters parms =
+            LauncherCalculator.getInstance()
+                .getParameters(
+                    () ->
+                        (new Pose3d(drive.getPose())
+                            .transformBy(ShooterTransforms.centerShooter)
+                            .toPose2d()),
+                    drive::getChassisSpeeds,
+                    drive::getRotation);
+        shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(parms.flywheelSpeed()));
+      } else {
+        shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(0));
+      }
+    }
   }
 
   public void periodic() {
