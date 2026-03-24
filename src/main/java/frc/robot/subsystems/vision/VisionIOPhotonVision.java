@@ -100,7 +100,7 @@ public class VisionIOPhotonVision implements VisionIO {
           poseObservations.add(
               new PoseObservation(
                   result.getTimestampSeconds(), // Timestamp
-                  new Pose3d(robotPose.toPose2d()), // 3D pose estimate
+                  robotPose, // 3D pose estimate
                   target.poseAmbiguity, // Ambiguity
                   1, // Tag count
                   cameraToTarget.getTranslation().getNorm(), // Average tag distance

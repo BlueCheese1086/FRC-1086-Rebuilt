@@ -207,8 +207,10 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVision("backLeft", VisionConstants.robotToLeftCam, driveAngle),
-                new VisionIOPhotonVision("backRight", VisionConstants.robotToRightCam, driveAngle),
+                new VisionIOPhotonVision(
+                    "backLeft", VisionConstants.robotToLeftCam, drive::getRotation),
+                new VisionIOPhotonVision(
+                    "backRight", VisionConstants.robotToRightCam, drive::getRotation),
                 new VisionIO() {});
         shooter = new Shooter(new FeederIO() {}, new ShooterIO() {});
         intake = new Intake(new IntakeIO() {});
