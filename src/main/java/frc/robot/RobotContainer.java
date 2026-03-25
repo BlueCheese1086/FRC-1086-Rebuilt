@@ -451,7 +451,7 @@ public class RobotContainer {
                             if (PoseMath.getDistanceToTarget(
                                     drive.getPose(), FieldConstants.Hub.hubCenter)
                                 > ShooterConstants.ShootingCorrections.TheJamesierLineOfJames) {
-                              shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(425));
+                              shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(430));
                             } else {
                               shooter.setVelocitySetpoint(
                                   () -> RadiansPerSecond.of(parms.flywheelSpeed() + 10));
