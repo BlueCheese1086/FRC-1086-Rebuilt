@@ -49,6 +49,7 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.hood.Hood;
+import frc.robot.subsystems.hood.HoodConstants;
 import frc.robot.subsystems.hood.HoodIO;
 import frc.robot.subsystems.hood.HoodIOServo;
 import frc.robot.subsystems.hood.HoodIOSim;
@@ -84,8 +85,6 @@ import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants;
 import frc.robot.util.PoseMath;
-
-import java.lang.reflect.Field;
 import java.util.Set;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -428,8 +427,7 @@ public class RobotContainer {
                     () -> {
                       WeLikeJames = true;
                     })));
-    
-   
+
     driver
         .y()
         .whileTrue(
@@ -447,12 +445,21 @@ public class RobotContainer {
                                       drive::getChassisSpeeds,
                                       drive::getRotation);
                           //   shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(350.0));
-                          if (PoseMath.getDistanceToTarget(drive.getPose(), FieldConstants.Hub.hubCenter) > ShooterConstants.ShootingCorrections.TheLineOfJames) {
-                            shooter.setVelocitySetpoint(
-                              () -> RadiansPerSecond.of(parms.flywheelSpeed() + 10));
+                          if (PoseMath.getDistanceToTarget(
+                                  drive.getPose(), FieldConstants.Hub.hubCenter)
+                              > ShooterConstants.ShootingCorrections.TheLineOfJames) {
+                            if (PoseMath.getDistanceToTarget(
+                                    drive.getPose(), FieldConstants.Hub.hubCenter)
+                                > ShooterConstants.ShootingCorrections.TheJamesierLineOfJames) {
+                              shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(425));
+                            } else {
+                              shooter.setVelocitySetpoint(
+                                  () -> RadiansPerSecond.of(parms.flywheelSpeed() + 10));
+                            }
                           } else {
-                          shooter.setVelocitySetpoint(
-                              () -> RadiansPerSecond.of(parms.flywheelSpeed())); }
+                            shooter.setVelocitySetpoint(
+                                () -> RadiansPerSecond.of(parms.flywheelSpeed()));
+                          }
                           hood.setPosition(() -> parms.hoodAngle());
 
                           Logger.recordOutput("Shoot Parms/ Hood Angle", parms.hoodAngle());
@@ -548,6 +555,7 @@ public class RobotContainer {
         shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(parms.flywheelSpeed()));
       } else {
         shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(0));
+        hood.setAngle(HoodConstants.Setpoints.passAngle);
       }
     }
   }

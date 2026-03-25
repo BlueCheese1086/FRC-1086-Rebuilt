@@ -23,7 +23,8 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 public class ShooterConstants {
 
   public static class ShootingCorrections {
-    public static final double TheLineOfJames = 10.0; 
+    public static final double TheLineOfJames = 3.0;
+    public static final double TheJamesierLineOfJames = 3.5;
   }
 
   public static class Tuning {
