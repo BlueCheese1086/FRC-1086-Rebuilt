@@ -83,6 +83,8 @@ import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants;
+import frc.robot.util.PoseMath;
+
 import java.util.Set;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -121,12 +123,14 @@ public class RobotContainer {
   @SuppressWarnings("unused")
   private Supplier<Rotation2d> driveAngle = () -> Rotation2d.kZero;
 
+  private boolean manualOverride = false;
+
   // Controller
   private final CommandXboxController driver = new CommandXboxController(0);
 
   private final CommandXboxController operator = new CommandXboxController(1);
 
-  private Pose2d[] backStartPose = new Pose2d[1];
+  // private Pose2d[] backStartPose = new Pose2d[1];
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -205,8 +209,10 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIO() {},
-                new VisionIO() {},
+                new VisionIOPhotonVision(
+                    "backLeft", VisionConstants.robotToLeftCam, drive::getRotation),
+                new VisionIOPhotonVision(
+                    "backRight", VisionConstants.robotToRightCam, drive::getRotation),
                 new VisionIO() {});
         shooter = new Shooter(new FeederIO() {}, new ShooterIO() {});
         intake = new Intake(new IntakeIO() {});
@@ -222,25 +228,28 @@ public class RobotContainer {
     // Shooting manager uses drive pose/speeds for SOTM calculations
     shootingManager =
         new ShootingManager(drive::getPose, drive::getChassisSpeeds, drive::getRotation);
-
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices");
     ppCommands = new PathPlannerCommands();
     // Set up SysId routines
     // autoChooser.addOption(
-    //     "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
+    // "Drive Wheel Radius Characterization",
+    // DriveCommands.wheelRadiusCharacterization(drive));
     // autoChooser.addOption(
-    //     "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
+    // "Drive Simple FF Characterization",
+    // DriveCommands.feedforwardCharacterization(drive));
     // autoChooser.addOption(
-    //     "Drive SysId (Quasistatic Forward)",
-    //     drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+    // "Drive SysId (Quasistatic Forward)",
+    // drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
     // autoChooser.addOption(
-    //     "Drive SysId (Quasistatic Reverse)",
-    //     drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+    // "Drive SysId (Quasistatic Reverse)",
+    // drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
     // autoChooser.addOption(
-    //     "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
+    // "Drive SysId (Dynamic Forward)",
+    // drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     // autoChooser.addOption(
-    //     "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    // "Drive SysId (Dynamic Reverse)",
+    // drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     autoChooser.addOption("auto builder", automanager.getSelectedAuto());
 
     // autoChooser.addOption("Intake Pivot SysId", intake.sysId());
@@ -262,7 +271,7 @@ public class RobotContainer {
                               drive.getRotation()));
                     },
                     drive)
-                .finallyDo(drive::stopWithX)
+                .finallyDo(drive::stop)
                 .withTimeout(0.75),
             intake.setPosition(IntakeConstants.Setpoints.deployed),
             Commands.parallel(
@@ -311,8 +320,9 @@ public class RobotContainer {
             drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
 
     // hood.setDefaultCommand(
-    //     Commands.run(
-    //         () -> hood.setPosition(() -> HoodConstants.Targeting.hoodAngle.getAsDouble()),
+    // Commands.run(
+    // () -> hood.setPosition(() ->
+    // HoodConstants.Targeting.hoodAngle.getAsDouble()),
     // hood));
 
     driver
@@ -392,17 +402,18 @@ public class RobotContainer {
                     .finallyDo(shooter::stopShooter),
                 Commands.runOnce(() -> hood.setPosition(() -> 64.0))));
 
-    // What i think is better and safer is a known trench shot. like 1678, they cant be defended
+    // What i think is better and safer is a known trench shot. like 1678, they cant
+    // be defended
     // there
     // driver
-    //     .a()
-    //     .whileTrue(
-    //         Commands.parallel(
-    //             Commands.run(
-    //                     () -> shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(385)),
-    //                     shooter)
-    //                     .finallyDo(shooter::stopShooter),
-    //             Commands.runOnce(() -> hood.setPosition(() -> 67.0))));
+    // .a()
+    // .whileTrue(
+    // Commands.parallel(
+    // Commands.run(
+    // () -> shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(385)),
+    // shooter)
+    // .finallyDo(shooter::stopShooter),
+    // Commands.runOnce(() -> hood.setPosition(() -> 67.0))));
 
     // Passing
     driver
@@ -430,9 +441,9 @@ public class RobotContainer {
                                               .toPose2d()),
                                       drive::getChassisSpeeds,
                                       drive::getRotation);
-                          //   shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(350.0));
+                          // shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(350.0));
                           shooter.setVelocitySetpoint(
-                              () -> RadiansPerSecond.of(parms.flywheelSpeed()));
+                              () -> RadiansPerSecond.of((PoseMath.getDistanceToTarget(drive.getPose(), AllianceFlipUtil.apply(FieldConstants.Hub.hubCenter)) < Units.inchesToMeters(137.76) ? 375 : 425)));
                           hood.setPosition(() -> parms.hoodAngle());
 
                           Logger.recordOutput("Shoot Parms/ Hood Angle", parms.hoodAngle());
@@ -482,7 +493,6 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     return autoChooser.get();
-    // return this.pathFindToStart("right1", false);
   }
 
   @AutoLogOutput(key = "Targetting/Distance")
@@ -496,12 +506,37 @@ public class RobotContainer {
   }
 
   public void periodic() {
+    manualOverride = driver.a().getAsBoolean();
     Logger.recordOutput(
         "Vision Transforms/Left",
         new Pose3d(drive.getPose()).transformBy(VisionConstants.robotToLeftCam));
     Logger.recordOutput(
         "Vision Transforms/Right",
         new Pose3d(drive.getPose()).transformBy(VisionConstants.robotToRightCam));
+
+    if (FieldConstants.LinesVertical.inAllianceZone(drive::getPose) && !manualOverride) {
+      hood.setPosition(
+          () ->
+              LauncherCalculator.getInstance()
+                  .getParameters(
+                      () ->
+                          (new Pose3d(drive.getPose())
+                              .transformBy(ShooterTransforms.centerShooter)
+                              .toPose2d()),
+                      drive::getChassisSpeeds,
+                      drive::getRotation)
+                  .hoodAngle());
+        Logger.recordOutput("Hood Automatic/Desired Position", () ->
+              LauncherCalculator.getInstance()
+                  .getParameters(
+                      () ->
+                          (new Pose3d(drive.getPose())
+                              .transformBy(ShooterTransforms.centerShooter)
+                              .toPose2d()),
+                      drive::getChassisSpeeds,
+                      drive::getRotation)
+                  .hoodAngle());
+    }
   }
 
   public Command pathFindToStart(String pathName, boolean flip) {
@@ -601,18 +636,19 @@ public class RobotContainer {
   private Command sotm() {
     return Commands.parallel(
         Commands.run(
-            () -> {
-              var sol =
-                  shootingManager.calculateShotSolution(
-                      drive.getPose(),
-                      drive.getChassisSpeeds(),
-                      FieldConstants.Hub.topCenterPoint,
-                      0.10,
-                      0.10);
-              shooter.setVelocitySetpoint(() -> RotationsPerSecond.of(sol.flywheelRpm / 60));
-              hood.setPosition(() -> Units.radiansToDegrees(sol.hoodPitchRad));
-            },
-            shooter),
+                () -> {
+                  var sol =
+                      shootingManager.calculateShotSolution(
+                          drive.getPose(),
+                          drive.getChassisSpeeds(),
+                          FieldConstants.Hub.topCenterPoint,
+                          0.10,
+                          0.10);
+                  shooter.setVelocitySetpoint(() -> RotationsPerSecond.of(sol.flywheelRpm / 60));
+                  hood.setPosition(() -> Units.radiansToDegrees(sol.hoodPitchRad));
+                },
+                shooter)
+            .finallyDo(shooter::stopShooter),
         DriveCommands.joystickDriveAtAngleFast(
             drive,
             () -> -driver.getLeftY(),

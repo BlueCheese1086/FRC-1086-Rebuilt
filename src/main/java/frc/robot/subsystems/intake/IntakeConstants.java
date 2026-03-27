@@ -24,7 +24,7 @@ public class IntakeConstants {
 
     public static LoggedTunableNumber kS = new LoggedTunableNumber("Pivot/FF/kS", 0.42893);
     public static LoggedTunableNumber kG = new LoggedTunableNumber("Pivot/FF/kG", 0.3871);
-    public static LoggedTunableNumber kV = new LoggedTunableNumber("Pivot/FF/kV", 2.7997);
+    public static LoggedTunableNumber kV = new LoggedTunableNumber("Pivot/FF/kV", 2.1997);
     public static LoggedTunableNumber kA = new LoggedTunableNumber("Pivot/FF/kA", 2.7468);
   }
 
@@ -35,8 +35,8 @@ public class IntakeConstants {
 
   public static class VoltageLimits {
     public static final Voltage peakForwardVoltage =
-        Volts.of(12); // is this rollers or is this pivot, both - martin
-    public static final Voltage peakReverseVoltage = Volts.of(-12);
+        Volts.of(3.0); // is this rollers or is this pivot, both - martin
+    public static final Voltage peakReverseVoltage = Volts.of(-4.0);
   }
 
   public static class Setpoints {

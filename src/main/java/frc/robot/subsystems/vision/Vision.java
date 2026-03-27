@@ -19,6 +19,7 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.vision.VisionIO.PoseObservation;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
 import java.util.LinkedList;
 import java.util.List;
@@ -73,6 +74,8 @@ public class Vision extends SubsystemBase {
 
     // Loop over cameras
     for (int cameraIndex = 0; cameraIndex < io.length; cameraIndex++) {
+      // System.out.println(inputs[cameraIndex].cameraName);
+
       // Update disconnected alert
       disconnectedAlerts[cameraIndex].set(!inputs[cameraIndex].connected);
 
@@ -89,9 +92,11 @@ public class Vision extends SubsystemBase {
           tagPoses.add(tagPose.get());
         }
       }
-
+      // rejectionReason[] rejections =
+      //     new rejectionReason[inputs[cameraIndex].poseObservations.length];
+      // int rejectionId = 0;
       // Loop over pose observations
-      for (var observation : inputs[cameraIndex].poseObservations) {
+      for (PoseObservation observation : inputs[cameraIndex].poseObservations) {
         // Check whether to reject pose
         boolean rejectPose =
             observation.tagCount() == 0 // Must have at least one tag
@@ -105,8 +110,24 @@ public class Vision extends SubsystemBase {
                 || observation.pose().getX() <= 0.0
                 || observation.pose().getX() >= VisionConstants.fieldLayout.getFieldLength()
                 || observation.pose().getY() <= 0.0
-                || observation.pose().getY() >= VisionConstants.fieldLayout.getFieldWidth();
+                || observation.pose().getY() >= VisionConstants.fieldLayout.getFieldWidth()
+                || !inputs[cameraIndex].connected;
+        // rejections[rejectionId] =
+        //     new rejectionReason(
+        //         observation.tagCount() == 0,
+        //         (observation.tagCount() == 1 && observation.ambiguity() > maxAmbiguity),
+        //         Math.abs(observation.pose().getZ()) > maxZError,
+        //         observation.averageTagDistance() >= averageTagDistance,
+        //         (observation.tagCount() == 1 && observation.averageTagDistance() >= 2.5),
+        //         observation.pose().getX() >= VisionConstants.fieldLayout.getFieldLength(),
+        //         observation.pose().getY() >= VisionConstants.fieldLayout.getFieldWidth(),
+        //         observation.pose().getX() <= 0.0,
+        //         observation.pose().getY() <= 0.0,
+        //         !MathUtil.isNear(Timer.getFPGATimestamp(), observation.timestamp(), 0.5),
+        //         observation.type(),
+        //         observation.pose());
 
+        // rejectionId++;
         // Add pose to log
         robotPoses.add(observation.pose());
         if (rejectPose) {
@@ -149,7 +170,7 @@ public class Vision extends SubsystemBase {
             observation.timestamp(),
             VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev));
       }
-
+      // Logger.recordOutput("Vision/Camera " + cameraIndex + "/Rejections", rejections);
       // Log camera metadata
       Logger.recordOutput(
           "Vision/Camera" + inputs[cameraIndex].cameraName + "/TagPoses",

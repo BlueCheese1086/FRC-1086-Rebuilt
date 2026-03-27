@@ -134,13 +134,13 @@ public class Superstructure extends SubsystemBase {
     stateRequests.put(
         stateTriggers
             .get(State.shoot)
-            .and(() -> !FieldConstants.LinesVertical.inAllianceZone(drive.getPose())),
+            .and(() -> !FieldConstants.LinesVertical.inAllianceZone(() -> drive.getPose())),
         State.holding);
 
     stateRequests.put(
         stateTriggers
             .get(State.holding)
-            .and(() -> FieldConstants.LinesVertical.inAllianceZone(drive.getPose())),
+            .and(() -> FieldConstants.LinesVertical.inAllianceZone(() -> drive.getPose())),
         State.shoot);
     stateRequests.put(
         ControllerLayout.intakeRequest.and(
@@ -331,7 +331,7 @@ public class Superstructure extends SubsystemBase {
     stateTriggers
         .get(State.pass)
         .and(ControllerLayout.scoreRequest)
-        .and(() -> (!FieldConstants.LinesVertical.inAllianceZone(drivePose.get())))
+        .and(() -> (!FieldConstants.LinesVertical.inAllianceZone(() -> drivePose.get())))
         .whileTrue(
             Commands.parallel(
                 indexer.setVoltage(IndexerConstants.Setpoints.feed),

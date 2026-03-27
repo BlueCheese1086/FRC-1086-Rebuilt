@@ -137,7 +137,7 @@ public class Robot extends LoggedRobot {
       }
     }
 
-    RobotController.setBrownoutVoltage(5.5);
+    RobotController.setBrownoutVoltage(7.0);
 
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
@@ -147,7 +147,7 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically during all modes. */
   @Override
   public void robotPeriodic() {
-    robotContainer.periodic();
+    // robotContainer.periodic();
     // Optionally switch the thread to high priority to improve loop
     // timing (see the template project documentation for details)
     Threads.setCurrentThreadPriority(true, 99);
