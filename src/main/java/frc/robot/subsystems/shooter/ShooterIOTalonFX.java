@@ -45,8 +45,6 @@ public class ShooterIOTalonFX implements ShooterIO {
 
   public ShooterIOTalonFX(int id, boolean inverted) {
     shooter = new TalonFX(id, RobotMap.systemBus);
-    // added .withUseTimesync(true) to velocity voltage, but not sure if it will cause issues with
-    // the way we are using them, will test and remove if it does
     velocityVoltage =
         new VelocityVoltage(0.0).withEnableFOC(true).withSlot(0).withUseTimesync(true);
 
@@ -84,7 +82,6 @@ public class ShooterIOTalonFX implements ShooterIO {
     BaseStatusSignal.setUpdateFrequencyForAll(
         50.0, acceleration, position, statorCurrent, supplyCurrent, temp, volts);
     shooter.optimizeBusUtilization();
-    Logger.recordOutput("Robot Map/Shooter Pro", shooter.getIsProLicensed().getValueAsDouble());
   }
 
   @Override
