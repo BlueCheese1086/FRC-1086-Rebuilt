@@ -15,6 +15,7 @@ import static frc.robot.subsystems.intake.IntakeConstants.PID.*;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
@@ -22,6 +23,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -143,6 +145,7 @@ public class IntakeIOTalonFX implements IntakeIO {
     PhoenixUtil.tryUntilOk(5, () -> rollerLeft.optimizeBusUtilization());
     PhoenixUtil.tryUntilOk(5, () -> rollerRight.optimizeBusUtilization());
     PhoenixUtil.tryUntilOk(5, () -> pivot.optimizeBusUtilization());
+    rollerRight.setControl(new Follower(rollerLeft.getDeviceID(), MotorAlignmentValue.Opposed));
   }
 
   @Override
@@ -160,13 +163,16 @@ public class IntakeIOTalonFX implements IntakeIO {
         pivotStator,
         pivotTemperature);
 
-
     inputs.rollerLeftConnected =
         StatusSignal.isAllGood(
-            rollerVelocity, rollerLeftVoltage, rollerLeftSupply, rollerLeftStator, rollerLeftTemperature);
+            rollerVelocity,
+            rollerLeftVoltage,
+            rollerLeftSupply,
+            rollerLeftStator,
+            rollerLeftTemperature);
     inputs.rollerRightConnected =
         StatusSignal.isAllGood(
-          rollerRightVoltage, rollerRightSupply, rollerRightStator, rollerRightTemperature);
+            rollerRightVoltage, rollerRightSupply, rollerRightStator, rollerRightTemperature);
     inputs.rollerVelocity = rollerVelocity.getValue();
     inputs.rollerLeftAppliedVoltage = rollerLeftVoltage.getValue();
     inputs.rollerLeftStator = rollerLeftStator.getValue();
@@ -214,7 +220,6 @@ public class IntakeIOTalonFX implements IntakeIO {
   @Override
   public void setVoltage(Voltage applied) {
     rollerLeft.setControl(applyVoltage.withOutput(applied));
-    rollerRight.setControl(applyVoltage.withOutput(applied.unaryMinus()));
 
     if (applied.magnitude() == 0) {
       rollerLeft.stopMotor();
@@ -224,7 +229,7 @@ public class IntakeIOTalonFX implements IntakeIO {
 
   @Override
   public void setVoltageTest(Voltage applied, boolean left) {
-    if (left) { 
+    if (left) {
       rollerLeft.setControl(applyVoltage.withOutput(applied));
     } else {
       rollerRight.setControl(applyVoltage.withOutput(applied.unaryMinus()));

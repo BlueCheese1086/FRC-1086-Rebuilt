@@ -12,8 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
-import java.util.stream.BaseStream;
-
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
@@ -98,18 +96,21 @@ public class VisionIOPhotonFused implements VisionIO {
           Pose3d bestTarget = pnpBestTarget.get().estimatedPose;
           Pose3d closestReference = closestToReference.get().estimatedPose;
           Logger.recordOutput("Vision/" + name + "/Pose Estimation/Trig", trigPose);
-          Logger.recordOutput(
-              "Vision/" + name + "/Pose Estimation/Lowest Ambiguity", lowestAmb);
-          Logger.recordOutput(
-              "Vision/" + name + "/Pose Estimation/Best Target", bestTarget);
-          Logger.recordOutput(
-              "Vision/" + name + "/Pose Estimation/closest", closestReference);
+          Logger.recordOutput("Vision/" + name + "/Pose Estimation/Lowest Ambiguity", lowestAmb);
+          Logger.recordOutput("Vision/" + name + "/Pose Estimation/Best Target", bestTarget);
+          Logger.recordOutput("Vision/" + name + "/Pose Estimation/closest", closestReference);
           ArrayList<Pose2d> acceptedPoses = new ArrayList<Pose2d>();
-          Pose2d[] poses = new Pose2d[] {trigPose.toPose2d(),lowestAmb.toPose2d(),bestTarget.toPose2d(),closestReference.toPose2d()};
-          for (int i=0; i<poses.length; i++) {
+          Pose2d[] poses =
+              new Pose2d[] {
+                trigPose.toPose2d(),
+                lowestAmb.toPose2d(),
+                bestTarget.toPose2d(),
+                closestReference.toPose2d()
+              };
+          for (int i = 0; i < poses.length; i++) {
             if (poses[i].getX() < 0) {}
           }
-          
+
         } else if (trig.isPresent()) {
           System.out.println("Got Trignometry");
           Pose3d trigPose = trig.get().estimatedPose;
@@ -117,8 +118,7 @@ public class VisionIOPhotonFused implements VisionIO {
         } else if (pnpLowestAmb.isPresent()) {
           System.out.println("Got Lowest Ambiguity");
           Pose3d lowestAmb = trig.get().estimatedPose;
-          Logger.recordOutput(
-              "Vision/" + name + "/Pose Estimation/Lowest Ambiguity", lowestAmb);
+          Logger.recordOutput("Vision/" + name + "/Pose Estimation/Lowest Ambiguity", lowestAmb);
         }
       }
     }
