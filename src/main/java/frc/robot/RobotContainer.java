@@ -84,7 +84,6 @@ import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants;
 import frc.robot.util.PoseMath;
-
 import java.util.Set;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -443,7 +442,15 @@ public class RobotContainer {
                                       drive::getRotation);
                           // shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(350.0));
                           shooter.setVelocitySetpoint(
-                              () -> RadiansPerSecond.of((PoseMath.getDistanceToTarget(drive.getPose(), AllianceFlipUtil.apply(FieldConstants.Hub.hubCenter)) < Units.inchesToMeters(137.76) ? 375 : 425)));
+                              () ->
+                                  RadiansPerSecond.of(
+                                      (PoseMath.getDistanceToTarget(
+                                                  drive.getPose(),
+                                                  AllianceFlipUtil.apply(
+                                                      FieldConstants.Hub.hubCenter))
+                                              < Units.inchesToMeters(137.76)
+                                          ? 375
+                                          : 425)));
                           hood.setPosition(() -> parms.hoodAngle());
 
                           Logger.recordOutput("Shoot Parms/ Hood Angle", parms.hoodAngle());
@@ -526,16 +533,17 @@ public class RobotContainer {
                       drive::getChassisSpeeds,
                       drive::getRotation)
                   .hoodAngle());
-        Logger.recordOutput("Hood Automatic/Desired Position", () ->
-              LauncherCalculator.getInstance()
-                  .getParameters(
-                      () ->
-                          (new Pose3d(drive.getPose())
-                              .transformBy(ShooterTransforms.centerShooter)
-                              .toPose2d()),
-                      drive::getChassisSpeeds,
-                      drive::getRotation)
-                  .hoodAngle());
+      Logger.recordOutput(
+          "Hood Automatic/Desired Position",
+          LauncherCalculator.getInstance()
+              .getParameters(
+                  () ->
+                      (new Pose3d(drive.getPose())
+                          .transformBy(ShooterTransforms.centerShooter)
+                          .toPose2d()),
+                  drive::getChassisSpeeds,
+                  drive::getRotation)
+              .hoodAngle());
     }
   }
 

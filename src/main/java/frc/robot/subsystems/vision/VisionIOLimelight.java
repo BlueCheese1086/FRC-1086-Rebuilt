@@ -98,7 +98,7 @@ public class VisionIOLimelight implements VisionIO {
               rawSample.value[9],
 
               // Observation type
-              PoseObservationType.MEGATAG_1));
+              PoseObservationType.LIMELIGHT_MEGATAG_1));
     }
     for (var rawSample : megatag2Subscriber.readQueue()) {
       if (rawSample.value.length == 0) continue;
@@ -123,7 +123,7 @@ public class VisionIOLimelight implements VisionIO {
               rawSample.value[9],
 
               // Observation type
-              PoseObservationType.MEGATAG_2));
+              PoseObservationType.LIMELIGHT_MEGATAG_2));
     }
 
     // Save pose observations to inputs object

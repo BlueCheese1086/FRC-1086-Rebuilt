@@ -15,7 +15,7 @@ import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
 
 /** IO implementation for physics sim using PhotonVision simulator. */
-public class VisionIOPhotonVisionSim extends VisionIOPhotonVision {
+public class VisionIOPhotonVisionSim extends VisionIOPhotonFused {
   private static VisionSystemSim visionSim;
 
   private final Supplier<Pose2d> poseSupplier;
@@ -29,7 +29,7 @@ public class VisionIOPhotonVisionSim extends VisionIOPhotonVision {
    */
   public VisionIOPhotonVisionSim(
       String name, Transform3d robotToCamera, Supplier<Pose2d> poseSupplier) {
-    super(name, robotToCamera, () -> (poseSupplier.get().getRotation()));
+    super(name, robotToCamera, poseSupplier);
     this.poseSupplier = poseSupplier;
 
     // Initialize vision sim

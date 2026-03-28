@@ -31,12 +31,17 @@ public interface IntakeIO {
     public Temperature pivotTemp = Celsius.zero();
     public Voltage pivotAppliedVoltage = Volts.zero();
 
-    public boolean rollerConnected = false;
+    public boolean rollerLeftConnected = false;
+    public boolean rollerRightConnected = false;
     public AngularVelocity rollerVelocity = RadiansPerSecond.zero();
-    public Current rollerSupply = Amps.zero();
-    public Current rollerStator = Amps.zero();
-    public Temperature rollerTemp = Celsius.zero();
-    public Voltage rollerAppliedVoltage = Volts.zero();
+    public Current rollerLeftSupply = Amps.zero();
+    public Current rollerLeftStator = Amps.zero();
+    public Temperature rollerLeftTemp = Celsius.zero();
+    public Voltage rollerLeftAppliedVoltage = Volts.zero();
+    public Current rollerRightSupply = Amps.zero();
+    public Current rollerRightStator = Amps.zero();
+    public Temperature rollerRightTemp = Celsius.zero();
+    public Voltage rollerRightAppliedVoltage = Volts.zero();
   }
 
   public default void updateInputs(IntakeInputs inputs) {}

@@ -22,19 +22,19 @@ public interface VisionIO {
     public int[] tagIds = new int[0];
   }
 
-  // public static record rejectionReason(
-  //     boolean tagCount,
-  //     boolean singleTagMaxAmbiguity,
-  //     boolean ZLimits,
-  //     boolean averageDist,
-  //     boolean singleTagDist,
-  //     boolean farOffFieldX,
-  //     boolean farOffFieldY,
-  //     boolean behindDriverX,
-  //     boolean behindDriverY,
-  //     boolean timestamp,
-  //     PoseObservationType type,
-  //     Pose3d pose) {}
+  public static record rejectionReason(
+      boolean tagCount,
+      boolean singleTagMaxAmbiguity,
+      boolean ZLimits,
+      boolean averageDist,
+      boolean singleTagDist,
+      boolean farOffFieldX,
+      boolean farOffFieldY,
+      boolean behindDriverX,
+      boolean behindDriverY,
+      boolean timestamp,
+      PoseObservationType type,
+      Pose3d pose) {}
 
   /** Represents the angle to a simple target, not used for pose estimation. */
   public static record TargetObservation(Rotation2d tx, Rotation2d ty) {}
@@ -49,10 +49,15 @@ public interface VisionIO {
       PoseObservationType type) {}
 
   public static enum PoseObservationType {
-    MEGATAG_1,
-    MEGATAG_2,
-    PHOTONVISION,
-    MultiTag
+    LIMELIGHT_MEGATAG_1,
+    LIMELIGHT_MEGATAG_2,
+    PHOTONVISION_TRIG,
+    PHOTONVISION_FUSED,
+    PHOTONVISION_LOWEST_AMBIGUITY,
+    PHOTONVISION_CLOSEST_TO_REFERENCE,
+    PHOTONVISION_CONSTRAINED_PNP,
+    PHOTONVISION_SOLVE_PNP,
+    PHOTONVISION_MULTITAG
   }
 
   public default void updateInputs(VisionIOInputs inputs) {}

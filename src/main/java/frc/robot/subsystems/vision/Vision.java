@@ -9,6 +9,7 @@ package frc.robot.subsystems.vision;
 
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -18,9 +19,12 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.vision.VisionIO.PoseObservation;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
+import frc.robot.subsystems.vision.VisionIO.rejectionReason;
+
 import java.util.LinkedList;
 import java.util.List;
 import org.littletonrobotics.junction.Logger;
@@ -92,9 +96,9 @@ public class Vision extends SubsystemBase {
           tagPoses.add(tagPose.get());
         }
       }
-      // rejectionReason[] rejections =
-      //     new rejectionReason[inputs[cameraIndex].poseObservations.length];
-      // int rejectionId = 0;
+      rejectionReason[] rejections =
+          new rejectionReason[inputs[cameraIndex].poseObservations.length];
+      int rejectionId = 0;
       // Loop over pose observations
       for (PoseObservation observation : inputs[cameraIndex].poseObservations) {
         // Check whether to reject pose
@@ -112,22 +116,22 @@ public class Vision extends SubsystemBase {
                 || observation.pose().getY() <= 0.0
                 || observation.pose().getY() >= VisionConstants.fieldLayout.getFieldWidth()
                 || !inputs[cameraIndex].connected;
-        // rejections[rejectionId] =
-        //     new rejectionReason(
-        //         observation.tagCount() == 0,
-        //         (observation.tagCount() == 1 && observation.ambiguity() > maxAmbiguity),
-        //         Math.abs(observation.pose().getZ()) > maxZError,
-        //         observation.averageTagDistance() >= averageTagDistance,
-        //         (observation.tagCount() == 1 && observation.averageTagDistance() >= 2.5),
-        //         observation.pose().getX() >= VisionConstants.fieldLayout.getFieldLength(),
-        //         observation.pose().getY() >= VisionConstants.fieldLayout.getFieldWidth(),
-        //         observation.pose().getX() <= 0.0,
-        //         observation.pose().getY() <= 0.0,
-        //         !MathUtil.isNear(Timer.getFPGATimestamp(), observation.timestamp(), 0.5),
-        //         observation.type(),
-        //         observation.pose());
+        rejections[rejectionId] =
+            new rejectionReason(
+                observation.tagCount() == 0,
+                (observation.tagCount() == 1 && observation.ambiguity() > maxAmbiguity),
+                Math.abs(observation.pose().getZ()) > maxZError,
+                observation.averageTagDistance() >= averageTagDistance,
+                (observation.tagCount() == 1 && observation.averageTagDistance() >= 2.5),
+                observation.pose().getX() >= VisionConstants.fieldLayout.getFieldLength(),
+                observation.pose().getY() >= VisionConstants.fieldLayout.getFieldWidth(),
+                observation.pose().getX() <= 0.0,
+                observation.pose().getY() <= 0.0,
+                !MathUtil.isNear(Timer.getFPGATimestamp(), observation.timestamp(), 0.5),
+                observation.type(),
+                observation.pose());
 
-        // rejectionId++;
+        rejectionId++;
         // Add pose to log
         robotPoses.add(observation.pose());
         if (rejectPose) {
@@ -145,16 +149,16 @@ public class Vision extends SubsystemBase {
         double stdDevFactor =
             Math.pow(observation.averageTagDistance(), 2.0) / observation.tagCount();
         double linearStdDev =
-            (observation.type() == PoseObservationType.PHOTONVISION
+            (observation.type() == PoseObservationType.PHOTONVISION_TRIG
                     ? trigLinearStdDevBaseline
                     : multitagLinearStdDevBaseline)
                 * stdDevFactor;
         double angularStdDev =
-            (observation.type() == PoseObservationType.PHOTONVISION
+            (observation.type() == PoseObservationType.PHOTONVISION_TRIG
                     ? trigAngularStdDevBaseline
                     : multitagAngularStdDevBaseline)
                 * stdDevFactor;
-        if (observation.type() == PoseObservationType.MEGATAG_2) {
+        if (observation.type() == PoseObservationType.LIMELIGHT_MEGATAG_2) {
           linearStdDev *= linearStdDevMegatag2Factor;
           angularStdDev *= angularStdDevMegatag2Factor;
         }

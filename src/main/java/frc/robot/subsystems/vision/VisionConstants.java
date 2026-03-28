@@ -36,22 +36,22 @@ public class VisionConstants {
   // hi
   public static Transform3d robotToLeftCam =
       new Transform3d(
-          -Units.inchesToMeters(12.5),
-          Units.inchesToMeters(12),
-          Units.inchesToMeters(9.85),
+          -Units.inchesToMeters(11.073859),
+          Units.inchesToMeters(8.995264),
+          Units.inchesToMeters(11.348081),
           new Rotation3d(
-              Units.degreesToRadians(0.0),
-              -Units.degreesToRadians(15.0),
-              Units.degreesToRadians(180.0)));
+              Units.degreesToRadians(7.6307485467),
+              -Units.degreesToRadians(30.028483379),
+              Units.degreesToRadians(180.0 + 17.1270263437)));
   public static Transform3d robotToRightCam =
       new Transform3d(
-          -Units.inchesToMeters(12.5),
-          -Units.inchesToMeters(12),
-          Units.inchesToMeters(9.85),
+          -Units.inchesToMeters(11.073859),
+          -Units.inchesToMeters(8.995264),
+          Units.inchesToMeters(11.348081),
           new Rotation3d(
-              Units.degreesToRadians(0.0),
-              -Units.degreesToRadians(15.0),
-              Units.degreesToRadians(180.0)));
+              -Units.degreesToRadians(7.6307485467),
+              -Units.degreesToRadians(29.9999866973),
+              Units.degreesToRadians(180.0 - 17.1921978943)));
 
   public static double trigLinearStdDevBaseline = 2.55;
   public static double trigAngularStdDevBaseline = Double.POSITIVE_INFINITY; // Radians
