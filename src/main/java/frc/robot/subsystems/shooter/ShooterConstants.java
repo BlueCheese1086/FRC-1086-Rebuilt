@@ -33,6 +33,7 @@ public class ShooterConstants {
     public static final LoggedNetworkNumber voltageSetpoint =
         new LoggedNetworkNumber("/Tuning/Voltage Setpoint", 4.5);
   }
+
   public static class Targeting {
     public static final double minRpm = 1500.0;
     public static final double maxRpm = 6000.0;

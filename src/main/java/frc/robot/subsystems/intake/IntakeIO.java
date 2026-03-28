@@ -37,6 +37,13 @@ public interface IntakeIO {
     public Current rollerStator = Amps.zero();
     public Temperature rollerTemp = Celsius.zero();
     public Voltage rollerAppliedVoltage = Volts.zero();
+
+    public boolean roller2Connected = false;
+    public AngularVelocity roller2Velocity = RadiansPerSecond.zero();
+    public Current roller2Supply = Amps.zero();
+    public Current roller2Stator = Amps.zero();
+    public Temperature roller2Temp = Celsius.zero();
+    public Voltage roller2AppliedVoltage = Volts.zero();
   }
 
   public default void updateInputs(IntakeInputs inputs) {}
