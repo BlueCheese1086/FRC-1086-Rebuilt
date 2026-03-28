@@ -164,33 +164,6 @@ public class IntakeIOTalonFX implements IntakeIO {
         pivotStator,
         pivotTemperature);
 
-    // if (kP.hasChanged(hashCode())) {
-    // resetValues();
-    // }
-
-    // if (kI.hasChanged(hashCode())) {
-    // resetValues();
-    // }
-
-    // if (kD.hasChanged(hashCode())) {
-    // resetValues();
-    // }
-
-    // if (kV.hasChanged(hashCode())) {
-    // resetValues();
-    // }
-
-    // if (kS.hasChanged(hashCode())) {
-    // resetValues();
-    // }
-
-    // if (kA.hasChanged(hashCode())) {
-    // resetValues();
-    // }
-
-    // if (kG.hasChanged(hashCode())) {
-    // resetValues();
-    // }
 
     inputs.rollerLeftConnected =
         StatusSignal.isAllGood(

@@ -521,30 +521,30 @@ public class RobotContainer {
         "Vision Transforms/Right",
         new Pose3d(drive.getPose()).transformBy(VisionConstants.robotToRightCam));
 
-    if (FieldConstants.LinesVertical.inAllianceZone(drive::getPose) && !manualOverride) {
-      hood.setPosition(
-          () ->
-              LauncherCalculator.getInstance()
-                  .getParameters(
-                      () ->
-                          (new Pose3d(drive.getPose())
-                              .transformBy(ShooterTransforms.centerShooter)
-                              .toPose2d()),
-                      drive::getChassisSpeeds,
-                      drive::getRotation)
-                  .hoodAngle());
-      Logger.recordOutput(
-          "Hood Automatic/Desired Position",
-          LauncherCalculator.getInstance()
-              .getParameters(
-                  () ->
-                      (new Pose3d(drive.getPose())
-                          .transformBy(ShooterTransforms.centerShooter)
-                          .toPose2d()),
-                  drive::getChassisSpeeds,
-                  drive::getRotation)
-              .hoodAngle());
-    }
+    // if (FieldConstants.LinesVertical.inAllianceZone(drive::getPose) && !manualOverride) {
+    //   hood.setPosition(
+    //       () ->
+    //           LauncherCalculator.getInstance()
+    //               .getParameters(
+    //                   () ->
+    //                       (new Pose3d(drive.getPose())
+    //                           .transformBy(ShooterTransforms.centerShooter)
+    //                           .toPose2d()),
+    //                   drive::getChassisSpeeds,
+    //                   drive::getRotation)
+    //               .hoodAngle());
+    //   Logger.recordOutput(
+    //       "Hood Automatic/Desired Position",
+    //       LauncherCalculator.getInstance()
+    //           .getParameters(
+    //               () ->
+    //                   (new Pose3d(drive.getPose())
+    //                       .transformBy(ShooterTransforms.centerShooter)
+    //                       .toPose2d()),
+    //               drive::getChassisSpeeds,
+    //               drive::getRotation)
+    //           .hoodAngle());
+    // }
   }
 
   public Command pathFindToStart(String pathName, boolean flip) {
