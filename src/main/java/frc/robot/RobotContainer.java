@@ -303,6 +303,7 @@ public class RobotContainer {
                                 intake.setPosition(IntakeConstants.Setpoints.deployed),
                                 Commands.waitSeconds(0.2)))))));
     autoChooser.addOption("Outpost 1", this.pathFindToStart("outpost", false));
+    autoChooser.addOption("STBHKATTMHTCMCMY", this.pathFindToStart("BSHIGTTMMCM", false));
 
     // Configure the button bindings
     configureButtonBindings();
