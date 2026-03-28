@@ -128,6 +128,7 @@ public class RobotContainer {
   private final CommandXboxController driver = new CommandXboxController(0);
 
   private final CommandXboxController operator = new CommandXboxController(1);
+  private final CommandXboxController testing = new CommandXboxController(2);
 
   // private Pose2d[] backStartPose = new Pose2d[1];
 
@@ -489,6 +490,8 @@ public class RobotContainer {
     operator.y().whileTrue(shooter.runFeed(ShooterConstants.FeederSetpoints.run.in(Volts)));
     operator.leftBumper().whileTrue(intake.setPosition(IntakeConstants.Setpoints.deployed));
     operator.rightBumper().whileTrue(intake.setPosition(IntakeConstants.Setpoints.stowed));
+    testing.leftBumper().whileTrue(intake.setVoltageTest(IntakeConstants.Setpoints.run, true));
+    testing.rightBumper().whileTrue(intake.setVoltageTest(IntakeConstants.Setpoints.run, false));
     // operator.povUp().onTrue(climb.setPosition(ClimbConstants.extendedHeight));
     // operator.povDown().onTrue(climb.setPosition(ClimbConstants.retractedHeight));
   }
