@@ -74,6 +74,17 @@ public class Intake extends SubsystemBase {
             });
   }
 
+  public Command setVoltageTest(Voltage applied, boolean left) {
+    return Commands.run(
+            () -> {
+              io.setVoltageTest(applied, left);
+            })
+        .finallyDo(
+            () -> {
+              io.setVoltage(Volts.zero());
+            });
+  }
+
   public Command setPivotVoltage(Voltage applied) {
     return Commands.run(
             () -> {
