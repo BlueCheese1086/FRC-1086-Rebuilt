@@ -29,11 +29,10 @@ public class IntakeConstants {
     public static LoggedTunableNumber kV = new LoggedTunableNumber("Pivot/FF/kV", 2.1997);
     public static LoggedTunableNumber kA = new LoggedTunableNumber("Pivot/FF/kA", 2.7468);
 
-    public static LoggedTunableNumber rollerkv = new LoggedTunableNumber("Roller/FF/kV" , 0.0);
+    public static LoggedTunableNumber rollerkv = new LoggedTunableNumber("Roller/FF/kV", 0.0);
     public static LoggedTunableNumber rollerks = new LoggedTunableNumber("Roller/FF/ks", 0.0);
     public static LoggedTunableNumber rollerkP = new LoggedTunableNumber("Roller/PID/kP", 0.0);
     public static LoggedTunableNumber rollerkd = new LoggedTunableNumber("Roller/PID/kD", 0.0);
-
   }
 
   public static class CurrentLimits {

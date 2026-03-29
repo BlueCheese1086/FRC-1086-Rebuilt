@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.subsystems.shooter.FeederIO.FeederIO;
 import frc.robot.subsystems.shooter.FeederIO.FeederIOInputsAutoLogged;
 import frc.robot.util.AllianceFlipUtil;
+import frc.robot.util.BatteryLogger;
 import frc.robot.util.FieldConstants.Hub;
 import java.io.File;
 import java.io.FileWriter;
@@ -35,10 +36,12 @@ public class Shooter extends SubsystemBase {
   private FeederIO feederIO;
   private FeederIOInputsAutoLogged feederIOInputsAutoLogged;
   // private final File file;
+  private BatteryLogger logger;
 
-  public Shooter(FeederIO feederIO, ShooterIO... io) {
+  public Shooter(FeederIO feederIO, BatteryLogger logger, ShooterIO... io) {
     this.io = io;
     this.feederIO = feederIO;
+    this.logger = logger;
     this.feederIOInputsAutoLogged = new FeederIOInputsAutoLogged();
     inputs = new ShooterInputsAutoLogged[io.length];
     for (int i = 0; i < io.length; i++) {
@@ -153,6 +156,7 @@ public class Shooter extends SubsystemBase {
     for (int i = 0; i < io.length; i++) {
       io[i].updateInputs(inputs[i]);
       Logger.processInputs("Shooter/Flywheel" + (i + 1), inputs[i]);
+      logger.reportCurrentUsage("Shooter/Flywheel" + (i + 1), false, inputs[i].supplyCurrent);
     }
     feederIO.updateInputs(feederIOInputsAutoLogged);
     Logger.processInputs("Shooter/Feeder", feederIOInputsAutoLogged);

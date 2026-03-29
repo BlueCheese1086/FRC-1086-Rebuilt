@@ -66,6 +66,7 @@ import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.AllianceFlipUtil;
+import frc.robot.util.BatteryLogger;
 import frc.robot.util.FieldConstants;
 import frc.robot.util.PoseMath;
 import java.util.Set;
@@ -93,6 +94,7 @@ public class RobotContainer {
 
   private final ShootingManager shootingManager;
   private final PathPlannerCommands ppCommands;
+  private final BatteryLogger batteryLogger = new BatteryLogger();
 
   @SuppressWarnings("unused")
   private Supplier<Rotation2d> driveAngle = () -> Rotation2d.kZero;
@@ -121,7 +123,8 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontLeft),
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
-                new ModuleIOTalonFX(TunerConstants.BackRight));
+                new ModuleIOTalonFX(TunerConstants.BackRight),
+                batteryLogger);
 
         // vision = new Vision(drive::addVisionMeasurement, new VisionIO() {});
         vision =
@@ -133,11 +136,12 @@ public class RobotContainer {
                     "backRight", VisionConstants.robotToRightCam, drive::getRotation),
                 new VisionIOLimelight("limelight-marble", drive::getRotation));
 
-        intake = new Intake(new IntakeIOTalonFX());
-        indexer = new Indexer(new IndexerIOTalonFX());
+        intake = new Intake(new IntakeIOTalonFX(), batteryLogger);
+        indexer = new Indexer(new IndexerIOTalonFX(), batteryLogger);
         shooter =
             new Shooter(
                 new FeederIOTalonFX(RobotMap.ShooterMap.feeder),
+                batteryLogger,
                 new ShooterIOTalonFX(RobotMap.ShooterMap.left, true),
                 new ShooterIOTalonFX(RobotMap.ShooterMap.middle, true),
                 new ShooterIOTalonFX(RobotMap.ShooterMap.right, false));
@@ -152,7 +156,8 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontLeft),
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
-                new ModuleIOSim(TunerConstants.BackRight));
+                new ModuleIOSim(TunerConstants.BackRight),
+                batteryLogger);
 
         vision =
             new Vision(
@@ -161,11 +166,15 @@ public class RobotContainer {
                     "backLeft", VisionConstants.robotToLeftCam, drive::getPose),
                 new VisionIOPhotonVisionSim(
                     "backRight", VisionConstants.robotToRightCam, drive::getPose));
-        indexer = new Indexer(new IndexerIOSim());
-        intake = new Intake(new IntakeIOSim());
+        indexer = new Indexer(new IndexerIOSim(), batteryLogger);
+        intake = new Intake(new IntakeIOSim(), batteryLogger);
         shooter =
             new Shooter(
-                new FeederIOSim(), new ShooterIOSim(), new ShooterIOSim(), new ShooterIOSim());
+                new FeederIOSim(),
+                batteryLogger,
+                new ShooterIOSim(),
+                new ShooterIOSim(),
+                new ShooterIOSim());
         hood = new Hood(new HoodIOSim());
         break;
 
@@ -177,7 +186,8 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {},
-                new ModuleIO() {});
+                new ModuleIO() {},
+                batteryLogger);
 
         vision =
             new Vision(
@@ -187,9 +197,9 @@ public class RobotContainer {
                 new VisionIOPhotonVision(
                     "backRight", VisionConstants.robotToRightCam, drive::getRotation),
                 new VisionIO() {});
-        shooter = new Shooter(new FeederIO() {}, new ShooterIO() {});
-        intake = new Intake(new IntakeIO() {});
-        indexer = new Indexer(new IndexerIO() {});
+        shooter = new Shooter(new FeederIO() {}, batteryLogger, new ShooterIO() {});
+        intake = new Intake(new IntakeIO() {}, batteryLogger);
+        indexer = new Indexer(new IndexerIO() {}, batteryLogger);
         hood = new Hood(new HoodIO() {});
         break;
     }

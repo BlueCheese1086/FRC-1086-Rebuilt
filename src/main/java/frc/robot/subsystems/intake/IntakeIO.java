@@ -17,8 +17,6 @@ import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import org.littletonrobotics.junction.AutoLog;
 
-import com.ctre.phoenix6.mechanisms.DifferentialMechanism.DeviceConstructor;
-
 /** Add your docs here. */
 public interface IntakeIO {
   @AutoLog
