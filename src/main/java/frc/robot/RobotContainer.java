@@ -39,9 +39,6 @@ import frc.robot.autonomous.PathPlannerCommands;
 import frc.robot.commands.AutoRoutines;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.climb.Climb;
-import frc.robot.subsystems.climb.ClimbIO;
-import frc.robot.subsystems.climb.ClimbIOSim;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -113,8 +110,6 @@ public class RobotContainer {
 
   private final Hood hood;
 
-  @SuppressWarnings("unused")
-  private final Climb climb;
 
   private final ShootingManager shootingManager;
   private final PathPlannerCommands ppCommands;
@@ -167,7 +162,6 @@ public class RobotContainer {
                 new ShooterIOTalonFX(RobotMap.ShooterMap.middle, true),
                 new ShooterIOTalonFX(RobotMap.ShooterMap.right, false));
         hood = new Hood(new HoodIOServo());
-        climb = new Climb(new ClimbIO() {});
         break;
 
       case SIM:
@@ -193,7 +187,6 @@ public class RobotContainer {
             new Shooter(
                 new FeederIOSim(), new ShooterIOSim(), new ShooterIOSim(), new ShooterIOSim());
         hood = new Hood(new HoodIOSim());
-        climb = new Climb(new ClimbIOSim());
         break;
 
       default:
@@ -218,7 +211,6 @@ public class RobotContainer {
         intake = new Intake(new IntakeIO() {});
         indexer = new Indexer(new IndexerIO() {});
         hood = new Hood(new HoodIO() {});
-        climb = new Climb(new ClimbIO() {});
         break;
     }
 
