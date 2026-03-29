@@ -25,6 +25,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.RobotMap;
+import frc.robot.util.LoggedTunableNumber;
 import org.littletonrobotics.junction.Logger;
 
 public class ShooterIOTalonFX implements ShooterIO {
@@ -45,8 +46,6 @@ public class ShooterIOTalonFX implements ShooterIO {
 
   public ShooterIOTalonFX(int id, boolean inverted) {
     shooter = new TalonFX(id, RobotMap.systemBus);
-    // added .withUseTimesync(true) to velocity voltage, but not sure if it will cause issues with
-    // the way we are using them, will test and remove if it does
     velocityVoltage =
         new VelocityVoltage(0.0).withEnableFOC(true).withSlot(0).withUseTimesync(true);
 
@@ -100,6 +99,8 @@ public class ShooterIOTalonFX implements ShooterIO {
     inputs.positionRadPerSec = position.getValueAsDouble();
     inputs.setpoint = setpoint;
     inputs.atSetpoint = MathUtil.isNear(setpoint, velocity.getValue().in(RadiansPerSecond), 25.0);
+
+    LoggedTunableNumber.ifChanged(hashCode(), () -> resetValues(), kP, kI, kd, kv, ks, ka);
   }
 
   private void resetValues() {

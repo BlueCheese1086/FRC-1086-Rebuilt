@@ -66,7 +66,7 @@ public class IntakeIOSim implements IntakeIO {
     inputs.pivotAppliedVoltage = Volts.of(armInputVolts);
 
     inputs.rollerLeftAppliedVoltage = Volts.of(simRoller.getInputVoltage());
-    inputs.rollerVelocity = RadiansPerSecond.of(simRoller.getAngularVelocityRadPerSec());
+    inputs.rollerLeftVelocity = simRoller.getAngularVelocityRadPerSec();
   }
 
   @Override

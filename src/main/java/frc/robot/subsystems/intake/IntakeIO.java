@@ -17,6 +17,8 @@ import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import org.littletonrobotics.junction.AutoLog;
 
+import com.ctre.phoenix6.mechanisms.DifferentialMechanism.DeviceConstructor;
+
 /** Add your docs here. */
 public interface IntakeIO {
   @AutoLog
@@ -33,7 +35,7 @@ public interface IntakeIO {
 
     public boolean rollerLeftConnected = false;
     public boolean rollerRightConnected = false;
-    public AngularVelocity rollerVelocity = RadiansPerSecond.zero();
+    public double rollerLeftVelocity = 0.0;
     public Current rollerLeftSupply = Amps.zero();
     public Current rollerLeftStator = Amps.zero();
     public Temperature rollerLeftTemp = Celsius.zero();
@@ -52,9 +54,9 @@ public interface IntakeIO {
 
   public default void setVoltage(Voltage applied) {}
 
-  public default void setVoltageTest(Voltage applied, boolean left) {}
-
   public default void switchMode() {}
 
   public default void setPivotVoltage(Voltage applied) {}
+
+  public default void setRollerVelocity(AngularVelocity velocity) {}
 }

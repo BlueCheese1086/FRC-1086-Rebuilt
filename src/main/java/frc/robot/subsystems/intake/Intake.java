@@ -6,12 +6,14 @@ package frc.robot.subsystems.intake;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -61,8 +63,6 @@ public class Intake extends SubsystemBase {
         .until(this::atSetpoint);
   }
 
-  // public Command switchMode() {}
-
   public Command setVoltage(Voltage applied) {
     return Commands.run(
             () -> {
@@ -74,15 +74,12 @@ public class Intake extends SubsystemBase {
             });
   }
 
-  public Command setVoltageTest(Voltage applied, boolean left) {
-    return Commands.run(
-            () -> {
-              io.setVoltageTest(applied, left);
-            })
-        .finallyDo(
-            () -> {
-              io.setVoltage(Volts.zero());
-            });
+  public Command runVelocity(AngularVelocity velocity){
+    return this.runOnce(()-> io.setRollerVelocity(velocity));
+  }
+
+  public Command stopRoller(){
+    return this.runOnce(()-> io.setRollerVelocity(RadiansPerSecond.of(0.0)));
   }
 
   public Command setPivotVoltage(Voltage applied) {

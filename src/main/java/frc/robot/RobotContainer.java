@@ -1,16 +1,3 @@
-// Copyright 2021-2025 FRC 6328
-// http://github.com/Mechanical-Advantage
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// version 3 as published by the Free Software Foundation or
-// available in the root directory of this project.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
-
 package frc.robot;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
@@ -87,12 +74,6 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
-/**
- * This class is where the bulk of the robot should be declared. Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
- * subsystems, commands, and button mappings) should be declared here.
- */
 @SuppressWarnings("unused")
 public class RobotContainer {
   // Subsystems
@@ -109,7 +90,6 @@ public class RobotContainer {
   private final Indexer indexer;
 
   private final Hood hood;
-
 
   private final ShootingManager shootingManager;
   private final PathPlannerCommands ppCommands;
@@ -376,11 +356,6 @@ public class RobotContainer {
                 shooter.setVoltage(12.0),
                 shooter.runFeed(-12.0).finallyDo(shooter::stopShooter)));
 
-    // driver
-    // .povUp()
-    // .multiPress(2, 1.0)
-    // .whileTrue(intake.setPosition(IntakeConstants.Setpoints.stowed));
-
     driver.povUp().whileTrue(intake.setPosition(IntakeConstants.Setpoints.stowed));
 
     // Known Tower Shot
@@ -470,7 +445,7 @@ public class RobotContainer {
     // driver.x().whileTrue(sotm());
 
     // Operator Commands
-    operator.leftTrigger().onTrue(intake.setVoltage(IntakeConstants.Setpoints.run));
+    operator.leftTrigger().onTrue(intake.runVelocity(IntakeConstants.Setpoints.rollerVelocity));
     operator
         .y()
         .whileTrue(
@@ -482,8 +457,6 @@ public class RobotContainer {
     operator.y().whileTrue(shooter.runFeed(ShooterConstants.FeederSetpoints.run.in(Volts)));
     operator.leftBumper().whileTrue(intake.setPosition(IntakeConstants.Setpoints.deployed));
     operator.rightBumper().whileTrue(intake.setPosition(IntakeConstants.Setpoints.stowed));
-    testing.leftBumper().whileTrue(intake.setVoltageTest(IntakeConstants.Setpoints.run, true));
-    testing.rightBumper().whileTrue(intake.setVoltageTest(IntakeConstants.Setpoints.run, false));
     // operator.povUp().onTrue(climb.setPosition(ClimbConstants.extendedHeight));
     // operator.povDown().onTrue(climb.setPosition(ClimbConstants.retractedHeight));
   }

@@ -11,13 +11,16 @@ import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.subsystems.intake.IntakeConstants.PID.*;
+import static frc.robot.subsystems.shooter.ShooterConstants.Tuning.ks;
 
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
@@ -33,6 +36,8 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.RobotMap;
+import frc.robot.subsystems.intake.IntakeConstants.PID;
+import frc.robot.util.LoggedTunableNumber;
 import frc.robot.util.PhoenixUtil;
 import org.littletonrobotics.junction.Logger;
 
@@ -42,6 +47,7 @@ public class IntakeIOTalonFX implements IntakeIO {
   private final VoltageOut applyPivotVoltage = new VoltageOut(0.0);
   private final TorqueCurrentFOC applyCurrent = new TorqueCurrentFOC(0.0);
   private final MotionMagicVoltage motionMagic = new MotionMagicVoltage(0.0).withEnableFOC(true);
+  private final VelocityVoltage velocityVoltage = new VelocityVoltage(0.0).withEnableFOC(true);
   private final TalonFX pivot;
   private final TalonFX rollerLeft;
   private final TalonFX rollerRight;
@@ -66,8 +72,8 @@ public class IntakeIOTalonFX implements IntakeIO {
   private final StatusSignal<Temperature> pivotTemperature;
 
   // divide the max free speed by the gear ratio to get the max pviot velocity
-  private final AngularVelocity maxPivotVelocity =
-      RadiansPerSecond.of(DCMotor.getKrakenX60Foc(1).freeSpeedRadPerSec).div(50.0);
+  private final AngularVelocity maxPivotVelocity = RadiansPerSecond.of(DCMotor.getKrakenX60Foc(1).freeSpeedRadPerSec)
+      .div(50.0);
 
   public IntakeIOTalonFX() {
     pivot = new TalonFX(RobotMap.IntakeMap.pivot, RobotMap.systemBus);
@@ -79,6 +85,11 @@ public class IntakeIOTalonFX implements IntakeIO {
 
     config.CurrentLimits.SupplyCurrentLimit = IntakeConstants.CurrentLimits.maxSupply.in(Amps);
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
+
+    config.Slot1.kV = PID.rollerkv.getAsDouble();
+    config.Slot1.kS = PID.rollerks.getAsDouble();
+    config.Slot1.kP = PID.rollerkP.getAsDouble();
+    config.Slot1.kD = PID.rollerkd.getAsDouble();
 
     PhoenixUtil.tryUntilOk(5, () -> (rollerLeft.getConfigurator().apply(config, 5)));
     PhoenixUtil.tryUntilOk(5, () -> (rollerRight.getConfigurator().apply(config, 5)));
@@ -101,8 +112,7 @@ public class IntakeIOTalonFX implements IntakeIO {
     config.Voltage.PeakForwardVoltage = IntakeConstants.VoltageLimits.peakForwardVoltage.in(Volts);
     config.Voltage.PeakReverseVoltage = IntakeConstants.VoltageLimits.peakReverseVoltage.in(Volts);
 
-    config.MotionMagic.MotionMagicAcceleration =
-        maxPivotVelocity.per(Second).in(RotationsPerSecondPerSecond);
+    config.MotionMagic.MotionMagicAcceleration = maxPivotVelocity.per(Second).in(RotationsPerSecondPerSecond);
     config.MotionMagic.MotionMagicCruiseVelocity = maxPivotVelocity.in(RotationsPerSecond);
 
     PhoenixUtil.tryUntilOk(5, () -> (pivot.getConfigurator().apply(config, 5)));
@@ -163,17 +173,15 @@ public class IntakeIOTalonFX implements IntakeIO {
         pivotStator,
         pivotTemperature);
 
-    inputs.rollerLeftConnected =
-        StatusSignal.isAllGood(
-            rollerVelocity,
-            rollerLeftVoltage,
-            rollerLeftSupply,
-            rollerLeftStator,
-            rollerLeftTemperature);
-    inputs.rollerRightConnected =
-        StatusSignal.isAllGood(
-            rollerRightVoltage, rollerRightSupply, rollerRightStator, rollerRightTemperature);
-    inputs.rollerVelocity = rollerVelocity.getValue();
+    inputs.rollerLeftConnected = StatusSignal.isAllGood(
+        rollerVelocity,
+        rollerLeftVoltage,
+        rollerLeftSupply,
+        rollerLeftStator,
+        rollerLeftTemperature);
+    inputs.rollerRightConnected = StatusSignal.isAllGood(
+        rollerRightVoltage, rollerRightSupply, rollerRightStator, rollerRightTemperature);
+    inputs.rollerLeftVelocity = rollerVelocity.getValue().in(RadiansPerSecond);
     inputs.rollerLeftAppliedVoltage = rollerLeftVoltage.getValue();
     inputs.rollerLeftStator = rollerLeftStator.getValue();
     inputs.rollerLeftSupply = rollerLeftSupply.getValue();
@@ -183,20 +191,22 @@ public class IntakeIOTalonFX implements IntakeIO {
     inputs.rollerRightSupply = rollerRightSupply.getValue();
     inputs.rollerRightTemp = rollerRightTemperature.getValue();
 
-    inputs.pivotConnected =
-        StatusSignal.isAllGood(
-            pivotAngle, pivotVelocity, pivotVoltage, pivotSupply, pivotStator, pivotTemperature);
+    inputs.pivotConnected = StatusSignal.isAllGood(
+        pivotAngle, pivotVelocity, pivotVoltage, pivotSupply, pivotStator, pivotTemperature);
     inputs.pivotAngle = pivotAngle.getValue();
     inputs.pivotVelocity = pivotVelocity.getValue();
     inputs.pivotStator = pivotStator.getValue();
     inputs.pivotSupply = pivotSupply.getValue();
     inputs.pivotAppliedVoltage = pivotVoltage.getValue();
     inputs.pivotTemp = pivotTemperature.getValue();
+
+    LoggedTunableNumber.ifChanged(hashCode(), () -> resetValues(), rollerkP, rollerkd, rollerks, rollerkv);
   }
 
   @SuppressWarnings("unused")
   private void resetValues() {
     Slot0Configs slot0Configs = new Slot0Configs();
+    Slot1Configs slot1Config = new Slot1Configs();
     slot0Configs.withKP(kP.getAsDouble());
     slot0Configs.withKI(kI.getAsDouble());
     slot0Configs.withKD(kD.getAsDouble());
@@ -204,12 +214,25 @@ public class IntakeIOTalonFX implements IntakeIO {
     slot0Configs.withKA(kA.getAsDouble());
     slot0Configs.withKG(kG.getAsDouble());
     slot0Configs.withKS(kS.getAsDouble());
+    slot1Config.withKV(rollerkv.getAsDouble());
+    slot1Config.withKS(rollerks.getAsDouble());
+    slot1Config.withKP(rollerkP.getAsDouble());
+    slot1Config.withKD(rollerkd.getAsDouble());
+    rollerLeft.getConfigurator().apply(slot1Config, 0.25);
     pivot.getConfigurator().apply(slot0Configs, 0.25);
   }
 
   @Override
   public void setPosition(Angle angle) {
     pivot.setControl(motionMagic.withPosition(angle));
+  }
+
+  @Override
+  public void setRollerVelocity(AngularVelocity velocity) {
+    rollerLeft.setControl(velocityVoltage.withVelocity(velocity));
+    if (velocity.magnitude() == 0.0) {
+      rollerLeft.stopMotor();
+    }
   }
 
   @Override
@@ -221,19 +244,6 @@ public class IntakeIOTalonFX implements IntakeIO {
   public void setVoltage(Voltage applied) {
     rollerLeft.setControl(applyVoltage.withOutput(applied));
 
-    if (applied.magnitude() == 0) {
-      rollerLeft.stopMotor();
-      rollerRight.stopMotor();
-    }
-  }
-
-  @Override
-  public void setVoltageTest(Voltage applied, boolean left) {
-    if (left) {
-      rollerLeft.setControl(applyVoltage.withOutput(applied));
-    } else {
-      rollerRight.setControl(applyVoltage.withOutput(applied.unaryMinus()));
-    }
     if (applied.magnitude() == 0) {
       rollerLeft.stopMotor();
       rollerRight.stopMotor();

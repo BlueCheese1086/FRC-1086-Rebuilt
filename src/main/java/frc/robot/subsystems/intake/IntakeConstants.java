@@ -7,9 +7,11 @@ package frc.robot.subsystems.intake;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Voltage;
@@ -26,6 +28,12 @@ public class IntakeConstants {
     public static LoggedTunableNumber kG = new LoggedTunableNumber("Pivot/FF/kG", 0.3871);
     public static LoggedTunableNumber kV = new LoggedTunableNumber("Pivot/FF/kV", 2.1997);
     public static LoggedTunableNumber kA = new LoggedTunableNumber("Pivot/FF/kA", 2.7468);
+
+    public static LoggedTunableNumber rollerkv = new LoggedTunableNumber("Roller/FF/kV" , 0.0);
+    public static LoggedTunableNumber rollerks = new LoggedTunableNumber("Roller/FF/ks", 0.0);
+    public static LoggedTunableNumber rollerkP = new LoggedTunableNumber("Roller/PID/kP", 0.0);
+    public static LoggedTunableNumber rollerkd = new LoggedTunableNumber("Roller/PID/kD", 0.0);
+
   }
 
   public static class CurrentLimits {
@@ -49,6 +57,7 @@ public class IntakeConstants {
     // i wanna try slowly moving intake up to homed or stowed while shooting cuz pumping will toss
     // but not compress them towards shooter that well
     public static final Voltage run = Volts.of(-12.0);
+    public static final AngularVelocity rollerVelocity = RadiansPerSecond.of(100.0);
   }
 
   public static class Mechanical { // TODO: Update all of these with the actual values

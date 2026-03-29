@@ -6,9 +6,11 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc.robot.subsystems.shooter.ShooterConstants;
+import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 
 public class FeederIOSim implements FeederIO {
   private DCMotorSim feeder;
+  private LoggedNetworkBoolean jammed = new LoggedNetworkBoolean("/Tuning/Feeder/Jammed", false);
 
   public FeederIOSim() {
     feeder =
@@ -25,6 +27,7 @@ public class FeederIOSim implements FeederIO {
     feeder.update(0.02);
     inputs.feedAppliedVoltage = feeder.getInputVoltage();
     inputs.feedStatorCurrent = feeder.getCurrentDrawAmps();
+    inputs.isJammed = jammed.get();
   }
 
   @Override

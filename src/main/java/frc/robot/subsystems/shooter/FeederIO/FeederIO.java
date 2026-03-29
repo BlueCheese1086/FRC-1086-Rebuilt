@@ -10,6 +10,8 @@ public interface FeederIO {
     public double feedStatorCurrent = 0.0;
     public double feedSupplyCurrent = 0.0;
     public double feedTemp = 0.0;
+    public double feedVelocity = 0.0;
+    public boolean isJammed = false;
   }
 
   public default void setFeedVoltage(double volts) {}
