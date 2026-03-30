@@ -635,8 +635,8 @@ public class RobotContainer {
             .finallyDo(shooter::stopShooter),
         DriveCommands.joystickDriveAtAngleFast(
             drive,
-            () -> -driver.getLeftY(),
-            () -> -driver.getLeftX(),
+            () -> -driver.getLeftY() * 0.5, // Limit translation speed during SOTM
+            () -> -driver.getLeftX() * 0.5,
             () ->
                 shootingManager.calculateShotSolution(
                         drive.getPose(),
