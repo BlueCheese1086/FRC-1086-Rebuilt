@@ -331,7 +331,9 @@ public class RobotContainer {
                 intake.setVoltage(IntakeConstants.Setpoints.run),
                 intake.setPosition(IntakeConstants.Setpoints.deployed),
                 DriveCommands.joystickDriveSyom(
-                    drive, () -> -driver.getLeftY(), () -> -driver.getLeftX())));
+                    drive, 
+                    () -> -driver.getLeftY(), 
+                    () -> -driver.getLeftX())));
 
     driver
         .rightTrigger()
@@ -388,7 +390,7 @@ public class RobotContainer {
     // () -> shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(385)),
     // shooter)
     // .finallyDo(shooter::stopShooter),
-    // Commands.runOnce(() -> hood.setPosition(() -> 67.0))));
+    // Commands.runOnce(() -> hood.setPosition(() -> 60.0))));
 
     // Passing
     driver
@@ -645,7 +647,7 @@ public class RobotContainer {
                         0.10,
                         0.10)
                     .drivetrainHeading),
-        Commands.waitSeconds(1.0)
+        Commands.waitSeconds(0.75)
             .andThen(
                 Commands.parallel(
                     shooter
