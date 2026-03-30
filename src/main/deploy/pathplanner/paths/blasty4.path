@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.3274322396576315,
-        "y": 2.501768901569187
+        "x": 7.6687303370786495,
+        "y": 3.7496516853932587
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.9902328846751933,
-        "y": 2.5084004367072548
+        "x": 6.9141616272427875,
+        "y": 3.1373521270239904
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "b3"
     },
     {
       "anchor": {
-        "x": 5.811654778887304,
-        "y": 2.501768901569187
+        "x": 6.262,
+        "y": 2.466
       },
       "prevControl": {
-        "x": 4.600615298588188,
-        "y": 2.482188635657366
+        "x": 6.821085064574216,
+        "y": 2.9010081148711038
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "So1E"
+      "linkedName": "b4"
     }
   ],
   "rotationTargets": [],
@@ -33,7 +33,7 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3.0,
+    "maxVelocity": 4.75,
     "maxAcceleration": 4.2,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
@@ -41,14 +41,14 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 3.0,
-    "rotation": 50.143
+    "velocity": 0.0,
+    "rotation": 38.53018001482678
   },
   "reversed": false,
-  "folder": "JohnAuto",
+  "folder": "another one",
   "idealStartingState": {
-    "velocity": 0.0,
-    "rotation": 50.143
+    "velocity": 4.75,
+    "rotation": 38.96471760338772
   },
   "useDefaultConstraints": true
 }

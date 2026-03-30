@@ -45,7 +45,7 @@
     "rotation": 90.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "JohnAuto",
   "idealStartingState": {
     "velocity": 1.5,
     "rotation": 0.0

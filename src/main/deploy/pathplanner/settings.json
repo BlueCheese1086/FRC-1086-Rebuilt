@@ -3,7 +3,10 @@
   "robotLength": 0.811,
   "holonomicMode": true,
   "pathFolders": [
+    "JohnAuto",
+    "another one",
     "left paths",
+    "outpost",
     "right paths"
   ],
   "autoFolders": [],

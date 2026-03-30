@@ -9,6 +9,8 @@ package frc.robot.subsystems.drive;
 
 import static edu.wpi.first.units.Units.*;
 
+import choreo.auto.AutoFactory;
+import choreo.trajectory.SwerveSample;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
@@ -19,6 +21,7 @@ import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -31,6 +34,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
@@ -63,6 +67,7 @@ public class Drive extends SubsystemBase {
   private static final double ROBOT_MASS_KG = Units.lbsToKilograms(115.0);
   private static final double ROBOT_MOI = 6.883;
   private static final double WHEEL_COF = 1.2;
+  private static AutoFactory factory;
 
   private static final RobotConfig PP_CONFIG =
       new RobotConfig(
@@ -98,6 +103,28 @@ public class Drive extends SubsystemBase {
   private SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, Pose2d.kZero);
 
+  private ProfiledPIDController xPID =
+      new ProfiledPIDController(
+          6.0,
+          0.0,
+          0.0,
+          new Constraints(
+              getMaxLinearSpeedMetersPerSec(), Math.pow(getMaxLinearSpeedMetersPerSec(), 2)));
+  private ProfiledPIDController yPID =
+      new ProfiledPIDController(
+          6.0,
+          0.0,
+          0.0,
+          new Constraints(
+              getMaxLinearSpeedMetersPerSec(), Math.pow(getMaxLinearSpeedMetersPerSec(), 2)));
+  private ProfiledPIDController heading =
+      new ProfiledPIDController(
+          6.0,
+          0.0,
+          0.0,
+          new Constraints(
+              getMaxAngularSpeedRadPerSec(), Math.pow(getMaxAngularSpeedRadPerSec(), 2)));
+
   public Drive(
       GyroIO gyroIO,
       ModuleIO flModuleIO,
@@ -115,6 +142,8 @@ public class Drive extends SubsystemBase {
     // Usage reporting for swerve template
     HAL.report(tResourceType.kResourceType_RobotDrive, tInstances.kRobotDriveSwerve_AdvantageKit);
 
+    factory = new AutoFactory(this::getPose, this::setPose, this::followTrajectory, true, this);
+
     // Start odometry thread
     PhoenixOdometryThread.getInstance().start();
 
@@ -124,7 +153,7 @@ public class Drive extends SubsystemBase {
         this::getChassisSpeeds,
         this::runVelocity,
         new PPHolonomicDriveController(
-            new PIDConstants(6.0, 0.0, 0.0), new PIDConstants(6.0, 0.0, 0.0)),
+            new PIDConstants(5.5, 0.0, 0.0), new PIDConstants(6.0, 0.0, 0.0), 0.02),
         PP_CONFIG,
         () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
         this);
@@ -205,6 +234,18 @@ public class Drive extends SubsystemBase {
 
     // Update gyro alert
     gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
+  }
+
+  public void followTrajectory(SwerveSample sample) {
+    Pose2d currentPose = getPose();
+
+    ChassisSpeeds speeds =
+        new ChassisSpeeds(
+            sample.vx + xPID.calculate(currentPose.getX(), sample.x),
+            sample.vy + yPID.calculate(currentPose.getY(), sample.y),
+            sample.omega + heading.calculate(currentPose.getRotation().getRadians(), sample.omega));
+
+    runVelocity(speeds);
   }
 
   /**
@@ -355,5 +396,9 @@ public class Drive extends SubsystemBase {
       new Translation2d(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
       new Translation2d(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)
     };
+  }
+
+  public Command autotest() {
+    return factory.trajectoryCmd("TestingFAH");
   }
 }

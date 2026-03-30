@@ -90,7 +90,7 @@ public class VisionIOPhotonFused implements VisionIO {
             && pnpLowestAmb.isPresent()
             && pnpBestTarget.isPresent()
             && closestToReference.isPresent()) {
-          System.out.println("Got Fused Single Tag");
+          // System.out.println("Got Fused Single Tag");
           Pose3d trigPose = trig.get().estimatedPose;
           Pose3d lowestAmb = pnpLowestAmb.get().estimatedPose;
           Pose3d bestTarget = pnpBestTarget.get().estimatedPose;

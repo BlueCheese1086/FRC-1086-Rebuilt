@@ -21,7 +21,7 @@
       },
       "prevControl": {
         "x": 6.406710843373492,
-        "y": 1.2375060240963864
+        "y": 1.2375060240963867
       },
       "nextControl": null,
       "isLocked": false,
@@ -45,7 +45,7 @@
     "rotation": 67.47943439710298
   },
   "reversed": false,
-  "folder": null,
+  "folder": "JohnAuto",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 50.143

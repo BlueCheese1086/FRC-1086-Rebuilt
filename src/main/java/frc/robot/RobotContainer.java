@@ -22,7 +22,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.autonomous.Autos;
 import frc.robot.autonomous.AutosManager;
-import frc.robot.autonomous.PathPlannerCommands;
 import frc.robot.commands.AutoRoutines;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
@@ -93,7 +92,6 @@ public class RobotContainer {
   private final Hood hood;
 
   private final ShootingManager shootingManager;
-  private final PathPlannerCommands ppCommands;
   private final BatteryLogger batteryLogger = new BatteryLogger();
 
   @SuppressWarnings("unused")
@@ -212,7 +210,6 @@ public class RobotContainer {
         new ShootingManager(drive::getPose, drive::getChassisSpeeds, drive::getRotation);
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices");
-    ppCommands = new PathPlannerCommands();
     // Set up SysId routines
     // autoChooser.addOption(
     // "Drive Wheel Radius Characterization",
@@ -290,7 +287,8 @@ public class RobotContainer {
                                 intake.setPosition(IntakeConstants.Setpoints.deployed),
                                 Commands.waitSeconds(0.2)))))));
     autoChooser.addOption("Outpost 1", this.pathFindToStart("outpost", false));
-
+    autoChooser.addOption("Risky right bump auto", this.pathFindToStart("blasty", false));
+    autoChooser.addOption("Risky left bump auto", this.pathFindToStart("blasty", true));
     // Configure the button bindings
     configureButtonBindings();
   }
