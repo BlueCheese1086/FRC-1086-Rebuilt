@@ -227,12 +227,8 @@ public class ShootingManager {
     double maxPitch = Units.degreesToRadians(HoodConstants.Targeting.maxAngleDeg);
     double clampedPitchStatic = MathUtil.clamp(pitchStatic, minPitch, maxPitch);
 
-    Translation3d shooterPosition =
-        new Pose3d(estimatedRobotPose).plus(Mechanical.shooterPose).getTranslation();
     Translation3d virtualTarget3d =
         new Translation3d(virtualTarget2d.getX(), virtualTarget2d.getY(), fixedTarget.getZ());
-    Translation3d shooterToVirtualTarget = virtualTarget3d.minus(shooterPosition);
-
     Translation3d vStatic =
         new Translation3d(
             ledExitVelocity * Math.cos(clampedPitchStatic) * Math.cos(finalYaw),
@@ -242,7 +238,7 @@ public class ShootingManager {
     Translation3d vRobot = new Translation3d(launcherVelocityX, launcherVelocityY, 0.0);
 
     Translation3d vFinal = vStatic.minus(vRobot);
-    double finalPitch = Math.atan2(vStatic.getZ(), vStatic.toTranslation2d().getNorm());
+    double finalPitch = Math.atan2(vFinal.getZ(), vFinal.toTranslation2d().getNorm());
     double clampedFinalPitch = MathUtil.clamp(finalPitch, minPitch, maxPitch);
     double finalExitVelocity = vFinal.getNorm();
     double rawRpm = calculateFlywheelRpmFromExitVelocity(finalExitVelocity);

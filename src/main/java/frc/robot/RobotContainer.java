@@ -432,7 +432,7 @@ public class RobotContainer {
                           Logger.recordOutput("Shoot Parms/ Hood Angle", parms.hoodAngle());
                           Logger.recordOutput("Shoot Parms/ Drive Angle", parms.driveAngle());
                           Logger.recordOutput("Shoot Parms/ Flywheel Speed", parms.flywheelSpeed());
-                          Logger.recordOutput("Shoot Parms/Distance", parms.distance());
+                          Logger.recordOutput("Shoot Parms/ Distance", parms.distance());
                         },
                         shooter),
                     DriveCommands.joystickDriveAtAngle(
@@ -450,7 +450,7 @@ public class RobotContainer {
                                     drive::getRotation)
                                 .driveAngle()))
                 .finallyDo(shooter::stopShooter));
-    // driver.x().whileTrue(sotm());
+    driver.x().whileTrue(sotm());
 
     // Operator Commands
     operator.leftTrigger().onTrue(intake.runVelocity(IntakeConstants.Setpoints.rollerVelocity));
