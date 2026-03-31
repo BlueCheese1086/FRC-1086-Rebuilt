@@ -60,4 +60,5 @@ public class VisionConstants {
   public static double multitagAngularStdDevBaseline = 0.03; // Radians
 
   public static double averageTagDistance = 4.5;
+  public static double maxFusedDistance = 0.125;
 }
