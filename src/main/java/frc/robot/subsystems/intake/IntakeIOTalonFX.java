@@ -255,6 +255,19 @@ public class IntakeIOTalonFX implements IntakeIO {
   }
 
   @Override
+  public void setVoltageTest(Voltage applied, boolean left) {
+    if (left) {
+      rollerLeft.setControl(applyVoltage.withOutput(applied));
+    } else {
+      rollerRight.setControl(applyVoltage.withOutput(applied.unaryMinus()));
+    }
+    if (applied.magnitude() == 0) {
+      rollerLeft.stopMotor();
+      rollerRight.stopMotor();
+    }
+  }
+
+  @Override
   public void setPivotVoltage(Voltage applied) {
     Logger.recordOutput("Intake/Applied Volts", applied.in(Volts));
     pivot.setControl(applyPivotVoltage.withOutput(MathUtil.clamp(applied.in(Volts), -1, 1)));
