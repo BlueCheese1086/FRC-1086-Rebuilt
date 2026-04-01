@@ -331,9 +331,7 @@ public class RobotContainer {
                 intake.setVoltage(IntakeConstants.Setpoints.run),
                 intake.setPosition(IntakeConstants.Setpoints.deployed),
                 DriveCommands.joystickDriveSyom(
-                    drive, 
-                    () -> -driver.getLeftY(), 
-                    () -> -driver.getLeftX())));
+                    drive, () -> -driver.getLeftY(), () -> -driver.getLeftX())));
 
     driver
         .rightTrigger()
