@@ -264,6 +264,7 @@ public class IntakeIOTalonFX implements IntakeIO {
     if (applied.magnitude() == 0) {
       rollerLeft.stopMotor();
       rollerRight.stopMotor();
+      rollerRight.setControl(new Follower(rollerLeft.getDeviceID(), MotorAlignmentValue.Opposed));
     }
   }
 
