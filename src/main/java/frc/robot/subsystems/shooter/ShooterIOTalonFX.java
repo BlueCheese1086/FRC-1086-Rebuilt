@@ -98,6 +98,7 @@ public class ShooterIOTalonFX implements ShooterIO {
     inputs.temp = temp.getValueAsDouble();
     inputs.positionRadPerSec = position.getValueAsDouble();
     inputs.setpoint = setpoint;
+    inputs.acceleration = acceleration.getValueAsDouble();
     inputs.atSetpoint = MathUtil.isNear(setpoint, velocity.getValue().in(RadiansPerSecond), 25.0);
 
     LoggedTunableNumber.ifChanged(hashCode(), () -> resetValues(), kP, kI, kd, kv, ks, ka);

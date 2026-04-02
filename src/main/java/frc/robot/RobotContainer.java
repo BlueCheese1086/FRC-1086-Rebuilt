@@ -139,7 +139,6 @@ public class RobotContainer {
         shooter =
             new Shooter(
                 new FeederIOTalonFX(RobotMap.ShooterMap.feeder),
-                batteryLogger,
                 new ShooterIOTalonFX(RobotMap.ShooterMap.left, true),
                 new ShooterIOTalonFX(RobotMap.ShooterMap.middle, true),
                 new ShooterIOTalonFX(RobotMap.ShooterMap.right, false));
@@ -168,11 +167,7 @@ public class RobotContainer {
         intake = new Intake(new IntakeIOSim(), batteryLogger);
         shooter =
             new Shooter(
-                new FeederIOSim(),
-                batteryLogger,
-                new ShooterIOSim(),
-                new ShooterIOSim(),
-                new ShooterIOSim());
+                new FeederIOSim(), new ShooterIOSim(), new ShooterIOSim(), new ShooterIOSim());
         hood = new Hood(new HoodIOSim());
         break;
 
@@ -195,7 +190,7 @@ public class RobotContainer {
                 new VisionIOPhotonVision(
                     "backRight", VisionConstants.robotToRightCam, drive::getRotation),
                 new VisionIO() {});
-        shooter = new Shooter(new FeederIO() {}, batteryLogger, new ShooterIO() {});
+        shooter = new Shooter(new FeederIO() {}, new ShooterIO() {});
         intake = new Intake(new IntakeIO() {}, batteryLogger);
         indexer = new Indexer(new IndexerIO() {}, batteryLogger);
         hood = new Hood(new HoodIO() {});

@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.shooter;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
@@ -23,10 +24,10 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.subsystems.shooter.FeederIO.FeederIO;
 import frc.robot.subsystems.shooter.FeederIO.FeederIOInputsAutoLogged;
 import frc.robot.util.AllianceFlipUtil;
-import frc.robot.util.BatteryLogger;
 import frc.robot.util.FieldConstants.Hub;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -35,30 +36,28 @@ public class Shooter extends SubsystemBase {
   private ShooterIO[] io;
   private FeederIO feederIO;
   private FeederIOInputsAutoLogged feederIOInputsAutoLogged;
-  // private final File file;
-  private BatteryLogger logger;
+  private final File file;
 
-  public Shooter(FeederIO feederIO, BatteryLogger logger, ShooterIO... io) {
+  public Shooter(FeederIO feederIO, ShooterIO... io) {
     this.io = io;
     this.feederIO = feederIO;
-    this.logger = logger;
     this.feederIOInputsAutoLogged = new FeederIOInputsAutoLogged();
     inputs = new ShooterInputsAutoLogged[io.length];
     for (int i = 0; i < io.length; i++) {
       inputs[i] = new ShooterInputsAutoLogged();
     }
-    // file = new File(ShooterConstants.Targeting.FileName);
+    file = new File(ShooterConstants.Targeting.FileName);
 
-    // try (FileWriter writer = new FileWriter(file, true)) {
-    // if (file.length() == 0) {
-    // writer.write("Distance, Shooter, Angle, TOF\n");
-    // } else {
-    // clearFile(file);
-    // writer.write("Distance, Shooter, Angle, TOF\n");
-    // }
-    // } catch (IOException e) {
-    // e.printStackTrace();
-    // }
+    try (FileWriter writer = new FileWriter(file, true)) {
+      if (file.length() == 0) {
+        writer.write("Distance, Shooter, Angle, TOF\n");
+      } else {
+        clearFile(file);
+        writer.write("Distance, Shooter, Angle, TOF\n");
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   private void clearFile(File file) {
@@ -127,19 +126,19 @@ public class Shooter extends SubsystemBase {
         "File Writing/ Shooter RPM",
         Units.radiansPerSecondToRotationsPerMinute(inputs[1].velocity));
 
-    // try (FileWriter writer = new FileWriter(file, true)) {
-    // writer.append(
-    // distanceToHub
-    // + " ,"
-    // + inputs[1].velocity
-    // + " ,"
-    // + hoodAngle.in(Degrees)
-    // + " , "
-    // + tof
-    // + "\n");
-    // } catch (Exception e) {
-    // e.printStackTrace();
-    // }
+    try (FileWriter writer = new FileWriter(file, true)) {
+      writer.append(
+          distanceToHub
+              + " ,"
+              + inputs[1].velocity
+              + " ,"
+              + hoodAngle.in(Degrees)
+              + " , "
+              + tof
+              + "\n");
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   public static Pose3d[] getShooterPoses(Pose2d robotPose) {
@@ -156,18 +155,9 @@ public class Shooter extends SubsystemBase {
     for (int i = 0; i < io.length; i++) {
       io[i].updateInputs(inputs[i]);
       Logger.processInputs("Shooter/Flywheel" + (i + 1), inputs[i]);
-      logger.reportCurrentUsage("Shooter/Flywheel" + (i + 1), false, inputs[i].supplyCurrent);
     }
     feederIO.updateInputs(feederIOInputsAutoLogged);
     Logger.processInputs("Shooter/Feeder", feederIOInputsAutoLogged);
-
-    if (feederIOInputsAutoLogged.isJammed) {
-      runFeed(-12.0).schedule();
-    }
-
-    if (!feederIOInputsAutoLogged.isJammed) {
-      runFeed(0.0).schedule();
-    }
   }
 
   public Command sysid(double timeout, int i, String string) {
