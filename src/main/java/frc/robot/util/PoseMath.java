@@ -41,6 +41,15 @@ public class PoseMath {
     return finalPose;
   }
 
+  public static Pose3d average(Pose3d... poses) {
+    ArrayList<Pose3d> poseList = new ArrayList<Pose3d>(List.of(poses));
+    Pose3d finalPose = poseList.remove(poseList.size() - 1);
+    while (poseList.size() > 0) {
+      finalPose = average(finalPose, poseList.remove(poseList.size() - 1));
+    }
+    return finalPose;
+  }
+
   public static Rotation2d getOrientationToTarget(Pose2d pose, Pose2d target) {
     Translation2d diff = target.relativeTo(pose).getTranslation();
     return diff.getAngle();

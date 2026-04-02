@@ -4,10 +4,13 @@
 
 package frc.robot.subsystems.vision;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.Timer;
+import frc.robot.util.FieldConstants;
+import frc.robot.util.PoseMath;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -17,6 +20,7 @@ import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.targeting.PhotonPipelineResult;
+import org.photonvision.targeting.PhotonTrackedTarget;
 
 /** Add your docs here. */
 public class VisionIOPhotonFused implements VisionIO {
@@ -41,6 +45,7 @@ public class VisionIOPhotonFused implements VisionIO {
     List<PhotonPipelineResult> results = camera.getAllUnreadResults();
     ArrayList<PoseObservation> observations = new ArrayList<PoseObservation>();
     Logger.recordOutput("Vision/" + name + "/Results", results.size());
+    ArrayList<Integer> tagIds = new ArrayList<Integer>();
     for (PhotonPipelineResult result : results) {
       Optional<EstimatedRobotPose> estimation = poseEstimator.estimateCoprocMultiTagPose(result);
       Optional<EstimatedRobotPose> trig = poseEstimator.estimatePnpDistanceTrigSolvePose(result);
@@ -99,29 +104,83 @@ public class VisionIOPhotonFused implements VisionIO {
           Logger.recordOutput("Vision/" + name + "/Pose Estimation/Lowest Ambiguity", lowestAmb);
           Logger.recordOutput("Vision/" + name + "/Pose Estimation/Best Target", bestTarget);
           Logger.recordOutput("Vision/" + name + "/Pose Estimation/closest", closestReference);
-          ArrayList<Pose2d> acceptedPoses = new ArrayList<Pose2d>();
-          Pose2d[] poses =
-              new Pose2d[] {
-                trigPose.toPose2d(),
-                lowestAmb.toPose2d(),
-                bestTarget.toPose2d(),
-                closestReference.toPose2d()
+          ArrayList<Pose3d> acceptedPoses = new ArrayList<Pose3d>();
+          EstimatedRobotPose[] poses =
+              new EstimatedRobotPose[] {
+                trig.get(), pnpLowestAmb.get(), pnpBestTarget.get(), closestToReference.get()
               };
           for (int i = 0; i < poses.length; i++) {
-            if (poses[i].getX() < 0) {}
+            if (poses[i].estimatedPose.getX() > 0
+                && poses[i].estimatedPose.getY() > 0
+                && poses[i].estimatedPose.getX() < FieldConstants.fieldLength
+                && poses[i].estimatedPose.getY() < FieldConstants.fieldWidth
+                && result.getBestTarget().poseAmbiguity < VisionConstants.maxAmbiguity
+                && MathUtil.isNear(Timer.getFPGATimestamp(), poses[i].timestampSeconds, 0.5)) {
+              double averageDist = 0.0;
+              for (int k = 0; k < poses.length; k++) {
+                if (i != k) {
+                  averageDist +=
+                      poses[k]
+                          .estimatedPose
+                          .relativeTo(poses[i].estimatedPose)
+                          .getTranslation()
+                          .getNorm();
+                  averageDist /= 2.0;
+                }
+              }
+              boolean tooFar = averageDist >= VisionConstants.maxFusedDistance;
+              if (!tooFar) {
+                acceptedPoses.add(poses[i].estimatedPose);
+              }
+            }
           }
-
+          if (acceptedPoses.size() > 0) {
+            Pose3d estimatedPose =
+                PoseMath.average(acceptedPoses.toArray(new Pose3d[acceptedPoses.size()]));
+            observations.add(
+                new PoseObservation(
+                    result.getTimestampSeconds(),
+                    estimatedPose,
+                    result.getBestTarget().poseAmbiguity,
+                    1,
+                    result.getBestTarget().bestCameraToTarget.getTranslation().getNorm(),
+                    PoseObservationType.PHOTONVISION_FUSED));
+          }
         } else if (trig.isPresent()) {
           System.out.println("Got Trignometry");
           Pose3d trigPose = trig.get().estimatedPose;
           Logger.recordOutput("Vision/" + name + "/Pose Estimation/Trig", trigPose);
+          observations.add(
+              new PoseObservation(
+                  result.getTimestampSeconds(),
+                  trigPose,
+                  result.getBestTarget().poseAmbiguity,
+                  1,
+                  result.getBestTarget().bestCameraToTarget.getTranslation().getNorm(),
+                  PoseObservationType.PHOTONVISION_TRIG));
         } else if (pnpLowestAmb.isPresent()) {
           System.out.println("Got Lowest Ambiguity");
           Pose3d lowestAmb = trig.get().estimatedPose;
           Logger.recordOutput("Vision/" + name + "/Pose Estimation/Lowest Ambiguity", lowestAmb);
+          observations.add(
+              new PoseObservation(
+                  result.getTimestampSeconds(),
+                  lowestAmb,
+                  result.getBestTarget().poseAmbiguity,
+                  1,
+                  result.getBestTarget().bestCameraToTarget.getTranslation().getNorm(),
+                  PoseObservationType.PHOTONVISION_LOWEST_AMBIGUITY));
         }
       }
+      for (PhotonTrackedTarget target : result.targets) {
+        tagIds.add(target.fiducialId);
+      }
     }
+    int[] tags = new int[tagIds.size()];
+    for (int i = 0; i < tags.length; i++) {
+      tags[i] = tagIds.get(i);
+    }
+    inputs.tagIds = tags;
     inputs.poseObservations = observations.toArray(new PoseObservation[observations.size()]);
   }
 }
