@@ -19,9 +19,6 @@ public interface HoodIO {
     public double leftPosition;
     public boolean rightAtSetpoint;
     public double rightPosition;
-
-    public double hoodAngle;
-    public double absoulteAngle;
   }
 
   public default void updateInputs(HoodInputs inputs) {}
