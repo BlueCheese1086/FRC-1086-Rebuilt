@@ -140,6 +140,12 @@
               }
             ]
           }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "blasty9"
+          }
         }
       ]
     }
