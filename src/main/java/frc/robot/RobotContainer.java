@@ -14,8 +14,11 @@ import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -32,6 +35,7 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.hood.Hood;
+import frc.robot.subsystems.hood.HoodConstants;
 import frc.robot.subsystems.hood.HoodIO;
 import frc.robot.subsystems.hood.HoodIOServo;
 import frc.robot.subsystems.hood.HoodIOSim;
@@ -67,6 +71,7 @@ import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.BatteryLogger;
 import frc.robot.util.FieldConstants;
+import frc.robot.util.MatchTimer;
 import frc.robot.util.PoseMath;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -103,12 +108,13 @@ public class RobotContainer {
   private final CommandXboxController driver = new CommandXboxController(0);
 
   private final CommandXboxController operator = new CommandXboxController(1);
-  private final CommandXboxController testing = new CommandXboxController(2);
 
   // private Pose2d[] backStartPose = new Pose2d[1];
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
+
+  private Alliance startingAlliance = Alliance.Red;
 
   /** The container for the robot. Contains subsystems, IO devices, and commands. */
   public RobotContainer() {
@@ -294,11 +300,9 @@ public class RobotContainer {
         DriveCommands.joystickDrive(
             drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
 
-    // hood.setDefaultCommand(
-    // Commands.run(
-    // () -> hood.setPosition(() ->
-    // HoodConstants.Targeting.hoodAngle.getAsDouble()),
-    // hood));
+    hood.setDefaultCommand(
+        Commands.run(
+            () -> hood.setPosition(() -> HoodConstants.Targeting.hoodAngle.getAsDouble()), hood));
 
     driver
         .start()
@@ -453,11 +457,16 @@ public class RobotContainer {
         .y()
         .whileTrue(
             Commands.run(
-                () -> shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(375.0)), shooter))
+                () ->
+                    shooter.setVelocitySetpoint(
+                        () ->
+                            RadiansPerSecond.of(
+                                ShooterConstants.Tuning.velocitySetpoint.getAsDouble())),
+                shooter))
         .onFalse(Commands.runOnce(shooter::stopShooter));
 
     operator.b().whileTrue(indexer.setVoltage(IndexerConstants.Setpoints.feed));
-    operator.y().whileTrue(shooter.runFeed(ShooterConstants.FeederSetpoints.run.in(Volts)));
+    operator.a().whileTrue(shooter.runFeed(ShooterConstants.FeederSetpoints.run.in(Volts)));
     operator.leftBumper().whileTrue(intake.setPosition(IntakeConstants.Setpoints.deployed));
     operator.rightBumper().whileTrue(intake.setPosition(IntakeConstants.Setpoints.stowed));
     // operator.povUp().onTrue(climb.setPosition(ClimbConstants.extendedHeight));
@@ -484,6 +493,13 @@ public class RobotContainer {
   }
 
   public void periodic() {
+    Logger.recordOutput(
+        "Distance To Hub",
+        new Pose3d(drive.getPose())
+            .transformBy(ShooterTransforms.centerShooter)
+            .relativeTo(new Pose3d(FieldConstants.Hub.topCenterPoint, Rotation3d.kZero))
+            .getTranslation()
+            .getNorm());
     manualOverride = driver.a().getAsBoolean();
     Logger.recordOutput(
         "Vision Transforms/Left",
@@ -491,7 +507,13 @@ public class RobotContainer {
     Logger.recordOutput(
         "Vision Transforms/Right",
         new Pose3d(drive.getPose()).transformBy(VisionConstants.robotToRightCam));
-
+    String data = DriverStation.getGameSpecificMessage();
+    if (data.length() > 0) {
+      startingAlliance = data.charAt(0) == 'R' ? Alliance.Red : Alliance.Blue;
+    }
+    Logger.recordOutput("Hub/Game Data", DriverStation.getGameSpecificMessage());
+    Logger.recordOutput("Hub/Active", FieldConstants.Hub.isHubActive(startingAlliance));
+    Logger.recordOutput("Hub/Sim Match Time", MatchTimer.getTime());
     // if (FieldConstants.LinesVertical.inAllianceZone(drive::getPose) && !manualOverride) {
     //   hood.setPosition(
     //       () ->

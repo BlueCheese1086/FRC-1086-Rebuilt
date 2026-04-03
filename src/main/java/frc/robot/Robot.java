@@ -20,20 +20,22 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerMotorArrangement;
 import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.IterativeRobotBase;
-import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Threads;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Watchdog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.hood.HoodConstants;
 import frc.robot.util.LoggedTunableNumber;
+import frc.robot.util.MatchTimer;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.util.Arrays;
 import org.littletonrobotics.junction.LogFileUtil;
+import org.littletonrobotics.junction.LogTable;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
@@ -57,6 +59,7 @@ public class Robot extends LoggedRobot {
           ? 100000000
           : // 100 MB
           1000000000; // 1 GB
+  private WPILOGWriter writer = null;
 
   public Robot() {
     // // Record metadata
@@ -84,16 +87,18 @@ public class Robot extends LoggedRobot {
         File file = new File(LOG_DIRECTORY);
         System.out.println(
             file.exists() && file.isDirectory() ? "Logging to USB Drive" : "Logging to RoboRio");
-        Logger.addDataReceiver(
+        writer =
             new WPILOGWriter(
-                file.exists() && file.isDirectory() ? LOG_DIRECTORY : "home/lvuser/logs"));
+                file.exists() && file.isDirectory() ? LOG_DIRECTORY : "home/lvuser/logs");
+        Logger.addDataReceiver(writer);
         Logger.addDataReceiver(new NT4Publisher());
         // setupLog();
         break;
 
       case SIM:
         // Running a physics simulator, log to NT
-        // Logger.addDataReceiver(new WPILOGWriter());
+        writer = new WPILOGWriter();
+        Logger.addDataReceiver(writer);
         Logger.addDataReceiver(new NT4Publisher());
         break;
 
@@ -143,8 +148,6 @@ public class Robot extends LoggedRobot {
       }
     }
 
-    RobotController.setBrownoutVoltage(7.0);
-
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
     robotContainer = new RobotContainer();
@@ -153,6 +156,9 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically during all modes. */
   @Override
   public void robotPeriodic() {
+    if (writer != null) {
+      writer.putTable(new LogTable((long) Timer.getFPGATimestamp()).getSubtable("photonvision"));
+    }
     // robotContainer.periodic();
     // Optionally switch the thread to high priority to improve loop
     // timing (see the template project documentation for details)
@@ -172,7 +178,9 @@ public class Robot extends LoggedRobot {
 
   /** This function is called once when the robot is disabled. */
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    MatchTimer.reset();
+  }
 
   /** This function is called periodically when disabled. */
   @Override
@@ -181,6 +189,7 @@ public class Robot extends LoggedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
+    MatchTimer.start();
     autonomousCommand = robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
@@ -202,11 +211,14 @@ public class Robot extends LoggedRobot {
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
     }
+    MatchTimer.reset();
   }
 
   /** This function is called once when teleop is enabled. */
   @Override
-  public void teleopInit() {}
+  public void teleopInit() {
+    MatchTimer.start();
+  }
 
   /** This function is called periodically during operator control. */
   @Override
