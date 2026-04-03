@@ -25,8 +25,6 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.RobotMap;
-import frc.robot.util.LoggedTunableNumber;
-import org.littletonrobotics.junction.Logger;
 
 public class ShooterIOTalonFX implements ShooterIO {
   private final TalonFX shooter;
@@ -67,6 +65,7 @@ public class ShooterIOTalonFX implements ShooterIO {
     config.CurrentLimits.StatorCurrentLimit = 120.0; // arbittury
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
     config.CurrentLimits.SupplyCurrentLimit = 80.0; // arbittury
+    config.TorqueCurrent.PeakForwardTorqueCurrent = 100;
 
     tryUntilOk(5, () -> shooter.getConfigurator().apply(config));
 
@@ -80,10 +79,10 @@ public class ShooterIOTalonFX implements ShooterIO {
 
     velocity.setUpdateFrequency(250.0);
     acceleration.setUpdateFrequency(250.0);
+    supplyCurrent.setUpdateFrequency(250.0);
     BaseStatusSignal.setUpdateFrequencyForAll(
-        50.0, acceleration, position, statorCurrent, supplyCurrent, temp, volts);
+        50.0, acceleration, position, statorCurrent, temp, volts);
     shooter.optimizeBusUtilization();
-    Logger.recordOutput("Robot Map/Shooter Pro", shooter.getIsProLicensed().getValueAsDouble());
   }
 
   @Override
@@ -100,8 +99,6 @@ public class ShooterIOTalonFX implements ShooterIO {
     inputs.setpoint = setpoint;
     inputs.acceleration = acceleration.getValueAsDouble();
     inputs.atSetpoint = MathUtil.isNear(setpoint, velocity.getValue().in(RadiansPerSecond), 25.0);
-
-    LoggedTunableNumber.ifChanged(hashCode(), () -> resetValues(), kP, kI, kd, kv, ks, ka);
   }
 
   private void resetValues() {

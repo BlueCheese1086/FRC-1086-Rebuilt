@@ -22,10 +22,10 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 /** Add your docs here. */
 public class ShooterConstants {
   public static class Tuning {
-    public static final LoggedTunableNumber kv = new LoggedTunableNumber("/Shooter/Kv", 0.125);
-    public static final LoggedTunableNumber ks = new LoggedTunableNumber("/Shooter/Ks", 0.14819);
-    public static final LoggedTunableNumber ka = new LoggedTunableNumber("/Shooter/ka", 0.0024824);
-    public static final LoggedTunableNumber kP = new LoggedTunableNumber("/Shooter/kP", 0.029853);
+    public static final LoggedTunableNumber kv = new LoggedTunableNumber("/Shooter/Kv", 0.1267);
+    public static final LoggedTunableNumber ks = new LoggedTunableNumber("/Shooter/Ks", 0.1484375);
+    public static final LoggedTunableNumber ka = new LoggedTunableNumber("/Shooter/ka", 0.0045);
+    public static final LoggedTunableNumber kP = new LoggedTunableNumber("/Shooter/kP", 0.45);
     public static final LoggedTunableNumber kI = new LoggedTunableNumber("/Shooter/kI", 0.0);
     public static final LoggedTunableNumber kd = new LoggedTunableNumber("/Shooter/kd", 0.0);
     public static final LoggedNetworkNumber velocitySetpoint =
@@ -48,7 +48,7 @@ public class ShooterConstants {
   }
 
   public static class FeederSetpoints {
-    public static final Voltage run = Volts.of(8);
+    public static final Voltage run = Volts.of(12.0);
   }
 
   public static class Mechanical {

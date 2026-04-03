@@ -65,19 +65,19 @@ public class LauncherCalculator {
     maxDistance = 5.60;
     phaseDelay = 0.03;
 
-    hoodAngleMap.put(1.99, Rotation2d.fromDegrees(80.0));
-    hoodAngleMap.put(2.48, Rotation2d.fromDegrees(75.0));
-    hoodAngleMap.put(3.069, Rotation2d.fromDegrees(70.0));
-    hoodAngleMap.put(3.289, Rotation2d.fromDegrees(68.0));
-    hoodAngleMap.put(3.725, Rotation2d.fromDegrees(65.0));
-    hoodAngleMap.put(5.205, Rotation2d.fromDegrees(60.0));
+    hoodAngleMap.put(1.887, Rotation2d.fromDegrees(77.0));
+    hoodAngleMap.put(2.323, Rotation2d.fromDegrees(74.0));
+    hoodAngleMap.put(2.762, Rotation2d.fromDegrees(63.0));
+    hoodAngleMap.put(3.613, Rotation2d.fromDegrees(58.0));
+    hoodAngleMap.put(4.190, Rotation2d.fromDegrees(62.0));
+    hoodAngleMap.put(5.537, Rotation2d.fromDegrees(58.0));
 
-    flywheelSpeedMap.put(1.99, 375.0);
-    flywheelSpeedMap.put(2.48, 375.0);
-    flywheelSpeedMap.put(3.069, 375.0);
-    flywheelSpeedMap.put(3.289, 375.0);
-    flywheelSpeedMap.put(3.725, 375.0);
-    flywheelSpeedMap.put(5.205, 415.0);
+    flywheelSpeedMap.put(1.887, 295.0);
+    flywheelSpeedMap.put(2.323, 315.0);
+    flywheelSpeedMap.put(2.762, 305.0);
+    flywheelSpeedMap.put(3.613, 330.0);
+    flywheelSpeedMap.put(4.190, 355.0);
+    flywheelSpeedMap.put(5.537, 400.0);
 
     timeOfFlightMap.put(5.68, 1.16);
     timeOfFlightMap.put(4.55, 1.12);

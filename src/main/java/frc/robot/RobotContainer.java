@@ -67,7 +67,6 @@ import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.BatteryLogger;
 import frc.robot.util.FieldConstants;
-import frc.robot.util.PoseMath;
 import java.util.Set;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -295,9 +294,8 @@ public class RobotContainer {
             drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
 
     // hood.setDefaultCommand(
-    // Commands.run(
-    // () -> hood.setPosition(() ->
-    // HoodConstants.Targeting.hoodAngle.getAsDouble()),
+    //     Commands.run(
+    //         () -> hood.setPosition(() -> HoodConstants.Targeting.hoodAngle.getAsDouble()),
     // hood));
 
     driver
@@ -413,17 +411,8 @@ public class RobotContainer {
                                       drive::getRotation);
                           // shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(350.0));
                           shooter.setVelocitySetpoint(
-                              () ->
-                                  RadiansPerSecond.of(
-                                      (PoseMath.getDistanceToTarget(
-                                                  drive.getPose(),
-                                                  AllianceFlipUtil.apply(
-                                                      FieldConstants.Hub.hubCenter))
-                                              < Units.inchesToMeters(137.76)
-                                          ? 375
-                                          : 425)));
+                              () -> RadiansPerSecond.of(parms.flywheelSpeed()));
                           hood.setPosition(() -> parms.hoodAngle());
-
                           Logger.recordOutput("Shoot Parms/ Hood Angle", parms.hoodAngle());
                           Logger.recordOutput("Shoot Parms/ Drive Angle", parms.driveAngle());
                           Logger.recordOutput("Shoot Parms/ Flywheel Speed", parms.flywheelSpeed());
@@ -453,7 +442,12 @@ public class RobotContainer {
         .y()
         .whileTrue(
             Commands.run(
-                () -> shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(375.0)), shooter))
+                () ->
+                    shooter.setVelocitySetpoint(
+                        () ->
+                            RadiansPerSecond.of(
+                                ShooterConstants.Tuning.velocitySetpoint.getAsDouble())),
+                shooter))
         .onFalse(Commands.runOnce(shooter::stopShooter));
 
     operator.b().whileTrue(indexer.setVoltage(IndexerConstants.Setpoints.feed));
