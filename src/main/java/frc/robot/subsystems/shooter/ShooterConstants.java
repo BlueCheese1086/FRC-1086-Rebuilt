@@ -19,19 +19,33 @@ import edu.wpi.first.units.measure.Voltage;
 import frc.robot.util.LoggedTunableNumber;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
+import com.ctre.phoenix6.configs.Slot0Configs;
+
 /** Add your docs here. */
 public class ShooterConstants {
   public static class Tuning {
-    public static final LoggedTunableNumber kv = new LoggedTunableNumber("/Shooter/Kv", 0.125);
-    public static final LoggedTunableNumber ks = new LoggedTunableNumber("/Shooter/Ks", 0.14819);
-    public static final LoggedTunableNumber ka = new LoggedTunableNumber("/Shooter/ka", 0.0024824);
-    public static final LoggedTunableNumber kP = new LoggedTunableNumber("/Shooter/kP", 0.029853);
-    public static final LoggedTunableNumber kI = new LoggedTunableNumber("/Shooter/kI", 0.0);
-    public static final LoggedTunableNumber kd = new LoggedTunableNumber("/Shooter/kd", 0.0);
+    public static final LoggedTunableNumber leftkv = new LoggedTunableNumber("/Shooter/Left/Kv", 0.125);
+    public static final LoggedTunableNumber leftks = new LoggedTunableNumber("/Shooter/Left/Ks", 0.14819);
+    public static final LoggedTunableNumber leftka = new LoggedTunableNumber("/Shooter/Left/ka", 0.0024824);
+    public static final LoggedTunableNumber leftkP = new LoggedTunableNumber("/Shooter/Left/kP", 0.029853);
+    public static final LoggedTunableNumber rightkv = new LoggedTunableNumber("/Shooter/Right/Kv", 0.125);
+    public static final LoggedTunableNumber rightks = new LoggedTunableNumber("/Shooter/Right/Ks", 0.14819);
+    public static final LoggedTunableNumber rightka = new LoggedTunableNumber("/Shooter/Right/ka", 0.0024824);
+    public static final LoggedTunableNumber rightkP = new LoggedTunableNumber("/Shooter/Right/kP", 0.029853);
+    public static final LoggedTunableNumber middlekv = new LoggedTunableNumber("/Shooter/Middle/Kv", 0.125);
+    public static final LoggedTunableNumber middleks = new LoggedTunableNumber("/Shooter/Middle/Ks", 0.14819);
+    public static final LoggedTunableNumber middleka = new LoggedTunableNumber("/Shooter/Middle/ka", 0.0024824);
+    public static final LoggedTunableNumber middlekP = new LoggedTunableNumber("/Shooter/Middle/kP", 0.029853);
+   
     public static final LoggedNetworkNumber velocitySetpoint =
         new LoggedNetworkNumber("/Tuning/Velocity Setpoint", 350.0);
     public static final LoggedNetworkNumber voltageSetpoint =
         new LoggedNetworkNumber("/Tuning/Voltage Setpoint", 4.5);
+
+
+    public static final Slot0Configs leftShooterConfigs = new Slot0Configs().withKP(leftkP.getAsDouble()).withKV(leftkv.getAsDouble()).withKS(leftks.getAsDouble()).withKA(leftka.getAsDouble());
+    public static final Slot0Configs middleShooterConfigs = new Slot0Configs().withKP(middlekP.getAsDouble()).withKV(middlekv.getAsDouble()).withKS(middleks.getAsDouble()).withKA(middleka.getAsDouble());
+    public static final Slot0Configs rightShooterConfigs = new Slot0Configs().withKP(rightkP.getAsDouble()).withKV(rightkv.getAsDouble()).withKS(rightks.getAsDouble()).withKA(rightka.getAsDouble());
   }
   // i could be wrong but do we need a current limit bc id like to not brown out while sotm if
   // possible
