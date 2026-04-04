@@ -462,7 +462,6 @@ public class RobotContainer {
                                               .toPose2d()),
                                       drive::getChassisSpeeds,
                                       drive::getRotation);
-                          // shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(350.0));
                           shooter.setVelocitySetpoint(
                               () -> RadiansPerSecond.of(parms.flywheelSpeed()));
                           hood.setPosition(() -> parms.hoodAngle());
@@ -474,8 +473,8 @@ public class RobotContainer {
                         shooter),
                     DriveCommands.joystickDriveAtAngle(
                         drive,
-                        () -> -driver.getLeftY() * 0.5,
-                        () -> -driver.getLeftX() * 0.5,
+                        () -> -driver.getLeftY() * 0.7,
+                        () -> -driver.getLeftX() * 0.7,
                         () ->
                             LauncherCalculator.getInstance()
                                 .getParameters(
@@ -487,7 +486,6 @@ public class RobotContainer {
                                     drive::getRotation)
                                 .driveAngle()))
                 .finallyDo(shooter::stopShooter));
-    // driver.x().whileTrue(sotm());
 
     // Operator Commands
     operator.leftTrigger().onTrue(intake.runVelocity(IntakeConstants.Setpoints.rollerVelocity));
