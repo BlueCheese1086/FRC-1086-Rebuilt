@@ -18,8 +18,6 @@ import edu.wpi.first.math.interpolation.InverseInterpolator;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants;
-
-import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -81,13 +79,12 @@ public class LauncherCalculator {
     flywheelSpeedMap.put(4.190, 355.0);
     flywheelSpeedMap.put(5.537, 400.0);
 
-    // TODO: Soham, send vids so i can get super accurate tof data (distance is right no touch, only need time)
-    timeOfFlightMap.put(5.553, 1.16);
-    timeOfFlightMap.put(4.30, 1.12);
-    timeOfFlightMap.put(3.73, 1.11);
-    timeOfFlightMap.put(3.18, 1.09);
-    timeOfFlightMap.put(2.266, 0.90);
-    timeOfFlightMap.put(1.69, 1.00);
+    timeOfFlightMap.put(5.553, 1.29);
+    timeOfFlightMap.put(4.30, 1.18);
+    timeOfFlightMap.put(3.73, 0.88);
+    timeOfFlightMap.put(3.18, 0.92);
+    timeOfFlightMap.put(2.266, 0.9);
+    timeOfFlightMap.put(1.69, 1.06);
   }
 
   public static double getMinTimeOfFlight() {
