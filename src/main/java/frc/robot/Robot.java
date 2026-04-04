@@ -17,7 +17,6 @@ import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.DriveMotorArrangement;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerMotorArrangement;
-import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.IterativeRobotBase;
 import edu.wpi.first.wpilibj.RobotController;
@@ -117,11 +116,6 @@ public class Robot extends LoggedRobot {
       watchdog.setTimeout(0.2);
     } catch (Exception e) {
       DriverStation.reportWarning("Failed to disable loop overrun warnings.", false);
-    }
-    try {
-      PathPlannerPath path = PathPlannerPath.fromChoreoTrajectory("TestingFAH");
-    } catch (Exception e) {
-      e.printStackTrace();
     }
     CommandScheduler.getInstance().setPeriod(0.2);
 

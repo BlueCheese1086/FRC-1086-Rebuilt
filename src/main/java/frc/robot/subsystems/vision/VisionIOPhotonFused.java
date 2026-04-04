@@ -94,7 +94,8 @@ public class VisionIOPhotonFused implements VisionIO {
         if (trig.isPresent()
             && pnpLowestAmb.isPresent()
             && pnpBestTarget.isPresent()
-            && closestToReference.isPresent()) {
+            && closestToReference.isPresent()
+            && VisionConstants.preferred == PoseObservationType.PHOTONVISION_FUSED) {
           // System.out.println("Got Fused Single Tag");
           Pose3d trigPose = trig.get().estimatedPose;
           Pose3d lowestAmb = pnpLowestAmb.get().estimatedPose;
@@ -146,7 +147,8 @@ public class VisionIOPhotonFused implements VisionIO {
                     result.getBestTarget().bestCameraToTarget.getTranslation().getNorm(),
                     PoseObservationType.PHOTONVISION_FUSED));
           }
-        } else if (trig.isPresent()) {
+        } else if (trig.isPresent()
+            && VisionConstants.preferred == PoseObservationType.PHOTONVISION_TRIG) {
           System.out.println("Got Trignometry");
           Pose3d trigPose = trig.get().estimatedPose;
           Logger.recordOutput("Vision/" + name + "/Pose Estimation/Trig", trigPose);
@@ -158,7 +160,8 @@ public class VisionIOPhotonFused implements VisionIO {
                   1,
                   result.getBestTarget().bestCameraToTarget.getTranslation().getNorm(),
                   PoseObservationType.PHOTONVISION_TRIG));
-        } else if (pnpLowestAmb.isPresent()) {
+        } else if (pnpLowestAmb.isPresent()
+            && VisionConstants.preferred == PoseObservationType.PHOTONVISION_LOWEST_AMBIGUITY) {
           System.out.println("Got Lowest Ambiguity");
           Pose3d lowestAmb = trig.get().estimatedPose;
           Logger.recordOutput("Vision/" + name + "/Pose Estimation/Lowest Ambiguity", lowestAmb);

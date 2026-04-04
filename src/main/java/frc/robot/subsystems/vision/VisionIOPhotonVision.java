@@ -14,7 +14,7 @@ import org.photonvision.PhotonCamera;
 /** IO implementation for real PhotonVision hardware. */
 public class VisionIOPhotonVision implements VisionIO {
   protected final PhotonCamera camera;
-  protected final Transform3d robotToCamera;
+  protected Transform3d robotToCamera;
   protected final AprilTagFieldLayout aprilTagLayout;
   private final Supplier<Rotation2d> rotationSupplier;
 
@@ -121,5 +121,9 @@ public class VisionIOPhotonVision implements VisionIO {
     for (int id : tagIds) {
       inputs.tagIds[i++] = id;
     }
+  }
+
+  public void setTransforms(Transform3d transform) {
+    robotToCamera = transform;
   }
 }

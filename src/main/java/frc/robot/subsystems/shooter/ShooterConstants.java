@@ -75,18 +75,20 @@ public class ShooterConstants {
     public static final Transform3d leftShooter =
         new Transform3d(
             new Translation3d(
-                -Units.inchesToMeters(8.5), Units.inchesToMeters(6.5), Units.inchesToMeters(26)),
+                -Units.inchesToMeters(8.5),
+                Units.inchesToMeters(6.5 + 0.25),
+                Units.inchesToMeters(26)),
             Rotation3d.kZero);
     public static final Transform3d centerShooter =
         new Transform3d(
             -Units.inchesToMeters(8.5),
-            Units.inchesToMeters(0.0),
+            Units.inchesToMeters(0.0 + 0.25),
             Units.inchesToMeters(26),
             Rotation3d.kZero);
     public static final Transform3d rightShooter =
         new Transform3d(
             -Units.inchesToMeters(8.5),
-            -Units.inchesToMeters(6.5),
+            -Units.inchesToMeters(6.5 + 0.25),
             Units.inchesToMeters(26),
             Rotation3d.kZero);
   }

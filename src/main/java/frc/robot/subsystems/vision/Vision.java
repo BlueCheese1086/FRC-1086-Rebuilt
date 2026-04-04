@@ -108,7 +108,10 @@ public class Vision extends SubsystemBase {
                 || Math.abs(observation.pose().getZ())
                     > maxZError // Must have realistic Z coordinate
                 || observation.averageTagDistance() >= averageTagDistance
-                || (observation.tagCount() == 1 && observation.averageTagDistance() >= 2.5)
+                || (observation.tagCount() == 1
+                    && observation.averageTagDistance()
+                        >= VisionConstants.averageTagDistanceSingleTag
+                    && observation.type() != PoseObservationType.LIMELIGHT_MEGATAG_2)
                 // Must be within the field boundaries
                 || observation.pose().getX() <= 0.0
                 || observation.pose().getX() >= VisionConstants.fieldLayout.getFieldLength()
@@ -121,7 +124,9 @@ public class Vision extends SubsystemBase {
                 (observation.tagCount() == 1 && observation.ambiguity() > maxAmbiguity),
                 Math.abs(observation.pose().getZ()) > maxZError,
                 observation.averageTagDistance() >= averageTagDistance,
-                (observation.tagCount() == 1 && observation.averageTagDistance() >= 2.5),
+                (observation.tagCount() == 1
+                    && observation.averageTagDistance()
+                        >= VisionConstants.averageTagDistanceSingleTag),
                 observation.pose().getX() >= VisionConstants.fieldLayout.getFieldLength(),
                 observation.pose().getY() >= VisionConstants.fieldLayout.getFieldWidth(),
                 observation.pose().getX() <= 0.0,
@@ -173,7 +178,8 @@ public class Vision extends SubsystemBase {
             observation.timestamp(),
             VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev));
       }
-      // Logger.recordOutput("Vision/Camera " + cameraIndex + "/Rejections", rejections);
+      Logger.recordOutput(
+          "Vision/Camera " + inputs[cameraIndex].cameraName + "/Rejections", rejections);
       // Log camera metadata
       Logger.recordOutput(
           "Vision/Camera" + inputs[cameraIndex].cameraName + "/TagPoses",

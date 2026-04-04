@@ -18,26 +18,25 @@ import edu.wpi.first.math.interpolation.InverseInterpolator;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants;
-
-import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
-public class LauncherCalculator {
-  private static LauncherCalculator instance;
+public class PassingManager {
+  private static PassingManager instance;
 
   private final LinearFilter hoodAngleFilter = LinearFilter.movingAverage((int) (0.1 / 0.02));
   private final LinearFilter driveAngleFilter = LinearFilter.movingAverage((int) (0.8 / 0.02));
 
   private double lastHoodAngle;
   private Rotation2d lastDriveAngle;
+  private Translation2d target = new Translation2d();
 
-  public static LauncherCalculator getInstance() {
-    if (instance == null) instance = new LauncherCalculator();
+  public static PassingManager getInstance() {
+    if (instance == null) instance = new PassingManager();
     return instance;
   }
 
-  public record LaunchingParameters(
+  public record PassingParams(
       boolean isValid,
       Rotation2d driveAngle,
       Rotation2d driveAngleNoLookahead,
@@ -50,7 +49,7 @@ public class LauncherCalculator {
       double timeOfFlight) {}
 
   // Cache parameters
-  private LaunchingParameters latestParameters = null;
+  private PassingParams latestParameters = null;
 
   private static double minDistance;
   private static double maxDistance;
@@ -81,13 +80,11 @@ public class LauncherCalculator {
     flywheelSpeedMap.put(4.190, 355.0);
     flywheelSpeedMap.put(5.537, 400.0);
 
-    // TODO: Soham, send vids so i can get super accurate tof data (distance is right no touch, only need time)
-    timeOfFlightMap.put(5.553, 1.16);
-    timeOfFlightMap.put(4.30, 1.12);
-    timeOfFlightMap.put(3.73, 1.11);
-    timeOfFlightMap.put(3.18, 1.09);
-    timeOfFlightMap.put(2.266, 0.90);
-    timeOfFlightMap.put(1.69, 1.00);
+    timeOfFlightMap.put(5.68, 1.16);
+    timeOfFlightMap.put(4.55, 1.12);
+    timeOfFlightMap.put(3.15, 1.11);
+    timeOfFlightMap.put(1.88, 1.09);
+    timeOfFlightMap.put(1.38, 0.90);
   }
 
   public static double getMinTimeOfFlight() {
@@ -98,7 +95,7 @@ public class LauncherCalculator {
     return timeOfFlightMap.get(maxDistance);
   }
 
-  public LaunchingParameters getParameters(
+  public PassingParams getParameters(
       Supplier<Pose2d> drivePose,
       Supplier<ChassisSpeeds> robotRelativeSpeeds,
       Supplier<Rotation2d> heading) {
@@ -117,8 +114,13 @@ public class LauncherCalculator {
                 robotRelativeVelocity.omegaRadiansPerSecond * phaseDelay));
 
     // Calculate distance from launcher to target
-    Translation2d target =
-        AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d());
+    if (drivePose.get().getY()
+        >= (FieldConstants.fieldWidth / 2) + (FieldConstants.Hub.width / 2)) {
+      target = AllianceFlipUtil.apply(FieldConstants.Tower.leftBackPose.getTranslation());
+    } else if (drivePose.get().getY()
+        <= (FieldConstants.fieldWidth / 2) - (FieldConstants.Hub.width / 2)) {
+      target = AllianceFlipUtil.apply(FieldConstants.Tower.rightBackPose.getTranslation());
+    }
     Pose2d launcherPosition =
         estimatedPose.transformBy(
             new Transform2d(
@@ -171,7 +173,7 @@ public class LauncherCalculator {
         driveAngleFilter.calculate(driveAngle.minus(lastDriveAngle).getRadians() / 0.02);
     lastDriveAngle = driveAngle;
     latestParameters =
-        new LaunchingParameters(
+        new PassingParams(
             lookaheadLauncherToTargetDistance >= minDistance
                 && lookaheadLauncherToTargetDistance <= maxDistance,
             driveAngle,

@@ -11,6 +11,7 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -286,6 +287,16 @@ public class FieldConstants {
             (defaultAprilTagType.getTagPose(31).get().getY())
                 - innerOpeningWidth / 2
                 - Units.inchesToMeters(0.75));
+    public static final Pose2d leftBackPose =
+        new Pose2d(
+            defaultAprilTagType.getTagPose(31).get().getX(),
+            defaultAprilTagType.getTagPose(31).get().getY() + 3.0,
+            new Rotation2d());
+    public static final Pose2d rightBackPose =
+        new Pose2d(
+            defaultAprilTagType.getTagPose(31).get().getX(),
+            defaultAprilTagType.getTagPose(31).get().getY() - 3.0,
+            new Rotation2d());
 
     // Relevant reference points on opposing side
     public static final Translation2d oppCenterPoint =

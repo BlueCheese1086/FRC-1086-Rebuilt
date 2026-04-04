@@ -45,7 +45,8 @@ public class ShooterIOTalonFX implements ShooterIO {
   public ShooterIOTalonFX(int id, boolean inverted) {
     shooter = new TalonFX(id, RobotMap.systemBus);
     velocityVoltage =
-        new VelocityVoltage(0.0).withEnableFOC(true).withSlot(0).withUseTimesync(true);
+        // new VelocityVoltage(0.0).withEnableFOC(true).withSlot(0).withUseTimesync(true);
+        new VelocityVoltage(0.0).withEnableFOC(true).withSlot(0);
 
     TalonFXConfiguration config = new TalonFXConfiguration();
     config.Slot0.kS = ks.getAsDouble();
