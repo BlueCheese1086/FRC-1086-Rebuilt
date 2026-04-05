@@ -14,7 +14,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -72,7 +71,6 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
-import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 @SuppressWarnings("unused")
 public class RobotContainer {
@@ -103,28 +101,6 @@ public class RobotContainer {
 
   private final CommandXboxController operator = new CommandXboxController(1);
   private final CommandXboxController testing = new CommandXboxController(2);
-
-  private final LoggedNetworkNumber poseX =
-      new LoggedNetworkNumber(
-          "/Vision/Transform/X", Units.metersToInches(VisionConstants.robotToLeftCam.getX()));
-  private final LoggedNetworkNumber poseY =
-      new LoggedNetworkNumber(
-          "/Vision/Transform/Y", Units.metersToInches(VisionConstants.robotToLeftCam.getY()));
-  private final LoggedNetworkNumber poseZ =
-      new LoggedNetworkNumber(
-          "/Vision/Transform/Z", Units.metersToInches(VisionConstants.robotToLeftCam.getZ()));
-  private final LoggedNetworkNumber pitch =
-      new LoggedNetworkNumber(
-          "/Vision/Transform/Pitch",
-          Units.radiansToDegrees(VisionConstants.robotToLeftCam.getRotation().getY()));
-  private final LoggedNetworkNumber yaw =
-      new LoggedNetworkNumber(
-          "/Vision/Transform/Yaw",
-          Units.radiansToDegrees(VisionConstants.robotToLeftCam.getRotation().getZ()));
-  private final LoggedNetworkNumber roll =
-      new LoggedNetworkNumber(
-          "/Vision/Transform/Roll",
-          Units.radiansToDegrees(VisionConstants.robotToLeftCam.getRotation().getX()));
 
   // private Pose2d[] backStartPose = new Pose2d[1];
 
@@ -306,6 +282,7 @@ public class RobotContainer {
     autoChooser.addOption(
         "Risky left bump auto", this.pathFindToStart("Risky Bump Double Intake", true));
     autoChooser.addOption("Depot Auto", this.pathFindToStart("Depot Auto", false));
+    autoChooser.addOption("Testing", this.pathFindToStart("2 Cycle", false));
     // Configure the button bindings
     configureButtonBindings();
   }
@@ -317,8 +294,9 @@ public class RobotContainer {
             drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
 
     // hood.setDefaultCommand(
-    //     Commands.run(
-    //         () -> hood.setPosition(() -> HoodConstants.Targeting.hoodAngle.getAsDouble()),
+    // Commands.run(
+    // () -> hood.setPosition(() ->
+    // HoodConstants.Targeting.hoodAngle.getAsDouble()),
     // hood));
 
     driver
@@ -347,7 +325,7 @@ public class RobotContainer {
                 intake.setVoltage(IntakeConstants.Setpoints.run),
                 intake.setPosition(IntakeConstants.Setpoints.deployed),
                 DriveCommands.joystickDriveSyom(
-                    drive, () -> -driver.getLeftY(), () -> -driver.getLeftX())));
+                    drive, intake, () -> -driver.getLeftY(), () -> -driver.getLeftX())));
 
     driver
         .rightTrigger()
@@ -357,7 +335,6 @@ public class RobotContainer {
                 indexer.setVoltage(IndexerConstants.Setpoints.feed),
                 intake.setVoltage(IntakeConstants.Setpoints.run),
                 Commands.sequence(
-                    Commands.waitSeconds(0.67),
                     Commands.repeatingSequence(
                         intake.setPosition(IntakeConstants.Setpoints.agitate),
                         Commands.waitSeconds(0.4),
@@ -433,6 +410,7 @@ public class RobotContainer {
                         shooter),
                     DriveCommands.joystickDriveAtAngle(
                         drive,
+                        intake,
                         () -> -driver.getLeftY() * 0.5,
                         () -> -driver.getLeftX() * 0.5,
                         () ->
@@ -473,6 +451,7 @@ public class RobotContainer {
                         shooter),
                     DriveCommands.joystickDriveAtAngle(
                         drive,
+                        intake,
                         () -> -driver.getLeftY() * 0.7,
                         () -> -driver.getLeftX() * 0.7,
                         () ->
@@ -488,7 +467,7 @@ public class RobotContainer {
                 .finallyDo(shooter::stopShooter));
 
     // Operator Commands
-    operator.leftTrigger().onTrue(intake.runVelocity(IntakeConstants.Setpoints.rollerVelocity));
+    operator.leftTrigger().onTrue(intake.setVoltage(IntakeConstants.Setpoints.run));
     operator
         .y()
         .whileTrue(
@@ -505,8 +484,6 @@ public class RobotContainer {
     operator.y().whileTrue(shooter.runFeed(ShooterConstants.FeederSetpoints.run.in(Volts)));
     operator.leftBumper().whileTrue(intake.setPosition(IntakeConstants.Setpoints.deployed));
     operator.rightBumper().whileTrue(intake.setPosition(IntakeConstants.Setpoints.stowed));
-    // operator.povUp().onTrue(climb.setPosition(ClimbConstants.extendedHeight));
-    // operator.povDown().onTrue(climb.setPosition(ClimbConstants.retractedHeight));
   }
 
   /**
@@ -536,64 +513,15 @@ public class RobotContainer {
     Logger.recordOutput(
         "Vision Transforms/Right",
         new Pose3d(drive.getPose()).transformBy(VisionConstants.robotToRightCam));
-
-    // if (FieldConstants.LinesVertical.inAllianceZone(drive::getPose) && !manualOverride) {
-    //   hood.setPosition(
-    //       () ->
-    //           LauncherCalculator.getInstance()
-    //               .getParameters(
-    //                   () ->
-    //                       (new Pose3d(drive.getPose())
-    //                           .transformBy(ShooterTransforms.centerShooter)
-    //                           .toPose2d()),
-    //                   drive::getChassisSpeeds,
-    //                   drive::getRotation)
-    //               .hoodAngle());
-    //   Logger.recordOutput(
-    //       "Hood Automatic/Desired Position",
-    //       LauncherCalculator.getInstance()
-    //           .getParameters(
-    //               () ->
-    //                   (new Pose3d(drive.getPose())
-    //                       .transformBy(ShooterTransforms.centerShooter)
-    //                       .toPose2d()),
-    //               drive::getChassisSpeeds,
-    //               drive::getRotation)
-    //           .hoodAngle());
-    // }
   }
 
   public Command pathFindToStart(String pathName, boolean flip) {
     NamedCommands.registerCommand(
         "IntakeDown", intake.setPosition(IntakeConstants.Setpoints.deployed));
     NamedCommands.registerCommand("IntakeRun", intake.setVoltage(IntakeConstants.Setpoints.run));
-    NamedCommands.registerCommand(
-        "RunupShooter",
-        Commands.run(
-                () -> {
-                  LaunchingParameters parms =
-                      LauncherCalculator.getInstance()
-                          .getParameters(
-                              () ->
-                                  (new Pose3d(drive.getPose())
-                                      .transformBy(ShooterTransforms.centerShooter)
-                                      .toPose2d()),
-                              drive::getChassisSpeeds,
-                              drive::getRotation);
-                  shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(parms.flywheelSpeed()));
-                  hood.setPosition(() -> parms.hoodAngle());
-                })
-            .until(shooter::atSetpoint));
-    NamedCommands.registerCommand(
-        "LoadUp",
-        Commands.parallel(
-                shooter.runFeed(ShooterConstants.FeederSetpoints.run.in(Volts)),
-                indexer.setVoltage(IndexerConstants.Setpoints.feed),
-                intake.setVoltage(IntakeConstants.Setpoints.run))
-            .finallyDo(shooter::stopAll));
     NamedCommands.registerCommand("IntakeUp", intake.setPosition(IntakeConstants.Setpoints.stowed));
     NamedCommands.registerCommand("ShootNow", getShootCommand());
-    // NamedCommands.registerCommand("SOTM", sotm());
+    NamedCommands.registerCommand("SOTM", getSOTMCommand());
     Command pathFind =
         AutoBuilder.pathfindToPose(
             AllianceFlipUtil.apply(new PathPlannerAuto(pathName, flip).getStartingPose()),
@@ -603,6 +531,7 @@ public class RobotContainer {
                 RadiansPerSecond.of(drive.getMaxAngularSpeedRadPerSec()),
                 RadiansPerSecondPerSecond.of(Math.pow(drive.getMaxAngularSpeedRadPerSec(), 2)),
                 Volts.of(RobotController.getBatteryVoltage())));
+
     return Commands.sequence(
         Commands.defer(
             () ->
@@ -618,6 +547,26 @@ public class RobotContainer {
                         Volts.of(RobotController.getBatteryVoltage()))),
             Set.of(drive)),
         new PathPlannerAuto(pathName, flip));
+  }
+
+  private Command getSOTMCommand() {
+    return Commands.parallel(
+        getShootCommand(),
+        DriveCommands.joystickDriveAtAngle(
+            drive,
+            intake,
+            () -> driver.getLeftX(),
+            () -> driver.getLeftY(),
+            () ->
+                LauncherCalculator.getInstance()
+                    .getParameters(
+                        () ->
+                            (new Pose3d(drive.getPose())
+                                .transformBy(ShooterTransforms.centerShooter)
+                                .toPose2d()),
+                        drive::getChassisSpeeds,
+                        drive::getRotation)
+                    .driveAngle()));
   }
 
   private Command getShootCommand() {
@@ -656,48 +605,4 @@ public class RobotContainer {
             intake.setPosition(IntakeConstants.Setpoints.deployed),
             Commands.waitSeconds(0.2)));
   }
-
-  //   private Command sotm() {
-  //     return Commands.parallel(
-  //         Commands.run(
-  //                 () -> {
-  //                   var sol =
-  //                       shootingManager.calculateShotSolution(
-  //                           drive.getPose(),
-  //                           drive.getChassisSpeeds(),
-  //                           FieldConstants.Hub.topCenterPoint,
-  //                           0.10,
-  //                           0.10);
-  //                   shooter.setVelocitySetpoint(() -> RotationsPerSecond.of(sol.flywheelRpm /
-  // 60));
-  //                   hood.setPosition(() -> Units.radiansToDegrees(sol.hoodPitchRad));
-  //                 },
-  //                 shooter)
-  //             .finallyDo(shooter::stopShooter),
-  //         DriveCommands.joystickDriveAtAngleFast(
-  //             drive,
-  //             () -> -driver.getLeftY() * 0.5, // Limit translation speed during SOTM
-  //             () -> -driver.getLeftX() * 0.5,
-  //             () ->
-  //                 shootingManager.calculateShotSolution(
-  //                         drive.getPose(),
-  //                         drive.getChassisSpeeds(),
-  //                         FieldConstants.Hub.topCenterPoint,
-  //                         0.10,
-  //                         0.10)
-  //                     .drivetrainHeading),
-  //         Commands.waitSeconds(0.75)
-  //             .andThen(
-  //                 Commands.parallel(
-  //                     shooter
-  //                         .runFeed(ShooterConstants.FeederSetpoints.run.in(Volts))
-  //                         .finallyDo(shooter::stopFeeder),
-  //                     indexer.setVoltage(IndexerConstants.Setpoints.feed),
-  //                     intake.setVoltage(IntakeConstants.Setpoints.run))),
-  //         Commands.repeatingSequence(
-  //             intake.setPosition(IntakeConstants.Setpoints.agitate),
-  //             Commands.waitSeconds(0.4),
-  //             intake.setPosition(IntakeConstants.Setpoints.deployed),
-  //             Commands.waitSeconds(0.4)));
-  //   }
 }

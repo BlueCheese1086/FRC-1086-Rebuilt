@@ -149,7 +149,7 @@ public class VisionIOPhotonFused implements VisionIO {
           }
         } else if (trig.isPresent()
             && VisionConstants.preferred == PoseObservationType.PHOTONVISION_TRIG) {
-          System.out.println("Got Trignometry");
+          // System.out.println("Got Trignometry");
           Pose3d trigPose = trig.get().estimatedPose;
           Logger.recordOutput("Vision/" + name + "/Pose Estimation/Trig", trigPose);
           observations.add(

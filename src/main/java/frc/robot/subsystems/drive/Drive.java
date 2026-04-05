@@ -161,10 +161,11 @@ public class Drive extends SubsystemBase {
         this::getChassisSpeeds,
         this::runVelocity,
         new PPHolonomicDriveController(
-            new PIDConstants(5.5, 0.0, 0.0), new PIDConstants(6.0, 0.0, 0.0), 0.02),
+            new PIDConstants(4.75, 0.0, 0.0), new PIDConstants(6.0, 0.0, 1.0), 0.02),
         PP_CONFIG,
         () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
         this);
+    PathPlannerLogging.logCurrentPose(getPose());
     PathPlannerLogging.setLogActivePathCallback(
         (activePath) -> {
           Logger.recordOutput("Odometry/Trajectory", activePath.toArray(new Pose2d[0]));

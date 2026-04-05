@@ -42,10 +42,10 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -23.692757991876704
+    "rotation": -23.692757991876707
   },
   "reversed": false,
-  "folder": null,
+  "folder": "Depot Auto",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 180.0

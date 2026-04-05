@@ -11,6 +11,7 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -18,6 +19,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -26,6 +29,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.hood.Hood;
+import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterConstants;
 import frc.robot.util.AllianceFlipUtil;
@@ -219,6 +223,7 @@ public class DriveCommands {
   @SuppressWarnings("resource")
   public static Command joystickDriveAtAngle(
       Drive drive,
+      Intake intake,
       DoubleSupplier xSupplier,
       DoubleSupplier ySupplier,
       Supplier<Rotation2d> rotationSupplier) {
@@ -260,7 +265,7 @@ public class DriveCommands {
                           ? drive.getRotation().plus(new Rotation2d(Math.PI))
                           : drive.getRotation()));
             },
-            drive)
+            intake)
 
         // Reset PID controller when command starts
         .beforeStarting(() -> angleController.reset());
@@ -318,11 +323,12 @@ public class DriveCommands {
    * the direction the driver is commanding translation.
    */
   public static Command joystickDriveSyom(
-      Drive drive, DoubleSupplier xSupplier, DoubleSupplier ySupplier) {
+      Drive drive, Intake intake, DoubleSupplier xSupplier, DoubleSupplier ySupplier) {
     // Reuse the existing angle-hold command but source the target angle from the
     // translation stick. Add a deadband to avoid instability from stick drift.
     return joystickDriveAtAngle(
         drive,
+        intake,
         xSupplier,
         ySupplier,
         () -> {
@@ -338,6 +344,64 @@ public class DriveCommands {
           return linearVelocity.getAngle();
         });
   }
+
+   public static Command autoAlign(Drive drive, Supplier<Pose2d> pose) {
+    // Create PID controller
+    ProfiledPIDController angleController =
+        new ProfiledPIDController(
+            ANGLE_KP,
+            0.0,
+            ANGLE_KD,
+            new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
+    angleController.enableContinuousInput(-Math.PI, Math.PI);
+    ProfiledPIDController xController = 
+        new ProfiledPIDController(
+          6.0, 
+          0.0, 
+          0.0, 
+          new Constraints(drive.getMaxLinearSpeedMetersPerSec(), Math.pow(drive.getMaxLinearSpeedMetersPerSec(), 2)));
+    ProfiledPIDController yController = 
+        new ProfiledPIDController(
+          6.0, 
+          0.0, 
+          0.0, 
+          new Constraints(drive.getMaxLinearSpeedMetersPerSec(), Math.pow(drive.getMaxLinearSpeedMetersPerSec(), 2)));
+
+    // Construct command
+    return Commands.run(
+            () -> {
+              Pose2d flippedPose = pose.get();
+              Logger.recordOutput("Flipped Pose", flippedPose);
+
+              // Get linear velocity
+              Translation2d linearVelocity =
+                  new Translation2d(
+                      xController.calculate(drive.getPose().getX(), flippedPose.getX()),
+                      yController.calculate(drive.getPose().getY(), flippedPose.getY()));
+
+              // Calculate angular speed
+              double omega =
+                  angleController.calculate(
+                      drive.getRotation().getRadians(), flippedPose.getRotation().getRadians());
+
+              // Convert to field relative speeds & send command
+              ChassisSpeeds speeds =
+                  new ChassisSpeeds(linearVelocity.getX(), linearVelocity.getY(), omega);
+
+              drive.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(speeds, drive.getRotation()));
+            },
+            drive)
+
+        // Reset PID controller when command starts
+        .beforeStarting(
+            () -> {
+              angleController.reset(drive.getRotation().getRadians());
+              xController.reset(0.0);
+              yController.reset(0.0);
+            })
+        .finallyDo(() -> drive.stopWithX());
+  }
+
 
   /**
    * Measures the velocity feedforward constants for the drive motors.
