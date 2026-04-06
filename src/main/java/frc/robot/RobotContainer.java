@@ -302,7 +302,22 @@ public class RobotContainer {
 
     hood.setDefaultCommand(
         Commands.run(
-            () -> hood.setPosition(() -> HoodConstants.Targeting.hoodAngle.getAsDouble()), hood));
+            () -> {
+                if (Constants.tuningMode) {
+                    hood.setPosition(HoodConstants.Targeting.hoodAngle::get);
+                } else {
+                    LaunchingParameters parms =
+                              LauncherCalculator.getInstance()
+                                  .getParameters(
+                                      () ->
+                                          (new Pose3d(drive.getPose())
+                                              .transformBy(ShooterTransforms.centerShooter)
+                                              .toPose2d()),
+                                      drive::getChassisSpeeds,
+                                      drive::getRotation);
+                    hood.setPosition(() -> parms.hoodAngle());
+                }
+            }, hood));
 
     driver
         .start()
@@ -369,12 +384,12 @@ public class RobotContainer {
     driver
         .a()
         .whileTrue(
-            Commands.parallel(
+            Commands.race(
                 Commands.run(
                         () -> shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(370.0)),
                         shooter)
                     .finallyDo(shooter::stopShooter),
-                Commands.runOnce(() -> hood.setPosition(() -> 64.0))));
+                Commands.run(() -> hood.setPosition(() -> 64.0),hood)));
 
     // What i think is better and safer is a known trench shot. like 1678, they cant
     // be defended
@@ -398,7 +413,7 @@ public class RobotContainer {
                         () -> shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(375.0)),
                         shooter)
                     .finallyDo(shooter::stopShooter),
-                Commands.runOnce(() -> hood.setPosition(() -> 54.0))));
+                Commands.run(() -> hood.setPosition(() -> 54.0),hood)));
 
     driver
         .y()
@@ -433,7 +448,8 @@ public class RobotContainer {
                           Logger.recordOutput("Shoot Parms/ Flywheel Speed", parms.flywheelSpeed());
                           Logger.recordOutput("Shoot Parms/ Distance", parms.distance());
                         },
-                        shooter),
+                        shooter,
+                        hood),
                     DriveCommands.joystickDriveAtAngle(
                         drive,
                         () -> -driver.getLeftY(),
