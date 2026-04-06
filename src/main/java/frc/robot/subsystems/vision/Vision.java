@@ -103,10 +103,15 @@ public class Vision extends SubsystemBase {
         // Check whether to reject pose
         boolean rejectPose =
             observation.tagCount() == 0 // Must have at least one tag
-                || (observation.tagCount() == 1 && observation.ambiguity() > maxAmbiguity) // Cannot be high ambiguity
-                || Math.abs(observation.pose().getZ()) > maxZError // Must have realistic Z coordinate
+                || (observation.tagCount() == 1
+                    && observation.ambiguity() > maxAmbiguity) // Cannot be high ambiguity
+                || Math.abs(observation.pose().getZ())
+                    > maxZError // Must have realistic Z coordinate
                 || observation.averageTagDistance() >= averageTagDistance
-                || (observation.tagCount() == 1 && observation.averageTagDistance() >= VisionConstants.averageTagDistanceSingleTag && observation.type() != PoseObservationType.LIMELIGHT_MEGATAG_2)
+                || (observation.tagCount() == 1
+                    && observation.averageTagDistance()
+                        >= VisionConstants.averageTagDistanceSingleTag
+                    && observation.type() != PoseObservationType.LIMELIGHT_MEGATAG_2)
                 // Must be within the field boundaries
                 || observation.pose().getX() <= 0.0
                 || observation.pose().getX() >= VisionConstants.fieldLayout.getFieldLength()

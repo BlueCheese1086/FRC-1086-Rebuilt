@@ -296,25 +296,25 @@ public class RobotContainer {
 
     hood.setDefaultCommand(
         Commands.run(
-        () -> {
-            if (Constants.tuningMode) {
+            () -> {
+              if (Constants.tuningMode) {
                 hood.setPosition(HoodConstants.Targeting.hoodAngle::get);
-            } else {
+              } else {
                 if (FieldConstants.LinesVertical.inAllianceZone(drive::getPose)) {
-                    LaunchingParameters parms =
-                              LauncherCalculator.getInstance()
-                                  .getParameters(
-                                      () ->
-                                          (new Pose3d(drive.getPose())
-                                              .transformBy(ShooterTransforms.centerShooter)
-                                              .toPose2d()),
-                                      drive::getChassisSpeeds,
-                                      drive::getRotation);
-                    hood.setPosition(() -> parms.hoodAngle());
+                  LaunchingParameters parms =
+                      LauncherCalculator.getInstance()
+                          .getParameters(
+                              () ->
+                                  (new Pose3d(drive.getPose())
+                                      .transformBy(ShooterTransforms.centerShooter)
+                                      .toPose2d()),
+                              drive::getChassisSpeeds,
+                              drive::getRotation);
+                  hood.setPosition(() -> parms.hoodAngle());
                 }
-            }
-        },
-    hood));
+              }
+            },
+            hood));
 
     driver
         .start()
@@ -385,7 +385,7 @@ public class RobotContainer {
                         () -> shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(370.0)),
                         shooter)
                     .finallyDo(shooter::stopShooter),
-                Commands.run(() -> hood.setPosition(() -> 64.0),hood)));
+                Commands.run(() -> hood.setPosition(() -> 64.0), hood)));
 
     // What i think is better and safer is a known trench shot. like 1678, they cant
     // be defended
