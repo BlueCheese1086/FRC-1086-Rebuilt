@@ -29,6 +29,7 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.hood.Hood;
+import frc.robot.subsystems.hood.HoodConstants;
 import frc.robot.subsystems.hood.HoodIO;
 import frc.robot.subsystems.hood.HoodIOServo;
 import frc.robot.subsystems.hood.HoodIOSim;
@@ -294,11 +295,27 @@ public class RobotContainer {
         DriveCommands.joystickDrive(
             drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
 
-    // hood.setDefaultCommand(
-    // Commands.run(
-    // () -> hood.setPosition(() ->
-    // HoodConstants.Targeting.hoodAngle.getAsDouble()),
-    // hood));
+    hood.setDefaultCommand(
+        Commands.run(
+            () -> {
+              if (Constants.tuningMode) {
+                hood.setPosition(HoodConstants.Targeting.hoodAngle::get);
+              } else {
+                if (FieldConstants.LinesVertical.inAllianceZone(drive::getPose)) {
+                  LaunchingParameters parms =
+                      LauncherCalculator.getInstance()
+                          .getParameters(
+                              () ->
+                                  (new Pose3d(drive.getPose())
+                                      .transformBy(ShooterTransforms.centerShooter)
+                                      .toPose2d()),
+                              drive::getChassisSpeeds,
+                              drive::getRotation);
+                  hood.setPosition(() -> parms.hoodAngle());
+                }
+              }
+            },
+            hood));
 
     driver
         .start()
@@ -369,7 +386,7 @@ public class RobotContainer {
                         () -> shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(370.0)),
                         shooter)
                     .finallyDo(shooter::stopShooter),
-                Commands.runOnce(() -> hood.setPosition(() -> 64.0))));
+                Commands.run(() -> hood.setPosition(() -> 64.0), hood)));
 
     // What i think is better and safer is a known trench shot. like 1678, they cant
     // be defended
@@ -408,7 +425,8 @@ public class RobotContainer {
                           Logger.recordOutput("Pass Parms/ Flywheel Speed", parms.flywheelSpeed());
                           Logger.recordOutput("Pass Parms/ Distance", parms.distance());
                         },
-                        shooter),
+                        shooter,
+                        hood),
                     DriveCommands.joystickDriveAtAngle(
                         drive,
                         () -> -driver.getLeftY() * 0.5,
@@ -442,7 +460,6 @@ public class RobotContainer {
                                       drive::getRotation);
                           shooter.setVelocitySetpoint(
                               () -> RadiansPerSecond.of(parms.flywheelSpeed()));
-                          hood.setPosition(() -> parms.hoodAngle());
                           Logger.recordOutput("Shoot Parms/ Hood Angle", parms.hoodAngle());
                           Logger.recordOutput("Shoot Parms/ Drive Angle", parms.driveAngle());
                           Logger.recordOutput("Shoot Parms/ Flywheel Speed", parms.flywheelSpeed());
