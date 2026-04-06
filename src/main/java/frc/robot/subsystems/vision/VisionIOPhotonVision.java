@@ -3,6 +3,7 @@ package frc.robot.subsystems.vision;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -96,11 +97,21 @@ public class VisionIOPhotonVision implements VisionIO {
           // Add tag ID
           tagIds.add((short) target.fiducialId);
 
+          Pose3d robot =
+              new Pose3d(
+                  robotPose.getX(),
+                  robotPose.getY(),
+                  robotPose.getZ(),
+                  new Rotation3d(
+                      robotPose.getRotation().getX(),
+                      robotPose.getRotation().getY(),
+                      rotationSupplier.get().getRadians()));
+
           // Add observation
           poseObservations.add(
               new PoseObservation(
                   result.getTimestampSeconds(), // Timestamp
-                  robotPose, // 3D pose estimate
+                  robot, // 3D pose estimate
                   target.poseAmbiguity, // Ambiguity
                   1, // Tag count
                   cameraToTarget.getTranslation().getNorm(), // Average tag distance

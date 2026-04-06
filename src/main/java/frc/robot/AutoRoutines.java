@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import choreo.auto.AutoFactory;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -58,7 +59,7 @@ public class AutoRoutines {
     return factory;
   }
 
-  public Command getNoneAuto() {
+  public Command getRBAuto() {
     final var routine = factory.newRoutine("Choreo Auto");
     final var first = routine.trajectory("RB1");
     final var second = routine.trajectory("RB2");
@@ -69,6 +70,44 @@ public class AutoRoutines {
         .active()
         .whileTrue(
             Commands.sequence(
+                DriveCommands.autoAlign(drive, () -> first.getInitialPose().orElse(new Pose2d()))
+                    .until(
+                        () ->
+                            DriveCommands.isNear(
+                                first.getInitialPose().orElse(new Pose2d()), drive.getPose())),
+                first.resetOdometry(),
+                first.cmd(),
+                second.resetOdometry(),
+                Commands.deadline(second.cmd(), intake.setVoltage(IntakeConstants.Setpoints.run)),
+                third.resetOdometry(),
+                Commands.deadline(third.cmd(), intake.setVoltage(IntakeConstants.Setpoints.run)),
+                Commands.deadline(Commands.waitSeconds(6.0), getShootCommand()),
+                intake.setPosition(IntakeConstants.Setpoints.deployed),
+                fourth.resetOdometry(),
+                Commands.deadline(fourth.cmd(), intake.setVoltage(IntakeConstants.Setpoints.run)),
+                Commands.deadline(Commands.waitSeconds(6.0), getShootCommand())));
+
+    routine.observe(first.done()).onTrue(intake.setPosition(IntakeConstants.Setpoints.deployed));
+
+    return routine.cmd();
+  }
+
+  public Command getLBAuto() {
+    final var routine = factory.newRoutine("Choreo Auto");
+    final var first = routine.trajectory("RB1").mirrorY();
+    final var second = routine.trajectory("RB2").mirrorY();
+    final var third = routine.trajectory("RB3").mirrorY();
+    final var fourth = routine.trajectory("RB4").mirrorY();
+
+    routine
+        .active()
+        .whileTrue(
+            Commands.sequence(
+                DriveCommands.autoAlign(drive, () -> first.getInitialPose().orElse(new Pose2d()))
+                    .until(
+                        () ->
+                            DriveCommands.isNear(
+                                first.getInitialPose().orElse(new Pose2d()), drive.getPose())),
                 first.resetOdometry(),
                 first.cmd(),
                 second.resetOdometry(),

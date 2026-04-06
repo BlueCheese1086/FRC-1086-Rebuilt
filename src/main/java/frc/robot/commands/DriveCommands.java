@@ -403,6 +403,12 @@ public class DriveCommands {
         .finallyDo(() -> drive.stopWithX());
   }
 
+  public static boolean isNear(Pose2d target, Pose2d actual) {
+    return MathUtil.isNear(0, actual.relativeTo(target).getTranslation().getNorm(), 0.015)
+        && MathUtil.isNear(
+            target.getRotation().getRadians(), actual.getRotation().getRadians(), 0.005);
+  }
+
   /**
    * Measures the velocity feedforward constants for the drive motors.
    *

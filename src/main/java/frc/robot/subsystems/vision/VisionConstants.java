@@ -6,12 +6,20 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
+import frc.robot.util.LoggedTunableNumber;
 
 /** Add your docs here. */
 public class VisionConstants {
 
+  public static LoggedTunableNumber tunableMultiTagLinearBaseline =
+      new LoggedTunableNumber("/Vision/Tuning/MultiTagLinearBaseline", 0.9);
+  public static LoggedTunableNumber tunableMultiTagAngularBaseline =
+      new LoggedTunableNumber("/Vision/Tuning/MultiTagAngluarBaseline", 0.03);
+  public static LoggedTunableNumber tunableTrigLinearBaseline =
+      new LoggedTunableNumber("/Vision/Tuning/TrigLinearBaseline", 2.55);
+
   // Basic filtering thresholds
-  public static double maxAmbiguity = 0.4;
+  public static double maxAmbiguity = 0.3;
   public static double maxZError = 1.245; // 0.75
 
   // Standard deviation baselines, for 1 meter distance and 1 tag
@@ -54,11 +62,11 @@ public class VisionConstants {
               -Units.degreesToRadians(20.0),
               Units.degreesToRadians(180.0 - 17.1921978943)));
 
-  public static double trigLinearStdDevBaseline = 2.55;
+  public static double trigLinearStdDevBaseline = tunableTrigLinearBaseline.getAsDouble();
   public static double trigAngularStdDevBaseline = Double.POSITIVE_INFINITY; // Radians
 
-  public static double multitagLinearStdDevBaseline = 0.9; // Meters
-  public static double multitagAngularStdDevBaseline = 0.03; // Radians
+  public static double multitagLinearStdDevBaseline = tunableMultiTagLinearBaseline.getAsDouble();
+  public static double multitagAngularStdDevBaseline = tunableMultiTagAngularBaseline.getAsDouble();
 
   public static double averageTagDistance = Double.POSITIVE_INFINITY;
   public static double averageTagDistanceSingleTag = 7.5;

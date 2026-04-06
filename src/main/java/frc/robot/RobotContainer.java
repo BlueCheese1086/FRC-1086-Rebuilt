@@ -282,7 +282,8 @@ public class RobotContainer {
         "Risky left bump auto", this.pathFindToStart("Risky Bump Double Intake", true));
     autoChooser.addOption("Depot Auto", this.pathFindToStart("Depot Auto", false));
     autoChooser.addOption("Testing", this.pathFindToStart("2 Cycle", false));
-    autoChooser.addOption("None Auto", factory.getNoneAuto());
+    autoChooser.addOption("Left Bump Choreo Auto", factory.getLBAuto());
+    autoChooser.addOption("Right Bump Choreo Auto", factory.getRBAuto());
     // Configure the button bindings
     configureButtonBindings();
   }
