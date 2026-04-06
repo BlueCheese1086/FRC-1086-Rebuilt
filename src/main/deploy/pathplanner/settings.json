@@ -3,8 +3,9 @@
   "robotLength": 0.811,
   "holonomicMode": true,
   "pathFolders": [
-    "JohnAuto",
     "Depot Auto",
+    "JohnAuto",
+    "2 cycle",
     "another one",
     "left paths",
     "outpost",

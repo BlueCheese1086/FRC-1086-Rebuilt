@@ -10,6 +10,7 @@ package frc.robot.subsystems.drive;
 import static edu.wpi.first.units.Units.*;
 
 import choreo.auto.AutoFactory;
+import choreo.auto.AutoRoutine;
 import choreo.trajectory.SwerveSample;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.ModuleConfig;
@@ -22,7 +23,7 @@ import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -35,7 +36,6 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
@@ -51,6 +51,7 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.util.BatteryLogger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -111,28 +112,6 @@ public class Drive extends SubsystemBase {
           VecBuilder.fill(1.0, 1.0, 0.1),
           VecBuilder.fill(0.9, 0.9, 0.9));
 
-  private ProfiledPIDController xPID =
-      new ProfiledPIDController(
-          6.0,
-          0.0,
-          0.0,
-          new Constraints(
-              getMaxLinearSpeedMetersPerSec(), Math.pow(getMaxLinearSpeedMetersPerSec(), 2)));
-  private ProfiledPIDController yPID =
-      new ProfiledPIDController(
-          6.0,
-          0.0,
-          0.0,
-          new Constraints(
-              getMaxLinearSpeedMetersPerSec(), Math.pow(getMaxLinearSpeedMetersPerSec(), 2)));
-  private ProfiledPIDController heading =
-      new ProfiledPIDController(
-          6.0,
-          0.0,
-          0.0,
-          new Constraints(
-              getMaxAngularSpeedRadPerSec(), Math.pow(getMaxAngularSpeedRadPerSec(), 2)));
-
   public Drive(
       GyroIO gyroIO,
       ModuleIO flModuleIO,
@@ -149,8 +128,6 @@ public class Drive extends SubsystemBase {
 
     // Usage reporting for swerve template
     HAL.report(tResourceType.kResourceType_RobotDrive, tInstances.kRobotDriveSwerve_AdvantageKit);
-
-    factory = new AutoFactory(this::getPose, this::setPose, this::followTrajectory, true, this);
 
     // Start odometry thread
     PhoenixOdometryThread.getInstance().start();
@@ -245,18 +222,6 @@ public class Drive extends SubsystemBase {
     gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
   }
 
-  public void followTrajectory(SwerveSample sample) {
-    Pose2d currentPose = getPose();
-
-    ChassisSpeeds speeds =
-        new ChassisSpeeds(
-            sample.vx + xPID.calculate(currentPose.getX(), sample.x),
-            sample.vy + yPID.calculate(currentPose.getY(), sample.y),
-            sample.omega + heading.calculate(currentPose.getRotation().getRadians(), sample.omega));
-
-    runVelocity(speeds);
-  }
-
   /**
    * Runs the drive at the desired velocity.
    *
@@ -279,6 +244,31 @@ public class Drive extends SubsystemBase {
 
     // Log optimized setpoints (runSetpoint mutates each state)
     Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
+  }
+
+  public Consumer<SwerveSample> choreoDriveController() {
+    final PIDController xController = new PIDController(8.0, 0.0, 0.0);
+    final PIDController yController = new PIDController(8.0, 0.0, 0.0);
+    final PIDController thetaController = new PIDController(10.0, 0.0, 0.0);
+    thetaController.enableContinuousInput(-Math.PI, Math.PI);
+    return (sample) -> {
+      final Pose2d pose = getPose();
+      Logger.recordOutput(
+          "Choreo/Target Pose",
+          new Pose2d(sample.x, sample.y, Rotation2d.fromRadians(sample.heading)));
+      Logger.recordOutput(
+          "Choreo/Target Speeds Field Relative",
+          new ChassisSpeeds(sample.vx, sample.vy, sample.omega));
+      ChassisSpeeds feedback =
+          new ChassisSpeeds(
+              xController.calculate(pose.getX(), sample.x),
+              yController.calculate(pose.getY(), sample.y),
+              thetaController.calculate(pose.getRotation().getRadians(), sample.heading));
+      ChassisSpeeds speeds =
+          ChassisSpeeds.fromFieldRelativeSpeeds(
+              new ChassisSpeeds(sample.vx, sample.vy, sample.omega).plus(feedback), getRotation());
+      this.runVelocity(speeds);
+    };
   }
 
   /** Runs the drive in a straight line with the specified drive output. */
@@ -409,7 +399,7 @@ public class Drive extends SubsystemBase {
     };
   }
 
-  public Command autotest() {
-    return factory.trajectoryCmd("TestingFAH");
+  public AutoRoutine autotest() {
+    return factory.newRoutine("twoswipe");
   }
 }

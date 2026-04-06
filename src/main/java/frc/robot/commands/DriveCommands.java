@@ -29,7 +29,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.hood.Hood;
-import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterConstants;
 import frc.robot.util.AllianceFlipUtil;
@@ -223,7 +222,6 @@ public class DriveCommands {
   @SuppressWarnings("resource")
   public static Command joystickDriveAtAngle(
       Drive drive,
-      Intake intake,
       DoubleSupplier xSupplier,
       DoubleSupplier ySupplier,
       Supplier<Rotation2d> rotationSupplier) {
@@ -265,7 +263,7 @@ public class DriveCommands {
                           ? drive.getRotation().plus(new Rotation2d(Math.PI))
                           : drive.getRotation()));
             },
-            intake)
+            drive)
 
         // Reset PID controller when command starts
         .beforeStarting(() -> angleController.reset());
@@ -323,12 +321,11 @@ public class DriveCommands {
    * the direction the driver is commanding translation.
    */
   public static Command joystickDriveSyom(
-      Drive drive, Intake intake, DoubleSupplier xSupplier, DoubleSupplier ySupplier) {
+      Drive drive, DoubleSupplier xSupplier, DoubleSupplier ySupplier) {
     // Reuse the existing angle-hold command but source the target angle from the
     // translation stick. Add a deadband to avoid instability from stick drift.
     return joystickDriveAtAngle(
         drive,
-        intake,
         xSupplier,
         ySupplier,
         () -> {
@@ -345,7 +342,7 @@ public class DriveCommands {
         });
   }
 
-   public static Command autoAlign(Drive drive, Supplier<Pose2d> pose) {
+  public static Command autoAlign(Drive drive, Supplier<Pose2d> pose) {
     // Create PID controller
     ProfiledPIDController angleController =
         new ProfiledPIDController(
@@ -354,18 +351,22 @@ public class DriveCommands {
             ANGLE_KD,
             new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
     angleController.enableContinuousInput(-Math.PI, Math.PI);
-    ProfiledPIDController xController = 
+    ProfiledPIDController xController =
         new ProfiledPIDController(
-          6.0, 
-          0.0, 
-          0.0, 
-          new Constraints(drive.getMaxLinearSpeedMetersPerSec(), Math.pow(drive.getMaxLinearSpeedMetersPerSec(), 2)));
-    ProfiledPIDController yController = 
+            6.0,
+            0.0,
+            0.0,
+            new Constraints(
+                drive.getMaxLinearSpeedMetersPerSec(),
+                Math.pow(drive.getMaxLinearSpeedMetersPerSec(), 2)));
+    ProfiledPIDController yController =
         new ProfiledPIDController(
-          6.0, 
-          0.0, 
-          0.0, 
-          new Constraints(drive.getMaxLinearSpeedMetersPerSec(), Math.pow(drive.getMaxLinearSpeedMetersPerSec(), 2)));
+            6.0,
+            0.0,
+            0.0,
+            new Constraints(
+                drive.getMaxLinearSpeedMetersPerSec(),
+                Math.pow(drive.getMaxLinearSpeedMetersPerSec(), 2)));
 
     // Construct command
     return Commands.run(
@@ -401,7 +402,6 @@ public class DriveCommands {
             })
         .finallyDo(() -> drive.stopWithX());
   }
-
 
   /**
    * Measures the velocity feedforward constants for the drive motors.

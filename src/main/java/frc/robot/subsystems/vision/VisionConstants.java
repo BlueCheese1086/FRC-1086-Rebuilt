@@ -11,7 +11,7 @@ import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
 public class VisionConstants {
 
   // Basic filtering thresholds
-  public static double maxAmbiguity = 0.3; // 0.3d
+  public static double maxAmbiguity = 0.4;
   public static double maxZError = 1.245; // 0.75
 
   // Standard deviation baselines, for 1 meter distance and 1 tag
@@ -42,16 +42,16 @@ public class VisionConstants {
           Units.inchesToMeters(10.75),
           new Rotation3d(
               -Units.degreesToRadians(7.6307485467),
-              -Units.degreesToRadians(25.25),
+              -Units.degreesToRadians(20.0),
               Units.degreesToRadians(180.0 + 17.1270263437)));
   public static Transform3d robotToRightCam =
       new Transform3d(
-          -Units.inchesToMeters(11.073859),
+          -Units.inchesToMeters(11.01875),
           -Units.inchesToMeters(8.25),
-          Units.inchesToMeters(11.348081),
+          Units.inchesToMeters(10.75),
           new Rotation3d(
               Units.degreesToRadians(7.6307485467),
-              -Units.degreesToRadians(25.25),
+              -Units.degreesToRadians(20.0),
               Units.degreesToRadians(180.0 - 17.1921978943)));
 
   public static double trigLinearStdDevBaseline = 2.55;
@@ -61,7 +61,7 @@ public class VisionConstants {
   public static double multitagAngularStdDevBaseline = 0.03; // Radians
 
   public static double averageTagDistance = Double.POSITIVE_INFINITY;
-  public static double averageTagDistanceSingleTag = 5.0;
+  public static double averageTagDistanceSingleTag = 7.5;
   public static double maxFusedDistance = 0.125;
   public static PoseObservationType preferred = PoseObservationType.PHOTONVISION_TRIG;
 }

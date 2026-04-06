@@ -1,11 +1,18 @@
-// Copyright (c) 2021-2026 Littleton Robotics
+// Copyright 2021-2025 FRC 6328
 // http://github.com/Mechanical-Advantage
 //
-// Use of this source code is governed by a BSD
-// license that can be found in the LICENSE file
-// at the root directory of this project.
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// version 3 as published by the Free Software Foundation or
+// available in the root directory of this project.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
 
 package frc.robot.subsystems.vision;
+
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -16,7 +23,7 @@ import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
 
 /** IO implementation for physics sim using PhotonVision simulator. */
-public class VisionIOPhotonVisionSim extends VisionIOPhotonFused {
+public class VisionIOPhotonVisionSim extends VisionIOPhotonVision {
   private static VisionSystemSim visionSim;
 
   private final Supplier<Pose2d> poseSupplier;
@@ -30,23 +37,25 @@ public class VisionIOPhotonVisionSim extends VisionIOPhotonFused {
    */
   public VisionIOPhotonVisionSim(
       String name, Transform3d robotToCamera, Supplier<Pose2d> poseSupplier) {
-    super(name, robotToCamera, poseSupplier);
+    super(name, robotToCamera, () -> poseSupplier.get().getRotation());
     this.poseSupplier = poseSupplier;
 
     // Initialize vision sim
     if (visionSim == null) {
       visionSim = new VisionSystemSim("main");
-      visionSim.addAprilTags(VisionConstants.fieldLayout);
+      visionSim.addAprilTags(aprilTagLayout);
     }
 
     // Add sim camera
-    SimCameraProperties cameraProperties =
-        SimCameraProperties.PERFECT_90DEG()
-            .setFPS(60)
-            .setAvgLatencyMs(20)
-            .setCalibError(0.37, 0.06)
-            .setCalibration(1280, 720, Rotation2d.fromDegrees(70));
-    cameraSim = new PhotonCameraSim(camera, cameraProperties, VisionConstants.fieldLayout);
+    SimCameraProperties cameraProperties = new SimCameraProperties();
+    cameraProperties.setCalibration(1280, 720, Rotation2d.fromDegrees(80.00));
+    cameraProperties.setFPS(40);
+    cameraProperties.setAvgLatencyMs(30);
+    cameraProperties.setLatencyStdDevMs(5);
+    cameraProperties.setCalibError(0.6, 0.08);
+
+    cameraSim = new PhotonCameraSim(camera, cameraProperties);
+    cameraSim.enableDrawWireframe(true);
     visionSim.addCamera(cameraSim, robotToCamera);
   }
 

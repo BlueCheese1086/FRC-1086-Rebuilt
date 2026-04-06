@@ -20,7 +20,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.autonomous.Autos;
 import frc.robot.autonomous.AutosManager;
-import frc.robot.commands.AutoRoutines;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
@@ -77,6 +76,7 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   private final AutosManager automanager;
+  private final AutoRoutines factory;
 
   @SuppressWarnings("unused")
   private final Vision vision;
@@ -196,7 +196,7 @@ public class RobotContainer {
 
     Autos.setup(drive, intake);
     automanager = new AutosManager(drive, shooter, indexer, intake, hood);
-    AutoRoutines.setup(drive, automanager.machine);
+    factory = new AutoRoutines(drive, shooter, intake, indexer, hood);
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices");
     // Set up SysId routines
@@ -219,7 +219,6 @@ public class RobotContainer {
     // "Drive SysId (Dynamic Reverse)",
     // drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     autoChooser.addOption("auto builder", automanager.getSelectedAuto());
-    autoChooser.addOption("Test Auto", new PathPlannerAuto("Commands Test Auto"));
 
     // autoChooser.addOption("Intake Pivot SysId", intake.sysId());
     // autoChooser.addOption("Climb SysId", climb.sysId());
@@ -283,6 +282,7 @@ public class RobotContainer {
         "Risky left bump auto", this.pathFindToStart("Risky Bump Double Intake", true));
     autoChooser.addOption("Depot Auto", this.pathFindToStart("Depot Auto", false));
     autoChooser.addOption("Testing", this.pathFindToStart("2 Cycle", false));
+    autoChooser.addOption("None Auto", factory.getNoneAuto());
     // Configure the button bindings
     configureButtonBindings();
   }
@@ -325,7 +325,7 @@ public class RobotContainer {
                 intake.setVoltage(IntakeConstants.Setpoints.run),
                 intake.setPosition(IntakeConstants.Setpoints.deployed),
                 DriveCommands.joystickDriveSyom(
-                    drive, intake, () -> -driver.getLeftY(), () -> -driver.getLeftX())));
+                    drive, () -> -driver.getLeftY(), () -> -driver.getLeftX())));
 
     driver
         .rightTrigger()
@@ -410,7 +410,6 @@ public class RobotContainer {
                         shooter),
                     DriveCommands.joystickDriveAtAngle(
                         drive,
-                        intake,
                         () -> -driver.getLeftY() * 0.5,
                         () -> -driver.getLeftX() * 0.5,
                         () ->
@@ -451,7 +450,6 @@ public class RobotContainer {
                         shooter),
                     DriveCommands.joystickDriveAtAngle(
                         drive,
-                        intake,
                         () -> -driver.getLeftY() * 0.7,
                         () -> -driver.getLeftX() * 0.7,
                         () ->
@@ -554,7 +552,6 @@ public class RobotContainer {
         getShootCommand(),
         DriveCommands.joystickDriveAtAngle(
             drive,
-            intake,
             () -> driver.getLeftX(),
             () -> driver.getLeftY(),
             () ->
