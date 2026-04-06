@@ -145,9 +145,12 @@ public class RobotContainer {
         shooter =
             new Shooter(
                 new FeederIOTalonFX(RobotMap.ShooterMap.feeder),
-                new ShooterIOTalonFX(RobotMap.ShooterMap.left, true, ShooterConstants.Tuning.leftShooterConfigs),
-                new ShooterIOTalonFX(RobotMap.ShooterMap.middle, true, ShooterConstants.Tuning.middleShooterConfigs),
-                new ShooterIOTalonFX(RobotMap.ShooterMap.right, false, ShooterConstants.Tuning.rightShooterConfigs));
+                new ShooterIOTalonFX(
+                    RobotMap.ShooterMap.left, true, ShooterConstants.Tuning.leftShooterConfigs),
+                new ShooterIOTalonFX(
+                    RobotMap.ShooterMap.middle, true, ShooterConstants.Tuning.middleShooterConfigs),
+                new ShooterIOTalonFX(
+                    RobotMap.ShooterMap.right, false, ShooterConstants.Tuning.rightShooterConfigs));
         hood = new Hood(new HoodIOServo());
         break;
 
@@ -238,6 +241,7 @@ public class RobotContainer {
     autoChooser.addOption("Left Bump Auto", this.pathFindToStart("left1", false));
     autoChooser.addOption("Right Bump Auto", this.pathFindToStart("left1", true));
     autoChooser.addOption("Right Bump Auto (w/ outpost)", this.pathFindToStart("right1", false));
+    autoChooser.addOption("SSHWTMHTCMCBIATSTGTTTW", this.pathFindToStart("BSHIGTTMMCM", false));
     autoChooser.addOption(
         "Basic Shooting Auto",
         Commands.sequence(
@@ -303,21 +307,22 @@ public class RobotContainer {
     hood.setDefaultCommand(
         Commands.run(
             () -> {
-                if (Constants.tuningMode) {
-                    hood.setPosition(HoodConstants.Targeting.hoodAngle::get);
-                } else {
-                    LaunchingParameters parms =
-                              LauncherCalculator.getInstance()
-                                  .getParameters(
-                                      () ->
-                                          (new Pose3d(drive.getPose())
-                                              .transformBy(ShooterTransforms.centerShooter)
-                                              .toPose2d()),
-                                      drive::getChassisSpeeds,
-                                      drive::getRotation);
-                    hood.setPosition(() -> parms.hoodAngle());
-                }
-            }, hood));
+              if (Constants.tuningMode) {
+                hood.setPosition(HoodConstants.Targeting.hoodAngle::get);
+              } else {
+                LaunchingParameters parms =
+                    LauncherCalculator.getInstance()
+                        .getParameters(
+                            () ->
+                                (new Pose3d(drive.getPose())
+                                    .transformBy(ShooterTransforms.centerShooter)
+                                    .toPose2d()),
+                            drive::getChassisSpeeds,
+                            drive::getRotation);
+                hood.setPosition(() -> parms.hoodAngle());
+              }
+            },
+            hood));
 
     driver
         .start()
@@ -389,7 +394,7 @@ public class RobotContainer {
                         () -> shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(370.0)),
                         shooter)
                     .finallyDo(shooter::stopShooter),
-                Commands.run(() -> hood.setPosition(() -> 64.0),hood)));
+                Commands.run(() -> hood.setPosition(() -> 64.0), hood)));
 
     // What i think is better and safer is a known trench shot. like 1678, they cant
     // be defended
@@ -413,7 +418,7 @@ public class RobotContainer {
                         () -> shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(375.0)),
                         shooter)
                     .finallyDo(shooter::stopShooter),
-                Commands.run(() -> hood.setPosition(() -> 54.0),hood)));
+                Commands.run(() -> hood.setPosition(() -> 54.0), hood)));
 
     driver
         .y()
