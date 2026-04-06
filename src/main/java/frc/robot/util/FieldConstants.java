@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * Contains information for location of field element and other useful reference points.
@@ -49,7 +50,7 @@ public class FieldConstants {
   public static class LinesVertical {
     public static final double center = fieldLength / 2.0;
     public static final double starting = defaultAprilTagType.getTagPose(26).get().getX();
-    public static final double allianceZone = starting;
+    public static final Pose2d allianceZone = AllianceFlipUtil.apply(defaultAprilTagType.getTagPose(26).get().toPose2d());
     public static final double hubCenter =
         defaultAprilTagType.getTagPose(26).get().getX() + Hub.width / 2.0;
     public static final double neutralZoneNear = center - Units.inchesToMeters(120);
@@ -57,11 +58,8 @@ public class FieldConstants {
     public static final double oppHubCenter =
         defaultAprilTagType.getTagPose(4).get().getX() + Hub.width / 2.0;
     public static final double oppAllianceZone = defaultAprilTagType.getTagPose(10).get().getX();
-
     public static boolean inAllianceZone(Supplier<Pose2d> pose) {
-      return AllianceFlipUtil.shouldFlip()
-          ? pose.get().getX() > allianceZone
-          : pose.get().getX() < allianceZone;
+       return AllianceFlipUtil.shouldFlip() ? pose.get().getX() <= Units.inchesToMeters(182.11) : pose.get().getX() >= Units.inchesToMeters(468.0);
     }
   }
 

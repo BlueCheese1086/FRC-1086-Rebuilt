@@ -66,6 +66,8 @@ import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.BatteryLogger;
 import frc.robot.util.FieldConstants;
+import frc.robot.util.FieldConstants.LinesVertical;
+
 import java.util.Set;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -522,13 +524,13 @@ public class RobotContainer {
   }
 
   public void periodic() {
-    manualOverride = driver.a().getAsBoolean();
     Logger.recordOutput(
         "Vision Transforms/Left",
         new Pose3d(drive.getPose()).transformBy(VisionConstants.robotToLeftCam));
     Logger.recordOutput(
         "Vision Transforms/Right",
         new Pose3d(drive.getPose()).transformBy(VisionConstants.robotToRightCam));
+    Logger.recordOutput("Robot/InAlianceZone", LinesVertical.inAllianceZone(drive::getPose));
   }
 
   public Command pathFindToStart(String pathName, boolean flip) {
