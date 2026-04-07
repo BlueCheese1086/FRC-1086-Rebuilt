@@ -52,7 +52,7 @@ public class VisionConstants {
           Units.inchesToMeters(10.75),
           new Rotation3d(
               -Units.degreesToRadians(7.6307485467),
-              -Units.degreesToRadians(20.0),
+              -Units.degreesToRadians(30.0),
               Units.degreesToRadians(180.0 + 17.1270263437)));
   public static Transform3d robotToRightCam =
       new Transform3d(
@@ -61,7 +61,7 @@ public class VisionConstants {
           Units.inchesToMeters(10.75),
           new Rotation3d(
               Units.degreesToRadians(7.6307485467),
-              -Units.degreesToRadians(20.0),
+              -Units.degreesToRadians(30.0),
               Units.degreesToRadians(180.0 - 17.1921978943)));
 
   public static double trigLinearStdDevBaseline = 0.5;
