@@ -22,7 +22,7 @@ import org.littletonrobotics.junction.AutoLogOutput;
  * (log replay from a file).
  */
 public final class Constants {
-  public static final Mode simMode = Mode.SIM;
+  public static final Mode simMode = Mode.REPLAY;
 
   @AutoLogOutput(key = "/Robot/Current Mode")
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
