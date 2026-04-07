@@ -19,13 +19,24 @@ public class MatchTimer {
   private static Timer shiftTimer = new Timer();
 
   private static enum Shift {
-    Autonomous,
-    Transistion,
-    Shift1,
-    Shift2,
-    Shift3,
-    Shift4,
-    EndGame
+    Autonomous("Autonomous"),
+    Transistion("Transistion"),
+    Shift_1("Shift 1"),
+    Shift_2("Shift 2"),
+    Shift_3("Shift 3"),
+    Shift_4("Shift 4"),
+    End_Game("End Game");
+
+    private String name;
+
+    Shift(String shiftName) {
+      this.name = shiftName;
+    }
+
+    @Override
+    public String toString() {
+      return name;
+    }
   }
 
   public static Shift currentShift = Shift.Autonomous;
@@ -71,22 +82,22 @@ public class MatchTimer {
     } else if (getTime() > 30) {
       shiftTotalTime = 25.0;
       if (MathUtil.isNear(130.0, getTime(), 0.03)) {
-        currentShift = Shift.Shift1;
+        currentShift = Shift.Shift_1;
       }
       if (MathUtil.isNear(105.0, getTime(), 0.03)) {
-        currentShift = Shift.Shift2;
+        currentShift = Shift.Shift_2;
       }
       if (MathUtil.isNear(80.0, getTime(), 0.03)) {
-        currentShift = Shift.Shift3;
+        currentShift = Shift.Shift_3;
       }
       if (MathUtil.isNear(55.0, getTime(), 0.03)) {
-        currentShift = Shift.Shift4;
+        currentShift = Shift.Shift_4;
       }
     } else if (DriverStation.isAutonomous()) {
       shiftTotalTime = 20.0;
       currentShift = Shift.Autonomous;
     } else {
-      currentShift = Shift.EndGame;
+      currentShift = Shift.End_Game;
       shiftTotalTime = 30.0;
     }
     return (DriverStation.isAutonomous()
