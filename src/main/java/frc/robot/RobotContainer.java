@@ -320,6 +320,7 @@ public class RobotContainer {
     autoChooser.addOption("Testing", this.pathFindToStart("2 Cycle", false));
     autoChooser.addOption("Left Bump Choreo Auto", factory.getLBAuto());
     autoChooser.addOption("Right Bump Choreo Auto", factory.getRBAuto());
+    autoChooser.addOption("Kamekazi", this.pathFindToStart("Kamekazi", false));
     // Configure the button bindings
     configureButtonBindings();
   }
