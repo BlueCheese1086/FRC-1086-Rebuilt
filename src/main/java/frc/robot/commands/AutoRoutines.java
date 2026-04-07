@@ -31,7 +31,6 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism;
-import frc.robot.autonomous.AutoStateMachine;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.util.AllianceFlipUtil;
 import java.util.function.Consumer;
@@ -44,7 +43,7 @@ public class AutoRoutines {
   private static AutoFactory factory;
   private static Drive kDrive;
 
-  public static void setup(Drive drive, AutoStateMachine asm) {
+  public static void setup(Drive drive) {
     kDrive = drive;
     factory = new AutoFactory(drive::getPose, drive::setPose, run(), true, drive);
 

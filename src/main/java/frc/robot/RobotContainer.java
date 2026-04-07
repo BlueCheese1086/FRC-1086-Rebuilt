@@ -224,6 +224,7 @@ public class RobotContainer {
     }
 
     Autos.setup(drive, intake);
+    frc.robot.commands.AutoRoutines.setup(drive);
     automanager = new AutosManager(drive, shooter, indexer, intake, hood);
     factory = new AutoRoutines(drive, shooter, intake, indexer, hood);
     // Set up auto routines
