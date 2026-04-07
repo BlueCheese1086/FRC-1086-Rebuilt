@@ -10,9 +10,9 @@ package frc.robot.util;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
+import frc.robot.subsystems.shooter.shooterUtil.LauncherCalculator;
 import java.util.Optional;
 import java.util.function.Supplier;
-import frc.robot.subsystems.shooter.shooterUtil.LauncherCalculator;
 
 public class HubShiftUtil {
   public enum ShiftEnum {
@@ -55,6 +55,7 @@ public class HubShiftUtil {
   public static void setAllianceWinOverride(Supplier<Optional<Boolean>> override) {
     allianceWinOverride = override;
   }
+
   public static Optional<Boolean> getAllianceWinOverride() {
     return allianceWinOverride.get();
   }
@@ -82,7 +83,7 @@ public class HubShiftUtil {
     }
 
     // Return default value
-    return alliance == Alliance.Blue ? Alliance.Red : Alliance.Blue;
+    return alliance == Alliance.Blue ? Alliance.Blue : Alliance.Red;
   }
 
   /** Starts the timer at the begining of teleop. */

@@ -79,7 +79,6 @@ import frc.robot.util.FieldConstants;
 import frc.robot.util.FieldConstants.LinesVertical;
 import frc.robot.util.HubShiftUtil;
 import frc.robot.util.controllers.OverrideSwitches;
-
 import java.util.Set;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -123,7 +122,7 @@ public class RobotContainer {
   private final Trigger coast = overrides.operatorSwitch(2);
   private final Trigger lostAutoOverride = overrides.multiDirectionSwitchLeft();
   private final Trigger wonAutoOverride = overrides.multiDirectionSwitchRight();
-  private final Trigger ignoreHubState = overrides.operatorSwitch(1);
+  private final Trigger ignoreHubState = overrides.operatorSwitch(3);
 
   // Alerts
   private final Alert driverDisconnected =
@@ -363,10 +362,7 @@ public class RobotContainer {
                 })
             .onlyIf(DriverStation::isTeleop));
 
-    Trigger hubActive =
-        new Trigger(
-            () ->
-                HubShiftUtil.getShiftedShiftInfo().active());
+    Trigger hubActive = new Trigger(() -> HubShiftUtil.getShiftedShiftInfo().active());
 
     driver
         .start()
@@ -398,12 +394,17 @@ public class RobotContainer {
 
     driver
         .rightTrigger()
-        .and(() -> LauncherCalculator.getInstance().getParameters(() ->
-                                  (new Pose3d(drive.getPose())
-                                      .transformBy(ShooterTransforms.centerShooter)
-                                      .toPose2d()),
-                              drive::getChassisSpeeds,
-                              drive::getRotation).isValid())
+        .and(
+            () ->
+                LauncherCalculator.getInstance()
+                    .getParameters(
+                        () ->
+                            (new Pose3d(drive.getPose())
+                                .transformBy(ShooterTransforms.centerShooter)
+                                .toPose2d()),
+                        drive::getChassisSpeeds,
+                        drive::getRotation)
+                    .isValid())
         .and(() -> ignoreHubState.getAsBoolean() || hubActive.getAsBoolean())
         .whileTrue(
             Commands.parallel(
@@ -454,8 +455,7 @@ public class RobotContainer {
         .whileTrue(
             Commands.parallel(
                 Commands.run(
-                        () -> shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(385)),
-                        shooter)
+                        () -> shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(385)), shooter)
                     .finallyDo(shooter::stopShooter),
                 Commands.runOnce(() -> hood.setPosition(() -> 60.0))));
 
@@ -559,7 +559,6 @@ public class RobotContainer {
     operator.leftBumper().whileTrue(intake.setPosition(IntakeConstants.Setpoints.deployed));
     operator.rightBumper().whileTrue(intake.setPosition(IntakeConstants.Setpoints.stowed));
 
-
     // ****** ALERTS ******
 
     // Warn formissing game data
@@ -584,7 +583,7 @@ public class RobotContainer {
                   driver.setRumble(RumbleType.kBothRumble, 0);
                   operator.setRumble(RumbleType.kBothRumble, 0);
                 }));
-    
+
     // End-of-shift warning
     for (int i = 1; i <= 5; i++) {
       double time = i;
@@ -616,9 +615,9 @@ public class RobotContainer {
     SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
 
     // Update from HubShiftUtil
-    SmartDashboard.putString(
-        "Shifts/Remaining Shift Time",
-        String.format("%.1f", Math.max(HubShiftUtil.getShiftedShiftInfo().remainingTime(), 0.0)));
+    SmartDashboard.putNumber(
+        "Shifts/Remaining Shift Time", 
+        Math.max(HubShiftUtil.getShiftedShiftInfo().remainingTime(), 0.0));
     SmartDashboard.putBoolean("Shifts/Shift Active", HubShiftUtil.getShiftedShiftInfo().active());
     SmartDashboard.putString(
         "Shifts/Game State", HubShiftUtil.getShiftedShiftInfo().currentShift().toString());
@@ -630,7 +629,7 @@ public class RobotContainer {
     driverDisconnected.set(!DriverStation.isJoystickConnected(driver.getHID().getPort()));
     operatorDisconnected.set(!DriverStation.isJoystickConnected(operator.getHID().getPort()));
     overrideDisconnected.set(!overrides.isConnected());
-    }
+  }
 
   @AutoLogOutput(key = "Targetting/Distance")
   private double getDist() {
