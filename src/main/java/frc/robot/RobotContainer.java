@@ -19,11 +19,14 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.autonomous.Autos;
 import frc.robot.autonomous.AutosManager;
@@ -104,7 +107,7 @@ public class RobotContainer {
   private final BatteryLogger batteryLogger = new BatteryLogger();
 
   @SuppressWarnings("unused")
-  private Supplier<Rotation2d> driveAngle = () -> Rotation2d.kZero;
+  private Supplier<Rotation2d> driveAngle = () -> (Rotation2d.kZero);
 
   private boolean manualOverride = false;
 
@@ -467,7 +470,6 @@ public class RobotContainer {
             Commands.parallel(
                 Commands.run(
                         () -> shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(385)), shooter)
-                        () -> shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(385)), shooter)
                     .finallyDo(shooter::stopShooter),
                 Commands.runOnce(() -> hood.setPosition(() -> 60.0))));
 
@@ -641,7 +643,6 @@ public class RobotContainer {
     driverDisconnected.set(!DriverStation.isJoystickConnected(driver.getHID().getPort()));
     operatorDisconnected.set(!DriverStation.isJoystickConnected(operator.getHID().getPort()));
     overrideDisconnected.set(!overrides.isConnected());
-  }
   }
 
   @AutoLogOutput(key = "Targetting/Distance")

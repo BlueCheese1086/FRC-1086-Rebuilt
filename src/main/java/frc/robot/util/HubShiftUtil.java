@@ -53,12 +53,20 @@ public class HubShiftUtil {
   // @Setter private static Supplier<Optional<Boolean>> allianceWinOverride = () ->
   // Optional.empty();
 
+  // public static void setAllianceWinOverride(Supplier<Optional<Boolean>> override) {
+  //   allianceWinOverride = override;
+  // }
+
+  // public static Optional<Boolean> getAllianceWinOverride() {
+  //   return allianceWinOverride.get();
+  // }
+
   public static void setAllianceWinOverride(Supplier<Optional<Boolean>> override) {
-    allianceWinOverride = override;
+    // allianceWinOverride = override;
   }
 
   public static Optional<Boolean> getAllianceWinOverride() {
-    return allianceWinOverride.get();
+    return Optional.empty();
   }
 
   public static Alliance getFirstActiveAlliance() {
