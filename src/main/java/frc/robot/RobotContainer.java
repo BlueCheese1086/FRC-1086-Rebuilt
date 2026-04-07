@@ -15,14 +15,19 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import edu.wpi.first.wpilibj2.GenericHID.RumbleType;
 import frc.robot.autonomous.Autos;
 import frc.robot.autonomous.AutosManager;
 import frc.robot.commands.DriveCommands;
@@ -72,6 +77,9 @@ import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.BatteryLogger;
 import frc.robot.util.FieldConstants;
 import frc.robot.util.FieldConstants.LinesVertical;
+import frc.robot.util.HubShiftUtil;
+import frc.robot.util.controllers.OverrideSwitches;
+
 import java.util.Set;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -108,8 +116,24 @@ public class RobotContainer {
 
   private final CommandXboxController operator = new CommandXboxController(1);
   private final CommandXboxController testing = new CommandXboxController(2);
+  private final OverrideSwitches overrides = new OverrideSwitches(5);
 
-  // private Pose2d[] backStartPose = new Pose2d[1];
+  // Operator overrides
+  private final Trigger robotRelative = overrides.operatorSwitch(1);
+  private final Trigger coast = overrides.operatorSwitch(2);
+  private final Trigger lostAutoOverride = overrides.multiDirectionSwitchLeft();
+  private final Trigger wonAutoOverride = overrides.multiDirectionSwitchRight();
+  private final Trigger ignoreHubState = overrides.operatorSwitch(1);
+
+  // Alerts
+  private final Alert driverDisconnected =
+      new Alert("Primary controller disconnected (port 0).", AlertType.kWarning);
+  private final Alert operatorDisconnected =
+      new Alert("Secondary controller disconnected (port 1).", AlertType.kWarning);
+  private final Alert overrideDisconnected =
+      new Alert("Override controller disconnected (port 5).", AlertType.kInfo);
+  private final Alert autoWinnerNotSet = new Alert("!!! AUTO WINNER NOT SET !!!", AlertType.kError);
+  private final Alert aprilTagLayoutAlert = new Alert("", AlertType.kInfo);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -343,13 +367,6 @@ public class RobotContainer {
         new Trigger(
             () ->
                 HubShiftUtil.getShiftedShiftInfo().active());
-    Trigger inLaunchingTolerance =
-        new Trigger(
-            () ->
-                hood.atGoal()
-                    && shooter.atGoal()
-                    && DriveCommands.atLaunchGoal()
-                    && DriveCommands.atPitchAndRollTolerance());
 
     driver
         .start()
@@ -381,8 +398,13 @@ public class RobotContainer {
 
     driver
         .rightTrigger()
-        .and(() -> LaunchCalculator.getInstance().getParameters().isValid())
-        .and(() -> ignoreHubState.getAsBoolean() || hubActiveOrPassing.getAsBoolean())
+        .and(() -> LauncherCalculator.getInstance().getParameters(() ->
+                                  (new Pose3d(drive.getPose())
+                                      .transformBy(ShooterTransforms.centerShooter)
+                                      .toPose2d()),
+                              drive::getChassisSpeeds,
+                              drive::getRotation).isValid())
+        .and(() -> ignoreHubState.getAsBoolean() || hubActive.getAsBoolean())
         .whileTrue(
             Commands.parallel(
                 shooter.runFeed(FeederSetpoints.run.in(Volts)),
@@ -605,11 +627,10 @@ public class RobotContainer {
         DriverStation.getAlliance().orElse(Alliance.Blue) == HubShiftUtil.getFirstActiveAlliance());
 
     // Controller disconnected alerts
-    primaryDisconnected.set(!DriverStation.isJoystickConnected(driver.getHID().getPort()));
-    secondaryDisconnected.set(!DriverStation.isJoystickConnected(operator.getHID().getPort()));
+    driverDisconnected.set(!DriverStation.isJoystickConnected(driver.getHID().getPort()));
+    operatorDisconnected.set(!DriverStation.isJoystickConnected(operator.getHID().getPort()));
     overrideDisconnected.set(!overrides.isConnected());
     }
-  }
 
   @AutoLogOutput(key = "Targetting/Distance")
   private double getDist() {
