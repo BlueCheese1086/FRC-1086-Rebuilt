@@ -540,24 +540,14 @@ public class RobotContainer {
         .whileTrue(
             Commands.runEnd(
                 () -> {
-                  primary.setRumble(RumbleType.kBothRumble, 1);
-                  secondary.setRumble(RumbleType.kBothRumble, 1);
+                  driver.setRumble(RumbleType.kBothRumble, 1);
+                  operator.setRumble(RumbleType.kBothRumble, 1);
                 },
                 () -> {
-                  primary.setRumble(RumbleType.kBothRumble, 0);
-                  secondary.setRumble(RumbleType.kBothRumble, 0);
-                }))
-        .whileTrue(
-            Commands.startEnd(
-                () -> {
-                  autoWinnerNotSet.set(true);
-                  leds.autoWinnerNotSet = true;
-                },
-                () -> {
-                  autoWinnerNotSet.set(false);
-                  leds.autoWinnerNotSet = false;
+                  driver.setRumble(RumbleType.kBothRumble, 0);
+                  operator.setRumble(RumbleType.kBothRumble, 0);
                 }));
-
+    
     // End-of-shift warning
     for (int i = 1; i <= 5; i++) {
       double time = i;
@@ -568,8 +558,8 @@ public class RobotContainer {
           .and(ignoreHubState.negate())
           .onTrue(
               Commands.runEnd(
-                      () -> primary.setRumble(RumbleType.kRightRumble, 1.0),
-                      () -> primary.setRumble(RumbleType.kBothRumble, 0.0))
+                      () -> driver.setRumble(RumbleType.kRightRumble, 1.0),
+                      () -> driver.setRumble(RumbleType.kBothRumble, 0.0))
                   .withTimeout(0.25));
     }
   }
