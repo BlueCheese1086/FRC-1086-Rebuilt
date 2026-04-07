@@ -94,7 +94,6 @@ public class RobotContainer {
   private final Drive drive;
   private final AutosManager automanager;
   private final AutoRoutines factory;
-  private BooleanSupplier canShoot = () -> false;
 
   @SuppressWarnings("unused")
   private final Vision vision;
