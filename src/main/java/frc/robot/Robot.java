@@ -153,6 +153,7 @@ public class Robot extends LoggedRobot {
     // Optionally switch the thread to high priority to improve loop
     // timing (see the template project documentation for details)
     Threads.setCurrentThreadPriority(true, 99);
+    robotContainer.updateDashboardOutputs();
 
     // Runs the Scheduler. This is responsible for polling buttons, adding
     // newly-scheduled commands, running already-scheduled commands, removing
@@ -169,8 +170,6 @@ public class Robot extends LoggedRobot {
     }
     robotContainer.periodic();
     MatchTimer.periodic();
-    // Update RobotContainer dashboard outputs
-    robotContainer.updateDashboardOutputs();
     Logger.recordOutput("Simulated Match/Match Time", MatchTimer.getTime());
     Logger.recordOutput("Simulated Match/Shift Time", MatchTimer.getShiftTime());
     Logger.recordOutput("Simulated Match/Current Shift", MatchTimer.currentShift.toString());
