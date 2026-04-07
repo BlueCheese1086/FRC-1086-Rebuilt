@@ -412,15 +412,15 @@ public class RobotContainer {
     // What i think is better and safer is a known trench shot. like 1678, they cant
     // be defended
     // there
-    // driver
-    // .a()
-    // .whileTrue(
-    // Commands.parallel(
-    // Commands.run(
-    // () -> shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(385)),
-    // shooter)
-    // .finallyDo(shooter::stopShooter),
-    // Commands.runOnce(() -> hood.setPosition(() -> 60.0))));
+    driver
+        .x()
+        .whileTrue(
+            Commands.parallel(
+                Commands.run(
+                        () -> shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(385)),
+                        shooter)
+                    .finallyDo(shooter::stopShooter),
+                Commands.runOnce(() -> hood.setPosition(() -> 60.0))));
 
     // Passing
     driver
