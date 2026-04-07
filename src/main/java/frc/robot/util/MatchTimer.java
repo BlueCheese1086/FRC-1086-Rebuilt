@@ -18,7 +18,7 @@ public class MatchTimer {
   private static Timer timer = new Timer();
   private static Timer shiftTimer = new Timer();
 
-  private static enum Shift {
+  public static enum Shift {
     Autonomous("Autonomous"),
     Transistion("Transistion"),
     Shift_1("Shift 1"),

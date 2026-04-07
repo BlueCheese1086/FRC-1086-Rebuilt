@@ -173,7 +173,7 @@ public class Robot extends LoggedRobot {
     robotContainer.updateDashboardOutputs();
     Logger.recordOutput("Simulated Match/Match Time", MatchTimer.getTime());
     Logger.recordOutput("Simulated Match/Shift Time", MatchTimer.getShiftTime());
-    Logger.recordOutput("Simulated Match/Current Shift", MatchTimer.currentShift);
+    Logger.recordOutput("Simulated Match/Current Shift", MatchTimer.currentShift.toString());
     Logger.recordOutput(
         "Simulated Match/Hub Active",
         DriverStation.getGameSpecificMessage().length() > 0
