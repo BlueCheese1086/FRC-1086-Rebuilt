@@ -630,7 +630,7 @@ public class RobotContainer {
 
     // Update from HubShiftUtil
     SmartDashboard.putNumber(
-        "Shifts/Remaining Shift Time", 
+        "Shifts/Remaining Shift Time",
         Math.max(HubShiftUtil.getShiftedShiftInfo().remainingTime(), 0.0));
     SmartDashboard.putBoolean("Shifts/Shift Active", HubShiftUtil.getShiftedShiftInfo().active());
     SmartDashboard.putString(
