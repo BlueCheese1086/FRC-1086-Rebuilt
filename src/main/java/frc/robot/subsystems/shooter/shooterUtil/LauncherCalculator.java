@@ -79,12 +79,11 @@ public class LauncherCalculator {
     flywheelSpeedMap.put(4.190, 355.0);
     flywheelSpeedMap.put(5.537, 400.0);
 
-    timeOfFlightMap.put(5.553, 1.29);
-    timeOfFlightMap.put(4.30, 1.18);
-    timeOfFlightMap.put(3.73, 0.88);
-    timeOfFlightMap.put(3.18, 0.92);
-    timeOfFlightMap.put(2.266, 0.9);
-    timeOfFlightMap.put(1.69, 1.06);
+    timeOfFlightMap.put(5.68, 1.16);
+    timeOfFlightMap.put(4.55, 1.12);
+    timeOfFlightMap.put(3.15, 1.11);
+    timeOfFlightMap.put(1.88, 1.09);
+    timeOfFlightMap.put(1.38, 0.90);
   }
 
   public static double getMinTimeOfFlight() {

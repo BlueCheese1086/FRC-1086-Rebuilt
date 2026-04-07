@@ -18,10 +18,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.Timer;
-import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
-import org.littletonrobotics.junction.Logger;
 
 /**
  * Contains information for location of field element and other useful reference points.
@@ -50,7 +47,8 @@ public class FieldConstants {
   public static class LinesVertical {
     public static final double center = fieldLength / 2.0;
     public static final double starting = defaultAprilTagType.getTagPose(26).get().getX();
-    public static final Pose2d allianceZone = AllianceFlipUtil.apply(defaultAprilTagType.getTagPose(26).get().toPose2d());
+    public static final Pose2d allianceZone =
+        AllianceFlipUtil.apply(defaultAprilTagType.getTagPose(26).get().toPose2d());
     public static final double hubCenter =
         defaultAprilTagType.getTagPose(26).get().getX() + Hub.width / 2.0;
     public static final double neutralZoneNear = center - Units.inchesToMeters(120);
@@ -58,8 +56,11 @@ public class FieldConstants {
     public static final double oppHubCenter =
         defaultAprilTagType.getTagPose(4).get().getX() + Hub.width / 2.0;
     public static final double oppAllianceZone = defaultAprilTagType.getTagPose(10).get().getX();
-    public static boolean inAllianceZone(Supplier<Pose2d> pose) {
-       return AllianceFlipUtil.shouldFlip() ? pose.get().getX() <= Units.inchesToMeters(182.11) : pose.get().getX() >= Units.inchesToMeters(468.0);
+
+    public static boolean inAllianceZone(Pose2d pose) {
+      return AllianceFlipUtil.shouldFlip()
+          ? pose.getX() >= Units.inchesToMeters(468.0)
+          : pose.getX() <= Units.inchesToMeters(182.11);
     }
   }
 
@@ -142,10 +143,10 @@ public class FieldConstants {
     public static boolean isHubActive(Alliance startingAlliance) {
       boolean redStart = startingAlliance.equals(Alliance.Red);
       if (DriverStation.isTeleop()) {
-        if (Timer.getMatchTime() > 130 || Timer.getMatchTime() < 30) {
+        if (MatchTimer.getTime() > 130 || MatchTimer.getTime() < 30) {
           return true;
         } else {
-          if (inRange(Timer.getMatchTime(), 105, 130) || inRange(Timer.getMatchTime(), 55, 80)) {
+          if (inRange(MatchTimer.getTime(), 105, 130) || inRange(MatchTimer.getTime(), 55, 80)) {
             return !redStart;
           } else {
             return redStart;

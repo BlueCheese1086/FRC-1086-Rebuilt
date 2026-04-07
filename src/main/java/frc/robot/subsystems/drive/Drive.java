@@ -68,7 +68,7 @@ public class Drive extends SubsystemBase {
               Math.hypot(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)));
 
   private static final double ROBOT_MASS_KG = Units.lbsToKilograms(115.0);
-  private static final double ROBOT_MOI = 6.883;
+  private static final double ROBOT_MOI = 4.088;
   private static final double WHEEL_COF = 1.2;
   private static AutoFactory factory;
 

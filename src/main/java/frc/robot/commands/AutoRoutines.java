@@ -189,10 +189,10 @@ public class AutoRoutines {
                 },
                 drive));
     return Commands.sequence(
-            linearRoutine.quasistatic(Direction.kForward).withTimeout(6.0),
-            linearRoutine.quasistatic(Direction.kReverse).withTimeout(6.0),
-            linearRoutine.dynamic(Direction.kForward).withTimeout(6.0),
-            linearRoutine.dynamic(Direction.kReverse).withTimeout(6.0))
+            linearRoutine.quasistatic(Direction.kForward).withTimeout(3.0),
+            linearRoutine.quasistatic(Direction.kReverse).withTimeout(3.0),
+            linearRoutine.dynamic(Direction.kForward).withTimeout(2.0),
+            linearRoutine.dynamic(Direction.kReverse).withTimeout(2.0))
         .beforeStarting(
             () -> {
               initialTranslation = drive.getPose().getTranslation();
@@ -222,10 +222,10 @@ public class AutoRoutines {
                 },
                 drive));
     return Commands.sequence(
-            rotationRoutine.quasistatic(Direction.kForward).withTimeout(6.0),
-            rotationRoutine.quasistatic(Direction.kReverse).withTimeout(6.0),
-            rotationRoutine.dynamic(Direction.kForward).withTimeout(6.0),
-            rotationRoutine.dynamic(Direction.kReverse).withTimeout(6.0))
+            rotationRoutine.quasistatic(Direction.kForward).withTimeout(3.0),
+            rotationRoutine.quasistatic(Direction.kReverse).withTimeout(3.0),
+            rotationRoutine.dynamic(Direction.kForward).withTimeout(3.0),
+            rotationRoutine.dynamic(Direction.kReverse).withTimeout(3.0))
         .beforeStarting(
             () -> {
               initialRotation = drive.getRotation();

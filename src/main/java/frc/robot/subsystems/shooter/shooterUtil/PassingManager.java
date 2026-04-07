@@ -62,25 +62,19 @@ public class PassingManager {
       new InterpolatingDoubleTreeMap();
 
   static {
-    minDistance = 1.34;
-    maxDistance = 5.60;
+    minDistance = 3.0;
+    maxDistance = 18.0;
     phaseDelay = 0.03;
 
-    hoodAngleMap.put(1.887, Rotation2d.fromDegrees(77.0));
-    hoodAngleMap.put(2.323, Rotation2d.fromDegrees(74.0));
-    hoodAngleMap.put(2.762, Rotation2d.fromDegrees(63.0));
-    hoodAngleMap.put(3.613, Rotation2d.fromDegrees(58.0));
-    hoodAngleMap.put(4.190, Rotation2d.fromDegrees(62.0));
-    hoodAngleMap.put(5.537, Rotation2d.fromDegrees(58.0));
+    hoodAngleMap.put(14.5, Rotation2d.fromDegrees(54.0));
+    hoodAngleMap.put(2.323, Rotation2d.fromDegrees(54.0));
+    hoodAngleMap.put(2.762, Rotation2d.fromDegrees(54.0));
 
-    flywheelSpeedMap.put(1.887, 295.0);
-    flywheelSpeedMap.put(2.323, 315.0);
-    flywheelSpeedMap.put(2.762, 305.0);
-    flywheelSpeedMap.put(3.613, 330.0);
-    flywheelSpeedMap.put(4.190, 355.0);
-    flywheelSpeedMap.put(5.537, 400.0);
+    flywheelSpeedMap.put(14.5, 600.0);
+    flywheelSpeedMap.put(11.77, 525.0);
+    flywheelSpeedMap.put(8.945, 450.0);
+    flywheelSpeedMap.put(6.7, 370.0);
 
-    timeOfFlightMap.put(5.68, 1.16);
     timeOfFlightMap.put(4.55, 1.12);
     timeOfFlightMap.put(3.15, 1.11);
     timeOfFlightMap.put(1.88, 1.09);

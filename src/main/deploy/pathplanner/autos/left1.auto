@@ -132,12 +132,6 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "IntakeUp"
-          }
-        },
-        {
           "type": "sequential",
           "data": {
             "commands": [
@@ -145,12 +139,6 @@
                 "type": "path",
                 "data": {
                   "pathName": "Path6"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "IntakeDown"
                 }
               }
             ]
