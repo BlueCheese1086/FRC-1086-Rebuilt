@@ -20,6 +20,8 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.autonomous.Autos;
 import frc.robot.autonomous.AutosManager;
 import frc.robot.commands.DriveCommands;
@@ -519,6 +521,57 @@ public class RobotContainer {
     operator.y().whileTrue(shooter.runFeed(ShooterConstants.FeederSetpoints.run.in(Volts)));
     operator.leftBumper().whileTrue(intake.setPosition(IntakeConstants.Setpoints.deployed));
     operator.rightBumper().whileTrue(intake.setPosition(IntakeConstants.Setpoints.stowed));
+
+
+    // ****** ALERTS ******
+
+    // Warn formissing game data
+    Timer teleopElapsedTimer = new Timer();
+    RobotModeTriggers.teleop()
+        .onTrue(
+            Commands.runOnce(
+                () -> {
+                  teleopElapsedTimer.restart();
+                }));
+    RobotModeTriggers.teleop()
+        .and(() -> !(DriverStation.getGameSpecificMessage().length() > 0))
+        .and(() -> HubShiftUtil.getAllianceWinOverride().isEmpty())
+        .and(() -> teleopElapsedTimer.hasElapsed(1.0))
+        .whileTrue(
+            Commands.runEnd(
+                () -> {
+                  primary.setRumble(RumbleType.kBothRumble, 1);
+                  secondary.setRumble(RumbleType.kBothRumble, 1);
+                },
+                () -> {
+                  primary.setRumble(RumbleType.kBothRumble, 0);
+                  secondary.setRumble(RumbleType.kBothRumble, 0);
+                }))
+        .whileTrue(
+            Commands.startEnd(
+                () -> {
+                  autoWinnerNotSet.set(true);
+                  leds.autoWinnerNotSet = true;
+                },
+                () -> {
+                  autoWinnerNotSet.set(false);
+                  leds.autoWinnerNotSet = false;
+                }));
+
+    // End-of-shift warning
+    for (int i = 1; i <= 5; i++) {
+      double time = i;
+      Trigger shiftAboutToEnd =
+          new Trigger(() -> (HubShiftUtil.getShiftedShiftInfo().remainingTime() < time));
+      shiftAboutToEnd
+          .and(RobotModeTriggers.teleop())
+          .and(ignoreHubState.negate())
+          .onTrue(
+              Commands.runEnd(
+                      () -> primary.setRumble(RumbleType.kRightRumble, 1.0),
+                      () -> primary.setRumble(RumbleType.kBothRumble, 0.0))
+                  .withTimeout(0.25));
+    }
   }
 
   /**
