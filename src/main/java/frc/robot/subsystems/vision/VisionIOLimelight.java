@@ -16,6 +16,7 @@ import edu.wpi.first.networktables.DoubleArraySubscriber;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.RobotController;
+import frc.robot.util.LimelightHelpers;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -50,6 +51,8 @@ public class VisionIOLimelight implements VisionIO {
     megatag2Subscriber =
         table.getDoubleArrayTopic("botpose_orb_wpiblue").subscribe(new double[] {});
     this.name = name;
+    LimelightHelpers.SetIMUMode(name, 4);
+    LimelightHelpers.SetIMUAssistAlpha(name, 0.001);
   }
 
   @Override

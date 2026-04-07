@@ -65,12 +65,12 @@ public class ShooterIOSim implements ShooterIO {
   }
 
   private void updateClosedLoop() {
-    shooterFF.setKa(ka.getAsDouble());
-    shooterFF.setKv(kv.getAsDouble());
-    shooterFF.setKs(ks.getAsDouble());
-    pidController.setP(kP.getAsDouble());
-    pidController.setI(kI.getAsDouble());
-    pidController.setD(kd.getAsDouble());
+    // shooterFF.setKa(ka.getAsDouble());
+    // shooterFF.setKv(kv.getAsDouble());
+    // shooterFF.setKs(ks.getAsDouble());
+    // pidController.setP(kP.getAsDouble());
+    // pidController.setI(kI.getAsDouble());
+    // pidController.setD(kd.getAsDouble());
   }
 
   @Override

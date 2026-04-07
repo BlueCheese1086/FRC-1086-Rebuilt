@@ -9,6 +9,7 @@ package frc.robot.util;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -19,6 +20,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * Contains information for location of field element and other useful reference points.
@@ -139,21 +141,50 @@ public class FieldConstants {
     public static final Pose2d rightFace = defaultAprilTagType.getTagPose(18).get().toPose2d();
     public static final Pose2d leftFace = defaultAprilTagType.getTagPose(21).get().toPose2d();
 
+    private static final Timer shiftTimer = new Timer();
+
     @AutoLogOutput(key = "Field/Hub Active")
     public static boolean isHubActive(Alliance startingAlliance) {
       boolean redStart = startingAlliance.equals(Alliance.Red);
+      Logger.recordOutput("Hub/Has Alliance", DriverStation.getAlliance().isPresent());
+      Logger.recordOutput("Hub/Starting Alliance", redStart ? Alliance.Red : Alliance.Blue);
+      if (DriverStation.getAlliance().isPresent()) {
+        Logger.recordOutput("Hub/Alliance", DriverStation.getAlliance().get().name());
+      }
+      double matchTime = MatchTimer.getTime();
       if (DriverStation.isTeleop()) {
+<<<<<<< HEAD
         if (MatchTimer.getTime() > 130 || MatchTimer.getTime() < 30) {
           return true;
         } else {
           if (inRange(MatchTimer.getTime(), 105, 130) || inRange(MatchTimer.getTime(), 55, 80)) {
             return !redStart;
+=======
+        if (MathUtil.isNear(130, matchTime, 0.01)) {
+          shiftTimer.get();
+          shiftTimer.hasElapsed(aprilTagCount);
+        }
+
+        if (matchTime > 130 || matchTime < 30) {
+          return true;
+        } else {
+          if (inRange(matchTime, 105, 130) || inRange(matchTime, 55, 80)) {
+            if (DriverStation.getAlliance().isPresent()) {
+              return startingAlliance.equals(DriverStation.getAlliance().get());
+            } else {
+              return redStart;
+            }
+>>>>>>> 999df29a9d90572172835004b4579ee7f30be876
           } else {
-            return redStart;
+            if (DriverStation.getAlliance().isPresent()) {
+              return !startingAlliance.equals(DriverStation.getAlliance().get());
+            } else {
+              return !redStart;
+            }
           }
         }
       } else {
-        return true;
+        return DriverStation.isEnabled();
       }
     }
 

@@ -4,7 +4,10 @@
 
 package frc.robot.util;
 
+<<<<<<< HEAD
 import edu.wpi.first.math.MathUtil;
+=======
+>>>>>>> 999df29a9d90572172835004b4579ee7f30be876
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 
@@ -13,26 +16,36 @@ public class MatchTimer {
   public static double autoLength = 20.0;
   public static double teleopLength = 140.0;
   private static Timer timer = new Timer();
+<<<<<<< HEAD
   private static Timer shiftTimer = new Timer();
+=======
+>>>>>>> 999df29a9d90572172835004b4579ee7f30be876
 
   public static void reset() {
     timer.reset();
     timer.stop();
+<<<<<<< HEAD
     shiftTimer.reset();
     shiftTimer.stop();
+=======
+>>>>>>> 999df29a9d90572172835004b4579ee7f30be876
   }
 
   public static void start() {
     timer.start();
+<<<<<<< HEAD
     if (DriverStation.isTeleop()) {
       shiftTimer.reset();
       shiftTimer.start();
     }
+=======
+>>>>>>> 999df29a9d90572172835004b4579ee7f30be876
   }
 
   public static double getTime() {
     return (DriverStation.isTeleop() ? teleopLength : autoLength) - timer.get();
   }
+<<<<<<< HEAD
 
   public static void periodic() {
     if (MathUtil.isNear(130.0, getTime(), 0.04)
@@ -58,4 +71,6 @@ public class MatchTimer {
         ? autoLength - timer.get()
         : shiftTotalTime - shiftTimer.get());
   }
+=======
+>>>>>>> 999df29a9d90572172835004b4579ee7f30be876
 }

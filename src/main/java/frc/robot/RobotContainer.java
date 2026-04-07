@@ -13,9 +13,14 @@ import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+<<<<<<< HEAD
+=======
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+>>>>>>> 999df29a9d90572172835004b4579ee7f30be876
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -71,7 +76,12 @@ import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.BatteryLogger;
 import frc.robot.util.FieldConstants;
+<<<<<<< HEAD
 import frc.robot.util.FieldConstants.LinesVertical;
+=======
+import frc.robot.util.MatchTimer;
+import frc.robot.util.PoseMath;
+>>>>>>> 999df29a9d90572172835004b4579ee7f30be876
 import java.util.Set;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -107,12 +117,13 @@ public class RobotContainer {
   private final CommandXboxController driver = new CommandXboxController(0);
 
   private final CommandXboxController operator = new CommandXboxController(1);
-  private final CommandXboxController testing = new CommandXboxController(2);
 
   // private Pose2d[] backStartPose = new Pose2d[1];
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
+
+  private Alliance startingAlliance = Alliance.Red;
 
   /** The container for the robot. Contains subsystems, IO devices, and commands. */
   public RobotContainer() {
@@ -143,9 +154,12 @@ public class RobotContainer {
         shooter =
             new Shooter(
                 new FeederIOTalonFX(RobotMap.ShooterMap.feeder),
-                new ShooterIOTalonFX(RobotMap.ShooterMap.left, true),
-                new ShooterIOTalonFX(RobotMap.ShooterMap.middle, true),
-                new ShooterIOTalonFX(RobotMap.ShooterMap.right, false));
+                new ShooterIOTalonFX(
+                    RobotMap.ShooterMap.left, true, ShooterConstants.Tuning.leftShooterConfigs),
+                new ShooterIOTalonFX(
+                    RobotMap.ShooterMap.middle, true, ShooterConstants.Tuning.middleShooterConfigs),
+                new ShooterIOTalonFX(
+                    RobotMap.ShooterMap.right, false, ShooterConstants.Tuning.rightShooterConfigs));
         hood = new Hood(new HoodIOServo());
         break;
 
@@ -237,6 +251,7 @@ public class RobotContainer {
     autoChooser.addOption("Left Bump Auto", this.pathFindToStart("left1", false));
     autoChooser.addOption("Right Bump Auto", this.pathFindToStart("left1", true));
     autoChooser.addOption("Right Bump Auto (w/ outpost)", this.pathFindToStart("right1", false));
+    autoChooser.addOption("SSHWTMHTCMCBIATSTGTTTW", this.pathFindToStart("BSHIGTTMMCM", false));
     autoChooser.addOption(
         "Basic Shooting Auto",
         Commands.sequence(
@@ -311,6 +326,7 @@ public class RobotContainer {
               if (Constants.tuningMode) {
                 hood.setPosition(HoodConstants.Targeting.hoodAngle::get);
               } else {
+<<<<<<< HEAD
                 if (FieldConstants.LinesVertical.inAllianceZone(drive.getPose())) {
                   LaunchingParameters parms =
                       LauncherCalculator.getInstance()
@@ -350,6 +366,21 @@ public class RobotContainer {
                     && shooter.atGoal()
                     && DriveCommands.atLaunchGoal()
                     && DriveCommands.atPitchAndRollTolerance());
+=======
+                LaunchingParameters parms =
+                    LauncherCalculator.getInstance()
+                        .getParameters(
+                            () ->
+                                (new Pose3d(drive.getPose())
+                                    .transformBy(ShooterTransforms.centerShooter)
+                                    .toPose2d()),
+                            drive::getChassisSpeeds,
+                            drive::getRotation);
+                hood.setPosition(() -> parms.hoodAngle());
+              }
+            },
+            hood));
+>>>>>>> 999df29a9d90572172835004b4579ee7f30be876
 
     driver
         .start()
@@ -417,7 +448,7 @@ public class RobotContainer {
     driver
         .a()
         .whileTrue(
-            Commands.parallel(
+            Commands.race(
                 Commands.run(
                         () -> shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(370.0)),
                         shooter)
@@ -442,6 +473,7 @@ public class RobotContainer {
         .b()
         .whileTrue(
             Commands.parallel(
+<<<<<<< HEAD
                     Commands.run(
                         () -> {
                           PassingParams parms =
@@ -478,6 +510,13 @@ public class RobotContainer {
                                     drive::getRotation)
                                 .driveAngle()))
                 .finallyDo(shooter::stopShooter));
+=======
+                Commands.run(
+                        () -> shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(375.0)),
+                        shooter)
+                    .finallyDo(shooter::stopShooter),
+                Commands.run(() -> hood.setPosition(() -> 54.0), hood)));
+>>>>>>> 999df29a9d90572172835004b4579ee7f30be876
 
     driver
         .y()
@@ -501,7 +540,8 @@ public class RobotContainer {
                           Logger.recordOutput("Shoot Parms/ Flywheel Speed", parms.flywheelSpeed());
                           Logger.recordOutput("Shoot Parms/ Distance", parms.distance());
                         },
-                        shooter),
+                        shooter,
+                        hood),
                     DriveCommands.joystickDriveAtAngle(
                         drive,
                         () -> -driver.getLeftY() * 0.55,
@@ -533,7 +573,7 @@ public class RobotContainer {
         .onFalse(Commands.runOnce(shooter::stopShooter));
 
     operator.b().whileTrue(indexer.setVoltage(IndexerConstants.Setpoints.feed));
-    operator.y().whileTrue(shooter.runFeed(ShooterConstants.FeederSetpoints.run.in(Volts)));
+    operator.a().whileTrue(shooter.runFeed(ShooterConstants.FeederSetpoints.run.in(Volts)));
     operator.leftBumper().whileTrue(intake.setPosition(IntakeConstants.Setpoints.deployed));
     operator.rightBumper().whileTrue(intake.setPosition(IntakeConstants.Setpoints.stowed));
 
@@ -632,18 +672,38 @@ public class RobotContainer {
   }
 
   public void periodic() {
+<<<<<<< HEAD
+=======
+    Logger.recordOutput(
+        "Distance To Hub",
+        new Pose3d(drive.getPose())
+            .transformBy(ShooterTransforms.centerShooter)
+            .relativeTo(new Pose3d(FieldConstants.Hub.topCenterPoint, Rotation3d.kZero))
+            .getTranslation()
+            .getNorm());
+>>>>>>> 999df29a9d90572172835004b4579ee7f30be876
     Logger.recordOutput(
         "Vision Transforms/Left",
         new Pose3d(drive.getPose()).transformBy(VisionConstants.robotToLeftCam));
     Logger.recordOutput(
         "Vision Transforms/Right",
         new Pose3d(drive.getPose()).transformBy(VisionConstants.robotToRightCam));
+<<<<<<< HEAD
     Logger.recordOutput("Robot/In Alliance Zone", LinesVertical.inAllianceZone(drive.getPose()));
     Logger.recordOutput("Robot/Should Flip", AllianceFlipUtil.shouldFlip());
     Logger.recordOutput(
         "Robot/Alliance Zone Red", drive.getPose().getX() >= Units.inchesToMeters(468.0));
     Logger.recordOutput(
         "Robot/Alliance Zone Blue", drive.getPose().getX() >= Units.inchesToMeters(182.11));
+=======
+    String data = DriverStation.getGameSpecificMessage();
+    if (data.length() > 0) {
+      startingAlliance = data.charAt(0) == 'R' ? Alliance.Red : Alliance.Blue;
+    }
+    Logger.recordOutput("Hub/Game Data", DriverStation.getGameSpecificMessage());
+    Logger.recordOutput("Hub/Active", FieldConstants.Hub.isHubActive(startingAlliance));
+    Logger.recordOutput("Hub/Sim Match Time", MatchTimer.getTime());
+>>>>>>> 999df29a9d90572172835004b4579ee7f30be876
   }
 
   public Command pathFindToStart(String pathName, boolean flip) {
@@ -652,7 +712,10 @@ public class RobotContainer {
     NamedCommands.registerCommand("IntakeRun", intake.setVoltage(IntakeConstants.Setpoints.run));
     NamedCommands.registerCommand("IntakeUp", intake.setPosition(IntakeConstants.Setpoints.stowed));
     NamedCommands.registerCommand("ShootNow", getShootCommand());
+<<<<<<< HEAD
     NamedCommands.registerCommand("SOTM", getSOTMCommand());
+=======
+>>>>>>> 999df29a9d90572172835004b4579ee7f30be876
     Command pathFind =
         AutoBuilder.pathfindToPose(
             AllianceFlipUtil.apply(new PathPlannerAuto(pathName, flip).getStartingPose()),
