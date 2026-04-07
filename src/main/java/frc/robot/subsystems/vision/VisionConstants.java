@@ -12,11 +12,11 @@ import frc.robot.util.LoggedTunableNumber;
 public class VisionConstants {
 
   public static LoggedTunableNumber tunableMultiTagLinearBaseline =
-      new LoggedTunableNumber("/Vision/Tuning/MultiTagLinearBaseline", 0.9);
+      new LoggedTunableNumber("/Vision/Tuning/MultiTagLinearBaseline", 0.8);
   public static LoggedTunableNumber tunableMultiTagAngularBaseline =
       new LoggedTunableNumber("/Vision/Tuning/MultiTagAngluarBaseline", 0.03);
   public static LoggedTunableNumber tunableTrigLinearBaseline =
-      new LoggedTunableNumber("/Vision/Tuning/TrigLinearBaseline", 2.55);
+      new LoggedTunableNumber("/Vision/Tuning/TrigLinearBaseline", 0.5);
 
   // Basic filtering thresholds
   public static double maxAmbiguity = 0.3;
@@ -35,9 +35,11 @@ public class VisionConstants {
       };
 
   // Multipliers to apply for MegaTag 2 observations
-  public static double linearStdDevMegatag2Factor = 0.45; // More stable than full 3D solve
-  public static double angularStdDevMegatag2Factor =
-      Double.POSITIVE_INFINITY; // No rotation data available
+  public static double linearStdDevMegatag2Factor = 0.32; // More stable than full 3D solve
+  public static double angularStdDevMegatag2Factor = Double.POSITIVE_INFINITY; // No rotation data available
+
+  public static double linearStdDevMegatag1Factor = 0.8;
+  public static double angularStdDevMegatag1Factor = 0.35;
   public static AprilTagFieldLayout fieldLayout =
       AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
   // public static AprilTagFieldLayout fieldLayout;
@@ -62,14 +64,15 @@ public class VisionConstants {
               -Units.degreesToRadians(30.0),
               Units.degreesToRadians(180.0 - 17.1921978943)));
 
-  public static double trigLinearStdDevBaseline = tunableTrigLinearBaseline.getAsDouble();
+  public static double trigLinearStdDevBaseline = 0.5;
   public static double trigAngularStdDevBaseline = Double.POSITIVE_INFINITY; // Radians
 
-  public static double multitagLinearStdDevBaseline = tunableMultiTagLinearBaseline.getAsDouble();
-  public static double multitagAngularStdDevBaseline = tunableMultiTagAngularBaseline.getAsDouble();
+  public static double multitagLinearStdDevBaseline = 0.08;
+  public static double multitagAngularStdDevBaseline = 0.03;
 
   public static double averageTagDistance = Double.POSITIVE_INFINITY;
   public static double averageTagDistanceSingleTag = 7.5;
+  public static double averageMultitag2SingleTagDistance = 4.5;
   public static double maxFusedDistance = 0.125;
   public static PoseObservationType preferred = PoseObservationType.PHOTONVISION_TRIG;
 }
