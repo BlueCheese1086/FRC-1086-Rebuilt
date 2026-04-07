@@ -80,7 +80,9 @@ import frc.robot.util.FieldConstants.LinesVertical;
 import frc.robot.util.HubShiftUtil;
 import frc.robot.util.controllers.OverrideSwitches;
 
+import frc.robot.util.MatchTimer;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -92,6 +94,7 @@ public class RobotContainer {
   private final Drive drive;
   private final AutosManager automanager;
   private final AutoRoutines factory;
+  private BooleanSupplier canShoot = () -> false;
 
   @SuppressWarnings("unused")
   private final Vision vision;
@@ -137,6 +140,7 @@ public class RobotContainer {
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
+  public Alliance startingAlliance = Alliance.Blue;
 
   /** The container for the robot. Contains subsystems, IO devices, and commands. */
   public RobotContainer() {
@@ -454,8 +458,7 @@ public class RobotContainer {
         .whileTrue(
             Commands.parallel(
                 Commands.run(
-                        () -> shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(385)),
-                        shooter)
+                        () -> shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(385)), shooter)
                     .finallyDo(shooter::stopShooter),
                 Commands.runOnce(() -> hood.setPosition(() -> 60.0))));
 
@@ -558,47 +561,76 @@ public class RobotContainer {
     operator.y().whileTrue(shooter.runFeed(ShooterConstants.FeederSetpoints.run.in(Volts)));
     operator.leftBumper().whileTrue(intake.setPosition(IntakeConstants.Setpoints.deployed));
     operator.rightBumper().whileTrue(intake.setPosition(IntakeConstants.Setpoints.stowed));
-
-
+    operator
+        .povLeft()
+        .onTrue(
+            Commands.runOnce(
+                    () -> {
+                      // Lost Auto
+                      this.startingAlliance = DriverStation.getAlliance().orElse(Alliance.Red);
+                    })
+                .ignoringDisable(true));
+    operator
+        .povRight()
+        .onTrue(
+            Commands.runOnce(
+                    () -> {
+                      // Win Auto
+                      this.startingAlliance =
+                          DriverStation.getAlliance().orElse(Alliance.Red).equals(Alliance.Red)
+                              ? Alliance.Blue
+                              : Alliance.Blue;
+                    })
+                .ignoringDisable(true));
     // ****** ALERTS ******
 
     // Warn formissing game data
-    Timer teleopElapsedTimer = new Timer();
-    RobotModeTriggers.teleop()
-        .onTrue(
-            Commands.runOnce(
-                () -> {
-                  teleopElapsedTimer.restart();
-                }));
-    RobotModeTriggers.teleop()
-        .and(() -> !(DriverStation.getGameSpecificMessage().length() > 0))
-        .and(() -> HubShiftUtil.getAllianceWinOverride().isEmpty())
-        .and(() -> teleopElapsedTimer.hasElapsed(1.0))
-        .whileTrue(
-            Commands.runEnd(
-                () -> {
-                  driver.setRumble(RumbleType.kBothRumble, 1);
-                  operator.setRumble(RumbleType.kBothRumble, 1);
-                },
-                () -> {
-                  driver.setRumble(RumbleType.kBothRumble, 0);
-                  operator.setRumble(RumbleType.kBothRumble, 0);
-                }));
-    
-    // End-of-shift warning
-    for (int i = 1; i <= 5; i++) {
-      double time = i;
-      Trigger shiftAboutToEnd =
-          new Trigger(() -> (HubShiftUtil.getShiftedShiftInfo().remainingTime() < time));
-      shiftAboutToEnd
-          .and(RobotModeTriggers.teleop())
-          .and(ignoreHubState.negate())
-          .onTrue(
-              Commands.runEnd(
-                      () -> driver.setRumble(RumbleType.kRightRumble, 1.0),
-                      () -> driver.setRumble(RumbleType.kBothRumble, 0.0))
-                  .withTimeout(0.25));
-    }
+    // Timer teleopElapsedTimer = new Timer();
+    // RobotModeTriggers.teleop()
+    //     .onTrue(
+    //         Commands.runOnce(
+    //             () -> {
+    //               teleopElapsedTimer.restart();
+    //             }));
+    // RobotModeTriggers.teleop()
+    //     .and(() -> !(DriverStation.getGameSpecificMessage().length() > 0))
+    //     .and(() -> HubShiftUtil.getAllianceWinOverride().isEmpty())
+    //     .and(() -> teleopElapsedTimer.hasElapsed(1.0))
+    //     .whileTrue(
+    //         Commands.runEnd(
+    //             () -> {
+    //               primary.setRumble(RumbleType.kBothRumble, 1);
+    //               secondary.setRumble(RumbleType.kBothRumble, 1);
+    //             },
+    //             () -> {
+    //               primary.setRumble(RumbleType.kBothRumble, 0);
+    //               secondary.setRumble(RumbleType.kBothRumble, 0);
+    //             }))
+    //     .whileTrue(
+    //         Commands.startEnd(
+    //             () -> {
+    //               autoWinnerNotSet.set(true);
+    //               leds.autoWinnerNotSet = true;
+    //             },
+    //             () -> {
+    //               autoWinnerNotSet.set(false);
+    //               leds.autoWinnerNotSet = false;
+    //             }));
+
+    // // End-of-shift warning
+    // for (int i = 1; i <= 5; i++) {
+    //   double time = i;
+    //   Trigger shiftAboutToEnd =
+    //       new Trigger(() -> (HubShiftUtil.getShiftedShiftInfo().remainingTime() < time));
+    //   shiftAboutToEnd
+    //       .and(RobotModeTriggers.teleop())
+    //       .and(ignoreHubState.negate())
+    //       .onTrue(
+    //           Commands.runEnd(
+    //                   () -> primary.setRumble(RumbleType.kRightRumble, 1.0),
+    //                   () -> primary.setRumble(RumbleType.kBothRumble, 0.0))
+    //               .withTimeout(0.25));
+    // }
   }
 
   /**
@@ -665,6 +697,10 @@ public class RobotContainer {
         "Robot/Alliance Zone Red", drive.getPose().getX() >= Units.inchesToMeters(468.0));
     Logger.recordOutput(
         "Robot/Alliance Zone Blue", drive.getPose().getX() >= Units.inchesToMeters(182.11));
+    Logger.recordOutput(
+        "Match Timer/Can Shoot",
+        MatchTimer.hubActiveInTof(
+            DriverStation.getAlliance().orElse(Alliance.Blue), startingAlliance, drive.getPose()));
   }
 
   public Command pathFindToStart(String pathName, boolean flip) {

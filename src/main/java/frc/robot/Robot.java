@@ -27,7 +27,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.hood.HoodConstants;
-import frc.robot.util.FieldConstants;
 import frc.robot.util.LoggedTunableNumber;
 import frc.robot.util.MatchTimer;
 import java.io.File;
@@ -164,20 +163,28 @@ public class Robot extends LoggedRobot {
 
     // Return to non-RT thread priority (do not modify the first argument)
     Threads.setCurrentThreadPriority(false, 10);
+    if (DriverStation.getGameSpecificMessage().length() > 0) {
+      robotContainer.startingAlliance =
+          DriverStation.getGameSpecificMessage().charAt(0) == 'R' ? Alliance.Red : Alliance.Blue;
+    }
     robotContainer.periodic();
     MatchTimer.periodic();
     // Update RobotContainer dashboard outputs
     robotContainer.updateDashboardOutputs();
     Logger.recordOutput("Simulated Match/Match Time", MatchTimer.getTime());
     Logger.recordOutput("Simulated Match/Shift Time", MatchTimer.getShiftTime());
+    Logger.recordOutput("Simulated Match/Current Shift", MatchTimer.currentShift);
     Logger.recordOutput(
         "Simulated Match/Hub Active",
         DriverStation.getGameSpecificMessage().length() > 0
-            ? FieldConstants.Hub.isHubActive(
+            ? MatchTimer.isHubActive(
                 DriverStation.getGameSpecificMessage().charAt(0) == 'R'
                     ? Alliance.Red
-                    : Alliance.Blue)
-            : FieldConstants.Hub.isHubActive(Alliance.Blue));
+                    : Alliance.Blue,
+                DriverStation.getAlliance().orElse(Alliance.Blue))
+            : MatchTimer.isHubActive(
+                robotContainer.startingAlliance,
+                DriverStation.getAlliance().orElse(Alliance.Blue)));
   }
 
   /** This function is called once when the robot is disabled. */
