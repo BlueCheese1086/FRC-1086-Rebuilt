@@ -1,0 +1,589 @@
+{
+ "name":"autobuilderpaths",
+ "version":2,
+ "type":"Swerve",
+ "variables":{
+  "expressions":{},
+  "poses":{
+   "crn":{
+    "x":{
+     "exp":"8.7 m",
+     "val":8.7
+    },
+    "y":{
+     "exp":"4 m",
+     "val":4.0
+    },
+    "heading":{
+     "exp":"-0.79 rad",
+     "val":-0.79
+    }
+   },
+   "cs":{
+    "x":{
+     "exp":"1.6 m",
+     "val":1.6
+    },
+    "y":{
+     "exp":"4 m",
+     "val":4.0
+    },
+    "heading":{
+     "exp":"0 deg",
+     "val":0.0
+    }
+   },
+   "db":{
+    "x":{
+     "exp":"4.6 m",
+     "val":4.6
+    },
+    "y":{
+     "exp":"5.5 m",
+     "val":5.5
+    },
+    "heading":{
+     "exp":"-0.79 rad",
+     "val":-0.79
+    }
+   },
+   "dbs":{
+    "x":{
+     "exp":"3.4 m",
+     "val":3.4
+    },
+    "y":{
+     "exp":"5.5 m",
+     "val":5.5
+    },
+    "heading":{
+     "exp":"-0.79 rad",
+     "val":-0.79
+    }
+   },
+   "dbsr":{
+    "x":{
+     "exp":"3.4 m",
+     "val":3.4
+    },
+    "y":{
+     "exp":"5.5 m",
+     "val":5.5
+    },
+    "heading":{
+     "exp":"180 deg",
+     "val":3.141592653589793
+    }
+   },
+   "dc":{
+    "x":{
+     "exp":"1.1 m",
+     "val":1.1
+    },
+    "y":{
+     "exp":"4.7 m",
+     "val":4.7
+    },
+    "heading":{
+     "exp":"0 rad",
+     "val":0.0
+    }
+   },
+   "dcn":{
+    "x":{
+     "exp":"6 m",
+     "val":6.0
+    },
+    "y":{
+     "exp":"5.5 m",
+     "val":5.5
+    },
+    "heading":{
+     "exp":"3.14 rad",
+     "val":3.14
+    }
+   },
+   "dcs":{
+    "x":{
+     "exp":"3.4 m",
+     "val":3.4
+    },
+    "y":{
+     "exp":"5.5 m",
+     "val":5.5
+    },
+    "heading":{
+     "exp":"-0.88 rad",
+     "val":-0.88
+    }
+   },
+   "dfrn":{
+    "x":{
+     "exp":"8.7 m",
+     "val":8.7
+    },
+    "y":{
+     "exp":"6.4 m",
+     "val":6.4
+    },
+    "heading":{
+     "exp":"-0.79 rad",
+     "val":-0.79
+    }
+   },
+   "dfs":{
+    "x":{
+     "exp":"0.6 m",
+     "val":0.6
+    },
+    "y":{
+     "exp":"7.5 m",
+     "val":7.5
+    },
+    "heading":{
+     "exp":"-0.7 rad",
+     "val":-0.7
+    }
+   },
+   "dfsn":{
+    "x":{
+     "exp":"7.7 m",
+     "val":7.7
+    },
+    "y":{
+     "exp":"6 m",
+     "val":6.0
+    },
+    "heading":{
+     "exp":"-0.4 rad",
+     "val":-0.4
+    }
+   },
+   "di":{
+    "x":{
+     "exp":"0.7 m",
+     "val":0.7
+    },
+    "y":{
+     "exp":"6 m",
+     "val":6.0
+    },
+    "heading":{
+     "exp":"3.14 rad",
+     "val":3.14
+    }
+   },
+   "dnrn":{
+    "x":{
+     "exp":"8.7 m",
+     "val":8.7
+    },
+    "y":{
+     "exp":"5.2 m",
+     "val":5.2
+    },
+    "heading":{
+     "exp":"-0.79 rad",
+     "val":-0.79
+    }
+   },
+   "dns":{
+    "x":{
+     "exp":"3.6 m",
+     "val":3.6
+    },
+    "y":{
+     "exp":"7.5 m",
+     "val":7.5
+    },
+    "heading":{
+     "exp":"-1.28 rad",
+     "val":-1.28
+    }
+   },
+   "dnsn":{
+    "x":{
+     "exp":"7.7 m",
+     "val":7.7
+    },
+    "y":{
+     "exp":"4.6 m",
+     "val":4.6
+    },
+    "heading":{
+     "exp":"-0.4 rad",
+     "val":-0.4
+    }
+   },
+   "dt":{
+    "x":{
+     "exp":"4.6 m",
+     "val":4.6
+    },
+    "y":{
+     "exp":"7.4 m",
+     "val":7.4
+    },
+    "heading":{
+     "exp":"0 deg",
+     "val":0.0
+    }
+   },
+   "dts":{
+    "x":{
+     "exp":"3.6 m",
+     "val":3.6
+    },
+    "y":{
+     "exp":"7.5 m",
+     "val":7.5
+    },
+    "heading":{
+     "exp":"0 deg",
+     "val":0.0
+    }
+   },
+   "dtsr":{
+    "x":{
+     "exp":"3.6 m",
+     "val":3.6
+    },
+    "y":{
+     "exp":"7.5 m",
+     "val":7.5
+    },
+    "heading":{
+     "exp":"180 deg",
+     "val":3.141592653589793
+    }
+   },
+   "hs":{
+    "x":{
+     "exp":"3.5 m",
+     "val":3.5
+    },
+    "y":{
+     "exp":"4 m",
+     "val":4.0
+    },
+    "heading":{
+     "exp":"0 deg",
+     "val":0.0
+    }
+   },
+   "hsr":{
+    "x":{
+     "exp":"3.5 m",
+     "val":3.5
+    },
+    "y":{
+     "exp":"4 m",
+     "val":4.0
+    },
+    "heading":{
+     "exp":"180 deg",
+     "val":3.141592653589793
+    }
+   },
+   "ob":{
+    "x":{
+     "exp":"4.6 m",
+     "val":4.6
+    },
+    "y":{
+     "exp":"2.5 m",
+     "val":2.5
+    },
+    "heading":{
+     "exp":"0.79 rad",
+     "val":0.79
+    }
+   },
+   "obs":{
+    "x":{
+     "exp":"3.4 m",
+     "val":3.4
+    },
+    "y":{
+     "exp":"2.5 m",
+     "val":2.5
+    },
+    "heading":{
+     "exp":"0.79 rad",
+     "val":0.79
+    }
+   },
+   "obsr":{
+    "x":{
+     "exp":"3.4 m",
+     "val":3.4
+    },
+    "y":{
+     "exp":"2.5 m",
+     "val":2.5
+    },
+    "heading":{
+     "exp":"180 deg",
+     "val":3.141592653589793
+    }
+   },
+   "oc":{
+    "x":{
+     "exp":"0.8 m",
+     "val":0.8
+    },
+    "y":{
+     "exp":"2.8 m",
+     "val":2.8
+    },
+    "heading":{
+     "exp":"3.14 rad",
+     "val":3.14
+    }
+   },
+   "ocn":{
+    "x":{
+     "exp":"6 m",
+     "val":6.0
+    },
+    "y":{
+     "exp":"2.5 m",
+     "val":2.5
+    },
+    "heading":{
+     "exp":"3.14 rad",
+     "val":3.14
+    }
+   },
+   "ocs":{
+    "x":{
+     "exp":"3.4 m",
+     "val":3.4
+    },
+    "y":{
+     "exp":"2.5 m",
+     "val":2.5
+    },
+    "heading":{
+     "exp":"0.88 rad",
+     "val":0.88
+    }
+   },
+   "ofrn":{
+    "x":{
+     "exp":"8.7 m",
+     "val":8.7
+    },
+    "y":{
+     "exp":"1.6 m",
+     "val":1.6
+    },
+    "heading":{
+     "exp":"-0.79 rad",
+     "val":-0.79
+    }
+   },
+   "ofs":{
+    "x":{
+     "exp":"0.6 m",
+     "val":0.6
+    },
+    "y":{
+     "exp":"0.6 m",
+     "val":0.6
+    },
+    "heading":{
+     "exp":"0.7 rad",
+     "val":0.7
+    }
+   },
+   "ofsn":{
+    "x":{
+     "exp":"7.7 m",
+     "val":7.7
+    },
+    "y":{
+     "exp":"2 m",
+     "val":2.0
+    },
+    "heading":{
+     "exp":"0.4 rad",
+     "val":0.4
+    }
+   },
+   "oi":{
+    "x":{
+     "exp":"0.5 m",
+     "val":0.5
+    },
+    "y":{
+     "exp":"0.6 m",
+     "val":0.6
+    },
+    "heading":{
+     "exp":"3.14 rad",
+     "val":3.14
+    }
+   },
+   "onrn":{
+    "x":{
+     "exp":"8.7 m",
+     "val":8.7
+    },
+    "y":{
+     "exp":"2.8 m",
+     "val":2.8
+    },
+    "heading":{
+     "exp":"-0.79 rad",
+     "val":-0.79
+    }
+   },
+   "ons":{
+    "x":{
+     "exp":"3.6 m",
+     "val":3.6
+    },
+    "y":{
+     "exp":"0.5 m",
+     "val":0.5
+    },
+    "heading":{
+     "exp":"1.28 rad",
+     "val":1.28
+    }
+   },
+   "onsn":{
+    "x":{
+     "exp":"7.7 m",
+     "val":7.7
+    },
+    "y":{
+     "exp":"3.4 m",
+     "val":3.4
+    },
+    "heading":{
+     "exp":"0.4 rad",
+     "val":0.4
+    }
+   },
+   "ot":{
+    "x":{
+     "exp":"4.6 m",
+     "val":4.6
+    },
+    "y":{
+     "exp":"0.6 m",
+     "val":0.6
+    },
+    "heading":{
+     "exp":"0 deg",
+     "val":0.0
+    }
+   },
+   "ots":{
+    "x":{
+     "exp":"3.6 m",
+     "val":3.6
+    },
+    "y":{
+     "exp":"0.5 m",
+     "val":0.5
+    },
+    "heading":{
+     "exp":"0 deg",
+     "val":0.0
+    }
+   },
+   "otsr":{
+    "x":{
+     "exp":"3.6 m",
+     "val":3.6
+    },
+    "y":{
+     "exp":"0.5 m",
+     "val":0.5
+    },
+    "heading":{
+     "exp":"180 deg",
+     "val":3.141592653589793
+    }
+   }
+  }
+ },
+ "config":{
+  "frontLeft":{
+   "x":{
+    "exp":"11 in",
+    "val":0.2794
+   },
+   "y":{
+    "exp":"11 in",
+    "val":0.2794
+   }
+  },
+  "backLeft":{
+   "x":{
+    "exp":"-11 in",
+    "val":-0.2794
+   },
+   "y":{
+    "exp":"11 in",
+    "val":0.2794
+   }
+  },
+  "mass":{
+   "exp":"145 lbs",
+   "val":65.77089365
+  },
+  "inertia":{
+   "exp":"6 kg m ^ 2",
+   "val":6.0
+  },
+  "gearing":{
+   "exp":"6.5",
+   "val":6.5
+  },
+  "radius":{
+   "exp":"1.75 in",
+   "val":0.04445
+  },
+  "vmax":{
+   "exp":"6000 RPM",
+   "val":628.3185307179587
+  },
+  "tmax":{
+   "exp":"1.2 N * m",
+   "val":1.2
+  },
+  "cof":{
+   "exp":"1.5",
+   "val":1.5
+  },
+  "bumper":{
+   "front":{
+    "exp":"16 in",
+    "val":0.4064
+   },
+   "side":{
+    "exp":"16 in",
+    "val":0.4064
+   },
+   "back":{
+    "exp":"16 in",
+    "val":0.4064
+   }
+  },
+  "differentialTrackWidth":{
+   "exp":"22 in",
+   "val":0.5588
+  }
+ },
+ "generationFeatures":[],
+ "codegen":{
+  "root":"..\\..\\java\\frc\\robot\\generated\\choreo",
+  "genVars":true,
+  "genTrajData":true,
+  "useChoreoLib":true
+ }
+}
