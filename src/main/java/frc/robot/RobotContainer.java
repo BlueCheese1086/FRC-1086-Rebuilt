@@ -588,6 +588,29 @@ public class RobotContainer {
     return autoChooser.get();
   }
 
+  /** Update dashboard outputs. */
+  public void updateDashboardOutputs() {
+    // Publish match time
+    SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
+
+    // Update from HubShiftUtil
+    SmartDashboard.putString(
+        "Shifts/Remaining Shift Time",
+        String.format("%.1f", Math.max(HubShiftUtil.getShiftedShiftInfo().remainingTime(), 0.0)));
+    SmartDashboard.putBoolean("Shifts/Shift Active", HubShiftUtil.getShiftedShiftInfo().active());
+    SmartDashboard.putString(
+        "Shifts/Game State", HubShiftUtil.getShiftedShiftInfo().currentShift().toString());
+    SmartDashboard.putBoolean(
+        "Shifts/Active First?",
+        DriverStation.getAlliance().orElse(Alliance.Blue) == HubShiftUtil.getFirstActiveAlliance());
+
+    // Controller disconnected alerts
+    primaryDisconnected.set(!DriverStation.isJoystickConnected(driver.getHID().getPort()));
+    secondaryDisconnected.set(!DriverStation.isJoystickConnected(operator.getHID().getPort()));
+    overrideDisconnected.set(!overrides.isConnected());
+    }
+  }
+
   @AutoLogOutput(key = "Targetting/Distance")
   private double getDist() {
     return new Pose3d(drive.getPose())
