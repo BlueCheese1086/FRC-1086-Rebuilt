@@ -125,7 +125,7 @@ public class MatchTimer {
     //                     .transformBy(ShooterConstants.ShooterTransforms.centerShooter)
     //                     .toPose2d(),
     //                 FieldConstants.Hub.hubCenter));
-    double timeOfFlight = 4.0;
+    double timeOfFlight = 2.1;
     boolean activeHub = isHubActive(startingAlliance, currentAlliance);
     if (nearShift(130.0, timeOfFlight)
         || nearShift(105.0, timeOfFlight)

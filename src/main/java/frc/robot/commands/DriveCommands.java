@@ -55,8 +55,10 @@ public class DriveCommands {
   // Lock Radius
   private static final double LOCK_RADIUS_KP = 1.5; // normalized output per meter error
   private static final double LOCK_RADIUS_MAX_OUTPUT = 0.8; // percent of max linear speed
+
   @SuppressWarnings("unused")
   private static final double ANGLE_MAX_VELOCITY_LOCK = 50.0;
+
   private static final double ANGLE_MAX_ACCELERATION_LOCK = 70.0;
 
   @SuppressWarnings("unused")
@@ -546,7 +548,7 @@ public class DriveCommands {
    * Field relative drive command that removes radial motion to a target (locks radius), while using
    * PID to continuously face the target.
    */
-  @SuppressWarnings({ "unused", "resource" })
+  @SuppressWarnings({"unused", "resource"})
   public static Command joystickDriveLockRadiusToTarget(
       Drive drive,
       DoubleSupplier xSupplier,

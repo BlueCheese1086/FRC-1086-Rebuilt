@@ -40,7 +40,7 @@ import org.littletonrobotics.junction.Logger;
 
 /** Add your docs here. */
 public class AutoRoutines {
-  
+
   private static AutoFactory factory;
   private static Drive kDrive;
 
