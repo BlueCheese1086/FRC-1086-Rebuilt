@@ -40,6 +40,7 @@ import org.littletonrobotics.junction.Logger;
 
 /** Add your docs here. */
 public class AutoRoutines {
+  
   private static AutoFactory factory;
   private static Drive kDrive;
 
@@ -50,6 +51,7 @@ public class AutoRoutines {
     NamedCommands.registerCommand("deployIntake", Commands.print("Passed marker!"));
     NamedCommands.registerCommand("startFeeder", Commands.print("Passed marker!"));
   }
+
   private static final PIDController xControl =
       new PIDController(
           Preferences.getDouble("Autos_X_P", 8.0), 0, Preferences.getDouble("Autos_X_D", 0.0));

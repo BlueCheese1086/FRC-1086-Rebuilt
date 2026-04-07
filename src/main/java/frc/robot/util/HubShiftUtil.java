@@ -10,8 +10,6 @@ package frc.robot.util;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
-import java.util.Optional;
-import java.util.function.Supplier;
 import frc.robot.subsystems.shooter.shooterUtil.LauncherCalculator;
 
 public class HubShiftUtil {

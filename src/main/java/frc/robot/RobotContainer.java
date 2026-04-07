@@ -19,14 +19,12 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.autonomous.Autos;
 import frc.robot.autonomous.AutosManager;
@@ -78,11 +76,9 @@ import frc.robot.util.BatteryLogger;
 import frc.robot.util.FieldConstants;
 import frc.robot.util.FieldConstants.LinesVertical;
 import frc.robot.util.HubShiftUtil;
-import frc.robot.util.controllers.OverrideSwitches;
-
 import frc.robot.util.MatchTimer;
+import frc.robot.util.controllers.OverrideSwitches;
 import java.util.Set;
-import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -370,8 +366,13 @@ public class RobotContainer {
     //     new Trigger(
     //         () ->
     //             HubShiftUtil.getShiftedShiftInfo().active());
-    Trigger hubActive = new Trigger(() -> (MatchTimer.hubActiveInTof(
-            DriverStation.getAlliance().orElse(Alliance.Blue), startingAlliance, drive.getPose())));
+    Trigger hubActive =
+        new Trigger(
+            () ->
+                (MatchTimer.hubActiveInTof(
+                    DriverStation.getAlliance().orElse(Alliance.Blue),
+                    startingAlliance,
+                    drive.getPose())));
     driver
         .start()
         .onTrue(
@@ -402,12 +403,17 @@ public class RobotContainer {
 
     driver
         .rightTrigger()
-        .and(() -> LauncherCalculator.getInstance().getParameters(() ->
-                                  (new Pose3d(drive.getPose())
-                                      .transformBy(ShooterTransforms.centerShooter)
-                                      .toPose2d()),
-                              drive::getChassisSpeeds,
-                              drive::getRotation).isValid())
+        .and(
+            () ->
+                LauncherCalculator.getInstance()
+                    .getParameters(
+                        () ->
+                            (new Pose3d(drive.getPose())
+                                .transformBy(ShooterTransforms.centerShooter)
+                                .toPose2d()),
+                        drive::getChassisSpeeds,
+                        drive::getRotation)
+                    .isValid())
         .and(() -> ignoreHubState.getAsBoolean() || hubActive.getAsBoolean())
         .whileTrue(
             Commands.parallel(
@@ -662,7 +668,7 @@ public class RobotContainer {
     driverDisconnected.set(!DriverStation.isJoystickConnected(driver.getHID().getPort()));
     operatorDisconnected.set(!DriverStation.isJoystickConnected(operator.getHID().getPort()));
     overrideDisconnected.set(!overrides.isConnected());
-    }
+  }
 
   @AutoLogOutput(key = "Targetting/Distance")
   private double getDist() {
