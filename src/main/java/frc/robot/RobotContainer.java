@@ -366,11 +366,12 @@ public class RobotContainer {
                 })
             .onlyIf(DriverStation::isTeleop));
 
-    Trigger hubActive =
-        new Trigger(
-            () ->
-                HubShiftUtil.getShiftedShiftInfo().active());
-
+    // Trigger hubActive =
+    //     new Trigger(
+    //         () ->
+    //             HubShiftUtil.getShiftedShiftInfo().active());
+    Trigger hubActive = new Trigger(() -> (MatchTimer.hubActiveInTof(
+            DriverStation.getAlliance().orElse(Alliance.Blue), startingAlliance, drive.getPose())));
     driver
         .start()
         .onTrue(
