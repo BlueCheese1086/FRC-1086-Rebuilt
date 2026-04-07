@@ -70,7 +70,7 @@ public class AutosManager extends SubsystemBase {
 
     intakePos.setDefaultOption("Depot", "di");
     intakePos.addOption("Outpost", "oi");
-    intakePos.addOption("Depot Close Neutral", "dcn");
+    /*intakePos.addOption("Depot Close Neutral", "dcn");
     intakePos.addOption("Outpost Close Neutral", "ocn");
     intakePos.addOption("Depot Far Safe Neutral", "dfsn");
     intakePos.addOption("Depot Near Safe Neutral", "dnsn");
@@ -80,7 +80,7 @@ public class AutosManager extends SubsystemBase {
     intakePos.addOption("Depot Far Risky Neutral", "dfrn");
     intakePos.addOption("Depot Near Risky Neutral", "dnrn");
     intakePos.addOption("Outpost Far Risky Neutral", "ofrn");
-    intakePos.addOption("Outpost Near Risky Neutral", "onrn");
+    intakePos.addOption("Outpost Near Risky Neutral", "onrn");*/
 
     nzEntry.setDefaultOption("Depot Trench", "dt");
     nzEntry.addOption("Depot Bump", "db");
