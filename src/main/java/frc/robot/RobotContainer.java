@@ -120,7 +120,7 @@ public class RobotContainer {
   private final Trigger coast = overrides.operatorSwitch(2);
   private final Trigger lostAutoOverride = overrides.multiDirectionSwitchLeft();
   private final Trigger wonAutoOverride = overrides.multiDirectionSwitchRight();
-  private final Trigger ignoreHubState = overrides.operatorSwitch(1);
+  private final Trigger ignoreHubState = overrides.operatorSwitch(3);
 
   // Alerts
   private final Alert driverDisconnected =
@@ -362,17 +362,8 @@ public class RobotContainer {
                 })
             .onlyIf(DriverStation::isTeleop));
 
-    // Trigger hubActive =
-    //     new Trigger(
-    //         () ->
-    //             HubShiftUtil.getShiftedShiftInfo().active());
-    Trigger hubActive =
-        new Trigger(
-            () ->
-                (MatchTimer.hubActiveInTof(
-                    DriverStation.getAlliance().orElse(Alliance.Blue),
-                    startingAlliance,
-                    drive.getPose())));
+    Trigger hubActive = new Trigger(() -> HubShiftUtil.getShiftedShiftInfo().active());
+
     driver
         .start()
         .onTrue(
@@ -403,6 +394,17 @@ public class RobotContainer {
 
     driver
         .rightTrigger()
+        .and(
+            () ->
+                LauncherCalculator.getInstance()
+                    .getParameters(
+                        () ->
+                            (new Pose3d(drive.getPose())
+                                .transformBy(ShooterTransforms.centerShooter)
+                                .toPose2d()),
+                        drive::getChassisSpeeds,
+                        drive::getRotation)
+                    .isValid())
         .and(
             () ->
                 LauncherCalculator.getInstance()
@@ -464,6 +466,7 @@ public class RobotContainer {
         .whileTrue(
             Commands.parallel(
                 Commands.run(
+                        () -> shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(385)), shooter)
                         () -> shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(385)), shooter)
                     .finallyDo(shooter::stopShooter),
                 Commands.runOnce(() -> hood.setPosition(() -> 60.0))));
@@ -567,76 +570,46 @@ public class RobotContainer {
     operator.y().whileTrue(shooter.runFeed(ShooterConstants.FeederSetpoints.run.in(Volts)));
     operator.leftBumper().whileTrue(intake.setPosition(IntakeConstants.Setpoints.deployed));
     operator.rightBumper().whileTrue(intake.setPosition(IntakeConstants.Setpoints.stowed));
-    operator
-        .povLeft()
-        .onTrue(
-            Commands.runOnce(
-                    () -> {
-                      // Lost Auto
-                      this.startingAlliance = DriverStation.getAlliance().orElse(Alliance.Red);
-                    })
-                .ignoringDisable(true));
-    operator
-        .povRight()
-        .onTrue(
-            Commands.runOnce(
-                    () -> {
-                      // Win Auto
-                      this.startingAlliance =
-                          DriverStation.getAlliance().orElse(Alliance.Red).equals(Alliance.Red)
-                              ? Alliance.Blue
-                              : Alliance.Blue;
-                    })
-                .ignoringDisable(true));
+
     // ****** ALERTS ******
 
     // Warn formissing game data
-    // Timer teleopElapsedTimer = new Timer();
-    // RobotModeTriggers.teleop()
-    //     .onTrue(
-    //         Commands.runOnce(
-    //             () -> {
-    //               teleopElapsedTimer.restart();
-    //             }));
-    // RobotModeTriggers.teleop()
-    //     .and(() -> !(DriverStation.getGameSpecificMessage().length() > 0))
-    //     .and(() -> HubShiftUtil.getAllianceWinOverride().isEmpty())
-    //     .and(() -> teleopElapsedTimer.hasElapsed(1.0))
-    //     .whileTrue(
-    //         Commands.runEnd(
-    //             () -> {
-    //               primary.setRumble(RumbleType.kBothRumble, 1);
-    //               secondary.setRumble(RumbleType.kBothRumble, 1);
-    //             },
-    //             () -> {
-    //               primary.setRumble(RumbleType.kBothRumble, 0);
-    //               secondary.setRumble(RumbleType.kBothRumble, 0);
-    //             }))
-    //     .whileTrue(
-    //         Commands.startEnd(
-    //             () -> {
-    //               autoWinnerNotSet.set(true);
-    //               leds.autoWinnerNotSet = true;
-    //             },
-    //             () -> {
-    //               autoWinnerNotSet.set(false);
-    //               leds.autoWinnerNotSet = false;
-    //             }));
+    Timer teleopElapsedTimer = new Timer();
+    RobotModeTriggers.teleop()
+        .onTrue(
+            Commands.runOnce(
+                () -> {
+                  teleopElapsedTimer.restart();
+                }));
+    RobotModeTriggers.teleop()
+        .and(() -> !(DriverStation.getGameSpecificMessage().length() > 0))
+        .and(() -> HubShiftUtil.getAllianceWinOverride().isEmpty())
+        .and(() -> teleopElapsedTimer.hasElapsed(1.0))
+        .whileTrue(
+            Commands.runEnd(
+                () -> {
+                  driver.setRumble(RumbleType.kBothRumble, 1);
+                  operator.setRumble(RumbleType.kBothRumble, 1);
+                },
+                () -> {
+                  driver.setRumble(RumbleType.kBothRumble, 0);
+                  operator.setRumble(RumbleType.kBothRumble, 0);
+                }));
 
-    // // End-of-shift warning
-    // for (int i = 1; i <= 5; i++) {
-    //   double time = i;
-    //   Trigger shiftAboutToEnd =
-    //       new Trigger(() -> (HubShiftUtil.getShiftedShiftInfo().remainingTime() < time));
-    //   shiftAboutToEnd
-    //       .and(RobotModeTriggers.teleop())
-    //       .and(ignoreHubState.negate())
-    //       .onTrue(
-    //           Commands.runEnd(
-    //                   () -> primary.setRumble(RumbleType.kRightRumble, 1.0),
-    //                   () -> primary.setRumble(RumbleType.kBothRumble, 0.0))
-    //               .withTimeout(0.25));
-    // }
+    // End-of-shift warning
+    for (int i = 1; i <= 5; i++) {
+      double time = i;
+      Trigger shiftAboutToEnd =
+          new Trigger(() -> (HubShiftUtil.getShiftedShiftInfo().remainingTime() < time));
+      shiftAboutToEnd
+          .and(RobotModeTriggers.teleop())
+          .and(ignoreHubState.negate())
+          .onTrue(
+              Commands.runEnd(
+                      () -> driver.setRumble(RumbleType.kRightRumble, 1.0),
+                      () -> driver.setRumble(RumbleType.kBothRumble, 0.0))
+                  .withTimeout(0.25));
+    }
   }
 
   /**
@@ -654,9 +627,9 @@ public class RobotContainer {
     SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
 
     // Update from HubShiftUtil
-    SmartDashboard.putString(
-        "Shifts/Remaining Shift Time",
-        String.format("%.1f", Math.max(HubShiftUtil.getShiftedShiftInfo().remainingTime(), 0.0)));
+    SmartDashboard.putNumber(
+        "Shifts/Remaining Shift Time", 
+        Math.max(HubShiftUtil.getShiftedShiftInfo().remainingTime(), 0.0));
     SmartDashboard.putBoolean("Shifts/Shift Active", HubShiftUtil.getShiftedShiftInfo().active());
     SmartDashboard.putString(
         "Shifts/Game State", HubShiftUtil.getShiftedShiftInfo().currentShift().toString());
@@ -668,6 +641,7 @@ public class RobotContainer {
     driverDisconnected.set(!DriverStation.isJoystickConnected(driver.getHID().getPort()));
     operatorDisconnected.set(!DriverStation.isJoystickConnected(operator.getHID().getPort()));
     overrideDisconnected.set(!overrides.isConnected());
+  }
   }
 
   @AutoLogOutput(key = "Targetting/Distance")
