@@ -106,7 +106,7 @@ public class RobotContainer {
   private final BatteryLogger batteryLogger = new BatteryLogger();
 
   @SuppressWarnings("unused")
-  private Supplier<Rotation2d> driveAngle = () -> Rotation2d.kZero;
+  private Supplier<Rotation2d> driveAngle = () -> (Rotation2d.kZero);
 
   private boolean manualOverride = false;
 
@@ -226,6 +226,7 @@ public class RobotContainer {
     }
 
     Autos.setup(drive, intake);
+    frc.robot.commands.AutoRoutines.setup(drive);
     automanager = new AutosManager(drive, shooter, indexer, intake, hood);
     factory = new AutoRoutines(drive, shooter, intake, indexer, hood);
     // Set up auto routines
