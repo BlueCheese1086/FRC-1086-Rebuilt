@@ -21,9 +21,7 @@ import org.littletonrobotics.junction.Logger;
 
 /** Add your docs here. */
 public class IntakeIOSim implements IntakeIO {
-  private final PIDController pid =
-      new PIDController(
-          IntakeConstants.PID.kP.get(), IntakeConstants.PID.kI.get(), IntakeConstants.PID.kD.get());
+  private final PIDController pid = new PIDController(1.0, IntakeConstants.PID.kI.get(), 0.0);
   private final ArmFeedforward ff =
       new ArmFeedforward(IntakeConstants.PID.kS.get(), 0.0, IntakeConstants.PID.kV.get());
 
@@ -65,8 +63,8 @@ public class IntakeIOSim implements IntakeIO {
     inputs.pivotVelocity = RadiansPerSecond.of(armSim.getVelocityRadPerSec());
     inputs.pivotAppliedVoltage = Volts.of(armInputVolts);
 
-    inputs.rollerAppliedVoltage = Volts.of(simRoller.getInputVoltage());
-    inputs.rollerVelocity = RadiansPerSecond.of(simRoller.getAngularVelocityRadPerSec());
+    inputs.rollerLeftAppliedVoltage = Volts.of(simRoller.getInputVoltage());
+    inputs.rollerLeftVelocity = simRoller.getAngularVelocityRadPerSec();
   }
 
   @Override

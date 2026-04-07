@@ -11,6 +11,7 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -18,6 +19,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -40,8 +43,8 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class DriveCommands {
-  private static LoggedNetworkNumber angleKP = new LoggedNetworkNumber("Angle/kp", 4.0);
-  private static LoggedNetworkNumber angleKd = new LoggedNetworkNumber("Angle/kd", 0.0);
+  private static LoggedNetworkNumber angleKP = new LoggedNetworkNumber("/TuningAngle/kp", 4.0);
+  private static LoggedNetworkNumber angleKd = new LoggedNetworkNumber("/TuningAngle/kd", 0.1);
   private static final double DEADBAND = 0.1;
   private static final double ANGLE_KP = angleKP.getAsDouble();
   private static final double ANGLE_KD = angleKd.getAsDouble();
@@ -226,6 +229,7 @@ public class DriveCommands {
     // Create PID controller
     PIDController angleController = new PIDController(ANGLE_KP, 0.0, ANGLE_KD);
     angleController.enableContinuousInput(-Math.PI, Math.PI);
+    angleController.setTolerance(Math.toRadians(0.4));
 
     // Construct command
     return Commands.run(
@@ -238,6 +242,10 @@ public class DriveCommands {
               double omega =
                   angleController.calculate(
                       drive.getRotation().getRadians(), rotationSupplier.get().getRadians());
+
+              Logger.recordOutput("AngleSetpoint", omega);
+              Logger.recordOutput("AngleInDegrees", Math.toDegrees(angleController.getSetpoint()));
+              Logger.recordOutput("RobotInDegrees", drive.getRotation().getDegrees());
 
               // Convert to field relative speeds & send command
               ChassisSpeeds speeds =
@@ -332,6 +340,73 @@ public class DriveCommands {
           // The translation direction is field-relative. Face that direction.
           return linearVelocity.getAngle();
         });
+  }
+
+  public static Command autoAlign(Drive drive, Supplier<Pose2d> pose) {
+    // Create PID controller
+    ProfiledPIDController angleController =
+        new ProfiledPIDController(
+            ANGLE_KP,
+            0.0,
+            ANGLE_KD,
+            new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
+    angleController.enableContinuousInput(-Math.PI, Math.PI);
+    ProfiledPIDController xController =
+        new ProfiledPIDController(
+            6.0,
+            0.0,
+            0.0,
+            new Constraints(
+                drive.getMaxLinearSpeedMetersPerSec(),
+                Math.pow(drive.getMaxLinearSpeedMetersPerSec(), 2)));
+    ProfiledPIDController yController =
+        new ProfiledPIDController(
+            6.0,
+            0.0,
+            0.0,
+            new Constraints(
+                drive.getMaxLinearSpeedMetersPerSec(),
+                Math.pow(drive.getMaxLinearSpeedMetersPerSec(), 2)));
+
+    // Construct command
+    return Commands.run(
+            () -> {
+              Pose2d flippedPose = pose.get();
+              Logger.recordOutput("Flipped Pose", flippedPose);
+
+              // Get linear velocity
+              Translation2d linearVelocity =
+                  new Translation2d(
+                      xController.calculate(drive.getPose().getX(), flippedPose.getX()),
+                      yController.calculate(drive.getPose().getY(), flippedPose.getY()));
+
+              // Calculate angular speed
+              double omega =
+                  angleController.calculate(
+                      drive.getRotation().getRadians(), flippedPose.getRotation().getRadians());
+
+              // Convert to field relative speeds & send command
+              ChassisSpeeds speeds =
+                  new ChassisSpeeds(linearVelocity.getX(), linearVelocity.getY(), omega);
+
+              drive.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(speeds, drive.getRotation()));
+            },
+            drive)
+
+        // Reset PID controller when command starts
+        .beforeStarting(
+            () -> {
+              angleController.reset(drive.getRotation().getRadians());
+              xController.reset(0.0);
+              yController.reset(0.0);
+            })
+        .finallyDo(() -> drive.stopWithX());
+  }
+
+  public static boolean isNear(Pose2d target, Pose2d actual) {
+    return MathUtil.isNear(0, actual.relativeTo(target).getTranslation().getNorm(), 0.015)
+        && MathUtil.isNear(
+            target.getRotation().getRadians(), actual.getRotation().getRadians(), 0.005);
   }
 
   /**

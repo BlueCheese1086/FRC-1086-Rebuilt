@@ -50,15 +50,6 @@ public class AutoRoutines {
     NamedCommands.registerCommand("deployIntake", Commands.print("Passed marker!"));
     NamedCommands.registerCommand("startFeeder", Commands.print("Passed marker!"));
   }
-  // private static final DoubleSupplier[] xSuppliers = new DoubleSupplier[]
-  // {DogLog.tunable("Autos/X/P", Preferences.getDouble("Autos_X_P",
-  // 8.0)),DogLog.tunable("Autos/X/D", Preferences.getDouble("Autos_X_D", 0.0))};
-  // private static final DoubleSupplier[] ySuppliers = new DoubleSupplier[]
-  // {DogLog.tunable("Autos/Y/P", Preferences.getDouble("Autos_Y_P",
-  // 8.0)),DogLog.tunable("Autos/Y/D", Preferences.getDouble("Autos_Y_D", 0.0))};
-  // private static final DoubleSupplier[] rotSuppliers = new DoubleSupplier[]
-  // {DogLog.tunable("Autos/Rot/P", Preferences.getDouble("Autos_Rot_P",
-  // 10.0)),DogLog.tunable("Autos/Rot/D", Preferences.getDouble("Autos_Rot_D", 0.0))};
   private static final PIDController xControl =
       new PIDController(
           Preferences.getDouble("Autos_X_P", 8.0), 0, Preferences.getDouble("Autos_X_D", 0.0));
@@ -120,33 +111,6 @@ public class AutoRoutines {
     }
   }
 
-  /*public static Command runPath(String trajectory, boolean resetPose) {
-  return (Commands.runOnce(
-              () -> {
-                System.out.println(trajectory);
-                Logger.recordOutput(
-                    "Autos/Selected Path", Choreo.loadTrajectory(trajectory).get().getPoses());
-                if (resetPose) {
-                  kDrive.setPose(
-                      Choreo.loadTrajectory(trajectory)
-                          .get()
-                          .getInitialPose(
-                              DriverStation.getAlliance()
-                                  .orElse(Alliance.Red)
-                                  .equals(Alliance.Red))
-                          .get());
-                }
-              })
-          .andThen(factory.trajectoryCmd(trajectory)))
-      .finallyDo(
-          () -> {
-            xControl.reset();
-            yControl.reset();
-            rotControl.reset();
-            kDrive.stop();
-          });
-    }*/
-
   private static boolean hasWarned = false;
 
   @SuppressWarnings("unused")
@@ -155,32 +119,6 @@ public class AutoRoutines {
       boolean updateX = false;
       boolean updateY = false;
       boolean updateRot = false;
-      // for (int i=0; i<xSuppliers.length; i++) {
-      //     double xCheck = switch (i) { case 0 -> xControl.getP(); case 1 -> xControl.getD();
-      // default -> xControl.getP();};
-      //     double yCheck = switch (i) { case 0 -> yControl.getP(); case 1 -> yControl.getD();
-      // default -> yControl.getP();};
-      //     double rotCheck = switch (i) { case 0 -> rotControl.getP(); case 1 ->
-      // rotControl.getD(); default -> rotControl.getP();};
-      //     updateX = (xSuppliers[i].getAsDouble() != xCheck) || updateX;
-      //     updateY = (ySuppliers[i].getAsDouble() != yCheck) || updateY;
-      //     updateRot = (rotSuppliers[i].getAsDouble() != rotCheck) || updateRot;
-      // }
-      // if (updateX) {
-      //     xControl.setPID(xSuppliers[0].getAsDouble(), 0.0, xSuppliers[1].getAsDouble());
-      //     Preferences.setDouble("Autos_X_P", xSuppliers[0].getAsDouble());
-      //     Preferences.setDouble("Autos_X_D", xSuppliers[1].getAsDouble());
-      // }
-      // if (updateY) {
-      //     yControl.setPID(ySuppliers[0].getAsDouble(), 0.0, ySuppliers[1].getAsDouble());
-      //     Preferences.setDouble("Autos_Y_P", ySuppliers[0].getAsDouble());
-      //     Preferences.setDouble("Autos_Y_D", ySuppliers[1].getAsDouble());
-      // }
-      // if (updateRot) {
-      //     rotControl.setPID(rotSuppliers[0].getAsDouble(), 0.0, rotSuppliers[1].getAsDouble());
-      //     Preferences.setDouble("Autos_Rot_P", rotSuppliers[0].getAsDouble());
-      //     Preferences.setDouble("Autos_Rot_D", rotSuppliers[1].getAsDouble());
-      // }
     } else {
       if (!hasWarned) {
         DriverStation.reportWarning(

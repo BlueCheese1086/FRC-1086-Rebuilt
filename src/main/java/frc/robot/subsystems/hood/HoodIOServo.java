@@ -4,11 +4,16 @@
 
 package frc.robot.subsystems.hood;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Millimeters;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Value;
 
+import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
@@ -27,6 +32,8 @@ public class HoodIOServo implements HoodIO {
 
   private final Servo leftServo;
   private final Servo rightServo;
+  private final CANcoder hoodEncoder;
+  private final CANcoderConfiguration encoderConfig;
 
   private double currentPosition = 0.01;
   private double targetPosition = 0.01;
@@ -37,6 +44,16 @@ public class HoodIOServo implements HoodIO {
     rightServo = new Servo(RobotMap.HoodMap.right);
     leftServo.setBoundsMicroseconds(2000, 1800, 1500, 1200, 1000);
     rightServo.setBoundsMicroseconds(2000, 1800, 1500, 1200, 1000);
+    encoderConfig = new CANcoderConfiguration();
+    hoodEncoder = new CANcoder(61, RobotMap.systemBus);
+    encoderConfig.MagnetSensor.MagnetOffset = -0.225;
+    encoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
+    hoodEncoder.getConfigurator().apply(encoderConfig);
+    hoodEncoder.optimizeBusUtilization();
+    hoodEncoder.setPosition(Degrees.of(81.0 * 3));
+
+    BaseStatusSignal.setUpdateFrequencyForAll(
+        250.0, hoodEncoder.getPosition(), hoodEncoder.getAbsolutePosition());
     setPosition(currentPosition);
   }
 
@@ -74,9 +91,13 @@ public class HoodIOServo implements HoodIO {
 
   @Override
   public void updateInputs(HoodInputs inputs) {
+    hoodEncoder.getPosition().refresh();
+    hoodEncoder.getAbsolutePosition().refresh();
     updateCurrentPosition();
     inputs.leftPosition = leftServo.getPosition();
     inputs.rightPosition = rightServo.getPosition();
     inputs.targetPosition = targetPosition;
+    inputs.hoodAngle = hoodEncoder.getPosition().getValue().in(Degrees) / 3;
+    inputs.absoulteAngle = hoodEncoder.getAbsolutePosition().getValueAsDouble();
   }
 }

@@ -49,38 +49,44 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "race",
           "data": {
             "commands": [
               {
-                "type": "path",
+                "type": "named",
                 "data": {
-                  "pathName": "RB4"
+                  "name": "ShootNow"
                 }
               },
               {
-                "type": "named",
+                "type": "wait",
                 "data": {
-                  "name": "SOTM"
+                  "waitTime": 3.0
                 }
               }
             ]
           }
         },
         {
-          "type": "sequential",
+          "type": "path",
+          "data": {
+            "pathName": "RB4"
+          }
+        },
+        {
+          "type": "race",
           "data": {
             "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "RB5"
-                }
-              },
               {
                 "type": "wait",
                 "data": {
                   "waitTime": 2.5
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "IntakeRun"
                 }
               }
             ]

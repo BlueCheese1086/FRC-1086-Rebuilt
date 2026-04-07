@@ -19,6 +19,7 @@ public interface ShooterIO {
     public double appliedVoltage = 0.0;
     public double setpoint = 0.0;
     public boolean atSetpoint = false;
+    public double acceleration = 0.0;
   }
 
   public default void updateInputs(ShooterInputs inputs) {}

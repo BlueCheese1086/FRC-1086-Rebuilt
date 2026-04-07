@@ -7,7 +7,6 @@ package frc.robot;
 import com.ctre.phoenix6.CANBus;
 import frc.robot.generated.TunerConstants;
 
-/** Add your docs here. */
 public class RobotMap {
   public static final CANBus driveBus = TunerConstants.kCANBus;
   public static final CANBus systemBus = new CANBus("SuperBus");
@@ -15,7 +14,8 @@ public class RobotMap {
   // TODO: Replace all these with the actual ids
   public static class IntakeMap {
     public static final int pivot = 41;
-    public static final int roller = 42;
+    public static final int rollerLeft = 42;
+    public static final int rollerRight = 43;
   }
 
   public static final int indexer = 11;
@@ -31,6 +31,4 @@ public class RobotMap {
     public static final int left = 0; // james said its this
     public static final int right = 6;
   }
-
-  public static final int climber = 31;
 }

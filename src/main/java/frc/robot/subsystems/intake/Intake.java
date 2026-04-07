@@ -4,14 +4,17 @@
 
 package frc.robot.subsystems.intake;
 
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -22,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism;
+import frc.robot.util.BatteryLogger;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -31,11 +35,13 @@ public class Intake extends SubsystemBase {
 
   private final IntakeInputsAutoLogged inputs = new IntakeInputsAutoLogged();
   private final SysIdRoutine routine;
+  private final BatteryLogger logger;
 
   private double setpoint = 0.0;
 
-  public Intake(IntakeIO io) {
+  public Intake(IntakeIO io, BatteryLogger logger) {
     this.io = io;
+    this.logger = logger;
     routine =
         new SysIdRoutine(
             new Config(Volts.of(1).per(Second), Volts.of(4), Seconds.of(5.0)),
@@ -61,8 +67,6 @@ public class Intake extends SubsystemBase {
         .until(this::atSetpoint);
   }
 
-  // public Command switchMode() {}
-
   public Command setVoltage(Voltage applied) {
     return Commands.run(
             () -> {
@@ -72,6 +76,14 @@ public class Intake extends SubsystemBase {
             () -> {
               io.setVoltage(Volts.zero());
             });
+  }
+
+  public Command runVelocity(AngularVelocity velocity) {
+    return this.runOnce(() -> io.setRollerVelocity(velocity));
+  }
+
+  public Command stopRoller() {
+    return this.runOnce(() -> io.setRollerVelocity(RadiansPerSecond.of(0.0)));
   }
 
   public Command setPivotVoltage(Voltage applied) {
@@ -155,5 +167,9 @@ public class Intake extends SubsystemBase {
     io.updateInputs(inputs);
     inputs.nearSetpoint = atSetpoint();
     Logger.processInputs("Intake", inputs);
+
+    logger.reportCurrentUsage("Intake/Pivot", false, inputs.pivotSupply.in(Amps));
+    logger.reportCurrentUsage("Intake/Left Roller", false, inputs.rollerLeftSupply.in(Amps));
+    logger.reportCurrentUsage("Intake/Right Roller", false, inputs.rollerRightSupply.in(Amps));
   }
 }

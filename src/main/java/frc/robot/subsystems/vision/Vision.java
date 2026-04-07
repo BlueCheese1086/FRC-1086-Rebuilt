@@ -9,6 +9,7 @@ package frc.robot.subsystems.vision;
 
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -18,8 +19,11 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.vision.VisionIO.PoseObservation;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
+import frc.robot.subsystems.vision.VisionIO.rejectionReason;
 import java.util.LinkedList;
 import java.util.List;
 import org.littletonrobotics.junction.Logger;
@@ -62,7 +66,19 @@ public class Vision extends SubsystemBase {
   public void periodic() {
     for (int i = 0; i < io.length; i++) {
       io[i].updateInputs(inputs[i]);
-      Logger.processInputs("Vision/Camera" + inputs[i].cameraName, inputs[i]);
+      Logger.processInputs("Vision/" + inputs[i].cameraName, inputs[i]);
+    }
+
+    if (VisionConstants.tunableMultiTagLinearBaseline.hasChanged(hashCode())) {
+      VisionConstants.multitagLinearStdDevBaseline = tunableMultiTagLinearBaseline.getAsDouble();
+    }
+
+    if (VisionConstants.tunableMultiTagAngularBaseline.hasChanged(hashCode())) {
+      VisionConstants.multitagAngularStdDevBaseline = tunableMultiTagAngularBaseline.getAsDouble();
+    }
+
+    if (VisionConstants.tunableTrigLinearBaseline.hasChanged(hashCode())) {
+      VisionConstants.trigLinearStdDevBaseline = tunableTrigLinearBaseline.getAsDouble();
     }
 
     // Initialize logging values
@@ -73,6 +89,8 @@ public class Vision extends SubsystemBase {
 
     // Loop over cameras
     for (int cameraIndex = 0; cameraIndex < io.length; cameraIndex++) {
+      // System.out.println(inputs[cameraIndex].cameraName);
+
       // Update disconnected alert
       disconnectedAlerts[cameraIndex].set(!inputs[cameraIndex].connected);
 
@@ -89,9 +107,11 @@ public class Vision extends SubsystemBase {
           tagPoses.add(tagPose.get());
         }
       }
-
+      rejectionReason[] rejections =
+          new rejectionReason[inputs[cameraIndex].poseObservations.length];
+      int rejectionId = 0;
       // Loop over pose observations
-      for (var observation : inputs[cameraIndex].poseObservations) {
+      for (PoseObservation observation : inputs[cameraIndex].poseObservations) {
         // Check whether to reject pose
         boolean rejectPose =
             observation.tagCount() == 0 // Must have at least one tag
@@ -100,13 +120,34 @@ public class Vision extends SubsystemBase {
                 || Math.abs(observation.pose().getZ())
                     > maxZError // Must have realistic Z coordinate
                 || observation.averageTagDistance() >= averageTagDistance
-                || (observation.tagCount() == 1 && observation.averageTagDistance() >= 2.5)
+                || (observation.tagCount() == 1
+                    && observation.averageTagDistance()
+                        >= VisionConstants.averageTagDistanceSingleTag
+                    && observation.type() != PoseObservationType.LIMELIGHT_MEGATAG_2)
                 // Must be within the field boundaries
                 || observation.pose().getX() <= 0.0
                 || observation.pose().getX() >= VisionConstants.fieldLayout.getFieldLength()
                 || observation.pose().getY() <= 0.0
-                || observation.pose().getY() >= VisionConstants.fieldLayout.getFieldWidth();
+                || observation.pose().getY() >= VisionConstants.fieldLayout.getFieldWidth()
+                || !inputs[cameraIndex].connected;
+        rejections[rejectionId] =
+            new rejectionReason(
+                observation.tagCount() == 0,
+                (observation.tagCount() == 1 && observation.ambiguity() > maxAmbiguity),
+                Math.abs(observation.pose().getZ()) > maxZError,
+                observation.averageTagDistance() >= averageTagDistance,
+                (observation.tagCount() == 1
+                    && observation.averageTagDistance()
+                        >= VisionConstants.averageTagDistanceSingleTag),
+                observation.pose().getX() >= VisionConstants.fieldLayout.getFieldLength(),
+                observation.pose().getY() >= VisionConstants.fieldLayout.getFieldWidth(),
+                observation.pose().getX() <= 0.0,
+                observation.pose().getY() <= 0.0,
+                !MathUtil.isNear(Timer.getFPGATimestamp(), observation.timestamp(), 0.5),
+                observation.type(),
+                observation.pose());
 
+        rejectionId++;
         // Add pose to log
         robotPoses.add(observation.pose());
         if (rejectPose) {
@@ -122,18 +163,18 @@ public class Vision extends SubsystemBase {
 
         // Calculate standard deviations
         double stdDevFactor =
-            Math.pow(observation.averageTagDistance(), 2.0) / observation.tagCount();
+            Math.min(10, Math.pow(observation.averageTagDistance(), 2.0) / observation.tagCount());
         double linearStdDev =
-            (observation.type() == PoseObservationType.PHOTONVISION
+            (observation.type() == PoseObservationType.PHOTONVISION_TRIG
                     ? trigLinearStdDevBaseline
                     : multitagLinearStdDevBaseline)
                 * stdDevFactor;
         double angularStdDev =
-            (observation.type() == PoseObservationType.PHOTONVISION
+            (observation.type() == PoseObservationType.PHOTONVISION_TRIG
                     ? trigAngularStdDevBaseline
                     : multitagAngularStdDevBaseline)
                 * stdDevFactor;
-        if (observation.type() == PoseObservationType.MEGATAG_2) {
+        if (observation.type() == PoseObservationType.LIMELIGHT_MEGATAG_2) {
           linearStdDev *= linearStdDevMegatag2Factor;
           angularStdDev *= angularStdDevMegatag2Factor;
         }
@@ -149,7 +190,8 @@ public class Vision extends SubsystemBase {
             observation.timestamp(),
             VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev));
       }
-
+      Logger.recordOutput(
+          "Vision/Camera " + inputs[cameraIndex].cameraName + "/Rejections", rejections);
       // Log camera metadata
       Logger.recordOutput(
           "Vision/Camera" + inputs[cameraIndex].cameraName + "/TagPoses",

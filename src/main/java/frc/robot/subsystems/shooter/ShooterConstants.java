@@ -22,14 +22,14 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 /** Add your docs here. */
 public class ShooterConstants {
   public static class Tuning {
-    public static final LoggedTunableNumber kv = new LoggedTunableNumber("/Shooter/Kv", 0.125);
-    public static final LoggedTunableNumber ks = new LoggedTunableNumber("/Shooter/Ks", 0.14819);
-    public static final LoggedTunableNumber ka = new LoggedTunableNumber("/Shooter/ka", 0.0024824);
-    public static final LoggedTunableNumber kP = new LoggedTunableNumber("/Shooter/kP", 0.029853);
+    public static final LoggedTunableNumber kv = new LoggedTunableNumber("/Shooter/Kv", 0.1267);
+    public static final LoggedTunableNumber ks = new LoggedTunableNumber("/Shooter/Ks", 0.1484375);
+    public static final LoggedTunableNumber ka = new LoggedTunableNumber("/Shooter/ka", 0.0045);
+    public static final LoggedTunableNumber kP = new LoggedTunableNumber("/Shooter/kP", 0.45);
     public static final LoggedTunableNumber kI = new LoggedTunableNumber("/Shooter/kI", 0.0);
     public static final LoggedTunableNumber kd = new LoggedTunableNumber("/Shooter/kd", 0.0);
     public static final LoggedNetworkNumber velocitySetpoint =
-        new LoggedNetworkNumber("/Tuning/Velocity Setpoint", 350.0);
+        new LoggedNetworkNumber("/Tuning/Velocity Setpoint", 550.0);
     public static final LoggedNetworkNumber voltageSetpoint =
         new LoggedNetworkNumber("/Tuning/Voltage Setpoint", 4.5);
   }
@@ -48,7 +48,7 @@ public class ShooterConstants {
   }
 
   public static class FeederSetpoints {
-    public static final Voltage run = Volts.of(8);
+    public static final Voltage run = Volts.of(12.0);
   }
 
   public static class Mechanical {
@@ -75,18 +75,20 @@ public class ShooterConstants {
     public static final Transform3d leftShooter =
         new Transform3d(
             new Translation3d(
-                -Units.inchesToMeters(8.5), Units.inchesToMeters(6.5), Units.inchesToMeters(26)),
+                -Units.inchesToMeters(8.5),
+                Units.inchesToMeters(6.5 + 0.25),
+                Units.inchesToMeters(26)),
             Rotation3d.kZero);
     public static final Transform3d centerShooter =
         new Transform3d(
             -Units.inchesToMeters(8.5),
-            Units.inchesToMeters(0.0),
+            Units.inchesToMeters(0.0 + 0.25),
             Units.inchesToMeters(26),
             Rotation3d.kZero);
     public static final Transform3d rightShooter =
         new Transform3d(
             -Units.inchesToMeters(8.5),
-            -Units.inchesToMeters(6.5),
+            -Units.inchesToMeters(6.5 + 0.25),
             Units.inchesToMeters(26),
             Rotation3d.kZero);
   }

@@ -18,6 +18,7 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.DriveMotorArrangement;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerMotorArrangement;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.IterativeRobotBase;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Threads;
@@ -26,8 +27,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.hood.HoodConstants;
-import frc.robot.subsystems.vision.VisionConstants;
+import frc.robot.util.FieldConstants;
 import frc.robot.util.LoggedTunableNumber;
+import frc.robot.util.MatchTimer;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -138,7 +140,7 @@ public class Robot extends LoggedRobot {
       }
     }
 
-    RobotController.setBrownoutVoltage(5.5);
+    RobotController.setBrownoutVoltage(7.0);
 
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
@@ -148,8 +150,7 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically during all modes. */
   @Override
   public void robotPeriodic() {
-    Logger.recordOutput("Vision Transforms/Left", VisionConstants.robotToLeftCam);
-    Logger.recordOutput("Vision Transforms/Right", VisionConstants.robotToRightCam);
+    // robotContainer.periodic();
     // Optionally switch the thread to high priority to improve loop
     // timing (see the template project documentation for details)
     Threads.setCurrentThreadPriority(true, 99);
@@ -163,11 +164,27 @@ public class Robot extends LoggedRobot {
 
     // Return to non-RT thread priority (do not modify the first argument)
     Threads.setCurrentThreadPriority(false, 10);
+    robotContainer.periodic();
+    MatchTimer.periodic();
+    // Update RobotContainer dashboard outputs
+    robotContainer.updateDashboardOutputs();
+    Logger.recordOutput("Simulated Match/Match Time", MatchTimer.getTime());
+    Logger.recordOutput("Simulated Match/Shift Time", MatchTimer.getShiftTime());
+    Logger.recordOutput(
+        "Simulated Match/Hub Active",
+        DriverStation.getGameSpecificMessage().length() > 0
+            ? FieldConstants.Hub.isHubActive(
+                DriverStation.getGameSpecificMessage().charAt(0) == 'R'
+                    ? Alliance.Red
+                    : Alliance.Blue)
+            : FieldConstants.Hub.isHubActive(Alliance.Blue));
   }
 
   /** This function is called once when the robot is disabled. */
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    MatchTimer.reset();
+  }
 
   /** This function is called periodically when disabled. */
   @Override
@@ -182,6 +199,8 @@ public class Robot extends LoggedRobot {
     if (autonomousCommand != null) {
       CommandScheduler.getInstance().schedule(autonomousCommand);
     }
+    MatchTimer.reset();
+    MatchTimer.start();
   }
 
   /** This function is called periodically during autonomous. */
@@ -197,11 +216,15 @@ public class Robot extends LoggedRobot {
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
     }
+    MatchTimer.reset();
   }
 
   /** This function is called once when teleop is enabled. */
   @Override
-  public void teleopInit() {}
+  public void teleopInit() {
+    MatchTimer.reset();
+    MatchTimer.start();
+  }
 
   /** This function is called periodically during operator control. */
   @Override

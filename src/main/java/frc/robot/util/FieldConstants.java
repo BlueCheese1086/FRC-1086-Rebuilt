@@ -11,13 +11,13 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.Timer;
 import org.littletonrobotics.junction.AutoLogOutput;
 
 /**
@@ -47,7 +47,8 @@ public class FieldConstants {
   public static class LinesVertical {
     public static final double center = fieldLength / 2.0;
     public static final double starting = defaultAprilTagType.getTagPose(26).get().getX();
-    public static final double allianceZone = starting;
+    public static final Pose2d allianceZone =
+        AllianceFlipUtil.apply(defaultAprilTagType.getTagPose(26).get().toPose2d());
     public static final double hubCenter =
         defaultAprilTagType.getTagPose(26).get().getX() + Hub.width / 2.0;
     public static final double neutralZoneNear = center - Units.inchesToMeters(120);
@@ -58,8 +59,8 @@ public class FieldConstants {
 
     public static boolean inAllianceZone(Pose2d pose) {
       return AllianceFlipUtil.shouldFlip()
-          ? pose.getX() > allianceZone
-          : pose.getX() < allianceZone;
+          ? pose.getX() >= Units.inchesToMeters(468.0)
+          : pose.getX() <= Units.inchesToMeters(182.11);
     }
   }
 
@@ -142,10 +143,10 @@ public class FieldConstants {
     public static boolean isHubActive(Alliance startingAlliance) {
       boolean redStart = startingAlliance.equals(Alliance.Red);
       if (DriverStation.isTeleop()) {
-        if (Timer.getMatchTime() > 130 || Timer.getMatchTime() < 30) {
+        if (MatchTimer.getTime() > 130 || MatchTimer.getTime() < 30) {
           return true;
         } else {
-          if (inRange(Timer.getMatchTime(), 105, 130) || inRange(Timer.getMatchTime(), 55, 80)) {
+          if (inRange(MatchTimer.getTime(), 105, 130) || inRange(MatchTimer.getTime(), 55, 80)) {
             return !redStart;
           } else {
             return redStart;
@@ -285,6 +286,16 @@ public class FieldConstants {
             (defaultAprilTagType.getTagPose(31).get().getY())
                 - innerOpeningWidth / 2
                 - Units.inchesToMeters(0.75));
+    public static final Pose2d leftBackPose =
+        new Pose2d(
+            defaultAprilTagType.getTagPose(31).get().getX(),
+            defaultAprilTagType.getTagPose(31).get().getY() + 3.0,
+            new Rotation2d());
+    public static final Pose2d rightBackPose =
+        new Pose2d(
+            defaultAprilTagType.getTagPose(31).get().getX(),
+            defaultAprilTagType.getTagPose(31).get().getY() - 3.0,
+            new Rotation2d());
 
     // Relevant reference points on opposing side
     public static final Translation2d oppCenterPoint =

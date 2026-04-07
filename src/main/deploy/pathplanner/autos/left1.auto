@@ -9,15 +9,15 @@
           "data": {
             "commands": [
               {
-                "type": "path",
-                "data": {
-                  "pathName": "Path1"
-                }
-              },
-              {
                 "type": "named",
                 "data": {
                   "name": "IntakeDown"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Path1"
                 }
               }
             ]
@@ -74,16 +74,10 @@
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 3.5
+                  "waitTime": 5.0
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "IntakeUp"
           }
         },
         {
@@ -95,11 +89,43 @@
                 "data": {
                   "pathName": "Path4"
                 }
+              }
+            ]
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Path5"
+                }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "IntakeDown"
+                  "name": "IntakeRun"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "ShootNow"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 3.5
                 }
               }
             ]
@@ -110,34 +136,28 @@
           "data": {
             "commands": [
               {
-                "type": "race",
+                "type": "path",
                 "data": {
-                  "commands": [
-                    {
-                      "type": "path",
-                      "data": {
-                        "pathName": "Path5"
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "IntakeRun"
-                      }
-                    }
-                  ]
+                  "pathName": "Path6"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Path7"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "IntakeUp"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "ShootNow"
+                  "name": "IntakeRun"
                 }
               }
             ]

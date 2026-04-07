@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 5.811654778887304,
+        "y": 2.501768901569187
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 8.565048192771085,
+        "y": 2.6253253012048186
+      },
+      "isLocked": false,
+      "linkedName": "So1E"
+    },
+    {
+      "anchor": {
+        "x": 8.871,
+        "y": 0.888
+      },
+      "prevControl": {
+        "x": 8.543247141513799,
+        "y": 2.6141596287001163
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "so6e"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 4.2,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 1.5,
+    "rotation": 0.0
+  },
+  "reversed": false,
+  "folder": "JohnAuto",
+  "idealStartingState": {
+    "velocity": 3.0,
+    "rotation": 50.143
+  },
+  "useDefaultConstraints": true
+}

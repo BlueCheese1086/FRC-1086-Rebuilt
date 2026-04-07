@@ -1,0 +1,127 @@
+{
+ "name":"rb1",
+ "version":2,
+ "type":"Swerve",
+ "variables":{
+  "expressions":{},
+  "poses":{
+   "RB2End":{
+    "x":{
+     "exp":"7.723789691925049 m",
+     "val":7.723789691925049
+    },
+    "y":{
+     "exp":"4.46902322769165 m",
+     "val":4.46902322769165
+    },
+    "heading":{
+     "exp":"1.027949608650141 rad",
+     "val":1.027949608650141
+    }
+   },
+   "RB2Start":{
+    "x":{
+     "exp":"5.834191799163818 m",
+     "val":5.834191799163818
+    },
+    "y":{
+     "exp":"2.603194236755371 m",
+     "val":2.603194236755371
+    },
+    "heading":{
+     "exp":"0.6822413947081583 rad",
+     "val":0.6822413947081583
+    }
+   },
+   "RB3Start":{
+    "x":{
+     "exp":"3.2294416427612305 m",
+     "val":3.2294416427612305
+    },
+    "y":{
+     "exp":"2.409738779067993 m",
+     "val":2.409738779067993
+    },
+    "heading":{
+     "exp":"0.8588586714973434 rad",
+     "val":0.8588586714973434
+    }
+   }
+  }
+ },
+ "config":{
+  "frontLeft":{
+   "x":{
+    "exp":"11 in",
+    "val":0.2794
+   },
+   "y":{
+    "exp":"11 in",
+    "val":0.2794
+   }
+  },
+  "backLeft":{
+   "x":{
+    "exp":"-11 in",
+    "val":-0.2794
+   },
+   "y":{
+    "exp":"11 in",
+    "val":0.2794
+   }
+  },
+  "mass":{
+   "exp":"115 lbs",
+   "val":52.16312255
+  },
+  "inertia":{
+   "exp":"6 kg m ^ 2",
+   "val":6.0
+  },
+  "gearing":{
+   "exp":"4.67",
+   "val":4.67
+  },
+  "radius":{
+   "exp":"1.75 in",
+   "val":0.04445
+  },
+  "vmax":{
+   "exp":"5800 RPM",
+   "val":607.3745796940267
+  },
+  "tmax":{
+   "exp":"1.2 N * m",
+   "val":1.2
+  },
+  "cof":{
+   "exp":"1.5",
+   "val":1.5
+  },
+  "bumper":{
+   "front":{
+    "exp":"16.5 in",
+    "val":0.4191
+   },
+   "side":{
+    "exp":"16.5 in",
+    "val":0.4191
+   },
+   "back":{
+    "exp":"16.5 in",
+    "val":0.4191
+   }
+  },
+  "differentialTrackWidth":{
+   "exp":"22 in",
+   "val":0.5588
+  }
+ },
+ "generationFeatures":[],
+ "codegen":{
+  "root":"../C:/Users/soham/Documents/BlueCheese/FRC-1086-Rebuilt/src/main/deploy/choreo/generation",
+  "genVars":true,
+  "genTrajData":true,
+  "useChoreoLib":true
+ }
+}
