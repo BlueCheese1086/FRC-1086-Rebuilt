@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilinj2.GenericHID.RumbleType;
 import frc.robot.autonomous.Autos;
 import frc.robot.autonomous.AutosManager;
 import frc.robot.commands.DriveCommands;
@@ -296,19 +297,6 @@ public class RobotContainer {
     autoChooser.addOption("Right Bump Choreo Auto", factory.getRBAuto());
     // Configure the button bindings
     configureButtonBindings();
-
-    // Set default commands
-    //hood.setDefaultCommand(hood.runFixedCommand(() -> Hood.minAngle, () -> 0.0));
-    // shooter.setDefaultCommand(
-    //     new ContinuousConditionalCommand(
-    //         shooter.stopCommand(),
-    //         shooter.runFixedCommand(
-    //             () -> {
-    //               var parameters = LaunchCalculator.getInstance().getParameters();
-    //               var shift = HubShiftUtil.getShiftedShiftInfo();
-    //               return parameters.flywheelSpeed();
-    //             }),
-    //         disableAutoSpinup));
   }
 
   private void configureButtonBindings() {
@@ -351,16 +339,15 @@ public class RobotContainer {
                 })
             .onlyIf(DriverStation::isTeleop));
 
-    Trigger hubActiveOrPassing =
+    Trigger hubActive =
         new Trigger(
             () ->
-                HubShiftUtil.getShiftedShiftInfo().active()
-                    || LaunchCalculator.getInstance().getParameters().passing());
+                HubShiftUtil.getShiftedShiftInfo().active());
     Trigger inLaunchingTolerance =
         new Trigger(
             () ->
                 hood.atGoal()
-                    && flywheel.atGoal()
+                    && shooter.atGoal()
                     && DriveCommands.atLaunchGoal()
                     && DriveCommands.atPitchAndRollTolerance());
 
@@ -394,6 +381,8 @@ public class RobotContainer {
 
     driver
         .rightTrigger()
+        .and(() -> LaunchCalculator.getInstance().getParameters().isValid())
+        .and(() -> ignoreHubState.getAsBoolean() || hubActiveOrPassing.getAsBoolean())
         .whileTrue(
             Commands.parallel(
                 shooter.runFeed(FeederSetpoints.run.in(Volts)),
