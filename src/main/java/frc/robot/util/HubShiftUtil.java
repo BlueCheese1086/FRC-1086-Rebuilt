@@ -50,7 +50,8 @@ public class HubShiftUtil {
   private static final boolean[] inactiveSchedule = {true, false, true, false, true, true};
   private static final double timeResetThreshold = 3.0;
   private static double shiftTimerOffset = 0.0;
-  private static Supplier<Optional<Boolean>> allianceWinOverride = () -> Optional.empty();
+  // @Setter private static Supplier<Optional<Boolean>> allianceWinOverride = () ->
+  // Optional.empty();
 
   public static void setAllianceWinOverride(Supplier<Optional<Boolean>> override) {
     allianceWinOverride = override;
@@ -64,12 +65,12 @@ public class HubShiftUtil {
     var alliance = DriverStation.getAlliance().orElse(Alliance.Blue);
 
     // Return override value
-    var winOverride = getAllianceWinOverride();
-    if (!winOverride.isEmpty()) {
-      return winOverride.get()
-          ? (alliance == Alliance.Blue ? Alliance.Red : Alliance.Blue)
-          : (alliance == Alliance.Blue ? Alliance.Blue : Alliance.Red);
-    }
+    // var winOverride = getAllianceWinOverride();
+    // if (!winOverride.isEmpty()) {
+    //   return winOverride.get()
+    //       ? (alliance == Alliance.Blue ? Alliance.Red : Alliance.Blue)
+    //       : (alliance == Alliance.Blue ? Alliance.Blue : Alliance.Red);
+    // }
 
     // Return FMS value
     String message = DriverStation.getGameSpecificMessage();
