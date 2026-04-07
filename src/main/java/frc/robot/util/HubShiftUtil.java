@@ -12,7 +12,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import java.util.Optional;
 import java.util.function.Supplier;
-import lombok.Setter;
 import frc.robot.subsystems.shooter.shooterUtil.LauncherCalculator;
 
 public class HubShiftUtil {
@@ -39,8 +38,8 @@ public class HubShiftUtil {
   private static final double minFuelCountDelay = 1.0;
   private static final double maxFuelCountDelay = 2.0;
   private static final double shiftEndFuelCountExtension = 3.0;
-  private static final double minTimeOfFlight = LaunchCalculator.getMinTimeOfFlight();
-  private static final double maxTimeOfFlight = LaunchCalculator.getMaxTimeOfFlight();
+  private static final double minTimeOfFlight = LauncherCalculator.getMinTimeOfFlight();
+  private static final double maxTimeOfFlight = LauncherCalculator.getMaxTimeOfFlight();
   private static final double approachingActiveFudge = -1 * (minTimeOfFlight + minFuelCountDelay);
   private static final double endingActiveFudge =
       shiftEndFuelCountExtension + -1 * (maxTimeOfFlight + maxFuelCountDelay);
@@ -51,8 +50,11 @@ public class HubShiftUtil {
   private static final boolean[] inactiveSchedule = {true, false, true, false, true, true};
   private static final double timeResetThreshold = 3.0;
   private static double shiftTimerOffset = 0.0;
-  @Setter private static Supplier<Optional<Boolean>> allianceWinOverride = () -> Optional.empty();
+  private static Supplier<Optional<Boolean>> allianceWinOverride = () -> Optional.empty();
 
+  public static void setAllianceWinOverride(Supplier<Optional<Boolean>> override) {
+    allianceWinOverride = override;
+  }
   public static Optional<Boolean> getAllianceWinOverride() {
     return allianceWinOverride.get();
   }
