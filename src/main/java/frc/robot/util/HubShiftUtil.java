@@ -5,7 +5,7 @@
 // license that can be found in the LICENSE file at
 // the root directory of this project.
 
-package org.littletonrobotics.frc2026.util;
+package frc.robot.util;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj.Timer;
 import java.util.Optional;
 import java.util.function.Supplier;
 import lombok.Setter;
-import org.littletonrobotics.frc2026.subsystems.launcher.LaunchCalculator;
+import frc.robot.subsystems.shooter.shooterUtil.LauncherCalculator;
 
 public class HubShiftUtil {
   public enum ShiftEnum {
