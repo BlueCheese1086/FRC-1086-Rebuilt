@@ -166,6 +166,8 @@ public class Robot extends LoggedRobot {
     Threads.setCurrentThreadPriority(false, 10);
     robotContainer.periodic();
     MatchTimer.periodic();
+    // Update RobotContainer dashboard outputs
+    robotContainer.updateDashboardOutputs();
     Logger.recordOutput("Simulated Match/Match Time", MatchTimer.getTime());
     Logger.recordOutput("Simulated Match/Shift Time", MatchTimer.getShiftTime());
     Logger.recordOutput(
