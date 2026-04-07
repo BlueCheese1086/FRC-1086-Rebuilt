@@ -50,8 +50,7 @@ public class HubShiftUtil {
   private static final boolean[] inactiveSchedule = {true, false, true, false, true, true};
   private static final double timeResetThreshold = 3.0;
   private static double shiftTimerOffset = 0.0;
-  // @Setter private static Supplier<Optional<Boolean>> allianceWinOverride = () ->
-  // Optional.empty();
+  private static Supplier<Optional<Boolean>> allianceWinOverride = () -> Optional.empty();
 
   // public static void setAllianceWinOverride(Supplier<Optional<Boolean>> override) {
   //   allianceWinOverride = override;

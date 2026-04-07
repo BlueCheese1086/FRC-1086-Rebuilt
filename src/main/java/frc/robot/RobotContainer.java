@@ -123,7 +123,7 @@ public class RobotContainer {
   private final Trigger coast = overrides.operatorSwitch(2);
   private final Trigger lostAutoOverride = overrides.multiDirectionSwitchLeft();
   private final Trigger wonAutoOverride = overrides.multiDirectionSwitchRight();
-  private final Trigger ignoreHubState = overrides.operatorSwitch(3);
+  private final Trigger ignoreHubState = overrides.operatorSwitch(1);
 
   // Alerts
   private final Alert driverDisconnected =
@@ -138,6 +138,7 @@ public class RobotContainer {
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
   public Alliance startingAlliance = Alliance.Blue;
+  public boolean overrideAlliance = false;
 
   /** The container for the robot. Contains subsystems, IO devices, and commands. */
   public RobotContainer() {
@@ -408,17 +409,6 @@ public class RobotContainer {
                         drive::getChassisSpeeds,
                         drive::getRotation)
                     .isValid())
-        .and(
-            () ->
-                LauncherCalculator.getInstance()
-                    .getParameters(
-                        () ->
-                            (new Pose3d(drive.getPose())
-                                .transformBy(ShooterTransforms.centerShooter)
-                                .toPose2d()),
-                        drive::getChassisSpeeds,
-                        drive::getRotation)
-                    .isValid())
         .and(() -> ignoreHubState.getAsBoolean() || hubActive.getAsBoolean())
         .whileTrue(
             Commands.parallel(
@@ -572,6 +562,29 @@ public class RobotContainer {
     operator.y().whileTrue(shooter.runFeed(ShooterConstants.FeederSetpoints.run.in(Volts)));
     operator.leftBumper().whileTrue(intake.setPosition(IntakeConstants.Setpoints.deployed));
     operator.rightBumper().whileTrue(intake.setPosition(IntakeConstants.Setpoints.stowed));
+    operator
+        .povLeft()
+        .onTrue(
+            Commands.run(
+                    () -> {
+                      // Lost Auto
+                      overrideAlliance = true;
+                      startingAlliance = DriverStation.getAlliance().orElse(Alliance.Red);
+                    })
+                .ignoringDisable(true));
+    operator
+        .povRight()
+        .onTrue(
+            Commands.run(
+                    () -> {
+                      // Won Auto
+                      overrideAlliance = true;
+                      startingAlliance =
+                          DriverStation.getAlliance().orElse(Alliance.Red).equals(Alliance.Blue)
+                              ? Alliance.Red
+                              : Alliance.Blue;
+                    })
+                .ignoringDisable(true));
 
     // ****** ALERTS ******
 
@@ -630,7 +643,7 @@ public class RobotContainer {
 
     // Update from HubShiftUtil
     SmartDashboard.putNumber(
-        "Shifts/Remaining Shift Time", 
+        "Shifts/Remaining Shift Time",
         Math.max(HubShiftUtil.getShiftedShiftInfo().remainingTime(), 0.0));
     SmartDashboard.putBoolean("Shifts/Shift Active", HubShiftUtil.getShiftedShiftInfo().active());
     SmartDashboard.putString(

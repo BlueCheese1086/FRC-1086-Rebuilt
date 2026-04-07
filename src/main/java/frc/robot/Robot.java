@@ -153,6 +153,7 @@ public class Robot extends LoggedRobot {
     // Optionally switch the thread to high priority to improve loop
     // timing (see the template project documentation for details)
     Threads.setCurrentThreadPriority(true, 99);
+    robotContainer.updateDashboardOutputs();
 
     // Runs the Scheduler. This is responsible for polling buttons, adding
     // newly-scheduled commands, running already-scheduled commands, removing
@@ -163,28 +164,19 @@ public class Robot extends LoggedRobot {
 
     // Return to non-RT thread priority (do not modify the first argument)
     Threads.setCurrentThreadPriority(false, 10);
-    if (DriverStation.getGameSpecificMessage().length() > 0) {
+    if (DriverStation.getGameSpecificMessage().length() > 0 && !robotContainer.overrideAlliance) {
       robotContainer.startingAlliance =
           DriverStation.getGameSpecificMessage().charAt(0) == 'R' ? Alliance.Red : Alliance.Blue;
     }
     robotContainer.periodic();
     MatchTimer.periodic();
-    // Update RobotContainer dashboard outputs
-    robotContainer.updateDashboardOutputs();
     Logger.recordOutput("Simulated Match/Match Time", MatchTimer.getTime());
     Logger.recordOutput("Simulated Match/Shift Time", MatchTimer.getShiftTime());
     Logger.recordOutput("Simulated Match/Current Shift", MatchTimer.currentShift.toString());
     Logger.recordOutput(
         "Simulated Match/Hub Active",
-        DriverStation.getGameSpecificMessage().length() > 0
-            ? MatchTimer.isHubActive(
-                DriverStation.getGameSpecificMessage().charAt(0) == 'R'
-                    ? Alliance.Red
-                    : Alliance.Blue,
-                DriverStation.getAlliance().orElse(Alliance.Blue))
-            : MatchTimer.isHubActive(
-                robotContainer.startingAlliance,
-                DriverStation.getAlliance().orElse(Alliance.Blue)));
+        MatchTimer.isHubActive(
+            robotContainer.startingAlliance, DriverStation.getAlliance().orElse(Alliance.Blue)));
   }
 
   /** This function is called once when the robot is disabled. */
