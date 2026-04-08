@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.3274322396576315,
-        "y": 2.501768901569187
+        "x": 8.179429386590584,
+        "y": 5.542353780313838
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.9902328846751933,
-        "y": 2.5084004367072548
+        "x": 11.181198288159772,
+        "y": 7.431398002853067
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "jp1"
     },
     {
       "anchor": {
-        "x": 5.811654778887304,
-        "y": 2.501768901569187
+        "x": 11.142382310987859,
+        "y": 7.405520684737637
       },
       "prevControl": {
-        "x": 4.600615298588188,
-        "y": 2.482188635657366
+        "x": 9.122361445783133,
+        "y": 7.520939759036144
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "So1E"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
@@ -34,21 +34,21 @@
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 4.75,
-    "maxAcceleration": 4.2,
+    "maxAcceleration": 5.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 3.0,
-    "rotation": 50.143
+    "velocity": 5.0,
+    "rotation": 180.0
   },
   "reversed": false,
-  "folder": "JohnAuto",
+  "folder": "kamikazi",
   "idealStartingState": {
-    "velocity": 0.0,
-    "rotation": 50.143
+    "velocity": 5.0,
+    "rotation": 180.0
   },
-  "useDefaultConstraints": true
+  "useDefaultConstraints": false
 }
