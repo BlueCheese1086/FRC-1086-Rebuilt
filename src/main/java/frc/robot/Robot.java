@@ -165,7 +165,7 @@ public class Robot extends LoggedRobot {
 
     // Return to non-RT thread priority (do not modify the first argument)
     Threads.setCurrentThreadPriority(false, 10);
-    if (DriverStation.getGameSpecificMessage().length() > 0) {
+    if (DriverStation.getGameSpecificMessage().length() > 0 && !robotContainer.overrideAlliance) {
       robotContainer.startingAlliance =
           DriverStation.getGameSpecificMessage().charAt(0) == 'R' ? Alliance.Red : Alliance.Blue;
     }
@@ -179,15 +179,8 @@ public class Robot extends LoggedRobot {
     Logger.recordOutput("Simulated Match/Current Shift", MatchTimer.currentShift.toString());
     Logger.recordOutput(
         "Simulated Match/Hub Active",
-        DriverStation.getGameSpecificMessage().length() > 0
-            ? MatchTimer.isHubActive(
-                DriverStation.getGameSpecificMessage().charAt(0) == 'R'
-                    ? Alliance.Red
-                    : Alliance.Blue,
-                DriverStation.getAlliance().orElse(Alliance.Blue))
-            : MatchTimer.isHubActive(
-                robotContainer.startingAlliance,
-                DriverStation.getAlliance().orElse(Alliance.Blue)));
+        MatchTimer.isHubActive(
+            robotContainer.startingAlliance, DriverStation.getAlliance().orElse(Alliance.Blue)));
   }
 
   /** This function is called once when the robot is disabled. */

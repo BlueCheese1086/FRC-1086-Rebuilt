@@ -77,6 +77,7 @@ import frc.robot.util.BatteryLogger;
 import frc.robot.util.FieldConstants;
 import frc.robot.util.FieldConstants.LinesVertical;
 import frc.robot.util.HubShiftUtil;
+import frc.robot.util.MatchTimer;
 import frc.robot.util.controllers.OverrideSwitches;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -136,6 +137,7 @@ public class RobotContainer {
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
   public Alliance startingAlliance = Alliance.Blue;
+  public boolean overrideAlliance = false;
 
   /** The container for the robot. Contains subsystems, IO devices, and commands. */
   public RobotContainer() {
@@ -318,6 +320,7 @@ public class RobotContainer {
     autoChooser.addOption("Testing", this.pathFindToStart("2 Cycle", false));
     autoChooser.addOption("Left Bump Choreo Auto", factory.getLBAuto());
     autoChooser.addOption("Right Bump Choreo Auto", factory.getRBAuto());
+    autoChooser.addOption("Kamekazi", this.pathFindToStart("Kamekazi", false));
     // Configure the button bindings
     rumbleController(driver, 10.0, 1.0).ignoringDisable(true);
     configureButtonBindings();
@@ -559,6 +562,29 @@ public class RobotContainer {
     operator.y().whileTrue(shooter.runFeed(ShooterConstants.FeederSetpoints.run.in(Volts)));
     operator.leftBumper().whileTrue(intake.setPosition(IntakeConstants.Setpoints.deployed));
     operator.rightBumper().whileTrue(intake.setPosition(IntakeConstants.Setpoints.stowed));
+    operator
+        .povLeft()
+        .onTrue(
+            Commands.run(
+                    () -> {
+                      // Lost Auto
+                      overrideAlliance = true;
+                      startingAlliance = DriverStation.getAlliance().orElse(Alliance.Red);
+                    })
+                .ignoringDisable(true));
+    operator
+        .povRight()
+        .onTrue(
+            Commands.run(
+                    () -> {
+                      // Won Auto
+                      overrideAlliance = true;
+                      startingAlliance =
+                          DriverStation.getAlliance().orElse(Alliance.Red).equals(Alliance.Blue)
+                              ? Alliance.Red
+                              : Alliance.Blue;
+                    })
+                .ignoringDisable(true));
 
     // ****** ALERTS ******
 
@@ -686,6 +712,10 @@ public class RobotContainer {
         "Robot/Alliance Zone Red", drive.getPose().getX() >= Units.inchesToMeters(468.0));
     Logger.recordOutput(
         "Robot/Alliance Zone Blue", drive.getPose().getX() >= Units.inchesToMeters(182.11));
+    Logger.recordOutput(
+        "Match Timer/Can Shoot",
+        MatchTimer.hubActiveInTof(
+            DriverStation.getAlliance().orElse(Alliance.Blue), startingAlliance, drive.getPose()));
   }
 
   public Command pathFindToStart(String pathName, boolean flip) {
