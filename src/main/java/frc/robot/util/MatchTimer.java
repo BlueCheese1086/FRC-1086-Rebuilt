@@ -19,7 +19,7 @@ public class MatchTimer {
   private static Timer shiftTimer = new Timer();
 
   public static enum Shift {
-    Autonomous("Autonomous"),
+    Autonomous("Auto"),
     Transistion("Transistion"),
     Shift_1("Shift 1"),
     Shift_2("Shift 2"),

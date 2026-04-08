@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.hood.HoodConstants;
+import frc.robot.util.HubShiftUtil;
 import frc.robot.util.LoggedTunableNumber;
 import frc.robot.util.MatchTimer;
 import java.io.File;
@@ -170,6 +171,9 @@ public class Robot extends LoggedRobot {
     }
     robotContainer.periodic();
     MatchTimer.periodic();
+    // Log hub state
+    Logger.recordOutput("HubShift/Official", HubShiftUtil.getOfficialShiftInfo());
+    Logger.recordOutput("HubShift/Shifted", HubShiftUtil.getShiftedShiftInfo());
     Logger.recordOutput("Simulated Match/Match Time", MatchTimer.getTime());
     Logger.recordOutput("Simulated Match/Shift Time", MatchTimer.getShiftTime());
     Logger.recordOutput("Simulated Match/Current Shift", MatchTimer.currentShift.toString());
@@ -207,6 +211,8 @@ public class Robot extends LoggedRobot {
     }
     MatchTimer.reset();
     MatchTimer.start();
+    // Start the hub shift timer so remaining shift time updates correctly
+    HubShiftUtil.initialize();
   }
 
   /** This function is called periodically during autonomous. */
@@ -230,6 +236,8 @@ public class Robot extends LoggedRobot {
   public void teleopInit() {
     MatchTimer.reset();
     MatchTimer.start();
+    // Start the hub shift timer at beginning of teleop
+    HubShiftUtil.initialize();
   }
 
   /** This function is called periodically during operator control. */
