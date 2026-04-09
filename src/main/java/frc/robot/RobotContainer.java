@@ -77,8 +77,6 @@ import frc.robot.util.BatteryLogger;
 import frc.robot.util.FieldConstants;
 import frc.robot.util.FieldConstants.LinesVertical;
 import frc.robot.util.HubShiftUtil;
-import frc.robot.util.MatchTimer;
-import frc.robot.util.OverrideSwitches;
 import java.util.Set;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -112,34 +110,20 @@ public class RobotContainer {
 
   // Controller
   private final CommandXboxController driver = new CommandXboxController(0);
-
   private final CommandXboxController operator = new CommandXboxController(1);
   private final CommandXboxController testing = new CommandXboxController(2);
-  //private final OverrideSwitches overrides = new OverrideSwitches(5);
 
-  // Operator overrides
-  //private final Trigger robotRelative = overrides.operatorSwitch(1);
-  //private final Trigger coast = overrides.operatorSwitch(2);
-  //private final Trigger lostAutoOverride = overrides.multiDirectionSwitchLeft();
-  //private final Trigger wonAutoOverride = overrides.multiDirectionSwitchRight();
-  //private final Trigger ignoreHubState = overrides.operatorSwitch(1);
-    Trigger ignoreHubState = new Trigger(() -> false);
-
+  Trigger ignoreHubState = new Trigger(() -> false);
 
   // Alerts
   private final Alert driverDisconnected =
       new Alert("Primary controller disconnected (port 0).", AlertType.kWarning);
   private final Alert operatorDisconnected =
       new Alert("Secondary controller disconnected (port 1).", AlertType.kWarning);
-  private final Alert overrideDisconnected =
-      new Alert("Override controller disconnected (port 5).", AlertType.kInfo);
   private final Alert autoWinnerNotSet = new Alert("!!! AUTO WINNER NOT SET !!!", AlertType.kError);
-  private final Alert aprilTagLayoutAlert = new Alert("", AlertType.kInfo);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
-  public Alliance startingAlliance = Alliance.Blue;
-  public boolean overrideAlliance = false;
 
   /** The container for the robot. Contains subsystems, IO devices, and commands. */
   public RobotContainer() {
@@ -577,7 +561,7 @@ public class RobotContainer {
         .onTrue(
             Commands.run(
                     () -> {
-                        ignoreHubState = new Trigger(() -> true);
+                      ignoreHubState = new Trigger(() -> true);
                     })
                 .ignoringDisable(true));
 
@@ -616,13 +600,13 @@ public class RobotContainer {
           .and(ignoreHubState.negate())
           .onTrue(
               Commands.parallel(
-                Commands.runEnd(
-                        () -> driver.setRumble(RumbleType.kRightRumble, 1.0),
-                        () -> driver.setRumble(RumbleType.kBothRumble, 0.0)),
-                Commands.runEnd(
-                        () -> operator.setRumble(RumbleType.kRightRumble, 1.0),
-                        () -> operator.setRumble(RumbleType.kBothRumble, 0.0)))
-                .withTimeout(0.25));
+                      Commands.runEnd(
+                          () -> driver.setRumble(RumbleType.kRightRumble, 1.0),
+                          () -> driver.setRumble(RumbleType.kBothRumble, 0.0)),
+                      Commands.runEnd(
+                          () -> operator.setRumble(RumbleType.kRightRumble, 1.0),
+                          () -> operator.setRumble(RumbleType.kBothRumble, 0.0)))
+                  .withTimeout(0.25));
     }
   }
 
@@ -690,10 +674,6 @@ public class RobotContainer {
         "Robot/Alliance Zone Red", drive.getPose().getX() >= Units.inchesToMeters(468.0));
     Logger.recordOutput(
         "Robot/Alliance Zone Blue", drive.getPose().getX() >= Units.inchesToMeters(182.11));
-    Logger.recordOutput(
-        "Match Timer/Can Shoot",
-        MatchTimer.hubActiveInTof(
-            DriverStation.getAlliance().orElse(Alliance.Blue), startingAlliance, drive.getPose()));
   }
 
   public Command pathFindToStart(String pathName, boolean flip) {
