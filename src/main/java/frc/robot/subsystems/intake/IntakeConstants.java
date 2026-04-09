@@ -55,7 +55,7 @@ public class IntakeConstants {
     // prepared for that
     // i wanna try slowly moving intake up to homed or stowed while shooting cuz pumping will toss
     // but not compress them towards shooter that well
-    public static final Voltage run = Volts.of(-12.0);
+    public static final Voltage run = Volts.of(12.0);
     public static final AngularVelocity rollerVelocity = RadiansPerSecond.of(100.0);
   }
 

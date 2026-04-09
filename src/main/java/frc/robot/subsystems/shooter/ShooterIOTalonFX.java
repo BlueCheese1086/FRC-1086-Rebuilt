@@ -45,7 +45,8 @@ public class ShooterIOTalonFX implements ShooterIO {
   public ShooterIOTalonFX(int id, boolean inverted) {
     shooter = new TalonFX(id, RobotMap.systemBus);
     velocityVoltage =
-        // new VelocityVoltage(0.0).withEnableFOC(true).withSlot(0).withUseTimesync(true);
+        // new
+        // VelocityVoltage(0.0).withEnableFOC(true).withSlot(0).withUseTimesync(true);
         new VelocityVoltage(0.0).withEnableFOC(true).withSlot(0);
 
     TalonFXConfiguration config = new TalonFXConfiguration();
@@ -100,6 +101,34 @@ public class ShooterIOTalonFX implements ShooterIO {
     inputs.setpoint = setpoint;
     inputs.acceleration = acceleration.getValueAsDouble();
     inputs.atSetpoint = MathUtil.isNear(setpoint, velocity.getValue().in(RadiansPerSecond), 25.0);
+
+    if (kP.hasChanged(hashCode())) {
+      resetValues();
+    }
+
+    if (kI.hasChanged(hashCode())) {
+      resetValues();
+    }
+
+    if (kd.hasChanged(hashCode())) {
+      resetValues();
+    }
+
+    if (kv.hasChanged(hashCode())) {
+      resetValues();
+    }
+
+    if (ks.hasChanged(hashCode())) {
+      resetValues();
+    }
+
+    if (ka.hasChanged(hashCode())) {
+      resetValues();
+    }
+
+    if (kP.hasChanged(hashCode())) {
+      resetValues();
+    }
   }
 
   private void resetValues() {

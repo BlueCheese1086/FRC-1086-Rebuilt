@@ -22,10 +22,17 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 /** Add your docs here. */
 public class ShooterConstants {
   public static class Tuning {
-    public static final LoggedTunableNumber kv = new LoggedTunableNumber("/Shooter/Kv", 0.1267);
-    public static final LoggedTunableNumber ks = new LoggedTunableNumber("/Shooter/Ks", 0.1484375);
-    public static final LoggedTunableNumber ka = new LoggedTunableNumber("/Shooter/ka", 0.0045);
-    public static final LoggedTunableNumber kP = new LoggedTunableNumber("/Shooter/kP", 0.45);
+    // public static final LoggedTunableNumber kv = new LoggedTunableNumber("/Shooter/Kv", 0.1267);
+    // public static final LoggedTunableNumber ks = new LoggedTunableNumber("/Shooter/Ks",
+    // 0.1484375);
+    // public static final LoggedTunableNumber ka = new LoggedTunableNumber("/Shooter/ka", 0.0045);
+    // public static final LoggedTunableNumber kP = new LoggedTunableNumber("/Shooter/kP", 0.45);
+    // public static final LoggedTunableNumber kI = new LoggedTunableNumber("/Shooter/kI", 0.0);
+    // public static final LoggedTunableNumber kd = new LoggedTunableNumber("/Shooter/kd", 0.0);
+    public static final LoggedTunableNumber kv = new LoggedTunableNumber("/Shooter/Kv", 0.126);
+    public static final LoggedTunableNumber ks = new LoggedTunableNumber("/Shooter/Ks", 0.8);
+    public static final LoggedTunableNumber ka = new LoggedTunableNumber("/Shooter/ka", 10.0);
+    public static final LoggedTunableNumber kP = new LoggedTunableNumber("/Shooter/kP", 0.499);
     public static final LoggedTunableNumber kI = new LoggedTunableNumber("/Shooter/kI", 0.0);
     public static final LoggedTunableNumber kd = new LoggedTunableNumber("/Shooter/kd", 0.0);
     public static final LoggedNetworkNumber velocitySetpoint =

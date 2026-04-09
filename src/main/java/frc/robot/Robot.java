@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.hood.HoodConstants;
 import frc.robot.util.FieldConstants;
+import frc.robot.util.HubShiftUtil;
 import frc.robot.util.LoggedTunableNumber;
 import frc.robot.util.MatchTimer;
 import java.io.File;
@@ -154,7 +155,7 @@ public class Robot extends LoggedRobot {
     // Optionally switch the thread to high priority to improve loop
     // timing (see the template project documentation for details)
     Threads.setCurrentThreadPriority(true, 99);
-
+    robotContainer.updateDashboardOutputs();
     // Runs the Scheduler. This is responsible for polling buttons, adding
     // newly-scheduled commands, running already-scheduled commands, removing
     // finished or interrupted commands, and running subsystem periodic() methods.
@@ -199,6 +200,7 @@ public class Robot extends LoggedRobot {
     }
     MatchTimer.reset();
     MatchTimer.start();
+    HubShiftUtil.initialize();
   }
 
   /** This function is called periodically during autonomous. */
@@ -222,6 +224,7 @@ public class Robot extends LoggedRobot {
   public void teleopInit() {
     MatchTimer.reset();
     MatchTimer.start();
+    HubShiftUtil.initialize();
   }
 
   /** This function is called periodically during operator control. */

@@ -15,11 +15,19 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.autonomous.Autos;
 import frc.robot.autonomous.AutosManager;
 import frc.robot.commands.DriveCommands;
@@ -69,6 +77,8 @@ import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.BatteryLogger;
 import frc.robot.util.FieldConstants;
 import frc.robot.util.FieldConstants.LinesVertical;
+import frc.robot.util.HubShiftUtil;
+import frc.robot.util.OverrideSwitches;
 import java.util.Set;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -105,11 +115,29 @@ public class RobotContainer {
 
   private final CommandXboxController operator = new CommandXboxController(1);
   private final CommandXboxController testing = new CommandXboxController(2);
+  private final OverrideSwitches overrides = new OverrideSwitches(5);
 
-  // private Pose2d[] backStartPose = new Pose2d[1];
+  // Operator overrides
+  private final Trigger robotRelative = overrides.operatorSwitch(1);
+  private final Trigger coast = overrides.operatorSwitch(2);
+  private final Trigger lostAutoOverride = overrides.multiDirectionSwitchLeft();
+  private final Trigger wonAutoOverride = overrides.multiDirectionSwitchRight();
+  private final Trigger ignoreHubState = overrides.operatorSwitch(1);
+
+  // Alerts
+  private final Alert driverDisconnected =
+      new Alert("Primary controller disconnected (port 0).", AlertType.kWarning);
+  private final Alert operatorDisconnected =
+      new Alert("Secondary controller disconnected (port 1).", AlertType.kWarning);
+  private final Alert overrideDisconnected =
+      new Alert("Override controller disconnected (port 5).", AlertType.kInfo);
+  private final Alert autoWinnerNotSet = new Alert("!!! AUTO WINNER NOT SET !!!", AlertType.kError);
+  private final Alert aprilTagLayoutAlert = new Alert("", AlertType.kInfo);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
+  public Alliance startingAlliance = Alliance.Blue;
+  public boolean overrideAlliance = false;
 
   /** The container for the robot. Contains subsystems, IO devices, and commands. */
   public RobotContainer() {
@@ -437,7 +465,7 @@ public class RobotContainer {
                                       drive::getChassisSpeeds,
                                       drive::getRotation);
                           shooter.setVelocitySetpoint(
-                              () -> RadiansPerSecond.of(parms.flywheelSpeed()));
+                              () -> RadiansPerSecond.of(Math.min(parms.flywheelSpeed(), 475.0)));
                           hood.setPosition(() -> parms.hoodAngle());
                           Logger.recordOutput("Pass Parms/ Hood Angle", parms.hoodAngle());
                           Logger.recordOutput("Pass Parms/ Drive Angle", parms.driveAngle());
@@ -519,6 +547,70 @@ public class RobotContainer {
     operator.y().whileTrue(shooter.runFeed(ShooterConstants.FeederSetpoints.run.in(Volts)));
     operator.leftBumper().whileTrue(intake.setPosition(IntakeConstants.Setpoints.deployed));
     operator.rightBumper().whileTrue(intake.setPosition(IntakeConstants.Setpoints.stowed));
+
+    operator
+        .povLeft()
+        .onTrue(
+            Commands.run(
+                    () -> {
+                      // Lost Auto
+                      overrideAlliance = true;
+                      startingAlliance = DriverStation.getAlliance().orElse(Alliance.Red);
+                    })
+                .ignoringDisable(true));
+    operator
+        .povRight()
+        .onTrue(
+            Commands.run(
+                    () -> {
+                      // Won Auto
+                      overrideAlliance = true;
+                      startingAlliance =
+                          DriverStation.getAlliance().orElse(Alliance.Red).equals(Alliance.Blue)
+                              ? Alliance.Red
+                              : Alliance.Blue;
+                    })
+                .ignoringDisable(true));
+
+    // ****** ALERTS ******
+
+    // Warn formissing game data
+    Timer teleopElapsedTimer = new Timer();
+    RobotModeTriggers.teleop()
+        .onTrue(
+            Commands.runOnce(
+                () -> {
+                  teleopElapsedTimer.restart();
+                }));
+    RobotModeTriggers.teleop()
+        .and(() -> !(DriverStation.getGameSpecificMessage().length() > 0))
+        .and(() -> HubShiftUtil.getAllianceWinOverride().isEmpty())
+        .and(() -> teleopElapsedTimer.hasElapsed(1.0))
+        .whileTrue(
+            Commands.runEnd(
+                () -> {
+                  driver.setRumble(RumbleType.kBothRumble, 1);
+                  operator.setRumble(RumbleType.kBothRumble, 1);
+                },
+                () -> {
+                  driver.setRumble(RumbleType.kBothRumble, 0);
+                  operator.setRumble(RumbleType.kBothRumble, 0);
+                }));
+
+    // End-of-shift warning
+    for (int i = 1; i <= 5; i++) {
+      double time = i;
+      Trigger shiftAboutToEnd =
+          new Trigger(() -> (HubShiftUtil.getShiftedShiftInfo().remainingTime() < time));
+      shiftAboutToEnd
+          .and(RobotModeTriggers.teleop())
+          .and(ignoreHubState.negate())
+          .onTrue(
+              Commands.runEnd(
+                      () -> driver.setRumble(RumbleType.kRightRumble, 1.0),
+                      () -> driver.setRumble(RumbleType.kBothRumble, 0.0))
+                  .withTimeout(0.25));
+    }
   }
 
   /**
@@ -528,6 +620,28 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     return autoChooser.get();
+  }
+
+  /** Update dashboard outputs. */
+  public void updateDashboardOutputs() {
+    // Publish match time
+    SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
+
+    // Update from HubShiftUtil
+    SmartDashboard.putNumber(
+        "Shifts/Remaining Shift Time",
+        Math.max(HubShiftUtil.getShiftedShiftInfo().remainingTime(), 0.0));
+    SmartDashboard.putBoolean("Shifts/Shift Active", HubShiftUtil.getShiftedShiftInfo().active());
+    SmartDashboard.putString(
+        "Shifts/Game State", HubShiftUtil.getShiftedShiftInfo().currentShift().toString());
+    SmartDashboard.putBoolean(
+        "Shifts/Active First?",
+        DriverStation.getAlliance().orElse(Alliance.Blue) == HubShiftUtil.getFirstActiveAlliance());
+
+    // Controller disconnected alerts
+    driverDisconnected.set(!DriverStation.isJoystickConnected(driver.getHID().getPort()));
+    operatorDisconnected.set(!DriverStation.isJoystickConnected(operator.getHID().getPort()));
+    overrideDisconnected.set(!overrides.isConnected());
   }
 
   @AutoLogOutput(key = "Targetting/Distance")
