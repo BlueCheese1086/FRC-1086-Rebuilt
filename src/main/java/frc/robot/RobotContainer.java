@@ -404,18 +404,6 @@ public class RobotContainer {
 
     driver
         .rightTrigger()
-        .and(
-            () ->
-                LauncherCalculator.getInstance()
-                    .getParameters(
-                        () ->
-                            (new Pose3d(drive.getPose())
-                                .transformBy(ShooterTransforms.centerShooter)
-                                .toPose2d()),
-                        drive::getChassisSpeeds,
-                        drive::getRotation)
-                    .isValid())
-        .and(() -> ignoreHubState.getAsBoolean() || hubActive.getAsBoolean())
         .whileTrue(
             Commands.parallel(
                 shooter.runFeed(FeederSetpoints.run.in(Volts)),
