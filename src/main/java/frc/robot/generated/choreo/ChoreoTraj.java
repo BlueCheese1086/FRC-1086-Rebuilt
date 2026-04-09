@@ -1074,8 +1074,8 @@ public record ChoreoTraj(
 	    new Pose2d(3.5, 4, Rotation2d.fromRadians(0)),
 	    new Pose2d(4.6, 0.6, Rotation2d.fromRadians(0))
 	);
-	public static final ChoreoTraj main = new ChoreoTraj(
-	    "main",
+	public static final ChoreoTraj a_main = new ChoreoTraj(
+	    "a_main",
 	    OptionalInt.empty(),
 	    37.33017,
 	    new Pose2d(3.6, 7.5, Rotation2d.fromRadians(0)),
@@ -1991,6 +1991,34 @@ public record ChoreoTraj(
 	    new Pose2d(0.7, 6, Rotation2d.fromRadians(3.14)),
 	    new Pose2d(3.4, 2.5, Rotation2d.fromRadians(0.88))
 	);
+	public static final ChoreoTraj db_farswipe = new ChoreoTraj(
+	    "db_farswipe",
+	    OptionalInt.empty(),
+	    3.1367,
+	    new Pose2d(4.6, 5.5, Rotation2d.fromRadians(-0.79)),
+	    new Pose2d(4.6, 5.5, Rotation2d.fromRadians(-0.79))
+	);
+	public static final ChoreoTraj db_nearswipe = new ChoreoTraj(
+	    "db_nearswipe",
+	    OptionalInt.empty(),
+	    2.55699,
+	    new Pose2d(4.6, 5.5, Rotation2d.fromRadians(-0.79)),
+	    new Pose2d(4.6, 5.5, Rotation2d.fromRadians(-0.79))
+	);
+	public static final ChoreoTraj ob_farswipe = new ChoreoTraj(
+	    "ob_farswipe",
+	    OptionalInt.empty(),
+	    3.21891,
+	    new Pose2d(4.6, 2.5, Rotation2d.fromRadians(0.79)),
+	    new Pose2d(4.6, 2.5, Rotation2d.fromRadians(0.79))
+	);
+	public static final ChoreoTraj ob_nearswipe = new ChoreoTraj(
+	    "ob_nearswipe",
+	    OptionalInt.empty(),
+	    2.70345,
+	    new Pose2d(4.6, 2.5, Rotation2d.fromRadians(0.79)),
+	    new Pose2d(4.6, 2.5, Rotation2d.fromRadians(0.79))
+	);
 
     /**
      * A map between trajectory names and their corresponding data.
@@ -2147,7 +2175,7 @@ public record ChoreoTraj(
 		Map.entry("hs_oi", hs_oi),
 		Map.entry("hs_ons", hs_ons),
 		Map.entry("hs_ot", hs_ot),
-		Map.entry("main", main),
+		Map.entry("a_main", a_main),
 		Map.entry("obsr_cs", obsr_cs),
 		Map.entry("obsr_dc", obsr_dc),
 		Map.entry("obsr_dfs", obsr_dfs),
@@ -2277,7 +2305,11 @@ public record ChoreoTraj(
 		Map.entry("obs_ocs", obs_ocs),
 		Map.entry("ots_ocs", ots_ocs),
 		Map.entry("oi_ocs", oi_ocs),
-		Map.entry("di_ocs", di_ocs)
+		Map.entry("di_ocs", di_ocs),
+		Map.entry("db_farswipe", db_farswipe),
+		Map.entry("db_nearswipe", db_nearswipe),
+		Map.entry("ob_farswipe", ob_farswipe),
+		Map.entry("ob_nearswipe", ob_nearswipe)
     );
 
     /**

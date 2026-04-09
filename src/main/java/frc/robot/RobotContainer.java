@@ -22,7 +22,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -108,7 +107,7 @@ public class RobotContainer {
   private final BatteryLogger batteryLogger = new BatteryLogger();
 
   @SuppressWarnings("unused")
-  private Supplier<Rotation2d> driveAngle = () -> (Rotation2d.kZero);
+  private Supplier<Rotation2d> driveAngle = () -> Rotation2d.kZero;
 
   private boolean manualOverride = false;
 
@@ -229,7 +228,6 @@ public class RobotContainer {
     }
 
     Autos.setup(drive, intake);
-    frc.robot.commands.AutoRoutines.setup(drive);
     automanager = new AutosManager(drive, shooter, indexer, intake, hood);
     factory = new AutoRoutines(drive, shooter, intake, indexer, hood);
     // Set up auto routines
@@ -323,7 +321,9 @@ public class RobotContainer {
     autoChooser.addOption("Testing", this.pathFindToStart("2 Cycle", false));
     autoChooser.addOption("Left Bump Choreo Auto", factory.getLBAuto());
     autoChooser.addOption("Right Bump Choreo Auto", factory.getRBAuto());
+    autoChooser.addOption("Kamekazi", this.pathFindToStart("Kamekazi", false));
     // Configure the button bindings
+    rumbleController(driver, 10.0, 1.0).ignoringDisable(true);
     configureButtonBindings();
   }
 
@@ -613,16 +613,16 @@ public class RobotContainer {
         .and(() -> !(DriverStation.getGameSpecificMessage().length() > 0))
         .and(() -> HubShiftUtil.getAllianceWinOverride().isEmpty())
         .and(() -> teleopElapsedTimer.hasElapsed(1.0))
-        .whileTrue(this.controllerRumble(0.25, 1.0));
-            // Commands.runEnd(
-            //     () -> {
-            //       driver.setRumble(RumbleType.kBothRumble, 1);
-            //       operator.setRumble(RumbleType.kBothRumble, 1);
-            //     },
-            //     () -> {
-            //       driver.setRumble(RumbleType.kBothRumble, 0);
-            //       operator.setRumble(RumbleType.kBothRumble, 0);
-            //     }));
+        .whileTrue(
+            Commands.runEnd(
+                () -> {
+                  driver.setRumble(RumbleType.kBothRumble, 1.0);
+                  operator.setRumble(RumbleType.kBothRumble, 1.0);
+                },
+                () -> {
+                  driver.setRumble(RumbleType.kBothRumble, 0);
+                  operator.setRumble(RumbleType.kBothRumble, 0);
+                }));
 
     // End-of-shift warning
     for (int i = 1; i <= 5; i++) {
@@ -632,12 +632,46 @@ public class RobotContainer {
       shiftAboutToEnd
           .and(RobotModeTriggers.teleop())
           .and(ignoreHubState.negate())
-          .onTrue(this.controllerRumble(0.25, 1.0));
-            //   Commands.runEnd(
-            //           () -> driver.setRumble(RumbleType.kRightRumble, 1.0),
-            //           () -> driver.setRumble(RumbleType.kBothRumble, 0.0))
-            //       .withTimeout(0.25));
+          .onTrue(rumbleController(driver, 0.25, 1.0));
+      //   Commands.runEnd(
+      //           () -> {
+      //             driver.setRumble(RumbleType.kRightRumble, 1.0);
+      //             operator.setRumble(RumbleType.kRightRumble, 1.0);
+      //           },
+      //           () -> {
+      //             driver.setRumble(RumbleType.kBothRumble, 0.0);
+      //             operator.setRumble(RumbleType.kBothRumble, 0.0);
+      //           })
+      //       .withTimeout(0.25));
     }
+  }
+
+  public Command rumbleController(
+      CommandXboxController controller, double timeout, double intensity) {
+    return Commands.run(
+            () -> {
+              controller.setRumble(RumbleType.kBothRumble, intensity);
+            },
+            drive)
+        .withTimeout(timeout)
+        .finallyDo(
+            () -> {
+              controller.setRumble(RumbleType.kBothRumble, 0.0);
+            });
+  }
+
+  public Command rumbleController(
+      CommandXboxController controller, double timeout, double intensity) {
+    return Commands.run(
+            () -> {
+              controller.setRumble(RumbleType.kBothRumble, intensity);
+            },
+            drive)
+        .withTimeout(timeout)
+        .finallyDo(
+            () -> {
+              controller.setRumble(RumbleType.kBothRumble, 0.0);
+            });
   }
 
   /**
@@ -652,18 +686,19 @@ public class RobotContainer {
   /** Update dashboard outputs. */
   public void updateDashboardOutputs() {
     // Publish match time
-    SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
+    Logger.recordOutput("Match Time", Math.max(DriverStation.getMatchTime(), 0.0));
 
     // Update from HubShiftUtil
-    SmartDashboard.putNumber(
+    Logger.recordOutput(
         "Shifts/Remaining Shift Time",
-        Math.max(HubShiftUtil.getShiftedShiftInfo().remainingTime(), 0.0));
-    SmartDashboard.putBoolean("Shifts/Shift Active", HubShiftUtil.getShiftedShiftInfo().active());
-    SmartDashboard.putString(
-        "Shifts/Game State", HubShiftUtil.getShiftedShiftInfo().currentShift().toString());
-    SmartDashboard.putBoolean(
+        String.format("%.1f", Math.max(HubShiftUtil.getOfficialShiftInfo().remainingTime(), 0.0)));
+    Logger.recordOutput("Shifts/Shift Active", HubShiftUtil.getOfficialShiftInfo().active());
+    Logger.recordOutput(
+        "Shifts/Game State", HubShiftUtil.getOfficialShiftInfo().currentShift().toString());
+    Logger.recordOutput(
         "Shifts/Active First?",
         DriverStation.getAlliance().orElse(Alliance.Blue) == HubShiftUtil.getFirstActiveAlliance());
+    Logger.recordOutput("Shifts/Shoot Now", HubShiftUtil.getShiftedShiftInfo().active());
 
     // Controller disconnected alerts
     driverDisconnected.set(!DriverStation.isJoystickConnected(driver.getHID().getPort()));
