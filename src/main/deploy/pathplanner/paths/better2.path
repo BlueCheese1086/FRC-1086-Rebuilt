@@ -64,10 +64,10 @@
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 1.4620347394540878,
+      "minWaypointRelativePos": 0.7771712158809024,
       "maxWaypointRelativePos": 2.956823821339945,
       "constraints": {
-        "maxVelocity": 3.5,
+        "maxVelocity": 2.5,
         "maxAcceleration": 4.2,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,

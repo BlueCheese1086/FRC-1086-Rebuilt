@@ -31,12 +31,13 @@ public class VisionConstants {
       new double[] {
         1.0, // Camera 0
         1.0, // Camera 1
-        1.0
+        1.0 // Limelight
       };
 
   // Multipliers to apply for MegaTag 2 observations
   public static double linearStdDevMegatag2Factor = 0.32; // More stable than full 3D solve
-  public static double angularStdDevMegatag2Factor = Double.POSITIVE_INFINITY; // No rotation data available
+  public static double angularStdDevMegatag2Factor =
+      Double.POSITIVE_INFINITY; // No rotation data available
 
   public static double linearStdDevMegatag1Factor = 0.8;
   public static double angularStdDevMegatag1Factor = 0.35;
@@ -72,7 +73,7 @@ public class VisionConstants {
 
   public static double averageTagDistance = Double.POSITIVE_INFINITY;
   public static double averageTagDistanceSingleTag = 7.5;
-  public static double averageMultitag2SingleTagDistance = 4.5;
+  public static double averageMultitag2SingleTagDistance = 3.75;
   public static double maxFusedDistance = 0.125;
   public static PoseObservationType preferred = PoseObservationType.PHOTONVISION_TRIG;
 }

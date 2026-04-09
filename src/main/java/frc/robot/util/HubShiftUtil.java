@@ -57,7 +57,7 @@ public class HubShiftUtil {
   }
 
   public static Optional<Boolean> getAllianceWinOverride() {
-    return Optional.empty();
+    return allianceWinOverride.get();
   }
 
   public static Alliance getFirstActiveAlliance() {

@@ -27,10 +27,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.hood.HoodConstants;
-import frc.robot.util.FieldConstants;
 import frc.robot.util.HubShiftUtil;
 import frc.robot.util.LoggedTunableNumber;
-import frc.robot.util.MatchTimer;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -170,23 +168,21 @@ public class Robot extends LoggedRobot {
           DriverStation.getGameSpecificMessage().charAt(0) == 'R' ? Alliance.Red : Alliance.Blue;
     }
     robotContainer.periodic();
-    MatchTimer.periodic();
     // Log hub state
     Logger.recordOutput("HubShift/Official", HubShiftUtil.getOfficialShiftInfo());
     Logger.recordOutput("HubShift/Shifted", HubShiftUtil.getShiftedShiftInfo());
-    Logger.recordOutput("Simulated Match/Match Time", MatchTimer.getTime());
-    Logger.recordOutput("Simulated Match/Shift Time", MatchTimer.getShiftTime());
-    Logger.recordOutput("Simulated Match/Current Shift", MatchTimer.currentShift.toString());
-    Logger.recordOutput(
-        "Simulated Match/Hub Active",
-        MatchTimer.isHubActive(
-            robotContainer.startingAlliance, DriverStation.getAlliance().orElse(Alliance.Blue)));
+    // Logger.recordOutput("Simulated Match/Match Time", MatchTimer.getTime());
+    // Logger.recordOutput("Simulated Match/Shift Time", MatchTimer.getShiftTime());
+    // Logger.recordOutput("Simulated Match/Current Shift", MatchTimer.currentShift.toString());
+    // Logger.recordOutput(
+    //     "Simulated Match/Hub Active",
+    //     MatchTimer.isHubActive(
+    //         robotContainer.startingAlliance, DriverStation.getAlliance().orElse(Alliance.Blue)));
   }
 
   /** This function is called once when the robot is disabled. */
   @Override
   public void disabledInit() {
-    MatchTimer.reset();
   }
 
   /** This function is called periodically when disabled. */
@@ -202,8 +198,6 @@ public class Robot extends LoggedRobot {
     if (autonomousCommand != null) {
       CommandScheduler.getInstance().schedule(autonomousCommand);
     }
-    MatchTimer.reset();
-    MatchTimer.start();
     HubShiftUtil.initialize();
   }
 
@@ -220,14 +214,11 @@ public class Robot extends LoggedRobot {
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
     }
-    MatchTimer.reset();
   }
 
   /** This function is called once when teleop is enabled. */
   @Override
   public void teleopInit() {
-    MatchTimer.reset();
-    MatchTimer.start();
     HubShiftUtil.initialize();
   }
 

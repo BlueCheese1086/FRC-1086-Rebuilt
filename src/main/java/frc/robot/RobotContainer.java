@@ -17,21 +17,14 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
-import edu.wpi.first.wpilibj.Alert;
-import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.autonomous.Autos;
@@ -324,7 +317,8 @@ public class RobotContainer {
     autoChooser.addOption(
         "Risky left bump auto", this.pathFindToStart("Risky Bump Double Intake", true));
     autoChooser.addOption("Depot Auto", this.pathFindToStart("Depot Auto", false));
-    autoChooser.addOption("Testing", this.pathFindToStart("2 Cycle", false));
+    autoChooser.addOption("Left Bump 2 Cycle Soham", this.pathFindToStart("2 Cycle", true));
+    autoChooser.addOption("Right Bump 2 Cycle Soham", this.pathFindToStart("2 Cycle", false));
     autoChooser.addOption("Left Bump Choreo Auto", factory.getLBAuto());
     autoChooser.addOption("Right Bump Choreo Auto", factory.getRBAuto());
     autoChooser.addOption("Kamekazi", this.pathFindToStart("Kamekazi", false));
@@ -565,6 +559,7 @@ public class RobotContainer {
                       // Lost Auto
                       overrideAlliance = true;
                       startingAlliance = DriverStation.getAlliance().orElse(Alliance.Red);
+                      HubShiftUtil.setAllianceWinOverride(() -> java.util.Optional.of(false));
                     })
                 .ignoringDisable(true));
     operator
@@ -578,6 +573,7 @@ public class RobotContainer {
                           DriverStation.getAlliance().orElse(Alliance.Red).equals(Alliance.Blue)
                               ? Alliance.Red
                               : Alliance.Blue;
+                      HubShiftUtil.setAllianceWinOverride(() -> java.util.Optional.of(true));
                     })
                 .ignoringDisable(true));
 
