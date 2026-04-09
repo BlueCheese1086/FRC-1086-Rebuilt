@@ -660,20 +660,6 @@ public class RobotContainer {
             });
   }
 
-  public Command rumbleController(
-      CommandXboxController controller, double timeout, double intensity) {
-    return Commands.run(
-            () -> {
-              controller.setRumble(RumbleType.kBothRumble, intensity);
-            },
-            drive)
-        .withTimeout(timeout)
-        .finallyDo(
-            () -> {
-              controller.setRumble(RumbleType.kBothRumble, 0.0);
-            });
-  }
-
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
