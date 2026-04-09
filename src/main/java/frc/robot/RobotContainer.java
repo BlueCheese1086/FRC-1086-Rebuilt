@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
@@ -326,6 +327,18 @@ public class RobotContainer {
     configureButtonBindings();
   }
 
+  public Command controllerRumble(double time, double strength) {
+    return Commands.run(
+            () -> {
+              driver.setRumble(RumbleType.kBothRumble, strength);
+            })
+        .withTimeout(time)
+        .finallyDo(
+            () -> {
+              driver.setRumble(RumbleType.kBothRumble, 0.0);
+            });
+  }
+
   private void configureButtonBindings() {
     // Default command, normal field-relative drive
     drive.setDefaultCommand(
@@ -600,16 +613,16 @@ public class RobotContainer {
         .and(() -> !(DriverStation.getGameSpecificMessage().length() > 0))
         .and(() -> HubShiftUtil.getAllianceWinOverride().isEmpty())
         .and(() -> teleopElapsedTimer.hasElapsed(1.0))
-        .whileTrue(
-            Commands.runEnd(
-                () -> {
-                  driver.setRumble(RumbleType.kBothRumble, 1);
-                  operator.setRumble(RumbleType.kBothRumble, 1);
-                },
-                () -> {
-                  driver.setRumble(RumbleType.kBothRumble, 0);
-                  operator.setRumble(RumbleType.kBothRumble, 0);
-                }));
+        .whileTrue(this.controllerRumble(0.25, 1.0));
+            // Commands.runEnd(
+            //     () -> {
+            //       driver.setRumble(RumbleType.kBothRumble, 1);
+            //       operator.setRumble(RumbleType.kBothRumble, 1);
+            //     },
+            //     () -> {
+            //       driver.setRumble(RumbleType.kBothRumble, 0);
+            //       operator.setRumble(RumbleType.kBothRumble, 0);
+            //     }));
 
     // End-of-shift warning
     for (int i = 1; i <= 5; i++) {
@@ -619,11 +632,11 @@ public class RobotContainer {
       shiftAboutToEnd
           .and(RobotModeTriggers.teleop())
           .and(ignoreHubState.negate())
-          .onTrue(
-              Commands.runEnd(
-                      () -> driver.setRumble(RumbleType.kRightRumble, 1.0),
-                      () -> driver.setRumble(RumbleType.kBothRumble, 0.0))
-                  .withTimeout(0.25));
+          .onTrue(this.controllerRumble(0.25, 1.0));
+            //   Commands.runEnd(
+            //           () -> driver.setRumble(RumbleType.kRightRumble, 1.0),
+            //           () -> driver.setRumble(RumbleType.kBothRumble, 0.0))
+            //       .withTimeout(0.25));
     }
   }
 

@@ -47,14 +47,14 @@ public class Vision extends SubsystemBase {
     // Initialize disconnected alerts
     this.disconnectedAlerts = new Alert[io.length];
     for (int i = 0; i < inputs.length; i++) {
-      disconnectedAlerts[i] = new Alert(
-          "Vision camera " + Integer.toString(i) + " is disconnected.", AlertType.kWarning);
+      disconnectedAlerts[i] =
+          new Alert(
+              "Vision camera " + Integer.toString(i) + " is disconnected.", AlertType.kWarning);
     }
   }
 
   /**
-   * Returns the X angle to the best target, which can be used for simple servoing
-   * with vision.
+   * Returns the X angle to the best target, which can be used for simple servoing with vision.
    *
    * @param cameraIndex The index of the camera to use.
    */
@@ -107,40 +107,46 @@ public class Vision extends SubsystemBase {
           tagPoses.add(tagPose.get());
         }
       }
-      rejectionReason[] rejections = new rejectionReason[inputs[cameraIndex].poseObservations.length];
+      rejectionReason[] rejections =
+          new rejectionReason[inputs[cameraIndex].poseObservations.length];
       int rejectionId = 0;
       // Loop over pose observations
       for (PoseObservation observation : inputs[cameraIndex].poseObservations) {
         // Check whether to reject pose
-        boolean rejectPose = observation.tagCount() == 0 // Must have at least one tag
-            || (observation.tagCount() == 1
-                && observation.ambiguity() > maxAmbiguity) // Cannot be high ambiguity
-            || Math.abs(observation.pose().getZ()) > maxZError // Must have realistic Z coordinate
-            || observation.averageTagDistance() >= averageTagDistance
-            || (observation.tagCount() == 1
-                && observation.averageTagDistance() >= VisionConstants.averageMultitag2SingleTagDistance
-                && observation.type() == PoseObservationType.LIMELIGHT_MEGATAG_2
-                && observation.type() == PoseObservationType.LIMELIGHT_MEGATAG_1)
-            // Must be within the field boundaries
-            || observation.pose().getX() <= 0.0
-            || observation.pose().getX() >= VisionConstants.fieldLayout.getFieldLength()
-            || observation.pose().getY() <= 0.0
-            || observation.pose().getY() >= VisionConstants.fieldLayout.getFieldWidth()
-            || !inputs[cameraIndex].connected;
-        rejections[rejectionId] = new rejectionReason(
-            observation.tagCount() == 0,
-            (observation.tagCount() == 1 && observation.ambiguity() > maxAmbiguity),
-            Math.abs(observation.pose().getZ()) > maxZError,
-            observation.averageTagDistance() >= averageTagDistance,
-            (observation.tagCount() == 1
-                && observation.averageTagDistance() >= VisionConstants.averageTagDistanceSingleTag),
-            observation.pose().getX() >= VisionConstants.fieldLayout.getFieldLength(),
-            observation.pose().getY() >= VisionConstants.fieldLayout.getFieldWidth(),
-            observation.pose().getX() <= 0.0,
-            observation.pose().getY() <= 0.0,
-            !MathUtil.isNear(Timer.getFPGATimestamp(), observation.timestamp(), 0.5),
-            observation.type(),
-            observation.pose());
+        boolean rejectPose =
+            observation.tagCount() == 0 // Must have at least one tag
+                || (observation.tagCount() == 1
+                    && observation.ambiguity() > maxAmbiguity) // Cannot be high ambiguity
+                || Math.abs(observation.pose().getZ())
+                    > maxZError // Must have realistic Z coordinate
+                || observation.averageTagDistance() >= averageTagDistance
+                || (observation.tagCount() == 1
+                    && observation.averageTagDistance()
+                        >= VisionConstants.averageMultitag2SingleTagDistance
+                    && observation.type() == PoseObservationType.LIMELIGHT_MEGATAG_2
+                    && observation.type() == PoseObservationType.LIMELIGHT_MEGATAG_1)
+                // Must be within the field boundaries
+                || observation.pose().getX() <= 0.0
+                || observation.pose().getX() >= VisionConstants.fieldLayout.getFieldLength()
+                || observation.pose().getY() <= 0.0
+                || observation.pose().getY() >= VisionConstants.fieldLayout.getFieldWidth()
+                || !inputs[cameraIndex].connected;
+        rejections[rejectionId] =
+            new rejectionReason(
+                observation.tagCount() == 0,
+                (observation.tagCount() == 1 && observation.ambiguity() > maxAmbiguity),
+                Math.abs(observation.pose().getZ()) > maxZError,
+                observation.averageTagDistance() >= averageTagDistance,
+                (observation.tagCount() == 1
+                    && observation.averageTagDistance()
+                        >= VisionConstants.averageTagDistanceSingleTag),
+                observation.pose().getX() >= VisionConstants.fieldLayout.getFieldLength(),
+                observation.pose().getY() >= VisionConstants.fieldLayout.getFieldWidth(),
+                observation.pose().getX() <= 0.0,
+                observation.pose().getY() <= 0.0,
+                !MathUtil.isNear(Timer.getFPGATimestamp(), observation.timestamp(), 0.5),
+                observation.type(),
+                observation.pose());
 
         rejectionId++;
         // Add pose to log
@@ -157,15 +163,18 @@ public class Vision extends SubsystemBase {
         }
 
         // Calculate standard deviations
-        double stdDevFactor = Math.min(10, Math.pow(observation.averageTagDistance(), 2.0) / observation.tagCount());
-        double linearStdDev = (observation.type() == PoseObservationType.PHOTONVISION_TRIG
-            ? trigLinearStdDevBaseline
-            : multitagLinearStdDevBaseline)
-            * stdDevFactor;
-        double angularStdDev = (observation.type() == PoseObservationType.PHOTONVISION_TRIG
-            ? trigAngularStdDevBaseline
-            : multitagAngularStdDevBaseline)
-            * stdDevFactor;
+        double stdDevFactor =
+            Math.min(10, Math.pow(observation.averageTagDistance(), 2.0) / observation.tagCount());
+        double linearStdDev =
+            (observation.type() == PoseObservationType.PHOTONVISION_TRIG
+                    ? trigLinearStdDevBaseline
+                    : multitagLinearStdDevBaseline)
+                * stdDevFactor;
+        double angularStdDev =
+            (observation.type() == PoseObservationType.PHOTONVISION_TRIG
+                    ? trigAngularStdDevBaseline
+                    : multitagAngularStdDevBaseline)
+                * stdDevFactor;
         if (observation.type() == PoseObservationType.LIMELIGHT_MEGATAG_2) {
           linearStdDev *= linearStdDevMegatag2Factor;
           angularStdDev *= angularStdDevMegatag2Factor;
