@@ -16,9 +16,6 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import org.littletonrobotics.junction.AutoLogOutput;
 
 /**
  * Contains information for location of field element and other useful reference points.
@@ -138,28 +135,6 @@ public class FieldConstants {
     public static final Pose2d farFace = defaultAprilTagType.getTagPose(20).get().toPose2d();
     public static final Pose2d rightFace = defaultAprilTagType.getTagPose(18).get().toPose2d();
     public static final Pose2d leftFace = defaultAprilTagType.getTagPose(21).get().toPose2d();
-
-    @AutoLogOutput(key = "Field/Hub Active")
-    public static boolean isHubActive(Alliance startingAlliance) {
-      boolean redStart = startingAlliance.equals(Alliance.Red);
-      if (DriverStation.isTeleop()) {
-        if (MatchTimer.getTime() > 130 || MatchTimer.getTime() < 30) {
-          return true;
-        } else {
-          if (inRange(MatchTimer.getTime(), 105, 130) || inRange(MatchTimer.getTime(), 55, 80)) {
-            return !redStart;
-          } else {
-            return redStart;
-          }
-        }
-      } else {
-        return true;
-      }
-    }
-
-    private static boolean inRange(double value, double min, double max) {
-      return value >= min && value <= max;
-    }
   }
 
   /** Left Bump related constants */

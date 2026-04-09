@@ -53,21 +53,24 @@ public class AutosManager extends SubsystemBase {
     startPos.addOption("Outpost Trench Start", "ots");
     startPos.addOption("Outpost Bump Start", "obs");
     startPos.addOption("Hub Start Reverse", "hsr");
-    startPos.addOption("Depot Trench Start Reverse", "dtsr");
+    /*startPos.addOption("Depot Trench Start Reverse", "dtsr");
     startPos.addOption("Depot Bump Start Reverse", "dbsr");
     startPos.addOption("Outpost Trench Start Reverse", "otsr");
-    startPos.addOption("Outpost Bump Start Reverse", "obsr");
+    startPos.addOption("Outpost Bump Start Reverse", "obsr");*/
 
     preloadShootPos.setDefaultOption("Center Shot", "cs");
+    preloadShootPos.setDefaultOption("Hub Shot", "hs");
     preloadShootPos.addOption("Depot Far Shot", "dfs");
     preloadShootPos.addOption("Depot Near Shot", "dns");
+    preloadShootPos.addOption("Depot Close Shot", "dcs");
     preloadShootPos.addOption("Outpost Far Shot", "ofs");
     preloadShootPos.addOption("Outpost Near Shot", "ons");
+    preloadShootPos.addOption("Outpost Close Shot", "ocs");
     preloadShootPos.addOption("None", "none");
 
     intakePos.setDefaultOption("Depot", "di");
     intakePos.addOption("Outpost", "oi");
-    intakePos.addOption("Depot Close Neutral", "dcn");
+    /*intakePos.addOption("Depot Close Neutral", "dcn");
     intakePos.addOption("Outpost Close Neutral", "ocn");
     intakePos.addOption("Depot Far Safe Neutral", "dfsn");
     intakePos.addOption("Depot Near Safe Neutral", "dnsn");
@@ -77,7 +80,7 @@ public class AutosManager extends SubsystemBase {
     intakePos.addOption("Depot Far Risky Neutral", "dfrn");
     intakePos.addOption("Depot Near Risky Neutral", "dnrn");
     intakePos.addOption("Outpost Far Risky Neutral", "ofrn");
-    intakePos.addOption("Outpost Near Risky Neutral", "onrn");
+    intakePos.addOption("Outpost Near Risky Neutral", "onrn");*/
 
     nzEntry.setDefaultOption("Depot Trench", "dt");
     nzEntry.addOption("Depot Bump", "db");
@@ -90,10 +93,13 @@ public class AutosManager extends SubsystemBase {
     nzExit.addOption("Outpost Bump", "ob");
 
     finalShootPos.setDefaultOption("Center Shot", "cs");
+    finalShootPos.setDefaultOption("Hub Shot", "hs");
     finalShootPos.addOption("Depot Far Shot", "dfs");
     finalShootPos.addOption("Depot Near Shot", "dns");
+    finalShootPos.addOption("Depot Close Shot", "dcs");
     finalShootPos.addOption("Outpost Far Shot", "ofs");
     finalShootPos.addOption("Outpost Near Shot", "ons");
+    finalShootPos.addOption("Outpost Close Shot", "ocs");
 
     climbPos.setDefaultOption("None", "none");
     climbPos.addOption("Depot Climb", "dc");

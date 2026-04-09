@@ -5,21 +5,53 @@
     "data": {
       "commands": [
         {
+          "type": "named",
+          "data": {
+            "name": "IntakeDown"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "better1"
           }
         },
         {
-          "type": "path",
+          "type": "race",
           "data": {
-            "pathName": "better2"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "better2"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "IntakeRun"
+                }
+              }
+            ]
           }
         },
         {
-          "type": "path",
+          "type": "race",
           "data": {
-            "pathName": "better3"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "better3"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "IntakeRun"
+                }
+              }
+            ]
           }
         },
         {
@@ -29,21 +61,60 @@
           }
         },
         {
-          "type": "wait",
+          "type": "race",
           "data": {
-            "waitTime": 6.0
+            "commands": [
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 6.0
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "ShootNow"
+                }
+              }
+            ]
           }
         },
         {
-          "type": "path",
+          "type": "race",
           "data": {
-            "pathName": "better5"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "better5"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "IntakeRun"
+                }
+              }
+            ]
           }
         },
         {
-          "type": "path",
+          "type": "race",
           "data": {
-            "pathName": "better6"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "better6"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "IntakeRun"
+                }
+              }
+            ]
           }
         },
         {
@@ -51,11 +122,17 @@
           "data": {
             "pathName": "better7"
           }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ShootNow"
+          }
         }
       ]
     }
   },
-  "resetOdom": true,
+  "resetOdom": false,
   "folder": null,
   "choreoAuto": false
 }

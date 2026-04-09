@@ -76,35 +76,31 @@ public class AutoStateMachine {
 
     double estimatedTime = 0.0;
 
-    // PRELOAD SHOOT
-    if (startPos.endsWith("r")) {
-      autoCommands =
-          autoCommands.andThen(startShoot(shootTime), Commands.waitSeconds(0.5), stopShoot());
-    } else if (!preloadShootPos.equals("none")) {
+    // shoot preload
+    if (!preloadShootPos.equals("none")) {
       String path = currentLocation + "_" + preloadShootPos;
       estimatedTime += addPathToPreview(path, previewPoses);
 
       autoCommands =
           autoCommands.andThen(
-              // Using the marker-aware path runner
-              Commands.deadline(AutoRoutines.runPath(path, true)),
-              startShoot(shootTime),
-              Commands.waitSeconds(shootTime));
+              Commands.parallel(AutoRoutines.runPath(path, true), runFlywheel(), retractIntake()),
+              startShoot(shootTime));
+
       estimatedTime += shootTime;
       currentLocation = preloadShootPos;
     }
 
     boolean isFirstPath = currentLocation.equals(startPos);
 
-    // INTAKE SEQUENCE
+    // intake
     if (intakePos.endsWith("i")) {
       String path = currentLocation + "_" + intakePos;
       estimatedTime += addPathToPreview(path, previewPoses);
       autoCommands =
           autoCommands.andThen(
-              Commands.deadline(AutoRoutines.runPath(path, isFirstPath), intake()),
-              Commands.waitSeconds(intakeTime));
-      estimatedTime += intakeTime;
+              AutoRoutines.runPath(path, isFirstPath).deadlineFor(deployIntake(), intake()));
+      // Commands.waitSeconds(intakeTime));
+      // estimatedTime += intakeTime;
       currentLocation = intakePos;
     } else {
       String entryPath = currentLocation + "_" + nzEntry;
@@ -115,13 +111,13 @@ public class AutoStateMachine {
       autoCommands =
           autoCommands.andThen(
               AutoRoutines.runPath(entryPath, isFirstPath),
-              Commands.deadline(AutoRoutines.runPath(intakePath, false), intake()),
-              Commands.waitSeconds(intakeTime));
-      estimatedTime += intakeTime;
+              AutoRoutines.runPath(intakePath, false).deadlineFor(deployIntake(), intake()));
+      // Commands.waitSeconds(intakeTime));
+      // estimatedTime += intakeTime;
       currentLocation = intakePos;
     }
 
-    // FINAL SHOOT SEQUENCE
+    // final shoot
     if (intakePos.endsWith("n")) {
       String exitPath = currentLocation + "_" + nzExit;
       String safePath = nzExit + "_" + nzExit + "s";
@@ -133,9 +129,9 @@ public class AutoStateMachine {
 
       autoCommands =
           autoCommands.andThen(
-              Commands.deadline(AutoRoutines.runPath(exitPath, false)),
+              Commands.deadline(AutoRoutines.runPath(exitPath, false), retractIntake()),
               AutoRoutines.runPath(safePath, false),
-              AutoRoutines.runPath(shootPath, false),
+              Commands.parallel(AutoRoutines.runPath(shootPath, false), runFlywheel()),
               startShoot(shootTime));
       estimatedTime += shootTime;
       currentLocation = finalShootPos;
@@ -145,9 +141,9 @@ public class AutoStateMachine {
 
       autoCommands =
           autoCommands.andThen(
-              Commands.deadline(AutoRoutines.runPath(shootPath, false)),
-              startShoot(shootTime),
-              stopShoot());
+              Commands.parallel(
+                  AutoRoutines.runPath(shootPath, false), runFlywheel(), retractIntake()),
+              startShoot(shootTime));
       estimatedTime += shootTime;
       currentLocation = finalShootPos;
     }
@@ -158,7 +154,7 @@ public class AutoStateMachine {
       autoCommands =
           autoCommands.andThen(
               AutoRoutines.runPath(climbPath, false)
-              // TODO: do climb stuff later
+              // TODO: climb commands
               );
     }
 
@@ -170,50 +166,30 @@ public class AutoStateMachine {
         () -> {
           drive.stop();
           stopShoot();
-          // TODO: add more stops if needed
+          retractIntake();
         });
   }
 
-  public Command startFeeder() { // just spins up flywheel, TODO: make better
-    return Commands.runOnce(() -> shooter.runFeed(12).execute());
-  }
-
   public Command startShoot(double shootTime) {
-    return Commands.parallel(
-            Commands.waitSeconds(2.0)
-                .andThen(
-                    Commands.parallel(
-                        shooter.runFeed(ShooterConstants.FeederSetpoints.run.in(Volts))
-                        /*.finallyDo(shooter.runFeederVoltage(0.0)::execute)*/ ,
-                        indexer.setVoltage(IndexerConstants.Setpoints.feed),
-                        Commands.repeatingSequence( // TODO: uhh probaly not gonna agitate
-                            intake.setPosition(IntakeConstants.Setpoints.agitate),
-                            intake.setPosition(IntakeConstants.Setpoints.deployed)))),
-            runFlywheel())
-        .withTimeout(shootTime);
+    return getShootCommand().withTimeout(shootTime);
   }
 
   public Command runFlywheel() {
     return Commands.run(
-        () -> {
-          LaunchingParameters parms =
-              LauncherCalculator.getInstance()
-                  .getParameters(
-                      () ->
-                          (new Pose3d(drive.getPose())
-                              .transformBy(ShooterTransforms.centerShooter)
-                              .toPose2d()),
-                      drive::getChassisSpeeds,
-                      drive::getRotation);
-          //   shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(350.0));
-          shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(parms.flywheelSpeed()));
-          hood.setPosition(() -> parms.hoodAngle());
-
-          Logger.recordOutput("Shoot Parms/ Hood Angle", parms.hoodAngle());
-          Logger.recordOutput("Shoot Parms/ Drive Angle", parms.driveAngle());
-          Logger.recordOutput("Shoot Parms/ Flywheel Speed", parms.flywheelSpeed());
-          Logger.recordOutput("Shoot Parms/Distance", parms.distance());
-        });
+            () -> {
+              LaunchingParameters parms =
+                  LauncherCalculator.getInstance()
+                      .getParameters(
+                          () ->
+                              (new Pose3d(drive.getPose())
+                                  .transformBy(ShooterTransforms.centerShooter)
+                                  .toPose2d()),
+                          drive::getChassisSpeeds,
+                          drive::getRotation);
+              shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(parms.flywheelSpeed()));
+              hood.setPosition(() -> parms.hoodAngle());
+            })
+        .until(shooter::atSetpoint);
   }
 
   public Command stopShoot() {
@@ -228,12 +204,47 @@ public class AutoStateMachine {
   }
 
   public Command intake() {
-    return Commands.parallel(
-        intake.setVoltage(IntakeConstants.Setpoints.run),
-        indexer.setVoltage(IndexerConstants.Setpoints.feed));
+    return intake.setVoltage(IntakeConstants.Setpoints.run);
   }
 
   public Command retractIntake() {
     return intake.setPosition(IntakeConstants.Setpoints.stowed);
+  }
+
+  private Command getShootCommand() {
+    return Commands.parallel(
+        Commands.run(
+                () -> {
+                  LaunchingParameters parms =
+                      LauncherCalculator.getInstance()
+                          .getParameters(
+                              () ->
+                                  (new Pose3d(drive.getPose())
+                                      .transformBy(ShooterTransforms.centerShooter)
+                                      .toPose2d()),
+                              drive::getChassisSpeeds,
+                              drive::getRotation);
+                  shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(parms.flywheelSpeed()));
+                  hood.setPosition(() -> parms.hoodAngle());
+                  Logger.recordOutput("Shoot Parms/ Hood Angle", parms.hoodAngle());
+                  Logger.recordOutput("Shoot Parms/ Drive Angle", parms.driveAngle());
+                  Logger.recordOutput("Shoot Parms/ Flywheel Speed", parms.flywheelSpeed());
+                  Logger.recordOutput("Shoot Parms/Distance", parms.distance());
+                },
+                shooter)
+            .finallyDo(shooter::stopShooter),
+        Commands.waitSeconds(1.0)
+            .andThen(
+                Commands.parallel(
+                    shooter
+                        .runFeed(ShooterConstants.FeederSetpoints.run.in(Volts))
+                        .finallyDo(shooter::stopFeeder),
+                    indexer.setVoltage(IndexerConstants.Setpoints.feed),
+                    intake.setVoltage(IntakeConstants.Setpoints.run))),
+        Commands.repeatingSequence(
+            intake.setPosition(IntakeConstants.Setpoints.agitate),
+            Commands.waitSeconds(0.2),
+            intake.setPosition(IntakeConstants.Setpoints.deployed),
+            Commands.waitSeconds(0.2)));
   }
 }

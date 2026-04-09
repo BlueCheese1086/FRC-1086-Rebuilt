@@ -17,7 +17,11 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.RobotController;
@@ -26,6 +30,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.autonomous.Autos;
@@ -78,6 +84,7 @@ import frc.robot.util.BatteryLogger;
 import frc.robot.util.FieldConstants;
 import frc.robot.util.FieldConstants.LinesVertical;
 import frc.robot.util.HubShiftUtil;
+import frc.robot.util.MatchTimer;
 import frc.robot.util.OverrideSwitches;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -320,6 +327,7 @@ public class RobotContainer {
     autoChooser.addOption("Testing", this.pathFindToStart("2 Cycle", false));
     autoChooser.addOption("Left Bump Choreo Auto", factory.getLBAuto());
     autoChooser.addOption("Right Bump Choreo Auto", factory.getRBAuto());
+    autoChooser.addOption("Kamekazi", this.pathFindToStart("Kamekazi", false));
     // Configure the button bindings
     configureButtonBindings();
   }
@@ -357,12 +365,14 @@ public class RobotContainer {
             .run(
                 () -> {
                   if (FieldConstants.LinesVertical.inAllianceZone(drive.getPose())) {
-                    shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(100.0));
+                    shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(150.0));
                   } else {
                     shooter.stopShooter();
                   }
                 })
             .onlyIf(DriverStation::isTeleop));
+
+    Trigger hubActive = new Trigger(() -> HubShiftUtil.getShiftedShiftInfo().active());
 
     driver
         .start()
@@ -394,6 +404,18 @@ public class RobotContainer {
 
     driver
         .rightTrigger()
+        .and(
+            () ->
+                LauncherCalculator.getInstance()
+                    .getParameters(
+                        () ->
+                            (new Pose3d(drive.getPose())
+                                .transformBy(ShooterTransforms.centerShooter)
+                                .toPose2d()),
+                        drive::getChassisSpeeds,
+                        drive::getRotation)
+                    .isValid())
+        .and(() -> ignoreHubState.getAsBoolean() || hubActive.getAsBoolean())
         .whileTrue(
             Commands.parallel(
                 shooter.runFeed(FeederSetpoints.run.in(Volts)),
@@ -438,15 +460,14 @@ public class RobotContainer {
     // What i think is better and safer is a known trench shot. like 1678, they cant
     // be defended
     // there
-    // driver
-    // .a()
-    // .whileTrue(
-    // Commands.parallel(
-    // Commands.run(
-    // () -> shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(385)),
-    // shooter)
-    // .finallyDo(shooter::stopShooter),
-    // Commands.runOnce(() -> hood.setPosition(() -> 60.0))));
+    driver
+        .x()
+        .whileTrue(
+            Commands.parallel(
+                Commands.run(
+                        () -> shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(385)), shooter)
+                    .finallyDo(shooter::stopShooter),
+                Commands.runOnce(() -> hood.setPosition(() -> 60.0))));
 
     // Passing
     driver
@@ -625,18 +646,19 @@ public class RobotContainer {
   /** Update dashboard outputs. */
   public void updateDashboardOutputs() {
     // Publish match time
-    SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
+    Logger.recordOutput("Match Time", Math.max(DriverStation.getMatchTime(), 0.0));
 
     // Update from HubShiftUtil
-    SmartDashboard.putNumber(
+    Logger.recordOutput(
         "Shifts/Remaining Shift Time",
-        Math.max(HubShiftUtil.getShiftedShiftInfo().remainingTime(), 0.0));
-    SmartDashboard.putBoolean("Shifts/Shift Active", HubShiftUtil.getShiftedShiftInfo().active());
-    SmartDashboard.putString(
-        "Shifts/Game State", HubShiftUtil.getShiftedShiftInfo().currentShift().toString());
-    SmartDashboard.putBoolean(
+        String.format("%.1f", Math.max(HubShiftUtil.getOfficialShiftInfo().remainingTime(), 0.0)));
+    Logger.recordOutput("Shifts/Shift Active", HubShiftUtil.getOfficialShiftInfo().active());
+    Logger.recordOutput(
+        "Shifts/Game State", HubShiftUtil.getOfficialShiftInfo().currentShift().toString());
+    Logger.recordOutput(
         "Shifts/Active First?",
         DriverStation.getAlliance().orElse(Alliance.Blue) == HubShiftUtil.getFirstActiveAlliance());
+    Logger.recordOutput("Shifts/Shoot Now", HubShiftUtil.getShiftedShiftInfo().active());
 
     // Controller disconnected alerts
     driverDisconnected.set(!DriverStation.isJoystickConnected(driver.getHID().getPort()));
@@ -677,6 +699,10 @@ public class RobotContainer {
         "Robot/Alliance Zone Red", drive.getPose().getX() >= Units.inchesToMeters(468.0));
     Logger.recordOutput(
         "Robot/Alliance Zone Blue", drive.getPose().getX() >= Units.inchesToMeters(182.11));
+    Logger.recordOutput(
+        "Match Timer/Can Shoot",
+        MatchTimer.hubActiveInTof(
+            DriverStation.getAlliance().orElse(Alliance.Blue), startingAlliance, drive.getPose()));
   }
 
   public Command pathFindToStart(String pathName, boolean flip) {
