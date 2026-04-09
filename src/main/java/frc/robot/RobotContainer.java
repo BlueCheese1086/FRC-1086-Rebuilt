@@ -115,14 +115,16 @@ public class RobotContainer {
 
   private final CommandXboxController operator = new CommandXboxController(1);
   private final CommandXboxController testing = new CommandXboxController(2);
-  private final OverrideSwitches overrides = new OverrideSwitches(5);
+  //private final OverrideSwitches overrides = new OverrideSwitches(5);
 
   // Operator overrides
-  private final Trigger robotRelative = overrides.operatorSwitch(1);
-  private final Trigger coast = overrides.operatorSwitch(2);
-  private final Trigger lostAutoOverride = overrides.multiDirectionSwitchLeft();
-  private final Trigger wonAutoOverride = overrides.multiDirectionSwitchRight();
-  private final Trigger ignoreHubState = overrides.operatorSwitch(1);
+  //private final Trigger robotRelative = overrides.operatorSwitch(1);
+  //private final Trigger coast = overrides.operatorSwitch(2);
+  //private final Trigger lostAutoOverride = overrides.multiDirectionSwitchLeft();
+  //private final Trigger wonAutoOverride = overrides.multiDirectionSwitchRight();
+  //private final Trigger ignoreHubState = overrides.operatorSwitch(1);
+    Trigger ignoreHubState = new Trigger(() -> false);
+
 
   // Alerts
   private final Alert driverDisconnected =
@@ -557,8 +559,6 @@ public class RobotContainer {
             Commands.run(
                     () -> {
                       // Lost Auto
-                      overrideAlliance = true;
-                      startingAlliance = DriverStation.getAlliance().orElse(Alliance.Red);
                       HubShiftUtil.setAllianceWinOverride(() -> java.util.Optional.of(false));
                     })
                 .ignoringDisable(true));
@@ -568,12 +568,16 @@ public class RobotContainer {
             Commands.run(
                     () -> {
                       // Won Auto
-                      overrideAlliance = true;
-                      startingAlliance =
-                          DriverStation.getAlliance().orElse(Alliance.Red).equals(Alliance.Blue)
-                              ? Alliance.Red
-                              : Alliance.Blue;
                       HubShiftUtil.setAllianceWinOverride(() -> java.util.Optional.of(true));
+                    })
+                .ignoringDisable(true));
+
+    operator
+        .povUp()
+        .onTrue(
+            Commands.run(
+                    () -> {
+                        ignoreHubState = new Trigger(() -> true);
                     })
                 .ignoringDisable(true));
 
@@ -611,10 +615,14 @@ public class RobotContainer {
           .and(RobotModeTriggers.teleop())
           .and(ignoreHubState.negate())
           .onTrue(
-              Commands.runEnd(
-                      () -> driver.setRumble(RumbleType.kRightRumble, 1.0),
-                      () -> driver.setRumble(RumbleType.kBothRumble, 0.0))
-                  .withTimeout(0.25));
+              Commands.parallel(
+                Commands.runEnd(
+                        () -> driver.setRumble(RumbleType.kRightRumble, 1.0),
+                        () -> driver.setRumble(RumbleType.kBothRumble, 0.0)),
+                Commands.runEnd(
+                        () -> operator.setRumble(RumbleType.kRightRumble, 1.0),
+                        () -> operator.setRumble(RumbleType.kBothRumble, 0.0)))
+                .withTimeout(0.25));
     }
   }
 
@@ -647,7 +655,6 @@ public class RobotContainer {
     // Controller disconnected alerts
     driverDisconnected.set(!DriverStation.isJoystickConnected(driver.getHID().getPort()));
     operatorDisconnected.set(!DriverStation.isJoystickConnected(operator.getHID().getPort()));
-    overrideDisconnected.set(!overrides.isConnected());
   }
 
   @AutoLogOutput(key = "Targetting/Distance")

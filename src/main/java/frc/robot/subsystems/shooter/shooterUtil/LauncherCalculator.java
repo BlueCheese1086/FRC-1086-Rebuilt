@@ -65,12 +65,12 @@ public class LauncherCalculator {
     maxDistance = 5.60;
     phaseDelay = 0.03;
 
-    hoodAngleMap.put(1.887, Rotation2d.fromDegrees(77.0 + 2.0));
-    hoodAngleMap.put(2.323, Rotation2d.fromDegrees(74.0 + 2.0));
-    hoodAngleMap.put(2.762, Rotation2d.fromDegrees(63.0 + 2.0));
-    hoodAngleMap.put(3.613, Rotation2d.fromDegrees(58.0 + 2.0));
-    hoodAngleMap.put(4.190, Rotation2d.fromDegrees(62.0 + 2.0));
-    hoodAngleMap.put(5.537, Rotation2d.fromDegrees(58.0 + 2.0));
+    hoodAngleMap.put(1.887, Rotation2d.fromDegrees(77.0 + 3.0));
+    hoodAngleMap.put(2.323, Rotation2d.fromDegrees(74.0 + 3.0));
+    hoodAngleMap.put(2.762, Rotation2d.fromDegrees(63.0 + 3.0));
+    hoodAngleMap.put(3.613, Rotation2d.fromDegrees(58.0 + 3.0));
+    hoodAngleMap.put(4.190, Rotation2d.fromDegrees(62.0 + 3.0));
+    hoodAngleMap.put(5.537, Rotation2d.fromDegrees(58.0 + 3.0));
 
     flywheelSpeedMap.put(1.887, 295.0);
     flywheelSpeedMap.put(2.323, 315.0);

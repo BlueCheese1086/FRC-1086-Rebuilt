@@ -65,7 +65,7 @@ public class HubShiftUtil {
 
     // Return override value
     var winOverride = getAllianceWinOverride();
-    if (!winOverride.isEmpty()) {
+    if (winOverride.isPresent()) {
       return winOverride.get()
           ? (alliance == Alliance.Blue ? Alliance.Red : Alliance.Blue)
           : (alliance == Alliance.Blue ? Alliance.Blue : Alliance.Red);

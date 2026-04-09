@@ -62,7 +62,7 @@ public class PassingManager {
       new InterpolatingDoubleTreeMap();
 
   static {
-    minDistance = 3.0;
+    minDistance = 2.0;
     maxDistance = 18.0;
     phaseDelay = 0.03;
 
@@ -75,9 +75,9 @@ public class PassingManager {
     flywheelSpeedMap.put(8.945, 450.0);
     flywheelSpeedMap.put(6.7, 370.0);
 
-    timeOfFlightMap.put(4.55, 1.12);
-    timeOfFlightMap.put(3.15, 1.11);
-    timeOfFlightMap.put(1.88, 1.09);
+    timeOfFlightMap.put(4.55, 1.12 + 0.5);
+    timeOfFlightMap.put(3.15, 1.11 + 0.5);
+    timeOfFlightMap.put(1.88, 1.09 + 0.5);
     timeOfFlightMap.put(1.38, 0.90);
   }
 
