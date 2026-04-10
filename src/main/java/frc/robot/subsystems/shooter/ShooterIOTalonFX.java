@@ -10,7 +10,6 @@ import static frc.robot.util.PhoenixUtil.tryUntilOk;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -79,18 +78,16 @@ public class ShooterIOTalonFX implements ShooterIO {
     velocity = shooter.getVelocity();
     volts = shooter.getMotorVoltage();
 
-    velocity.setUpdateFrequency(250.0);
-    acceleration.setUpdateFrequency(250.0);
-    supplyCurrent.setUpdateFrequency(250.0);
+    velocity.setUpdateFrequency(50.0);
     BaseStatusSignal.setUpdateFrequencyForAll(
-        50.0, acceleration, position, statorCurrent, temp, volts);
+        50.0, acceleration, supplyCurrent, position, statorCurrent, temp, volts);
     shooter.optimizeBusUtilization();
   }
 
   @Override
   public void updateInputs(ShooterInputs inputs) {
     BaseStatusSignal.refreshAll(
-        acceleration, position, statorCurrent, supplyCurrent, temp, velocity, volts);
+        position, acceleration, statorCurrent, supplyCurrent, temp, velocity, volts);
 
     inputs.velocity = velocity.getValue().in(RadiansPerSecond);
     inputs.appliedVoltage = volts.getValueAsDouble();
@@ -102,45 +99,45 @@ public class ShooterIOTalonFX implements ShooterIO {
     inputs.acceleration = acceleration.getValueAsDouble();
     inputs.atSetpoint = MathUtil.isNear(setpoint, velocity.getValue().in(RadiansPerSecond), 25.0);
 
-    if (kP.hasChanged(hashCode())) {
-      resetValues();
-    }
+    // if (kP.hasChanged(hashCode())) {
+    //   resetValues();
+    // }
 
-    if (kI.hasChanged(hashCode())) {
-      resetValues();
-    }
+    // if (kI.hasChanged(hashCode())) {
+    //   resetValues();
+    // }
 
-    if (kd.hasChanged(hashCode())) {
-      resetValues();
-    }
+    // if (kd.hasChanged(hashCode())) {
+    //   resetValues();
+    // }
 
-    if (kv.hasChanged(hashCode())) {
-      resetValues();
-    }
+    // if (kv.hasChanged(hashCode())) {
+    //   resetValues();
+    // }
 
-    if (ks.hasChanged(hashCode())) {
-      resetValues();
-    }
+    // if (ks.hasChanged(hashCode())) {
+    //   resetValues();
+    // }
 
-    if (ka.hasChanged(hashCode())) {
-      resetValues();
-    }
+    // if (ka.hasChanged(hashCode())) {
+    //   resetValues();
+    // }
 
-    if (kP.hasChanged(hashCode())) {
-      resetValues();
-    }
+    // if (kP.hasChanged(hashCode())) {
+    //   resetValues();
+    // }
   }
 
-  private void resetValues() {
-    Slot0Configs slot0Configs = new Slot0Configs();
-    slot0Configs.withKP(kP.getAsDouble());
-    slot0Configs.withKI(kI.getAsDouble());
-    slot0Configs.withKD(kd.getAsDouble());
-    slot0Configs.withKV(kv.getAsDouble());
-    slot0Configs.withKA(ka.getAsDouble());
-    slot0Configs.withKS(ks.getAsDouble());
-    shooter.getConfigurator().apply(slot0Configs, 0.2);
-  }
+  // private void resetValues() {
+  //   Slot0Configs slot0Configs = new Slot0Configs();
+  //   slot0Configs.withKP(kP.getAsDouble());
+  //   slot0Configs.withKI(kI.getAsDouble());
+  //   slot0Configs.withKD(kd.getAsDouble());
+  //   slot0Configs.withKV(kv.getAsDouble());
+  //   slot0Configs.withKA(ka.getAsDouble());
+  //   slot0Configs.withKS(ks.getAsDouble());
+  //   shooter.getConfigurator().apply(slot0Configs, 0.2);
+  // }
 
   @Override
   public void setVelocity(AngularVelocity velocity) {

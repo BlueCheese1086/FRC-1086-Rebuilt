@@ -68,7 +68,7 @@
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 4.5
+                  "waitTime": 4.25
                 }
               }
             ]
@@ -85,9 +85,22 @@
                 }
               },
               {
-                "type": "path",
+                "type": "race",
                 "data": {
-                  "pathName": "Path4"
+                  "commands": [
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "Path4"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "IntakeRun"
+                      }
+                    }
+                  ]
                 }
               }
             ]
@@ -125,7 +138,7 @@
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 3.5
+                  "waitTime": 4.0
                 }
               }
             ]

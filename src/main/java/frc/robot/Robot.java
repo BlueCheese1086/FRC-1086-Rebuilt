@@ -18,10 +18,8 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.DriveMotorArrangement;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerMotorArrangement;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.IterativeRobotBase;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Threads;
-import edu.wpi.first.wpilibj.Watchdog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.generated.TunerConstants;
@@ -30,7 +28,6 @@ import frc.robot.util.HubShiftUtil;
 import frc.robot.util.LoggedTunableNumber;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.util.Arrays;
 import org.littletonrobotics.junction.LogFileUtil;
@@ -51,7 +48,7 @@ public class Robot extends LoggedRobot {
   private RobotContainer robotContainer;
 
   private static final boolean IS_PRACTICE = !DriverStation.isFMSAttached();
-  private static final String LOG_DIRECTORY = "/U/logs";
+  private static final String LOG_DIRECTORY = "/u/logs";
   private static final long MIN_FREE_SPACE =
       IS_PRACTICE
           ? 100000000
@@ -110,15 +107,15 @@ public class Robot extends LoggedRobot {
     Logger.start();
     SignalLogger.enableAutoLogging(false);
     HoodConstants.Targeting.hoodAngle = new LoggedTunableNumber("Hood/Hood Angle", 54.0);
-    try {
-      Field watchdogField = IterativeRobotBase.class.getDeclaredField("m_watchdog");
-      watchdogField.setAccessible(true);
-      Watchdog watchdog = (Watchdog) watchdogField.get(this);
-      watchdog.setTimeout(0.2);
-    } catch (Exception e) {
-      DriverStation.reportWarning("Failed to disable loop overrun warnings.", false);
-    }
-    CommandScheduler.getInstance().setPeriod(0.2);
+    // try {
+    //   Field watchdogField = IterativeRobotBase.class.getDeclaredField("m_watchdog");
+    //   watchdogField.setAccessible(true);
+    //   Watchdog watchdog = (Watchdog) watchdogField.get(this);
+    //   watchdog.setTimeout(0.2);
+    // } catch (Exception e) {
+    //   DriverStation.reportWarning("Failed to disable loop overrun warnings.", false);
+    // }
+    // CommandScheduler.getInstance().setPeriod(0.2);
 
     DriverStation.silenceJoystickConnectionWarning(true);
 
@@ -152,7 +149,6 @@ public class Robot extends LoggedRobot {
     // Optionally switch the thread to high priority to improve loop
     // timing (see the template project documentation for details)
     Threads.setCurrentThreadPriority(true, 99);
-    robotContainer.updateDashboardOutputs();
     // Runs the Scheduler. This is responsible for polling buttons, adding
     // newly-scheduled commands, running already-scheduled commands, removing
     // finished or interrupted commands, and running subsystem periodic() methods.
@@ -163,9 +159,11 @@ public class Robot extends LoggedRobot {
     // Return to non-RT thread priority (do not modify the first argument)
     Threads.setCurrentThreadPriority(false, 10);
     robotContainer.periodic();
-    // Log hub state
-    Logger.recordOutput("HubShift/Official", HubShiftUtil.getOfficialShiftInfo());
-    Logger.recordOutput("HubShift/Shifted", HubShiftUtil.getShiftedShiftInfo());
+    // // Log hub state
+    robotContainer.updateDashboardOutputs();
+
+    // Logger.recordOutput("HubShift/Official", HubShiftUtil.getOfficialShiftInfo());
+    // Logger.recordOutput("HubShift/Shifted", HubShiftUtil.getShiftedShiftInfo());
   }
 
   /** This function is called once when the robot is disabled. */

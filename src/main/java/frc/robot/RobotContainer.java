@@ -211,11 +211,10 @@ public class RobotContainer {
         hood = new Hood(new HoodIO() {});
         break;
     }
-
+    // Set up auto routines
     Autos.setup(drive, intake);
     automanager = new AutosManager(drive, shooter, indexer, intake, hood);
     factory = new AutoRoutines(drive, shooter, intake, indexer, hood);
-    // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices");
     // Set up SysId routines
     // autoChooser.addOption(
@@ -236,12 +235,12 @@ public class RobotContainer {
     // autoChooser.addOption(
     // "Drive SysId (Dynamic Reverse)",
     // drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption("auto builder", automanager.getSelectedAuto());
-    autoChooser.addOption(
-        "AutoRoutines Sys ID Rotation", frc.robot.commands.AutoRoutines.autoRotationSysId(drive));
-    autoChooser.addOption(
-        "AutoRoutines Sys ID Translation",
-        frc.robot.commands.AutoRoutines.autoTranslationSysId(drive));
+    // autoChooser.addOption(
+    //     "AutoRoutines Sys ID Rotation",
+    // frc.robot.commands.AutoRoutines.autoRotationSysId(drive));
+    // autoChooser.addOption(
+    //     "AutoRoutines Sys ID Translation",
+    //     frc.robot.commands.AutoRoutines.autoTranslationSysId(drive));
     // autoChooser.addOption("Intake Pivot SysId", intake.sysId());
     // autoChooser.addOption("Climb SysId", climb.sysId());
     // autoChooser.addOption("Shooter Sys id", shooter.sysid(5.0, 0, "shooter"));
@@ -301,8 +300,6 @@ public class RobotContainer {
     autoChooser.addOption("Depot Auto", this.pathFindToStart("Depot Auto", false));
     autoChooser.addOption("Left Bump 2 Cycle Soham", this.pathFindToStart("2 Cycle", true));
     autoChooser.addOption("Right Bump 2 Cycle Soham", this.pathFindToStart("2 Cycle", false));
-    autoChooser.addOption("Left Bump Choreo Auto", factory.getLBAuto());
-    autoChooser.addOption("Right Bump Choreo Auto", factory.getRBAuto());
     autoChooser.addOption("Kamekazi", this.pathFindToStart("Kamekazi", false));
     // Configure the button bindings
     configureButtonBindings();
@@ -385,8 +382,8 @@ public class RobotContainer {
                 shooter.runFeed(FeederSetpoints.run.in(Volts)),
                 indexer.setVoltage(IndexerConstants.Setpoints.feed),
                 intake.setVoltage(IntakeConstants.Setpoints.run),
-                // intake.agitate()));
-                intake.smush(4.0)));
+                intake.agitate()));
+    // intake.smush(4.0)));
 
     driver
         .povRight()
@@ -673,7 +670,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("IntakeRun", intake.setVoltage(IntakeConstants.Setpoints.run));
     NamedCommands.registerCommand("IntakeUp", intake.setPosition(IntakeConstants.Setpoints.stowed));
     NamedCommands.registerCommand("ShootNow", getShootCommand());
-    NamedCommands.registerCommand("SOTM", getSOTMCommand());
+    // NamedCommands.registerCommand("SOTM", getSOTMCommand());
     Command pathFind =
         AutoBuilder.pathfindToPose(
             AllianceFlipUtil.apply(new PathPlannerAuto(pathName, flip).getStartingPose()),
@@ -701,24 +698,24 @@ public class RobotContainer {
         new PathPlannerAuto(pathName, flip));
   }
 
-  private Command getSOTMCommand() {
-    return Commands.parallel(
-        getShootCommand(),
-        DriveCommands.joystickDriveAtAngle(
-            drive,
-            () -> driver.getLeftX(),
-            () -> driver.getLeftY(),
-            () ->
-                LauncherCalculator.getInstance()
-                    .getParameters(
-                        () ->
-                            (new Pose3d(drive.getPose())
-                                .transformBy(ShooterTransforms.centerShooter)
-                                .toPose2d()),
-                        drive::getChassisSpeeds,
-                        drive::getRotation)
-                    .driveAngle()));
-  }
+  //   private Command getSOTMCommand() {
+  //     return Commands.parallel(
+  //         getShootCommand(),
+  //         DriveCommands.joystickDriveAtAngle(
+  //             drive,
+  //             () -> driver.getLeftX(),
+  //             () -> driver.getLeftY(),
+  //             () ->
+  //                 LauncherCalculator.getInstance()
+  //                     .getParameters(
+  //                         () ->
+  //                             (new Pose3d(drive.getPose())
+  //                                 .transformBy(ShooterTransforms.centerShooter)
+  //                                 .toPose2d()),
+  //                         drive::getChassisSpeeds,
+  //                         drive::getRotation)
+  //                     .driveAngle()));
+  //   }
 
   private Command getShootCommand() {
     return Commands.parallel(
@@ -743,7 +740,7 @@ public class RobotContainer {
                 shooter,
                 hood)
             .finallyDo(shooter::stopShooter),
-        Commands.waitSeconds(0.5)
+        Commands.waitSeconds(0.75)
             .andThen(
                 Commands.parallel(
                     shooter
@@ -751,6 +748,20 @@ public class RobotContainer {
                         .finallyDo(shooter::stopFeeder),
                     indexer.setVoltage(IndexerConstants.Setpoints.feed),
                     intake.setVoltage(IntakeConstants.Setpoints.run))),
-                    intake.smush(4.5));
+        DriveCommands.joystickDriveAtAngle(
+            drive,
+            () -> 0.0,
+            () -> 0.0,
+            () ->
+                LauncherCalculator.getInstance()
+                    .getParameters(
+                        () ->
+                            new Pose3d(drive.getPose())
+                                .transformBy(ShooterTransforms.centerShooter)
+                                .toPose2d(),
+                        drive::getChassisSpeeds,
+                        drive::getRotation)
+                    .driveAngle()),
+        intake.agitate());
   }
 }

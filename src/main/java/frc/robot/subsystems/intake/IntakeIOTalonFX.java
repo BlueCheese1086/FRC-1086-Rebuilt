@@ -84,6 +84,8 @@ public class IntakeIOTalonFX implements IntakeIO {
 
     config.CurrentLimits.SupplyCurrentLimit = IntakeConstants.CurrentLimits.maxSupply.in(Amps);
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
+    config.CurrentLimits.StatorCurrentLimit = IntakeConstants.CurrentLimits.maxStator.in(Amps);
+    config.CurrentLimits.StatorCurrentLimitEnable = true;
 
     config.Slot1.kV = PID.rollerkv.getAsDouble();
     config.Slot1.kS = PID.rollerks.getAsDouble();
@@ -92,9 +94,6 @@ public class IntakeIOTalonFX implements IntakeIO {
 
     PhoenixUtil.tryUntilOk(5, () -> (rollerLeft.getConfigurator().apply(config, 5)));
     PhoenixUtil.tryUntilOk(5, () -> (rollerRight.getConfigurator().apply(config, 5)));
-
-    config.CurrentLimits.StatorCurrentLimit = IntakeConstants.CurrentLimits.maxStator.in(Amps);
-    config.CurrentLimits.StatorCurrentLimitEnable = true;
 
     // TODO: PID STUFF
     config.Slot0.kP = IntakeConstants.PID.kP.get();
@@ -135,7 +134,7 @@ public class IntakeIOTalonFX implements IntakeIO {
 
     pivot.setPosition(IntakeConstants.Setpoints.stowed);
 
-    StatusSignal.setUpdateFrequencyForAll(250.0, pivotAngle);
+    StatusSignal.setUpdateFrequencyForAll(50.0, pivotAngle);
     StatusSignal.setUpdateFrequencyForAll(
         50.0,
         rollerLeftVoltage,

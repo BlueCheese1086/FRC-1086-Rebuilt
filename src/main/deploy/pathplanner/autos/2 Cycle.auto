@@ -80,6 +80,12 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "IntakeDown"
+          }
+        },
+        {
           "type": "race",
           "data": {
             "commands": [
@@ -127,6 +133,12 @@
           "type": "named",
           "data": {
             "name": "ShootNow"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "IntakeDown"
           }
         }
       ]

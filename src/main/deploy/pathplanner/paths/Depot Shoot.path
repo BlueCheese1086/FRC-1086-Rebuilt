@@ -8,20 +8,20 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.0255508861572429,
-        "y": 5.802006629430989
+        "x": 2.183922294908289,
+        "y": 5.179866408644269
       },
       "isLocked": true,
       "linkedName": "DepotIntake"
     },
     {
       "anchor": {
-        "x": 1.5418972895863048,
-        "y": 5.412967189728959
+        "x": 1.839486447931526,
+        "y": 3.8732667617689023
       },
       "prevControl": {
-        "x": 1.347817403708987,
-        "y": 5.6070470756062765
+        "x": 1.904179743223965,
+        "y": 4.222610556348074
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,7 +33,7 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 0.7,
+    "maxVelocity": 1.0,
     "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
@@ -42,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -23.692757991876707
+    "rotation": 4.0095015414392625
   },
   "reversed": false,
   "folder": "Depot Auto",

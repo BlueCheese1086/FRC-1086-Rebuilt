@@ -13,7 +13,7 @@ import edu.wpi.first.units.measure.Voltage;
 /** Add your docs here. */
 public class IndexerConstants {
   public static class CurrentLimits {
-    public static final Current maxSupply = Amps.of(30.0);
+    public static final Current maxSupply = Amps.of(20.0);
     public static final Current maxStator = Amps.of(60.0); // a bit high imo
   }
 
