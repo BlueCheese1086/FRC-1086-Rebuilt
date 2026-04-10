@@ -292,11 +292,7 @@ public class RobotContainer {
                                 .runFeed(ShooterConstants.FeederSetpoints.run.in(Volts))
                                 .finallyDo(shooter::stopFeeder),
                             indexer.setVoltage(IndexerConstants.Setpoints.feed),
-                            Commands.repeatingSequence(
-                                intake.setPosition(IntakeConstants.Setpoints.agitate),
-                                Commands.waitSeconds(0.2),
-                                intake.setPosition(IntakeConstants.Setpoints.deployed),
-                                Commands.waitSeconds(0.2)))))));
+                            intake.smush(4.5))))));
     autoChooser.addOption("Outpost 1", this.pathFindToStart("outpost", false));
     autoChooser.addOption(
         "Risky right bump auto", this.pathFindToStart("Risky Bump Double Intake", false));
@@ -389,12 +385,8 @@ public class RobotContainer {
                 shooter.runFeed(FeederSetpoints.run.in(Volts)),
                 indexer.setVoltage(IndexerConstants.Setpoints.feed),
                 intake.setVoltage(IntakeConstants.Setpoints.run),
-                Commands.sequence(
-                    Commands.repeatingSequence(
-                        intake.setPosition(IntakeConstants.Setpoints.agitate),
-                        Commands.waitSeconds(0.4),
-                        intake.setPosition(IntakeConstants.Setpoints.deployed),
-                        Commands.waitSeconds(0.4)))));
+                // intake.agitate()));
+                intake.smush(4.0)));
 
     driver
         .povRight()
@@ -420,22 +412,20 @@ public class RobotContainer {
         .whileTrue(
             Commands.parallel(
                 Commands.run(
-                        () -> shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(370.0)),
+                        () -> shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(325.0)),
                         shooter)
                     .finallyDo(shooter::stopShooter),
-                Commands.run(() -> hood.setPosition(() -> 64.0), hood)));
+                Commands.run(() -> hood.setPosition(() -> 78.0), hood)));
 
-    // What i think is better and safer is a known trench shot. like 1678, they cant
-    // be defended
-    // there
+    // Known trench/bump Shot
     driver
         .x()
         .whileTrue(
             Commands.parallel(
                 Commands.run(
-                        () -> shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(385)), shooter)
+                        () -> shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(322)), shooter)
                     .finallyDo(shooter::stopShooter),
-                Commands.runOnce(() -> hood.setPosition(() -> 60.0))));
+                Commands.runOnce(() -> hood.setPosition(() -> 79.0))));
 
     // Passing
     driver
@@ -561,6 +551,7 @@ public class RobotContainer {
         .onTrue(
             Commands.run(
                     () -> {
+                      // Ignore hub state in HubShiftUtil
                       ignoreHubState = new Trigger(() -> true);
                     })
                 .ignoringDisable(true));
@@ -760,10 +751,6 @@ public class RobotContainer {
                         .finallyDo(shooter::stopFeeder),
                     indexer.setVoltage(IndexerConstants.Setpoints.feed),
                     intake.setVoltage(IntakeConstants.Setpoints.run))),
-        Commands.repeatingSequence(
-            intake.setPosition(IntakeConstants.Setpoints.agitate),
-            Commands.waitSeconds(0.2),
-            intake.setPosition(IntakeConstants.Setpoints.deployed),
-            Commands.waitSeconds(0.2)));
+                    intake.smush(4.5));
   }
 }

@@ -43,19 +43,13 @@
           }
         },
         {
-          "type": "race",
+          "type": "sequential",
           "data": {
             "commands": [
               {
                 "type": "path",
                 "data": {
                   "pathName": "Path3"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "IntakeRun"
                 }
               }
             ]
@@ -84,6 +78,12 @@
           "type": "sequential",
           "data": {
             "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "IntakeDown"
+                }
+              },
               {
                 "type": "path",
                 "data": {
@@ -135,6 +135,12 @@
           "type": "sequential",
           "data": {
             "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "IntakeDown"
+                }
+              },
               {
                 "type": "path",
                 "data": {

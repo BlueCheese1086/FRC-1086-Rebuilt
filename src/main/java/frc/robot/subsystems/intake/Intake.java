@@ -17,10 +17,10 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-// import frc.robot.subsystems.intake.IntakeIO.IntakeInputs;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
@@ -95,6 +95,56 @@ public class Intake extends SubsystemBase {
             () -> {
               io.setPivotVoltage(Volts.zero());
             });
+  }
+
+  /**
+   * Smoothly move the intake from the deployed setpoint up to the stowed setpoint over the
+   * specified duration (seconds).
+   *
+   * @param seconds duration in seconds for the motion
+   */
+  public Command smush(double seconds) {
+    final Timer timer = new Timer();
+    final Angle start = IntakeConstants.Setpoints.deployed;
+    final Angle end = IntakeConstants.Setpoints.stowed;
+
+    return Commands.sequence(
+        // start timer
+        Commands.runOnce(
+            () -> {
+              timer.reset();
+              timer.start();
+            }),
+        // on each scheduler run, compute interpolated angle and command it to the IO
+        Commands.run(
+                () -> {
+                  double frac = MathUtil.clamp(timer.get() / seconds, 0.0, 1.0);
+                  double s = start.in(Radians);
+                  double e = end.in(Radians);
+                  double interp = s + (e - s) * frac;
+                  io.setPosition(Radians.of(interp));
+                },
+                this)
+            .withTimeout(seconds),
+        // ensure final position and stop timer
+        Commands.runOnce(
+            () -> {
+              timer.stop();
+              io.setPosition(end);
+            }));
+  }
+
+  public Command agitate() {
+    return Commands.repeatingSequence(
+        Commands.runOnce(() -> io.setPosition(IntakeConstants.Setpoints.agitate), this),
+        Commands.waitSeconds(0.5),
+        Commands.runOnce(() -> io.setPosition(IntakeConstants.Setpoints.deployed), this),
+        Commands.waitSeconds(0.5));
+  }
+
+  // Cleaning mode
+  public Command clean() {
+    return setVoltage(Volts.of(1.5));
   }
 
   public Command setCurrent(Current applied) {
