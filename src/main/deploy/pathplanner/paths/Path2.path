@@ -88,6 +88,10 @@
     {
       "waypointRelativePos": 2.9850746268656816,
       "rotationDegrees": -156.7435918991437
+    },
+    {
+      "waypointRelativePos": 3.744227353463623,
+      "rotationDegrees": -45.0
     }
   ],
   "constraintZones": [],
