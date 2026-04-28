@@ -1,0 +1,91 @@
+      String line;
+      while ((line = br.readLine()) != null) {
+        fileContentBuilder.append(line);
+      }
+
+      String fileContent = fileContentBuilder.toString();
+      JSONObject json = (JSONObject) new JSONParser().parse(fileContent);
+
+      int version = 0;
+
+      try {
+        version = ((Number) json.get("version")).intValue();
+      } catch (Exception ignored) {
+        // Assume version 0
+      }
+
+      if (version > 3) {
+        throw new FileVersionException(Integer.toString(version), "<= 3", trajectoryName + ".traj");
+      }
+
+      JSONObject trajJson = (JSONObject) json.get("trajectory");
+
+      List<PathPlannerTrajectoryState> fullTrajStates = new ArrayList<>();
+      for (var s : (JSONArray) trajJson.get("samples")) {
+        JSONObject sample = (JSONObject) s;
+        var state = new PathPlannerTrajectoryState();
+
+        double time = ((Number) sample.get("t")).doubleValue();
+        double xPos = ((Number) sample.get("x")).doubleValue();
+        double yPos = ((Number) sample.get("y")).doubleValue();
+        double rotationRad = ((Number) sample.get("heading")).doubleValue();
+        double xVel = ((Number) sample.get("vx")).doubleValue();
+        double yVel = ((Number) sample.get("vy")).doubleValue();
+        double angularVelRps = ((Number) sample.get("omega")).doubleValue();
+
+        JSONArray fx = (JSONArray) sample.get("fx");
+        JSONArray fy = (JSONArray) sample.get("fy");
+        double[] forcesX = new double[fx.size()];
+        double[] forcesY = new double[fy.size()];
+        for (int i = 0; i < fx.size(); i++) {
+          forcesX[i] = ((Number) fx.get(i)).doubleValue();
+          forcesY[i] = ((Number) fy.get(i)).doubleValue();
+        }
+
+        state.timeSeconds = time;
+        state.linearVelocity = Math.hypot(xVel, yVel);
+        state.pose = new Pose2d(new Translation2d(xPos, yPos), new Rotation2d(rotationRad));
+        state.fieldSpeeds = new ChassisSpeeds(xVel, yVel, angularVelRps);
+        if (Math.abs(state.linearVelocity) > 1e-6) {
+          state.heading =
+              new Rotation2d(
+                  state.fieldSpeeds.vxMetersPerSecond, state.fieldSpeeds.vyMetersPerSecond);
+        }
+
+        // The module forces are field relative, rotate them to be robot relative
+        for (int i = 0; i < forcesX.length; i++) {
+          Translation2d rotated =
+              new Translation2d(forcesX[i], forcesY[i])
+                  .rotateBy(state.pose.getRotation().unaryMinus());
+          forcesX[i] = rotated.getX();
+          forcesY[i] = rotated.getY();
+        }
+
+        // All other feedforwards besides X and Y components will be zeros because they cannot be
+        // calculated without RobotConfig
+        state.feedforwards =
+            new DriveFeedforwards(
+                new double[forcesX.length],
+                new double[forcesX.length],
+                new double[forcesX.length],
+                forcesX,
+                forcesY);
+
+        fullTrajStates.add(state);
+      }
+
+      List<Event> fullEvents = new ArrayList<>();
+      for (var m : (JSONArray) json.get("events")) {
+        JSONObject markerJson = (JSONObject) m;
+        String name = (String) markerJson.get("name");
+
+        JSONObject fromJson = (JSONObject) markerJson.get("from");
+        JSONObject fromOffsetJson = (JSONObject) fromJson.get("offset");
+        double fromTargetTimestamp = ((Number) fromJson.get("targetTimestamp")).doubleValue();
+        double fromOffset = ((Number) fromOffsetJson.get("val")).doubleValue();
+        double fromTimestamp = fromTargetTimestamp + fromOffset;
+
+        fullEvents.add(new OneShotTriggerEvent(fromTimestamp, name));
+
+        if (markerJson.get("event") != null) {
+          Command eventCommand =

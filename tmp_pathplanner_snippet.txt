@@ -1,0 +1,91 @@
+              poses.get(i - 1).getTranslation(),
+              poses.get(i + 1).getTranslation()));
+    }
+
+    // Last pose
+    waypoints.add(
+        Waypoint.autoControlPoints(
+            poses.get(poses.size() - 1).getTranslation(),
+            poses.get(poses.size() - 1).getRotation(),
+            poses.get(poses.size() - 2).getTranslation(),
+            null));
+
+    return waypoints;
+  }
+
+  /**
+   * Hot reload the path. This is used internally.
+   *
+   * @param pathJson Updated JSONObject for the path
+   */
+  public void hotReload(JSONObject pathJson) {
+    PathPlannerPath updatedPath = PathPlannerPath.fromJson(pathJson);
+
+    this.waypoints = updatedPath.waypoints;
+    this.rotationTargets = updatedPath.rotationTargets;
+    this.pointTowardsZones = updatedPath.pointTowardsZones;
+    this.constraintZones = updatedPath.constraintZones;
+    this.eventMarkers = updatedPath.eventMarkers;
+    this.globalConstraints = updatedPath.globalConstraints;
+    this.idealStartingState = updatedPath.idealStartingState;
+    this.goalEndState = updatedPath.goalEndState;
+    this.allPoints = updatedPath.allPoints;
+    this.reversed = updatedPath.reversed;
+
+    // Clear the ideal trajectory so it gets regenerated
+    this.idealTrajectory = Optional.empty();
+  }
+
+  /**
+   * Load a path from a path file in storage
+   *
+   * @param pathName The name of the path to load
+   * @return PathPlannerPath created from the given file name
+   * @throws IOException if the file cannot be read
+   * @throws FileNotFoundException if the file cannot be found
+   * @throws ParseException If the JSON cannot be parsed
+   * @throws FileVersionException If the file version does not match the expected version
+   */
+  public static PathPlannerPath fromPathFile(String pathName)
+      throws IOException, ParseException, FileVersionException {
+    if (pathCache.containsKey(pathName)) {
+      return pathCache.get(pathName);
+    }
+
+    try (BufferedReader br =
+        new BufferedReader(
+            new FileReader(
+                new File(
+                    Filesystem.getDeployDirectory(), "pathplanner/paths/" + pathName + ".path")))) {
+      StringBuilder fileContentBuilder = new StringBuilder();
+      String line;
+      while ((line = br.readLine()) != null) {
+        fileContentBuilder.append(line);
+      }
+
+      String fileContent = fileContentBuilder.toString();
+      JSONObject json = (JSONObject) new JSONParser().parse(fileContent);
+
+      String version = json.get("version").toString();
+      String[] versions = version.split("\\.");
+
+      if (!versions[0].equals("2025")) {
+        throw new FileVersionException(version, "2025.X", pathName + ".path");
+      }
+
+      PathPlannerPath path = PathPlannerPath.fromJson(json);
+      path.name = pathName;
+      PPLibTelemetry.registerHotReloadPath(pathName, path);
+      pathCache.put(pathName, path);
+      return path;
+    }
+  }
+
+  private static void loadChoreoTrajectoryIntoCache(String trajectoryName)
+      throws IOException, ParseException, FileVersionException {
+    try (BufferedReader br =
+        new BufferedReader(
+            new FileReader(
+                new File(Filesystem.getDeployDirectory(), "choreo/" + trajectoryName + ".traj")))) {
+      StringBuilder fileContentBuilder = new StringBuilder();
+      String line;

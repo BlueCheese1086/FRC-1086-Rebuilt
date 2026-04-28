@@ -59,16 +59,21 @@ public class AutoStateMachine {
     return 0.0;
   }
 
+  private Command pathCommand(String pathName, boolean resetPose, boolean previewOnly) {
+    return previewOnly ? Commands.none() : AutoRoutines.runPath(pathName, resetPose);
+  }
+
   public Command buildAutoSequence(
       String startPos,
       String preloadShootPos,
-      String intakePos,
+      int swipeCount,
       String nzEntry,
       String nzExit,
       String finalShootPos,
       String climbPos,
       double shootTime,
-      double intakeTime) {
+      double unused,
+      boolean previewOnly) {
 
     Command autoCommands = Commands.sequence();
     String currentLocation = startPos;
@@ -83,7 +88,8 @@ public class AutoStateMachine {
 
       autoCommands =
           autoCommands.andThen(
-              Commands.parallel(AutoRoutines.runPath(path, true), runFlywheel(), retractIntake()),
+              Commands.parallel(
+                  pathCommand(path, true, previewOnly), runFlywheel(), retractIntake()),
               startShoot(shootTime));
 
       estimatedTime += shootTime;
@@ -92,49 +98,42 @@ public class AutoStateMachine {
 
     boolean isFirstPath = currentLocation.equals(startPos);
 
-    // intake
-    if (intakePos.endsWith("i")) {
-      String path = currentLocation + "_" + intakePos;
-      estimatedTime += addPathToPreview(path, previewPoses);
-      autoCommands =
-          autoCommands.andThen(
-              AutoRoutines.runPath(path, isFirstPath).deadlineFor(deployIntake(), intake()));
-      // Commands.waitSeconds(intakeTime));
-      // estimatedTime += intakeTime;
-      currentLocation = intakePos;
-    } else {
+    boolean useSwipes = swipeCount > 0 && (nzEntry.equals("db") || nzEntry.equals("ob"));
+
+    if (useSwipes) {
       String entryPath = currentLocation + "_" + nzEntry;
-      String intakePath = nzEntry + "_" + intakePos;
       estimatedTime += addPathToPreview(entryPath, previewPoses);
-      estimatedTime += addPathToPreview(intakePath, previewPoses);
+      autoCommands = autoCommands.andThen(pathCommand(entryPath, isFirstPath, previewOnly));
+      currentLocation = nzEntry;
+      isFirstPath = false;
 
-      autoCommands =
-          autoCommands.andThen(
-              AutoRoutines.runPath(entryPath, isFirstPath),
-              AutoRoutines.runPath(intakePath, false).deadlineFor(deployIntake(), intake()));
-      // Commands.waitSeconds(intakeTime));
-      // estimatedTime += intakeTime;
-      currentLocation = intakePos;
-    }
+      for (int swipeIndex = 1; swipeIndex <= swipeCount; swipeIndex++) {
+        String swipeType = swipeIndex % 2 == 1 ? "farswipe" : "nearswipe";
+        String swipePath = nzEntry + "_" + swipeType;
+        estimatedTime += addPathToPreview(swipePath, previewPoses);
 
-    // final shoot
-    if (intakePos.endsWith("n")) {
-      String exitPath = currentLocation + "_" + nzExit;
-      String safePath = nzExit + "_" + nzExit + "s";
-      String shootPath = nzExit + "s_" + finalShootPos;
+        autoCommands =
+            autoCommands.andThen(
+                pathCommand(swipePath, false, previewOnly).deadlineFor(deployIntake(), intake()));
 
-      estimatedTime += addPathToPreview(exitPath, previewPoses);
-      estimatedTime += addPathToPreview(safePath, previewPoses);
-      estimatedTime += addPathToPreview(shootPath, previewPoses);
+        String shootPath = nzEntry + "_" + finalShootPos;
+        estimatedTime += addPathToPreview(shootPath, previewPoses);
+        autoCommands =
+            autoCommands.andThen(
+                Commands.parallel(
+                    pathCommand(shootPath, false, previewOnly), runFlywheel(), retractIntake()),
+                startShoot(shootTime));
+        estimatedTime += shootTime;
 
-      autoCommands =
-          autoCommands.andThen(
-              Commands.deadline(AutoRoutines.runPath(exitPath, false), retractIntake()),
-              AutoRoutines.runPath(safePath, false),
-              Commands.parallel(AutoRoutines.runPath(shootPath, false), runFlywheel()),
-              startShoot(shootTime));
-      estimatedTime += shootTime;
-      currentLocation = finalShootPos;
+        if (swipeIndex < swipeCount) {
+          String returnPath = finalShootPos + "_" + nzEntry;
+          estimatedTime += addPathToPreview(returnPath, previewPoses);
+          autoCommands = autoCommands.andThen(pathCommand(returnPath, false, previewOnly));
+          currentLocation = nzEntry;
+        } else {
+          currentLocation = finalShootPos;
+        }
+      }
     } else {
       String shootPath = currentLocation + "_" + finalShootPos;
       estimatedTime += addPathToPreview(shootPath, previewPoses);
@@ -142,7 +141,7 @@ public class AutoStateMachine {
       autoCommands =
           autoCommands.andThen(
               Commands.parallel(
-                  AutoRoutines.runPath(shootPath, false), runFlywheel(), retractIntake()),
+                  pathCommand(shootPath, false, previewOnly), runFlywheel(), retractIntake()),
               startShoot(shootTime));
       estimatedTime += shootTime;
       currentLocation = finalShootPos;
@@ -153,7 +152,7 @@ public class AutoStateMachine {
       estimatedTime += addPathToPreview(climbPath, previewPoses);
       autoCommands =
           autoCommands.andThen(
-              AutoRoutines.runPath(climbPath, false)
+              pathCommand(climbPath, false, previewOnly)
               // TODO: climb commands
               );
     }

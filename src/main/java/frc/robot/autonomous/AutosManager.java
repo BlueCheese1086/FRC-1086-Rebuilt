@@ -23,14 +23,13 @@ import java.util.Set;
 public class AutosManager extends SubsystemBase {
   private final SendableChooser<String> startPos = new SendableChooser<>();
   private final SendableChooser<String> preloadShootPos = new SendableChooser<>();
-  private final SendableChooser<String> intakePos = new SendableChooser<>();
   private final SendableChooser<String> nzEntry = new SendableChooser<>();
   private final SendableChooser<String> nzExit = new SendableChooser<>();
   private final SendableChooser<String> finalShootPos = new SendableChooser<>();
   private final SendableChooser<String> climbPos = new SendableChooser<>();
 
   private final LoggedTunableNumber shootTime = new LoggedTunableNumber("Auto/ShootTime", 1.0);
-  private final LoggedTunableNumber intakeTime = new LoggedTunableNumber("Auto/intakeTime", 1.0);
+  private static final String swipeCountKey = "Auto/Swipe Count";
 
   private final Field2d autoPreviewField = new Field2d();
 
@@ -68,20 +67,6 @@ public class AutosManager extends SubsystemBase {
     preloadShootPos.addOption("Outpost Close Shot", "ocs");
     preloadShootPos.addOption("None", "none");
 
-    intakePos.setDefaultOption("Depot", "di");
-    intakePos.addOption("Outpost", "oi");
-    /*intakePos.addOption("Depot Close Neutral", "dcn");
-    intakePos.addOption("Outpost Close Neutral", "ocn");
-    intakePos.addOption("Depot Far Safe Neutral", "dfsn");
-    intakePos.addOption("Depot Near Safe Neutral", "dnsn");
-    intakePos.addOption("Outpost Far Safe Neutral", "ofsn");
-    intakePos.addOption("Outpost Near Safe Neutral", "onsn");
-    intakePos.addOption("Center Risky Neutral", "crn");
-    intakePos.addOption("Depot Far Risky Neutral", "dfrn");
-    intakePos.addOption("Depot Near Risky Neutral", "dnrn");
-    intakePos.addOption("Outpost Far Risky Neutral", "ofrn");
-    intakePos.addOption("Outpost Near Risky Neutral", "onrn");*/
-
     nzEntry.setDefaultOption("Depot Trench", "dt");
     nzEntry.addOption("Depot Bump", "db");
     nzEntry.addOption("Outpost Trench", "ot");
@@ -109,8 +94,7 @@ public class AutosManager extends SubsystemBase {
     SmartDashboard.putData(
         "Auto/Preload Shoot Pos (if preloaded and not a reverse starting position)",
         preloadShootPos);
-    SmartDashboard.putData(
-        "Auto/Intake Source (after shooting preload or starting not preloaded)", intakePos);
+    SmartDashboard.putNumber(swipeCountKey, 1.0);
     SmartDashboard.putData(
         "Auto/NZ Entry (if starting or going to neutral zone after shooting preload)", nzEntry);
     SmartDashboard.putData("Auto/NZ Exit (if entered neutral zone)", nzExit);
@@ -129,13 +113,14 @@ public class AutosManager extends SubsystemBase {
           return machine.buildAutoSequence(
               startPos.getSelected(),
               preloadShootPos.getSelected(),
-              intakePos.getSelected(),
+              (int) Math.max(0, Math.round(SmartDashboard.getNumber(swipeCountKey, 1.0))),
               nzEntry.getSelected(),
               nzExit.getSelected(),
               finalShootPos.getSelected(),
               climbPos.getSelected(),
               1.0,
-              1.0);
+              1.0,
+              false);
         },
         Set.of(drive));
   }
@@ -147,13 +132,14 @@ public class AutosManager extends SubsystemBase {
       machine.buildAutoSequence(
           startPos.getSelected(),
           preloadShootPos.getSelected(),
-          intakePos.getSelected(),
+          (int) Math.max(0, Math.round(SmartDashboard.getNumber(swipeCountKey, 1.0))),
           nzEntry.getSelected(),
           nzExit.getSelected(),
           finalShootPos.getSelected(),
           climbPos.getSelected(),
           shootTime.get(),
-          intakeTime.get());
+          0.0,
+          true);
 
       var pathPoses = machine.autoPreviewField.getObject("traj").getPoses();
       autoPreviewField.getObject("traj").setPoses(pathPoses);

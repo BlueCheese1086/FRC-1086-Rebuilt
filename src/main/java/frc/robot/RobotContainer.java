@@ -23,7 +23,6 @@ import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
@@ -230,6 +229,7 @@ public class RobotContainer {
     Autos.setup(drive, intake);
     automanager = new AutosManager(drive, shooter, indexer, intake, hood);
     factory = new AutoRoutines(drive, shooter, intake, indexer, hood);
+    frc.robot.commands.AutoRoutines.setup(drive);
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices");
     // Set up SysId routines
