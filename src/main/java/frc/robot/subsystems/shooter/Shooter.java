@@ -58,6 +58,7 @@ public class Shooter extends SubsystemBase {
     // }
   }
 
+  // Clears a specified file
   private void clearFile(File file) {
     try (FileWriter writer = new FileWriter(file, false)) {
       writer.write("");
@@ -66,16 +67,28 @@ public class Shooter extends SubsystemBase {
     }
   }
 
+  /**
+   * Sets the velocity setpoint of the shooter. This is the value that the shooter will try to get to.
+   * @param radPerSec The new velocity setpoint
+   */
   public void setVelocitySetpoint(Supplier<AngularVelocity> radPerSec) {
     for (int i = 0; i < io.length; i++) {
       io[i].setVelocity(radPerSec.get());
     }
   }
 
+  /**
+   * Runs the feeder at a specified voltage. Intended to be used within safe tolerances.
+   * @param volts the desired output voltage
+   */
   public Command runFeed(double volts) {
     return Commands.run(() -> feederIO.setFeedVoltage(volts)).finallyDo(() -> stopFeeder());
   }
 
+  /**
+   * Sets the voltage of the shooter motors
+   * @param volts the request output voltage
+   */
   public Command setVoltage(double volts) {
     return this.run(
             () -> {
@@ -86,6 +99,9 @@ public class Shooter extends SubsystemBase {
         .finallyDo(this::stopShooter);
   }
 
+  /**
+   * Stops both the feeder and shooter motors
+   */
   public void stopAll() {
     for (int i = 0; i < io.length; i++) {
       io[i].setVoltage(0.0);
@@ -93,7 +109,9 @@ public class Shooter extends SubsystemBase {
     }
     feederIO.setFeedVoltage(0.0);
   }
-
+  /**
+   * Stops only the shooter
+   */
   public void stopShooter() {
     for (int i = 0; i < io.length; i++) {
       // io[i].setVoltage(0.0);
@@ -101,6 +119,9 @@ public class Shooter extends SubsystemBase {
     }
   }
 
+  /**
+   * Stops only the feeder
+   */
   public void stopFeeder() {
     feederIO.setFeedVoltage(0.0);
   }
@@ -112,6 +133,12 @@ public class Shooter extends SubsystemBase {
     return inputs[0].atSetpoint && inputs[1].atSetpoint && inputs[2].atSetpoint;
   }
 
+  /**
+   * Records the shot into the file
+   * @param drivePose the pose of the robot
+   * @param hoodAngle the hood angle used
+   * @param tof the time it took for the shot to land
+   */
   public void recordShot(Pose3d drivePose, Angle hoodAngle, double tof) {
     double distanceToHub =
         Math.abs(
@@ -139,6 +166,11 @@ public class Shooter extends SubsystemBase {
     // }
   }
 
+  /**
+   * Gets the Pose3ds of each of the shooter lanes for logging
+   * @param robotPose the robot's 2d pose
+   * @return the pose3ds of the shooter lanes
+   */
   public static Pose3d[] getShooterPoses(Pose2d robotPose) {
     Pose3d robot3d = new Pose3d(robotPose);
     return new Pose3d[] {
@@ -148,6 +180,9 @@ public class Shooter extends SubsystemBase {
     };
   }
 
+  /**
+   * The periodic function
+   */
   @Override
   public void periodic() {
     for (int i = 0; i < io.length; i++) {
@@ -158,6 +193,13 @@ public class Shooter extends SubsystemBase {
     Logger.processInputs("Shooter/Feeder", feederIOInputsAutoLogged);
   }
 
+  /**
+   * Gets the Command to run the System Identification Routine on the Shooter
+   * @param timeout How long each stage of the routine should run
+   * @param i Which shooter IO should run
+   * @param string The unique name of the System Identification Test
+   * @return The command to run the System Identification routine
+   */
   public Command sysid(double timeout, int i, String string) {
     return Commands.sequence(
         this.getShooterSysIdQuasistatic(Direction.kForward, i, string).withTimeout(timeout),
@@ -171,6 +213,13 @@ public class Shooter extends SubsystemBase {
         Commands.runOnce(() -> io[i].setVoltage(0.0)));
   }
 
+  /**
+   * Gets the command to run the Quasistic Portion of the SysID Routine
+   * @param direction The direction the motor should output
+   * @param index Which shooter IO you wanted to run the routine on
+   * @param name The name of the Sysid Test
+   * @return
+   */
   public Command getShooterSysIdQuasistatic(Direction direction, int index, String name) {
     return new SysIdRoutine(
             new SysIdRoutine.Config(Volts.of(2.0).per(Second), Volts.of(8.0), null),
@@ -186,6 +235,13 @@ public class Shooter extends SubsystemBase {
         .quasistatic(direction);
   }
 
+  /**
+   * Gets the command to run the Quasistic Portion of the SysID Routine
+   * @param direction The direction the motor should output
+   * @param index Which shooter IO you wanted to run the routine on
+   * @param name The name of the Sysid Test
+   * @return
+   */
   public Command getShooterSysIdDynamic(Direction direction, int index, String name) {
     return new SysIdRoutine(
             new SysIdRoutine.Config(Volts.of(2.0).per(Second), Volts.of(4), null),

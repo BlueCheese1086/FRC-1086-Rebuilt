@@ -372,7 +372,7 @@ public class RobotContainer {
             .run(
                 () -> {
                   if (FieldConstants.LinesVertical.inAllianceZone(drive.getPose())) {
-                    shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(150.0));
+                    shooter.setVelocitySetpoint(() -> RadiansPerSecond.of(100.0));
                   } else {
                     shooter.stopShooter();
                   }
