@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import org.littletonrobotics.junction.Logger;
 
-/** Add your docs here. */
+/** Simulation IO implementation for the intake pivot and rollers. */
 public class IntakeIOSim implements IntakeIO {
   private final PIDController pid = new PIDController(1.0, IntakeConstants.PID.kI.get(), 0.0);
   private final ArmFeedforward ff =
@@ -42,10 +42,16 @@ public class IntakeIOSim implements IntakeIO {
   private boolean useClosedLoop = false;
   private double armInputVolts = 0.0;
 
+  /** Creates the simulated intake IO and initializes the pivot setpoint. */
   public IntakeIOSim() {
     pid.setSetpoint(armInputVolts);
   }
 
+  /**
+   * Advances the intake simulation and stores simulated values in the input snapshot.
+   *
+   * @param inputs mutable input snapshot to fill
+   */
   @Override
   public void updateInputs(IntakeInputs inputs) {
     if (useClosedLoop) {
@@ -67,17 +73,32 @@ public class IntakeIOSim implements IntakeIO {
     inputs.rollerLeftVelocity = simRoller.getAngularVelocityRadPerSec();
   }
 
+  /**
+   * Enables closed-loop pivot simulation to the requested angle.
+   *
+   * @param angle desired pivot angle
+   */
   @Override
   public void setPosition(Angle angle) {
     useClosedLoop = true;
     pid.setSetpoint(angle.in(Radians));
   }
 
+  /**
+   * Applies voltage to the simulated roller.
+   *
+   * @param applied desired roller voltage
+   */
   @Override
   public void setVoltage(Voltage applied) {
     simRoller.setInputVoltage(applied.in(Volts));
   }
 
+  /**
+   * Applies open-loop voltage to the simulated pivot.
+   *
+   * @param applied desired pivot voltage
+   */
   @Override
   public void setPivotVoltage(Voltage applied) {
     useClosedLoop = false;

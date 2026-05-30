@@ -40,7 +40,7 @@ import frc.robot.util.LoggedTunableNumber;
 import frc.robot.util.PhoenixUtil;
 import org.littletonrobotics.junction.Logger;
 
-/** Add your docs here. */
+/** TalonFX-backed IO implementation for the intake pivot and rollers. */
 public class IntakeIOTalonFX implements IntakeIO {
   private final VoltageOut applyVoltage = new VoltageOut(0.0).withEnableFOC(true);
   private final VoltageOut applyPivotVoltage = new VoltageOut(0.0);
@@ -74,6 +74,7 @@ public class IntakeIOTalonFX implements IntakeIO {
   private final AngularVelocity maxPivotVelocity =
       RadiansPerSecond.of(DCMotor.getKrakenX60Foc(1).freeSpeedRadPerSec).div(50.0);
 
+  /** Creates and configures the real intake motor controllers. */
   public IntakeIOTalonFX() {
     pivot = new TalonFX(RobotMap.IntakeMap.pivot, RobotMap.systemBus);
     rollerLeft = new TalonFX(RobotMap.IntakeMap.rollerLeft, RobotMap.systemBus);
@@ -158,6 +159,11 @@ public class IntakeIOTalonFX implements IntakeIO {
     rollerRight.setControl(new Follower(rollerLeft.getDeviceID(), MotorAlignmentValue.Opposed));
   }
 
+  /**
+   * Refreshes motor status signals and stores them in the logged input snapshot.
+   *
+   * @param inputs mutable input snapshot to fill
+   */
   @Override
   public void updateInputs(IntakeInputs inputs) {
     StatusSignal.refreshAll(
@@ -207,6 +213,7 @@ public class IntakeIOTalonFX implements IntakeIO {
         hashCode(), () -> resetValues(), rollerkP, rollerkd, rollerks, rollerkv);
   }
 
+  /** Reapplies tunable PID and feedforward constants to the motor controllers. */
   @SuppressWarnings("unused")
   private void resetValues() {
     Slot0Configs slot0Configs = new Slot0Configs();
@@ -226,11 +233,21 @@ public class IntakeIOTalonFX implements IntakeIO {
     pivot.getConfigurator().apply(slot0Configs, 0.25);
   }
 
+  /**
+   * Commands the pivot to an angle with Motion Magic.
+   *
+   * @param angle desired pivot angle
+   */
   @Override
   public void setPosition(Angle angle) {
     pivot.setControl(motionMagic.withPosition(angle));
   }
 
+  /**
+   * Commands the left roller velocity and stops the roller when zero is requested.
+   *
+   * @param velocity desired roller velocity
+   */
   @Override
   public void setRollerVelocity(AngularVelocity velocity) {
     rollerLeft.setControl(velocityVoltage.withVelocity(velocity));
@@ -239,11 +256,21 @@ public class IntakeIOTalonFX implements IntakeIO {
     }
   }
 
+  /**
+   * Applies torque current to the left roller.
+   *
+   * @param desired desired roller current
+   */
   @Override
   public void setCurrent(Current desired) {
     rollerLeft.setControl(applyCurrent.withOutput(desired));
   }
 
+  /**
+   * Applies voltage to the roller pair.
+   *
+   * @param applied desired roller voltage
+   */
   @Override
   public void setVoltage(Voltage applied) {
     rollerLeft.setControl(applyVoltage.withOutput(applied));
@@ -254,6 +281,12 @@ public class IntakeIOTalonFX implements IntakeIO {
     }
   }
 
+  /**
+   * Applies test voltage to a selected roller.
+   *
+   * @param applied desired test voltage
+   * @param left true for the left roller, false for the right roller
+   */
   @Override
   public void setVoltageTest(Voltage applied, boolean left) {
     if (left) {
@@ -268,6 +301,11 @@ public class IntakeIOTalonFX implements IntakeIO {
     }
   }
 
+  /**
+   * Applies clamped voltage directly to the pivot motor.
+   *
+   * @param applied desired pivot voltage
+   */
   @Override
   public void setPivotVoltage(Voltage applied) {
     Logger.recordOutput("Intake/Applied Volts", applied.in(Volts));

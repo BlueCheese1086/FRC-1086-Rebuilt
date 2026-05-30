@@ -29,8 +29,8 @@ import frc.robot.util.BatteryLogger;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
+/** Command-based subsystem for controlling the intake pivot and rollers. */
 public class Intake extends SubsystemBase {
-  /** Creates a new Intake. */
   private final IntakeIO io;
 
   private final IntakeInputsAutoLogged inputs = new IntakeInputsAutoLogged();
@@ -39,6 +39,12 @@ public class Intake extends SubsystemBase {
 
   private double setpoint = 0.0;
 
+  /**
+   * Creates an intake subsystem.
+   *
+   * @param io hardware or simulation IO layer
+   * @param logger battery/current logger
+   */
   public Intake(IntakeIO io, BatteryLogger logger) {
     this.io = io;
     this.logger = logger;
@@ -58,6 +64,12 @@ public class Intake extends SubsystemBase {
                 this));
   }
 
+  /**
+   * Commands the pivot to a target angle.
+   *
+   * @param newPos desired pivot angle
+   * @return command that finishes when the pivot reaches the setpoint
+   */
   public Command setPosition(Angle newPos) {
     return Commands.runOnce(
             () -> {
@@ -67,6 +79,12 @@ public class Intake extends SubsystemBase {
         .until(this::atSetpoint);
   }
 
+  /**
+   * Runs the intake rollers at an applied voltage.
+   *
+   * @param applied roller voltage
+   * @return command that stops the rollers when interrupted or ended
+   */
   public Command setVoltage(Voltage applied) {
     return Commands.run(
             () -> {
@@ -78,14 +96,31 @@ public class Intake extends SubsystemBase {
             });
   }
 
+  /**
+   * Sets the roller closed-loop velocity once.
+   *
+   * @param velocity desired roller velocity
+   * @return instant command that applies the velocity target
+   */
   public Command runVelocity(AngularVelocity velocity) {
     return this.runOnce(() -> io.setRollerVelocity(velocity));
   }
 
+  /**
+   * Stops the intake roller velocity command.
+   *
+   * @return instant command that sets roller velocity to zero
+   */
   public Command stopRoller() {
     return this.runOnce(() -> io.setRollerVelocity(RadiansPerSecond.of(0.0)));
   }
 
+  /**
+   * Runs the pivot at an applied voltage.
+   *
+   * @param applied pivot voltage
+   * @return command that zeros pivot voltage when interrupted or ended
+   */
   public Command setPivotVoltage(Voltage applied) {
     return Commands.run(
             () -> {
@@ -97,6 +132,12 @@ public class Intake extends SubsystemBase {
             });
   }
 
+  /**
+   * Runs the rollers with torque-current control.
+   *
+   * @param applied desired roller current
+   * @return command that stops roller voltage when interrupted or ended
+   */
   public Command setCurrent(Current applied) {
     return Commands.run(
             () -> {
@@ -108,6 +149,11 @@ public class Intake extends SubsystemBase {
             });
   }
 
+  /**
+   * Runs the intake pivot characterization routine.
+   *
+   * @return command sequence for dynamic and quasistatic SysId tests
+   */
   public Command sysId() {
     return Commands.sequence(
         routine
@@ -145,6 +191,11 @@ public class Intake extends SubsystemBase {
                         IntakeConstants.Mechanical.kPositionTolerance.in(Degrees)))));
   }
 
+  /**
+   * Checks whether the pivot is within the configured position tolerance.
+   *
+   * @return true when the current pivot angle is near the active setpoint
+   */
   @AutoLogOutput(key = "Intake/Near Setpoint")
   public boolean atSetpoint() {
     return MathUtil.isNear(
@@ -154,6 +205,11 @@ public class Intake extends SubsystemBase {
             Radians)); // TODO: Tune this to require it to be more accurate.
   }
 
+  /**
+   * Toggles the IO control mode.
+   *
+   * @return instant command that requests the IO mode switch
+   */
   public Command switchMode() {
     return Commands.runOnce(
         () -> {
@@ -161,6 +217,7 @@ public class Intake extends SubsystemBase {
         });
   }
 
+  /** Updates intake sensor inputs, logs telemetry, and reports current usage. */
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
