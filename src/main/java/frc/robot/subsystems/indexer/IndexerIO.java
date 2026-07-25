@@ -15,21 +15,19 @@ import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import org.littletonrobotics.junction.AutoLog;
 
-/** Add your docs here. */
 public interface IndexerIO {
   @AutoLog
   public class IndexerInputs {
-    public boolean connected = false;
-    public AngularVelocity velocity = RadiansPerSecond.zero();
-    public Current supply = Amps.zero();
-    public Current stator = Amps.zero();
-    public Temperature temp = Celsius.zero();
-    public Voltage voltage = Volts.zero();
+    public boolean hopperConnected = false;
+    public boolean hopperAlive = false;
+    public AngularVelocity hopperVelocity = RadiansPerSecond.zero();
+    public Voltage hopperVoltage = Volts.zero();
+    public Temperature hopperTemperature = Celsius.zero();
+    public Current hopperSupplyCurrent = Amps.zero();
+    public Current hopperStatorCurrent = Amps.zero();
   }
 
   public default void updateInputs(IndexerInputs inputs) {}
 
-  public default void setVoltage(Voltage applied) {}
-
-  public default void setCurrent(Current applied) {}
+  public default void setVoltage(Voltage voltage) {}
 }

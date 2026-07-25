@@ -4,8 +4,6 @@
 
 package frc.robot.subsystems.shooter.shooterUtil;
 
-import static frc.robot.subsystems.shooter.ShooterConstants.Mechanical.shooterPose;
-
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -16,6 +14,7 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.math.interpolation.InverseInterpolator;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants;
 import java.util.function.Supplier;
@@ -115,6 +114,9 @@ public class PassingManager {
         <= (FieldConstants.fieldWidth / 2) - (FieldConstants.Hub.width / 2)) {
       target = AllianceFlipUtil.apply(FieldConstants.Tower.rightBackPose.getTranslation());
     }
+
+    Pose2d shooterPose = Shooter.shooterPose(drivePose);
+
     Pose2d launcherPosition =
         estimatedPose.transformBy(
             new Transform2d(

@@ -4,92 +4,50 @@
 
 package frc.robot.subsystems.shooter;
 
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.KilogramSquareMeters;
-import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.Preferences;
 import frc.robot.util.LoggedTunableNumber;
-import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 /** Add your docs here. */
 public class ShooterConstants {
-  public static class Tuning {
-    public static final LoggedTunableNumber kv = new LoggedTunableNumber("/Shooter/Kv", 0.1267);
-    public static final LoggedTunableNumber ks = new LoggedTunableNumber("/Shooter/Ks", 0.1484375);
-    public static final LoggedTunableNumber ka = new LoggedTunableNumber("/Shooter/ka", 0.0045);
-    public static final LoggedTunableNumber kP = new LoggedTunableNumber("/Shooter/kP", 0.45);
-    public static final LoggedTunableNumber kI = new LoggedTunableNumber("/Shooter/kI", 0.0);
-    public static final LoggedTunableNumber kd = new LoggedTunableNumber("/Shooter/kd", 0.0);
-    public static final LoggedNetworkNumber velocitySetpoint =
-        new LoggedNetworkNumber("/Tuning/Velocity Setpoint", 550.0);
-    public static final LoggedNetworkNumber voltageSetpoint =
-        new LoggedNetworkNumber("/Tuning/Voltage Setpoint", 4.5);
-  }
-  // i could be wrong but do we need a current limit bc id like to not brown out while sotm if
-  // possible
-  // i could be wrong but do we need a current limit bc id like to not brown out while sotm if
-  // possible
-  public static class Targeting {
-    public static final double minRpm = 1500.0;
-    public static final double maxRpm = 6000.0;
-    public static final double stationaryRpm = 3200.0;
-    public static final double movingSpeedThresholdMps = 0.25;
-    public static final double movingRpmChangeWeight = 2.0;
-    public static final double movingHoodChangeWeight = 0.5;
-    public static final String FileName = "/home/lvuser/logs/Shot.csv";
-  }
-
-  public static class FeederSetpoints {
-    public static final Voltage run = Volts.of(12.0);
-  }
-
   public static class Mechanical {
-    public static final MomentOfInertia J = KilogramSquareMeters.of(0.001);
-    public static final Distance shooterHeight = Inches.of(26.0);
-    public static final Distance flywheelRadius = Inches.of(2.0);
-    public static final double shooterWheelGearRatio = 1.0;
-    public static final Distance shooterXOffset = Inches.of(-10.0);
-    public static final Distance shooterYOffset = Inches.of(0.0);
-
-    // The position of the shooter relative to the robot's center, used for
-    // calculating the distance to the hub.
-    public static final Transform3d shooterPose =
-        new Transform3d(
-            -Units.inchesToMeters(8.5),
-            shooterYOffset.in(Meters),
-            shooterHeight.in(Meters),
-            new Rotation3d(0.0, 0.0, 0.0));
-    public static Transform3d robotToLauncher =
-        new Transform3d(-0.276, 0.09, 0.599, new Rotation3d(0.0, 0.0, Math.PI));
+    public static final double gearing = 1.0;
+    public static final Distance diameter = Inches.of(4.125);
+    public static final AngularVelocity idleVelocity = RadiansPerSecond.of(10);
   }
 
-  public static class ShooterTransforms {
-    public static final Transform3d leftShooter =
-        new Transform3d(
-            new Translation3d(
-                -Units.inchesToMeters(8.5),
-                Units.inchesToMeters(6.5 + 0.25),
-                Units.inchesToMeters(26)),
-            Rotation3d.kZero);
-    public static final Transform3d centerShooter =
-        new Transform3d(
-            -Units.inchesToMeters(8.5),
-            Units.inchesToMeters(0.0 + 0.25),
-            Units.inchesToMeters(26),
-            Rotation3d.kZero);
-    public static final Transform3d rightShooter =
-        new Transform3d(
-            -Units.inchesToMeters(8.5),
-            -Units.inchesToMeters(6.5 + 0.25),
-            Units.inchesToMeters(26),
-            Rotation3d.kZero);
+  public static class CurrentLimits {
+    public static final Current maxSupply = Amps.of(60);
+    public static final Current maxStator = Amps.of(80);
+  }
+
+  public static class VoltageLimits {
+    public static final Voltage minVoltage = Volts.of(-12.0);
+    public static final Voltage maxVoltage = Volts.of(12.0);
+  }
+
+  public static class PID {
+    public static LoggedTunableNumber kP =
+        new LoggedTunableNumber("Shooter/PID/kP", Preferences.getDouble("Shooter_kP", 9.0));
+    public static LoggedTunableNumber kI =
+        new LoggedTunableNumber("Shooter/PID/kI", Preferences.getDouble("Shooter_kI", 0));
+    public static LoggedTunableNumber kD =
+        new LoggedTunableNumber("Shooter/PID/kD", Preferences.getDouble("Shooter_kD", 0));
+    public static LoggedTunableNumber kS =
+        new LoggedTunableNumber("Shooter/PID/kS", Preferences.getDouble("Shooter_kS", 0));
+    public static LoggedTunableNumber kG =
+        new LoggedTunableNumber("Shooter/PID/kG", Preferences.getDouble("Shooter_kG", 0));
+    public static LoggedTunableNumber kV =
+        new LoggedTunableNumber("Shooter/PID/kV", Preferences.getDouble("Shooter_kV", 10));
+    public static LoggedTunableNumber kA =
+        new LoggedTunableNumber("Shooter/PID/kA", Preferences.getDouble("Shooter_kA", 0));
   }
 }

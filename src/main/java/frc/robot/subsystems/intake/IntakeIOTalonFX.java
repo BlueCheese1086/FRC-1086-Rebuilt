@@ -5,313 +5,269 @@
 package frc.robot.subsystems.intake;
 
 import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Volts;
-import static frc.robot.subsystems.intake.IntakeConstants.PID.*;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
-import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
-import com.ctre.phoenix6.signals.NeutralModeValue;
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.RobotMap;
-import frc.robot.subsystems.intake.IntakeConstants.PID;
-import frc.robot.util.LoggedTunableNumber;
 import frc.robot.util.PhoenixUtil;
-import org.littletonrobotics.junction.Logger;
 
-/** TalonFX-backed IO implementation for the intake pivot and rollers. */
+/** Add your docs here. */
 public class IntakeIOTalonFX implements IntakeIO {
-  private final VoltageOut applyVoltage = new VoltageOut(0.0).withEnableFOC(true);
-  private final VoltageOut applyPivotVoltage = new VoltageOut(0.0);
-  private final TorqueCurrentFOC applyCurrent = new TorqueCurrentFOC(0.0);
-  private final MotionMagicVoltage motionMagic = new MotionMagicVoltage(0.0).withEnableFOC(true);
-  private final VelocityVoltage velocityVoltage = new VelocityVoltage(0.0).withEnableFOC(true);
-  private final TalonFX pivot;
-  private final TalonFX rollerLeft;
-  private final TalonFX rollerRight;
-  private final TalonFXConfiguration config = new TalonFXConfiguration();
+  private TalonFX pivot;
+  private TalonFX leftRoller;
+  private TalonFX rightRoller;
 
-  // Status Signals
-  private final StatusSignal<AngularVelocity> rollerVelocity;
-  private final StatusSignal<Voltage> rollerLeftVoltage;
-  private final StatusSignal<Current> rollerLeftSupply;
-  private final StatusSignal<Current> rollerLeftStator;
-  private final StatusSignal<Voltage> rollerRightVoltage;
-  private final StatusSignal<Current> rollerRightSupply;
-  private final StatusSignal<Current> rollerRightStator;
-  private final StatusSignal<Temperature> rollerLeftTemperature;
-  private final StatusSignal<Temperature> rollerRightTemperature;
+  private final TalonFXConfiguration pivotConfig = new TalonFXConfiguration();
+  private final TalonFXConfiguration rollerConfig = new TalonFXConfiguration();
 
-  private final StatusSignal<Angle> pivotAngle;
+  private final StatusSignal<Angle> pivotPosition;
   private final StatusSignal<AngularVelocity> pivotVelocity;
+  private final StatusSignal<Integer> pivotVersion;
   private final StatusSignal<Voltage> pivotVoltage;
-  private final StatusSignal<Current> pivotSupply;
-  private final StatusSignal<Current> pivotStator;
   private final StatusSignal<Temperature> pivotTemperature;
+  private final StatusSignal<Current> pivotStator;
+  private final StatusSignal<Current> pivotSupply;
 
-  // divide the max free speed by the gear ratio to get the max pviot velocity
-  private final AngularVelocity maxPivotVelocity =
-      RadiansPerSecond.of(DCMotor.getKrakenX60Foc(1).freeSpeedRadPerSec).div(50.0);
+  private final StatusSignal<AngularVelocity> leftRollerVelocity;
+  private final StatusSignal<Integer> leftRollerVersion;
+  private final StatusSignal<Voltage> leftRollerVoltage;
+  private final StatusSignal<Temperature> leftRollerTemperature;
+  private final StatusSignal<Current> leftRollerStator;
+  private final StatusSignal<Current> leftRollerSupply;
 
-  /** Creates and configures the real intake motor controllers. */
+  private final StatusSignal<AngularVelocity> rightRollerVelocity;
+  private final StatusSignal<Integer> rightRollerVersion;
+  private final StatusSignal<Voltage> rightRollerVoltage;
+  private final StatusSignal<Temperature> rightRollerTemperature;
+  private final StatusSignal<Current> rightRollerStator;
+  private final StatusSignal<Current> rightRollerSupply;
+
+  private final VoltageOut voltageOut = new VoltageOut(0.0);
+  private final PositionVoltage positionVoltage = new PositionVoltage(Radians.zero());
+  private final VelocityVoltage velocityVoltage = new VelocityVoltage(RadiansPerSecond.zero());
+  private final TorqueCurrentFOC currentOutput = new TorqueCurrentFOC(0.0);
+
+  private final VoltageOut pivotAppliedVoltage = new VoltageOut(0.0);
+
   public IntakeIOTalonFX() {
-    pivot = new TalonFX(RobotMap.IntakeMap.pivot, RobotMap.systemBus);
-    rollerLeft = new TalonFX(RobotMap.IntakeMap.rollerLeft, RobotMap.systemBus);
-    rollerRight = new TalonFX(RobotMap.IntakeMap.rollerRight, RobotMap.systemBus);
+    pivot = new TalonFX(RobotMap.Intake.pivot, RobotMap.systemBus);
+    leftRoller = new TalonFX(RobotMap.Intake.leftRoller, RobotMap.systemBus);
+    rightRoller = new TalonFX(RobotMap.Intake.rightRoller, RobotMap.systemBus);
 
-    config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-    config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    pivotConfig.Feedback.SensorToMechanismRatio = IntakeConstants.Mechanical.pivotGearing;
+    pivotConfig.MotorOutput.Inverted =
+        IntakeConstants.Mechanical.pivotInverted
+            ? InvertedValue.CounterClockwise_Positive
+            : InvertedValue.Clockwise_Positive;
+    pivotConfig.MotorOutput.PeakForwardDutyCycle = IntakeConstants.Pivot.Output.maxForward;
+    pivotConfig.MotorOutput.PeakReverseDutyCycle = IntakeConstants.Pivot.Output.maxReverse;
+    pivotConfig.Slot0.kP = IntakeConstants.Pivot.PID.kP.getAsDouble();
+    pivotConfig.Slot0.kI = IntakeConstants.Pivot.PID.kI.getAsDouble();
+    pivotConfig.Slot0.kD = IntakeConstants.Pivot.PID.kD.getAsDouble();
+    pivotConfig.Slot0.kS = IntakeConstants.Pivot.PID.kS.getAsDouble();
+    pivotConfig.Slot0.kG = IntakeConstants.Pivot.PID.kG.getAsDouble();
+    pivotConfig.Slot0.kV = IntakeConstants.Pivot.PID.kV.getAsDouble();
+    pivotConfig.Slot0.kA = IntakeConstants.Pivot.PID.kA.getAsDouble();
+    pivotConfig.CurrentLimits.SupplyCurrentLimit =
+        (int) IntakeConstants.Pivot.CurrentLimits.maxSupply.in(Amps);
+    pivotConfig.CurrentLimits.StatorCurrentLimit =
+        (int) IntakeConstants.Pivot.CurrentLimits.maxStator.in(Amps);
+    pivotConfig.Voltage.PeakForwardVoltage =
+        IntakeConstants.Pivot.VoltageLimits.maxForward.in(Volts);
+    pivotConfig.Voltage.PeakReverseVoltage =
+        IntakeConstants.Pivot.VoltageLimits.maxReverse.in(Volts);
+    pivotConfig.ClosedLoopRamps.VoltageClosedLoopRampPeriod = 0.25;
 
-    config.CurrentLimits.SupplyCurrentLimit = IntakeConstants.CurrentLimits.maxSupply.in(Amps);
-    config.CurrentLimits.SupplyCurrentLimitEnable = true;
+    rollerConfig.Feedback.SensorToMechanismRatio = IntakeConstants.Mechanical.rollerGearing;
+    rollerConfig.MotorOutput.Inverted =
+        IntakeConstants.Mechanical.rollerInverted
+            ? InvertedValue.CounterClockwise_Positive
+            : InvertedValue.Clockwise_Positive;
+    rollerConfig.MotorOutput.PeakForwardDutyCycle = IntakeConstants.Roller.Output.maxForward;
+    rollerConfig.MotorOutput.PeakReverseDutyCycle = IntakeConstants.Roller.Output.maxReverse;
+    rollerConfig.CurrentLimits.SupplyCurrentLimit =
+        (int) IntakeConstants.Roller.CurrentLimits.maxSupply.in(Amps);
+    rollerConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+    rollerConfig.CurrentLimits.StatorCurrentLimit =
+        (int) IntakeConstants.Roller.CurrentLimits.maxStator.in(Amps);
+    rollerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+    rollerConfig.Voltage.PeakForwardVoltage =
+        IntakeConstants.Roller.VoltageLimits.maxForward.in(Volts);
+    rollerConfig.Voltage.PeakReverseVoltage =
+        IntakeConstants.Roller.VoltageLimits.maxReverse.in(Volts);
+    rollerConfig.ClosedLoopRamps.VoltageClosedLoopRampPeriod = 0.25;
+    rollerConfig.Slot0.kP = IntakeConstants.Roller.PID.kP.getAsDouble();
+    rollerConfig.Slot0.kI = IntakeConstants.Roller.PID.kI.getAsDouble();
+    rollerConfig.Slot0.kD = IntakeConstants.Roller.PID.kD.getAsDouble();
+    rollerConfig.Slot0.kS = IntakeConstants.Roller.PID.kS.getAsDouble();
+    rollerConfig.Slot0.kG = IntakeConstants.Roller.PID.kG.getAsDouble();
+    rollerConfig.Slot0.kV = IntakeConstants.Roller.PID.kV.getAsDouble();
+    rollerConfig.Slot0.kA = IntakeConstants.Roller.PID.kA.getAsDouble();
 
-    config.Slot1.kV = PID.rollerkv.getAsDouble();
-    config.Slot1.kS = PID.rollerks.getAsDouble();
-    config.Slot1.kP = PID.rollerkP.getAsDouble();
-    config.Slot1.kD = PID.rollerkd.getAsDouble();
+    PhoenixUtil.tryUntilOk(5, () -> pivot.getConfigurator().apply(pivotConfig, 0.25));
+    PhoenixUtil.tryUntilOk(5, () -> leftRoller.getConfigurator().apply(rollerConfig, 0.25));
+    PhoenixUtil.tryUntilOk(5, () -> rightRoller.getConfigurator().apply(rollerConfig, 0.25));
 
-    PhoenixUtil.tryUntilOk(5, () -> (rollerLeft.getConfigurator().apply(config, 5)));
-    PhoenixUtil.tryUntilOk(5, () -> (rollerRight.getConfigurator().apply(config, 5)));
-
-    config.CurrentLimits.StatorCurrentLimit = IntakeConstants.CurrentLimits.maxStator.in(Amps);
-    config.CurrentLimits.StatorCurrentLimitEnable = true;
-
-    // TODO: PID STUFF
-    config.Slot0.kP = IntakeConstants.PID.kP.get();
-    config.Slot0.kI = IntakeConstants.PID.kI.get();
-    config.Slot0.kD = IntakeConstants.PID.kD.get();
-    config.Slot0.kG = IntakeConstants.PID.kG.get();
-    config.Slot0.kS = IntakeConstants.PID.kS.get();
-    config.Slot0.kV = IntakeConstants.PID.kV.get();
-    config.Slot0.kA = IntakeConstants.PID.kA.get();
-    config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
-    config.Feedback.SensorToMechanismRatio = IntakeConstants.Mechanical.gearing;
-    config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
-    config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-    config.Voltage.PeakForwardVoltage = IntakeConstants.VoltageLimits.peakForwardVoltage.in(Volts);
-    config.Voltage.PeakReverseVoltage = IntakeConstants.VoltageLimits.peakReverseVoltage.in(Volts);
-
-    config.MotionMagic.MotionMagicAcceleration =
-        maxPivotVelocity.per(Second).in(RotationsPerSecondPerSecond);
-    config.MotionMagic.MotionMagicCruiseVelocity = maxPivotVelocity.in(RotationsPerSecond);
-
-    PhoenixUtil.tryUntilOk(5, () -> (pivot.getConfigurator().apply(config, 5)));
-    rollerVelocity = rollerLeft.getVelocity();
-    rollerLeftVoltage = rollerLeft.getMotorVoltage();
-    rollerLeftSupply = rollerLeft.getSupplyCurrent();
-    rollerLeftStator = rollerLeft.getStatorCurrent();
-    rollerRightVoltage = rollerRight.getMotorVoltage();
-    rollerRightSupply = rollerRight.getSupplyCurrent();
-    rollerRightStator = rollerRight.getStatorCurrent();
-    rollerLeftTemperature = rollerLeft.getDeviceTemp();
-    rollerRightTemperature = rollerRight.getDeviceTemp();
-
-    pivotAngle = pivot.getPosition();
+    pivotPosition = pivot.getPosition();
     pivotVelocity = pivot.getVelocity();
     pivotVoltage = pivot.getMotorVoltage();
-    pivotSupply = pivot.getSupplyCurrent();
-    pivotStator = pivot.getStatorCurrent();
     pivotTemperature = pivot.getDeviceTemp();
+    pivotStator = pivot.getStatorCurrent();
+    pivotSupply = pivot.getSupplyCurrent();
+    pivotVersion = pivot.getVersion();
 
-    pivot.setPosition(IntakeConstants.Setpoints.stowed);
+    leftRollerVersion = leftRoller.getVersion();
+    leftRollerVelocity = leftRoller.getVelocity();
+    leftRollerVoltage = leftRoller.getMotorVoltage();
+    leftRollerTemperature = leftRoller.getDeviceTemp();
+    leftRollerStator = leftRoller.getStatorCurrent();
+    leftRollerSupply = leftRoller.getSupplyCurrent();
 
-    StatusSignal.setUpdateFrequencyForAll(250.0, pivotAngle);
-    StatusSignal.setUpdateFrequencyForAll(
-        50.0,
-        rollerLeftVoltage,
-        rollerLeftSupply,
-        rollerLeftStator,
-        rollerRightVoltage,
-        rollerRightSupply,
-        rollerRightStator,
-        rollerLeftTemperature,
-        rollerRightTemperature,
-        rollerVelocity,
-        pivotVelocity,
-        pivotVoltage,
-        pivotSupply,
-        pivotStator,
-        pivotTemperature);
-    PhoenixUtil.tryUntilOk(5, () -> rollerLeft.optimizeBusUtilization());
-    PhoenixUtil.tryUntilOk(5, () -> rollerRight.optimizeBusUtilization());
+    rightRollerVersion = rightRoller.getVersion();
+    rightRollerVelocity = rightRoller.getVelocity();
+    rightRollerVoltage = rightRoller.getMotorVoltage();
+    rightRollerTemperature = rightRoller.getDeviceTemp();
+    rightRollerStator = rightRoller.getStatorCurrent();
+    rightRollerSupply = rightRoller.getSupplyCurrent();
+
+    rightRoller.setControl(new Follower(leftRoller.getDeviceID(), MotorAlignmentValue.Opposed));
+
+    PhoenixUtil.tryUntilOk(
+        5,
+        () ->
+            BaseStatusSignal.setUpdateFrequencyForAll(
+                50.0,
+                pivotPosition,
+                pivotVelocity,
+                pivotVoltage,
+                pivotTemperature,
+                pivotStator,
+                pivotSupply,
+                leftRollerVelocity,
+                leftRollerVoltage,
+                leftRollerTemperature,
+                leftRollerStator,
+                leftRollerSupply,
+                rightRollerVelocity,
+                rightRollerVoltage,
+                rightRollerTemperature,
+                rightRollerStator,
+                rightRollerSupply));
+    PhoenixUtil.tryUntilOk(
+        5,
+        () ->
+            BaseStatusSignal.setUpdateFrequencyForAll(
+                4.0, pivotVersion, leftRollerVersion, rightRollerVersion));
     PhoenixUtil.tryUntilOk(5, () -> pivot.optimizeBusUtilization());
-    rollerRight.setControl(new Follower(rollerLeft.getDeviceID(), MotorAlignmentValue.Opposed));
+    PhoenixUtil.tryUntilOk(5, () -> leftRoller.optimizeBusUtilization());
+    PhoenixUtil.tryUntilOk(5, () -> rightRoller.optimizeBusUtilization());
+    pivot.setPosition(Radians.zero());
   }
 
-  /**
-   * Refreshes motor status signals and stores them in the logged input snapshot.
-   *
-   * @param inputs mutable input snapshot to fill
-   */
   @Override
   public void updateInputs(IntakeInputs inputs) {
     StatusSignal.refreshAll(
-        rollerVelocity,
-        rollerLeftVoltage,
-        rollerLeftSupply,
-        rollerLeftStator,
-        rollerLeftTemperature,
-        pivotAngle,
+        pivotPosition,
         pivotVelocity,
         pivotVoltage,
-        pivotSupply,
+        pivotTemperature,
         pivotStator,
-        pivotTemperature);
-
-    inputs.rollerLeftConnected =
+        pivotSupply,
+        pivotVersion,
+        leftRollerVelocity,
+        leftRollerVoltage,
+        leftRollerTemperature,
+        leftRollerStator,
+        leftRollerSupply,
+        leftRollerVersion,
+        rightRollerVelocity,
+        rightRollerVoltage,
+        rightRollerTemperature,
+        rightRollerStator,
+        rightRollerSupply,
+        rightRollerVersion);
+    inputs.pivotConnected = pivot.isConnected();
+    inputs.pivotAlive =
         StatusSignal.isAllGood(
-            rollerVelocity,
-            rollerLeftVoltage,
-            rollerLeftSupply,
-            rollerLeftStator,
-            rollerLeftTemperature);
-    inputs.rollerRightConnected =
-        StatusSignal.isAllGood(
-            rollerRightVoltage, rollerRightSupply, rollerRightStator, rollerRightTemperature);
-    inputs.rollerLeftVelocity = rollerVelocity.getValue().in(RadiansPerSecond);
-    inputs.rollerLeftAppliedVoltage = rollerLeftVoltage.getValue();
-    inputs.rollerLeftStator = rollerLeftStator.getValue();
-    inputs.rollerLeftSupply = rollerLeftSupply.getValue();
-    inputs.rollerLeftTemp = rollerLeftTemperature.getValue();
-    inputs.rollerRightAppliedVoltage = rollerRightVoltage.getValue();
-    inputs.rollerRightStator = rollerRightStator.getValue();
-    inputs.rollerRightSupply = rollerRightSupply.getValue();
-    inputs.rollerRightTemp = rollerRightTemperature.getValue();
-
-    inputs.pivotConnected =
-        StatusSignal.isAllGood(
-            pivotAngle, pivotVelocity, pivotVoltage, pivotSupply, pivotStator, pivotTemperature);
-    inputs.pivotAngle = pivotAngle.getValue();
+            pivotPosition,
+            pivotVelocity,
+            pivotVoltage,
+            pivotTemperature,
+            pivotStator,
+            pivotSupply,
+            pivotVersion);
+    inputs.pivotPosition = pivotPosition.getValue();
     inputs.pivotVelocity = pivotVelocity.getValue();
+    inputs.pivotVoltage = pivotVoltage.getValue();
+    inputs.pivotTemperature = pivotTemperature.getValue();
     inputs.pivotStator = pivotStator.getValue();
     inputs.pivotSupply = pivotSupply.getValue();
-    inputs.pivotAppliedVoltage = pivotVoltage.getValue();
-    inputs.pivotTemp = pivotTemperature.getValue();
 
-    LoggedTunableNumber.ifChanged(
-        hashCode(), () -> resetValues(), rollerkP, rollerkd, rollerks, rollerkv);
+    inputs.leftRollerConnected = leftRoller.isConnected();
+    inputs.leftRollerAlive =
+        StatusSignal.isAllGood(
+            leftRollerVelocity,
+            leftRollerVoltage,
+            leftRollerTemperature,
+            leftRollerStator,
+            leftRollerSupply,
+            leftRollerVersion);
+    inputs.leftRollerVelocity = leftRollerVelocity.getValue();
+    inputs.leftRollerVoltage = leftRollerVoltage.getValue();
+    inputs.leftRollerTemperature = leftRollerTemperature.getValue();
+    inputs.leftRollerStator = leftRollerStator.getValue();
+    inputs.leftRollerSupply = leftRollerSupply.getValue();
+
+    inputs.rightRollerConnected = rightRoller.isConnected();
+    inputs.rightRollerAlive =
+        StatusSignal.isAllGood(
+            rightRollerVelocity,
+            rightRollerVoltage,
+            rightRollerTemperature,
+            rightRollerStator,
+            rightRollerSupply,
+            rightRollerVersion);
+    inputs.rightRollerVelocity = rightRollerVelocity.getValue();
+    inputs.rightRollerVoltage = rightRollerVoltage.getValue();
+    inputs.rightRollerTemperature = rightRollerTemperature.getValue();
+    inputs.rightRollerStator = rightRollerStator.getValue();
+    inputs.rightRollerSupply = rightRollerSupply.getValue();
   }
 
-  /** Reapplies tunable PID and feedforward constants to the motor controllers. */
-  @SuppressWarnings("unused")
-  private void resetValues() {
-    Slot0Configs slot0Configs = new Slot0Configs();
-    Slot1Configs slot1Config = new Slot1Configs();
-    slot0Configs.withKP(kP.getAsDouble());
-    slot0Configs.withKI(kI.getAsDouble());
-    slot0Configs.withKD(kD.getAsDouble());
-    slot0Configs.withKV(kV.getAsDouble());
-    slot0Configs.withKA(kA.getAsDouble());
-    slot0Configs.withKG(kG.getAsDouble());
-    slot0Configs.withKS(kS.getAsDouble());
-    slot1Config.withKV(rollerkv.getAsDouble());
-    slot1Config.withKS(rollerks.getAsDouble());
-    slot1Config.withKP(rollerkP.getAsDouble());
-    slot1Config.withKD(rollerkd.getAsDouble());
-    rollerLeft.getConfigurator().apply(slot1Config, 0.25);
-    pivot.getConfigurator().apply(slot0Configs, 0.25);
-  }
-
-  /**
-   * Commands the pivot to an angle with Motion Magic.
-   *
-   * @param angle desired pivot angle
-   */
   @Override
-  public void setPosition(Angle angle) {
-    pivot.setControl(motionMagic.withPosition(angle));
+  public void setRollerVoltage(Voltage output) {
+    leftRoller.setControl(voltageOut.withOutput(output));
   }
 
-  /**
-   * Commands the left roller velocity and stops the roller when zero is requested.
-   *
-   * @param velocity desired roller velocity
-   */
   @Override
   public void setRollerVelocity(AngularVelocity velocity) {
-    rollerLeft.setControl(velocityVoltage.withVelocity(velocity));
-    if (velocity.magnitude() == 0.0) {
-      rollerLeft.stopMotor();
-    }
+    leftRoller.setControl(velocityVoltage.withVelocity(velocity));
   }
 
-  /**
-   * Applies torque current to the left roller.
-   *
-   * @param desired desired roller current
-   */
   @Override
-  public void setCurrent(Current desired) {
-    rollerLeft.setControl(applyCurrent.withOutput(desired));
+  public void setPivotPosition(Angle position) {
+    pivot.setControl(positionVoltage.withPosition(position));
   }
 
-  /**
-   * Applies voltage to the roller pair.
-   *
-   * @param applied desired roller voltage
-   */
   @Override
-  public void setVoltage(Voltage applied) {
-    rollerLeft.setControl(applyVoltage.withOutput(applied));
-
-    if (applied.magnitude() == 0) {
-      rollerLeft.stopMotor();
-      rollerRight.stopMotor();
-    }
-  }
-
-  /**
-   * Applies test voltage to a selected roller.
-   *
-   * @param applied desired test voltage
-   * @param left true for the left roller, false for the right roller
-   */
-  @Override
-  public void setVoltageTest(Voltage applied, boolean left) {
-    if (left) {
-      rollerLeft.setControl(applyVoltage.withOutput(applied));
-    } else {
-      rollerRight.setControl(applyVoltage.withOutput(applied.unaryMinus()));
-    }
-    if (applied.magnitude() == 0) {
-      rollerLeft.stopMotor();
-      rollerRight.stopMotor();
-      rollerRight.setControl(new Follower(rollerLeft.getDeviceID(), MotorAlignmentValue.Opposed));
-    }
-  }
-
-  /**
-   * Applies clamped voltage directly to the pivot motor.
-   *
-   * @param applied desired pivot voltage
-   */
-  @Override
-  public void setPivotVoltage(Voltage applied) {
-    Logger.recordOutput("Intake/Applied Volts", applied.in(Volts));
-    pivot.setControl(applyPivotVoltage.withOutput(MathUtil.clamp(applied.in(Volts), -1, 1)));
-    if (applied.magnitude() == 0) {
-      pivot.stopMotor();
-    }
+  public void setPivotVoltage(Voltage voltage) {
+    pivot.setControl(pivotAppliedVoltage.withOutput(voltage));
   }
 }

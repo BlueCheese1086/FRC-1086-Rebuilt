@@ -4,9 +4,8 @@
 
 package frc.robot.subsystems.shooter;
 
-import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static frc.robot.subsystems.shooter.ShooterConstants.Tuning.*;
+import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -26,10 +25,7 @@ public class ShooterIOSim implements ShooterIO {
   public ShooterIOSim() {
     shooter =
         new FlywheelSim(
-            LinearSystemId.createFlywheelSystem(
-                DCMotor.getKrakenX60Foc(1),
-                ShooterConstants.Mechanical.J.in(KilogramSquareMeters),
-                ShooterConstants.Mechanical.shooterWheelGearRatio),
+            LinearSystemId.createFlywheelSystem(DCMotor.getKrakenX60Foc(1), 0.01, 1.0),
             DCMotor.getKrakenX60Foc(1));
     shooterFF = new SimpleMotorFeedforward(0.0, 0.019, 0.0);
     pidController = new PIDController(0.01, 0.0, 0.0);
@@ -48,29 +44,7 @@ public class ShooterIOSim implements ShooterIO {
 
     shooter.setInputVoltage(MathUtil.clamp(appliedVoltage, -12.0, 12.0));
     inputs.velocity = shooter.getAngularVelocityRadPerSec();
-    inputs.appliedVoltage = shooter.getInputVoltage();
-    inputs.statorCurrent = shooter.getCurrentDrawAmps();
-    inputs.positionRadPerSec = 0.0;
-    inputs.setpoint = pidController.getSetpoint();
-    inputs.atSetpoint = pidController.atSetpoint();
-
-    // if (kP.hasChanged(hashCode())
-    //     || kI.hasChanged(hashCode())
-    //     || kd.hasChanged(hashCode())
-    //     || kv.hasChanged(hashCode())
-    //     || ka.hasChanged(hashCode())
-    //     || ks.hasChanged(hashCode())) {
-    //   updateClosedLoop();
-    // }
-  }
-
-  private void updateClosedLoop() {
-    shooterFF.setKa(ka.getAsDouble());
-    shooterFF.setKv(kv.getAsDouble());
-    shooterFF.setKs(ks.getAsDouble());
-    pidController.setP(kP.getAsDouble());
-    pidController.setI(kI.getAsDouble());
-    pidController.setD(kd.getAsDouble());
+    inputs.upperLeftVoltage = Volts.of(shooter.getInputVoltage());
   }
 
   @Override

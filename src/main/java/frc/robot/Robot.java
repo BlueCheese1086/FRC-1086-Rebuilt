@@ -26,9 +26,7 @@ import edu.wpi.first.wpilibj.Watchdog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.hood.HoodConstants;
 import frc.robot.util.HubShiftUtil;
-import frc.robot.util.LoggedTunableNumber;
 import frc.robot.util.MatchTimer;
 import java.io.File;
 import java.io.IOException;
@@ -111,7 +109,6 @@ public class Robot extends LoggedRobot {
     // Start AdvantageKit logger
     Logger.start();
     SignalLogger.enableAutoLogging(false);
-    HoodConstants.Targeting.hoodAngle = new LoggedTunableNumber("Hood/Hood Angle", 54.0);
     try {
       Field watchdogField = IterativeRobotBase.class.getDeclaredField("m_watchdog");
       watchdogField.setAccessible(true);

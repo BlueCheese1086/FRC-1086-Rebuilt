@@ -5,80 +5,46 @@
 package frc.robot.subsystems.shooter;
 
 import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.Second;
-import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.subsystems.shooter.FeederIO.FeederIO;
 import frc.robot.subsystems.shooter.FeederIO.FeederIOInputsAutoLogged;
-import frc.robot.util.AllianceFlipUtil;
-import frc.robot.util.FieldConstants.Hub;
-import java.io.File;
-import java.io.FileWriter;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
-  private ShooterInputsAutoLogged[] inputs;
-  private ShooterIO[] io;
+  private ShooterInputsAutoLogged shooterIOinputsAutoLogged;
+  private ShooterIO shooterIO;
   private FeederIO feederIO;
   private FeederIOInputsAutoLogged feederIOInputsAutoLogged;
   // private final File file;
 
-  public Shooter(FeederIO feederIO, ShooterIO... io) {
-    this.io = io;
+  public Shooter(FeederIO feederIO, ShooterIO shooterIO) {
+    this.shooterIO = shooterIO;
     this.feederIO = feederIO;
     this.feederIOInputsAutoLogged = new FeederIOInputsAutoLogged();
-    inputs = new ShooterInputsAutoLogged[io.length];
-    for (int i = 0; i < io.length; i++) {
-      inputs[i] = new ShooterInputsAutoLogged();
-    }
-    // file = new File(ShooterConstants.Targeting.FileName);
-
-    // try (FileWriter writer = new FileWriter(file, true)) {
-    //   if (file.length() == 0) {
-    //     writer.write("Distance, Shooter, Angle, TOF\n");
-    //   } else {
-    //     clearFile(file);
-    //     writer.write("Distance, Shooter, Angle, TOF\n");
-    //   }
-    // } catch (IOException e) {
-    //   e.printStackTrace();
-    // }
-  }
-
-  // Clears a specified file
-  private void clearFile(File file) {
-    try (FileWriter writer = new FileWriter(file, false)) {
-      writer.write("");
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    this.shooterIOinputsAutoLogged = new ShooterInputsAutoLogged();
   }
 
   /**
-   * Sets the velocity setpoint of the shooter. This is the value that the shooter will try to get to.
+   * Sets the velocity setpoint of the shooter. This is the value that the shooter will try to get
+   * to.
+   *
    * @param radPerSec The new velocity setpoint
    */
   public void setVelocitySetpoint(Supplier<AngularVelocity> radPerSec) {
-    for (int i = 0; i < io.length; i++) {
-      io[i].setVelocity(radPerSec.get());
-    }
+    shooterIO.setVelocity(radPerSec.get());
   }
 
   /**
    * Runs the feeder at a specified voltage. Intended to be used within safe tolerances.
+   *
    * @param volts the desired output voltage
    */
   public Command runFeed(double volts) {
@@ -87,173 +53,49 @@ public class Shooter extends SubsystemBase {
 
   /**
    * Sets the voltage of the shooter motors
+   *
    * @param volts the request output voltage
    */
   public Command setVoltage(double volts) {
     return this.run(
             () -> {
-              for (int i = 0; i < io.length; i++) {
-                io[i].setVoltage(volts);
-              }
+              shooterIO.setVoltage(volts);
             })
         .finallyDo(this::stopShooter);
   }
 
-  /**
-   * Stops both the feeder and shooter motors
-   */
+  /** Stops both the feeder and shooter motors */
   public void stopAll() {
-    for (int i = 0; i < io.length; i++) {
-      io[i].setVoltage(0.0);
-      io[i].setVelocity(RadiansPerSecond.of(0.0));
-    }
+    shooterIO.setVoltage(0.0);
+    shooterIO.setVelocity(RadiansPerSecond.of(0.0));
     feederIO.setFeedVoltage(0.0);
   }
-  /**
-   * Stops only the shooter
-   */
+
+  /** Stops only the shooter */
   public void stopShooter() {
-    for (int i = 0; i < io.length; i++) {
-      // io[i].setVoltage(0.0);
-      io[i].setVelocity(RadiansPerSecond.of(0.0));
-    }
+    shooterIO.setVelocity(RadiansPerSecond.of(0.0));
   }
 
-  /**
-   * Stops only the feeder
-   */
+  /** Stops only the feeder */
   public void stopFeeder() {
     feederIO.setFeedVoltage(0.0);
   }
 
-  /**
-   * @return returns the setpoint of the MIDDLE SHOOTER, if that shooter is at the setpoint or not
-   */
-  public boolean atSetpoint() {
-    return inputs[0].atSetpoint && inputs[1].atSetpoint && inputs[2].atSetpoint;
+  public static Pose2d shooterPose(Supplier<Pose2d> drivePose) {
+    return drivePose
+        .get()
+        .transformBy(
+            new Transform2d(
+                Units.inchesToMeters(11.0), drivePose.get().getY(), drivePose.get().getRotation()));
   }
 
-  /**
-   * Records the shot into the file
-   * @param drivePose the pose of the robot
-   * @param hoodAngle the hood angle used
-   * @param tof the time it took for the shot to land
-   */
-  public void recordShot(Pose3d drivePose, Angle hoodAngle, double tof) {
-    double distanceToHub =
-        Math.abs(
-            drivePose
-                .plus(ShooterConstants.ShooterTransforms.centerShooter)
-                .getTranslation()
-                .getDistance(AllianceFlipUtil.apply(Hub.topCenterPoint)));
-    Logger.recordOutput("File Writing/ Distance to Hub", distanceToHub);
-    Logger.recordOutput(
-        "File Writing/ Shooter RPM",
-        Units.radiansPerSecondToRotationsPerMinute(inputs[1].velocity));
-
-    // try (FileWriter writer = new FileWriter(file, true)) {
-    //   writer.append(
-    //       distanceToHub
-    //           + " ,"
-    //           + inputs[1].velocity
-    //           + " ,"
-    //           + hoodAngle.in(Degrees)
-    //           + " , "
-    //           + tof
-    //           + "\n");
-    // } catch (Exception e) {
-    //   e.printStackTrace();
-    // }
-  }
-
-  /**
-   * Gets the Pose3ds of each of the shooter lanes for logging
-   * @param robotPose the robot's 2d pose
-   * @return the pose3ds of the shooter lanes
-   */
-  public static Pose3d[] getShooterPoses(Pose2d robotPose) {
-    Pose3d robot3d = new Pose3d(robotPose);
-    return new Pose3d[] {
-      robot3d.transformBy(ShooterConstants.ShooterTransforms.leftShooter),
-      robot3d.transformBy(ShooterConstants.ShooterTransforms.centerShooter),
-      robot3d.transformBy(ShooterConstants.ShooterTransforms.rightShooter)
-    };
-  }
-
-  /**
-   * The periodic function
-   */
+  /** The periodic function */
   @Override
   public void periodic() {
-    for (int i = 0; i < io.length; i++) {
-      io[i].updateInputs(inputs[i]);
-      Logger.processInputs("Shooter/Flywheel" + (i + 1), inputs[i]);
-    }
+    shooterIO.updateInputs(shooterIOinputsAutoLogged);
+    Logger.processInputs("Shooter/Flywheel", shooterIOinputsAutoLogged);
+
     feederIO.updateInputs(feederIOInputsAutoLogged);
     Logger.processInputs("Shooter/Feeder", feederIOInputsAutoLogged);
-  }
-
-  /**
-   * Gets the Command to run the System Identification Routine on the Shooter
-   * @param timeout How long each stage of the routine should run
-   * @param i Which shooter IO should run
-   * @param string The unique name of the System Identification Test
-   * @return The command to run the System Identification routine
-   */
-  public Command sysid(double timeout, int i, String string) {
-    return Commands.sequence(
-        this.getShooterSysIdQuasistatic(Direction.kForward, i, string).withTimeout(timeout),
-        Commands.waitUntil(() -> inputs[i].velocity <= 30.0),
-        this.getShooterSysIdQuasistatic(Direction.kReverse, i, string).withTimeout(timeout),
-        Commands.waitUntil(() -> inputs[i].velocity <= 30.0),
-        this.getShooterSysIdDynamic(Direction.kForward, i, string).withTimeout(timeout),
-        Commands.waitUntil(() -> inputs[i].velocity <= 30.0),
-        this.getShooterSysIdDynamic(Direction.kReverse, i, string).withTimeout(timeout),
-        Commands.waitUntil(() -> inputs[i].velocity <= 30.0),
-        Commands.runOnce(() -> io[i].setVoltage(0.0)));
-  }
-
-  /**
-   * Gets the command to run the Quasistic Portion of the SysID Routine
-   * @param direction The direction the motor should output
-   * @param index Which shooter IO you wanted to run the routine on
-   * @param name The name of the Sysid Test
-   * @return
-   */
-  public Command getShooterSysIdQuasistatic(Direction direction, int index, String name) {
-    return new SysIdRoutine(
-            new SysIdRoutine.Config(Volts.of(2.0).per(Second), Volts.of(8.0), null),
-            new SysIdRoutine.Mechanism(
-                volts -> io[index].setVoltage(volts.in(Volts)),
-                log -> {
-                  log.motor(name)
-                      .voltage(Volts.of(inputs[index].appliedVoltage))
-                      .angularPosition(Rotations.of(inputs[index].positionRadPerSec))
-                      .angularVelocity(RotationsPerSecond.of(inputs[index].velocity));
-                },
-                this))
-        .quasistatic(direction);
-  }
-
-  /**
-   * Gets the command to run the Quasistic Portion of the SysID Routine
-   * @param direction The direction the motor should output
-   * @param index Which shooter IO you wanted to run the routine on
-   * @param name The name of the Sysid Test
-   * @return
-   */
-  public Command getShooterSysIdDynamic(Direction direction, int index, String name) {
-    return new SysIdRoutine(
-            new SysIdRoutine.Config(Volts.of(2.0).per(Second), Volts.of(4), null),
-            new SysIdRoutine.Mechanism(
-                volts -> io[index].setVoltage(volts.in(Volts)),
-                log -> {
-                  log.motor(name)
-                      .voltage(Volts.of(inputs[index].appliedVoltage))
-                      .angularPosition(Rotations.of(inputs[index].positionRadPerSec))
-                      .angularVelocity(RotationsPerSecond.of(inputs[index].velocity));
-                },
-                this))
-        .dynamic(direction);
   }
 }

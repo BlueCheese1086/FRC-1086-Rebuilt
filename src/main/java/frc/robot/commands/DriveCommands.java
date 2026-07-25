@@ -7,14 +7,11 @@
 
 package frc.robot.commands;
 
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -28,9 +25,6 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.hood.Hood;
-import frc.robot.subsystems.shooter.Shooter;
-import frc.robot.subsystems.shooter.ShooterConstants;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.PoseMath;
 import java.text.DecimalFormat;
@@ -130,32 +124,6 @@ public class DriveCommands {
                       : drive.getRotation()));
         },
         drive);
-  }
-
-  public static Command recordData(Drive drive, Shooter shooter, Hood hood) {
-    Timer time = new Timer();
-    return Commands.runEnd(
-            () -> {
-              shooter.setVelocitySetpoint(
-                  () ->
-                      RadiansPerSecond.of(ShooterConstants.Tuning.velocitySetpoint.getAsDouble()));
-              // hood.setPosition(() -> hoodAngle.getAsDouble());
-            },
-            () -> {
-              time.stop();
-              shooter.recordShot(new Pose3d(drive.getPose()), hood.getAngle(), time.get());
-              shooter.stopAll();
-              Logger.recordOutput("File Writing/ Hood Angle", hood.getAngle());
-              Logger.recordOutput("File Writing/Time", time.get());
-              Logger.recordOutput("File Writing/Shot finished?", true);
-            },
-            shooter)
-        .beforeStarting(
-            () -> {
-              time.reset();
-              time.start();
-              Logger.recordOutput("File Writing/Shot finished?", false);
-            });
   }
 
   private static Pose2d target = Pose2d.kZero;

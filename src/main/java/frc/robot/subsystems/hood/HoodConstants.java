@@ -4,37 +4,51 @@
 
 package frc.robot.subsystems.hood;
 
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Millimeters;
-import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Volts;
 
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.Preferences;
 import frc.robot.util.LoggedTunableNumber;
 
 /** Add your docs here. */
 public class HoodConstants {
+
+  public static LoggedTunableNumber hoodAngle = new LoggedTunableNumber("Manual Hood", 0.0);
+
   public static class Mechanical {
-    public static final Distance kServoLength = Millimeters.of(100);
-    public static final Distance kDesiredLength = Millimeters.of(100);
-    public static final double scaledDist =
-        MathUtil.clamp(kDesiredLength.in(Millimeters) / kServoLength.in(Millimeters), 0, 1.0);
-    public static final LinearVelocity kMaxServoSpeed = Millimeters.of(20).per(Second);
-    public static final double kPositionTolerance = 0.01;
-    public static final double minPosition = 0.01;
-    public static final double maxPosition = 0.77;
-    // do we need the ratio? idk im genuinely asking
+    public static final double gearing = 226.5;
+    public static final double minAngle = 0.0;
+    public static final double travel = 29;
+    public static final double maxAngle = minAngle + travel;
   }
 
-  public static class Targeting {
-    public static final double minAngleDeg = 54.0;
-    public static final double maxAngleDeg = 81.0;
-    public static LoggedTunableNumber hoodAngle = new LoggedTunableNumber("Hood/Hood Angle", 54.0);
+  public static class CurrentLimits {
+    public static final Current maxSupply = Amps.of(30);
+    public static final Current maxStator = Amps.of(60);
   }
 
-  public static class Setpoints {
-    public static final Angle passAngle = Degrees.of(60.0);
+  public static class VoltageLimits {
+    public static final Voltage minVoltage = Volts.of(-12.0);
+    public static final Voltage maxVoltage = Volts.of(12.0);
+  }
+
+  public static class PID {
+    public static LoggedTunableNumber kP =
+        new LoggedTunableNumber("Hood/PID/kP", Preferences.getDouble("Hood_kP", 200.0));
+    public static LoggedTunableNumber kI =
+        new LoggedTunableNumber("Hood/PID/kI", Preferences.getDouble("Hood_kI", 0));
+    public static LoggedTunableNumber kD =
+        new LoggedTunableNumber("Hood/PID/kD", Preferences.getDouble("Hood_kD", 0));
+    public static LoggedTunableNumber kS =
+        new LoggedTunableNumber("Hood/PID/kS", Preferences.getDouble("Hood_kS", 0.23046875));
+    public static LoggedTunableNumber kG =
+        new LoggedTunableNumber("Hood/PID/kG", Preferences.getDouble("Hood_kG", 0));
+    public static LoggedTunableNumber kV =
+        new LoggedTunableNumber("Hood/PID/kV", Preferences.getDouble("Hood_kV", 24));
+    public static LoggedTunableNumber kA =
+        new LoggedTunableNumber(
+            "Hood/PID/kA", Preferences.getDouble("Hood_kA", 1.7207000255584717));
   }
 }

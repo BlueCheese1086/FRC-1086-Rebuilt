@@ -6,108 +6,112 @@ package frc.robot.subsystems.intake;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.Preferences;
 import frc.robot.util.LoggedTunableNumber;
 
-/** Constants and tunable values for the intake subsystem. */
+/** Add your docs here. */
 public class IntakeConstants {
-  /** Pivot and roller feedback/feedforward gains. */
-  public static class PID {
-    /** Pivot proportional gain. */
-    public static LoggedTunableNumber kP = new LoggedTunableNumber("Pivot/PID/kP", 56.408);
+  public static class Mechanical {
+    public static final double rollerGearing = 1.0;
+    public static final double pivotGearing = 33.0 + (1.0 / 3.0);
 
-    /** Pivot integral gain. */
-    public static LoggedTunableNumber kI = new LoggedTunableNumber("Pivot/PID/kI", 0.0);
+    public static final boolean pivotInverted = true;
+    public static final boolean rollerInverted = false;
 
-    /** Pivot derivative gain. */
-    public static LoggedTunableNumber kD = new LoggedTunableNumber("Pivot/PID/kD", 16.039);
-
-    /** Pivot static feedforward gain. */
-    public static LoggedTunableNumber kS = new LoggedTunableNumber("Pivot/FF/kS", 0.42893);
-
-    /** Pivot gravity feedforward gain. */
-    public static LoggedTunableNumber kG = new LoggedTunableNumber("Pivot/FF/kG", 0.3871);
-
-    /** Pivot velocity feedforward gain. */
-    public static LoggedTunableNumber kV = new LoggedTunableNumber("Pivot/FF/kV", 2.1997);
-
-    /** Pivot acceleration feedforward gain. */
-    public static LoggedTunableNumber kA = new LoggedTunableNumber("Pivot/FF/kA", 2.7468);
-
-    /** Roller velocity feedforward gain. */
-    public static LoggedTunableNumber rollerkv = new LoggedTunableNumber("Roller/FF/kV", 0.0);
-
-    /** Roller static feedforward gain. */
-    public static LoggedTunableNumber rollerks = new LoggedTunableNumber("Roller/FF/ks", 0.0);
-
-    /** Roller proportional gain. */
-    public static LoggedTunableNumber rollerkP = new LoggedTunableNumber("Roller/PID/kP", 0.0);
-
-    /** Roller derivative gain. */
-    public static LoggedTunableNumber rollerkd = new LoggedTunableNumber("Roller/PID/kD", 0.0);
+    public static final Angle maxAngle = Degrees.of(135);
   }
 
-  /** Motor current limits. */
-  public static class CurrentLimits {
-    /** Maximum allowed supply current. */
-    public static final Current maxSupply = Amps.of(50);
+  public static class Pivot {
 
-    /** Maximum allowed stator current. */
-    public static final Current maxStator = Amps.of(40.0);
+    public static final Angle deploy = Degrees.zero();
+    public static final Angle retracted =
+        Degrees.of(123); // Temporary please find actual number in real life.
+
+    public static class CurrentLimits {
+      public static final Current maxSupply = Amps.of(40);
+      public static final Current maxStator = Amps.of(30);
+    }
+
+    public static class VoltageLimits {
+      public static final Voltage maxForward = Volts.of(12);
+      public static final Voltage maxReverse = Volts.of(-12);
+    }
+
+    public static class PID {
+      public static final LoggedTunableNumber kP =
+          new LoggedTunableNumber(
+              "Intake/Pivot/PID/kP", Preferences.getDouble("Intake_Pivot_kP", 12.5));
+      public static final LoggedTunableNumber kI =
+          new LoggedTunableNumber(
+              "Intake/Pivot/PID/kI", Preferences.getDouble("Intake_Pivot_kI", 0));
+      public static final LoggedTunableNumber kD =
+          new LoggedTunableNumber(
+              "Intake/Pivot/PID/kD", Preferences.getDouble("Intake_Pivot_kD", 0));
+      public static final LoggedTunableNumber kS =
+          new LoggedTunableNumber(
+              "Intake/Pivot/PID/kS", Preferences.getDouble("Intake_Pivot_kS", 0.2383));
+      public static final LoggedTunableNumber kG =
+          new LoggedTunableNumber(
+              "Intake/Pivot/PID/kG", Preferences.getDouble("Intake_Pivot_kG", 0.143));
+      public static final LoggedTunableNumber kV =
+          new LoggedTunableNumber(
+              "Intake/Pivot/PID/kV", Preferences.getDouble("Intake_Pivot_kV", 4.9277));
+      public static final LoggedTunableNumber kA =
+          new LoggedTunableNumber(
+              "Intake/Pivot/PID/kA", Preferences.getDouble("Intake_Pivot_kA", 0));
+    }
+
+    public static class Output {
+      public static final double maxForward = 1.0;
+      public static final double maxReverse = -1.0;
+    }
   }
 
-  /** Motor voltage limits. */
-  public static class VoltageLimits {
-    /** Maximum forward voltage. */
-    public static final Voltage peakForwardVoltage =
-        Volts.of(3.0); // is this rollers or is this pivot, both - martin
+  public static class Roller {
+    public static class CurrentLimits {
+      public static final Current maxSupply = Amps.of(40);
+      public static final Current maxStator = Amps.of(60);
+    }
 
-    /** Maximum reverse voltage. */
-    public static final Voltage peakReverseVoltage = Volts.of(-4.0);
-  }
+    public static final Voltage running = Volts.of(12.0);
 
-  /** Named intake positions and roller targets. */
-  public static class Setpoints {
-    /** Pivot angle for the stowed position. */
-    public static final Angle stowed = Degrees.of(115.0);
+    public static class VoltageLimits {
+      public static final Voltage maxForward = Volts.of(12);
+      public static final Voltage maxReverse = Volts.of(-12);
+    }
 
-    /** Pivot angle for the homed position. */
-    public static final Angle homed = Degrees.of(110.0);
+    public static class PID {
+      public static final LoggedTunableNumber kP =
+          new LoggedTunableNumber(
+              "Intake/Roller/PID/kP", Preferences.getDouble("Intake_Roller_kP", 0));
+      public static final LoggedTunableNumber kI =
+          new LoggedTunableNumber(
+              "Intake/Roller/PID/kI", Preferences.getDouble("Intake_Roller_kI", 0));
+      public static final LoggedTunableNumber kD =
+          new LoggedTunableNumber(
+              "Intake/Roller/PID/kD", Preferences.getDouble("Intake_Roller_kD", 0));
+      public static final LoggedTunableNumber kS =
+          new LoggedTunableNumber(
+              "Intake/Roller/PID/kS", Preferences.getDouble("Intake_Roller_kS", 0));
+      public static final LoggedTunableNumber kG =
+          new LoggedTunableNumber(
+              "Intake/Roller/PID/kG", Preferences.getDouble("Intake_Roller_kG", 0));
+      public static final LoggedTunableNumber kV =
+          new LoggedTunableNumber(
+              "Intake/Roller/PID/kV", Preferences.getDouble("Intake_Roller_kV", 0));
+      public static final LoggedTunableNumber kA =
+          new LoggedTunableNumber(
+              "Intake/Roller/PID/kA", Preferences.getDouble("Intake_Roller_kA", 0));
+    }
 
-    /** Pivot angle used for agitation. */
-    public static final Angle agitate = Degrees.of(35.0);
-
-    /** Pivot angle for the deployed position. */
-    public static final Angle deployed = Degrees.of(-24.35);
-    // im js letting yall know i might have a funny idea for agitation while shooting so js be
-    // prepared for that
-    // i wanna try slowly moving intake up to homed or stowed while shooting cuz pumping will toss
-    // but not compress them towards shooter that well
-    /** Roller voltage used to run the intake. */
-    public static final Voltage run = Volts.of(-12.0);
-
-    /** Closed-loop roller velocity target. */
-    public static final AngularVelocity rollerVelocity = RadiansPerSecond.of(100.0);
-  }
-
-  /** Mechanical dimensions, ratios, and tolerances. */
-  public static class Mechanical { // TODO: Update all of these with the actual values
-    /** Approximate intake arm length. */
-    public static final Distance intakeLength = Inches.of(14);
-
-    /** Pivot gearing reduction. */
-    public static final double gearing = 50.0;
-
-    /** Allowed pivot position error. */
-    public static final Angle kPositionTolerance = Degrees.of(1.0);
-    // all of these are in cad right
+    public static class Output {
+      public static final double maxForward = 1.0;
+      public static final double maxReverse = -1.0;
+    }
   }
 }

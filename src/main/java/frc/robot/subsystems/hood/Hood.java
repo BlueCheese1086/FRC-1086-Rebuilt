@@ -6,82 +6,115 @@ package frc.robot.subsystems.hood;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Volts;
 
-import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Robot;
-import java.util.function.DoubleSupplier;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Hood extends SubsystemBase {
-  public static final InterpolatingDoubleTreeMap AngleToPosition = new InterpolatingDoubleTreeMap();
+  /** Creates a new Hood. */
+  private final HoodIO io;
 
-  public static final InterpolatingDoubleTreeMap InvertAngleToPosition =
-      new InterpolatingDoubleTreeMap();
-  private Angle setAngle = Radians.zero();
   private final HoodInputsAutoLogged inputs = new HoodInputsAutoLogged();
 
-  static {
-    AngleToPosition.put(81.0, 0.01);
-    AngleToPosition.put(54.0, 0.77);
+  private Angle setpoint = Degrees.zero();
 
-    InvertAngleToPosition.put(0.01, 81.0);
-    InvertAngleToPosition.put(0.77, 54.0);
-  }
-
-  private final HoodIO io;
+  private final SysIdRoutine routine;
 
   public Hood(HoodIO io) {
     this.io = io;
-  }
-
-  public Command setAngle(Angle angle) {
-    Logger.recordOutput("/Hood/Map/0-1", AngleToPosition.get(angle.in(Degrees)));
-    Logger.recordOutput("/Hood/Map/key", angle.in(Degrees));
-    return this.run(() -> io.setPosition(AngleToPosition.get(angle.in(Degrees))));
+    routine =
+        new SysIdRoutine(
+            new Config(Volts.of(0.5).per(Second), Volts.of(2), Second.of(4)),
+            new Mechanism(
+                io::setVoltage,
+                (log) -> {
+                  log.motor("Hood")
+                      .angularPosition(inputs.position)
+                      .angularVelocity(inputs.velocity)
+                      .voltage(inputs.appliedVoltage);
+                },
+                this));
   }
 
   public Command setAngle(Supplier<Angle> angle) {
-    Logger.recordOutput("/Hood/Map/0-1", AngleToPosition.get(angle.get().in(Degrees)));
-    Logger.recordOutput("/Hood/Map/key", angle.get().in(Degrees));
-    return this.run(() -> io.setPosition(AngleToPosition.get(angle.get().in(Degrees))))
-        .withTimeout(0.1);
+    return this.run(
+        () -> {
+          this.setpoint = angle.get();
+          io.setAngle(
+              Radians.of(
+                  MathUtil.clamp(
+                      angle.get().in(Radians),
+                      0.0,
+                      Units.degreesToRadians(HoodConstants.Mechanical.travel))));
+        });
   }
 
-  public void setPosition(DoubleSupplier position) {
-    Logger.recordOutput("/Hood/Map/0-1", AngleToPosition.get(position.getAsDouble()));
-    Logger.recordOutput("/Hood/Map/key", position);
-    io.setPosition(AngleToPosition.get(position.getAsDouble()));
-  }
-
-  public Command directPWMControl(DoubleSupplier pwm) {
-    return this.run(() -> io.setPosition(pwm.getAsDouble())).until(io::atSetpoint);
+  public Command runAngleThenLower(Supplier<Angle> angle) {
+    return this.run(
+            () -> {
+              this.setpoint = angle.get();
+              io.setAngle(
+                  Radians.of(
+                      MathUtil.clamp(
+                          angle.get().in(Radians),
+                          0.0,
+                          Units.degreesToRadians(HoodConstants.Mechanical.travel))));
+            })
+        .finallyDo(
+            () -> {
+              this.setpoint = Radians.zero();
+              io.setAngle(Radians.zero());
+            });
   }
 
   public boolean atSetpoint() {
-    return io.atSetpoint();
+    return MathUtil.isNear(setpoint.in(Degrees), inputs.position.in(Degrees), 5);
   }
 
+  @AutoLogOutput(key = "Hood/Hood Angle")
   public Angle getAngle() {
-    if (Robot.isSimulation()) {
-      return setAngle;
-    } else {
-      return getAngleFromHoodPos(this.inputs.leftPosition);
-    }
+    return inputs.position.plus(Degrees.of(7.402304));
   }
 
-  public static Angle getAngleFromHoodPos(double hoodpos) {
-    return Degrees.of(AngleToPosition.get(hoodpos));
+  public Command runVoltage(Voltage voltage) {
+    return this.runEnd(
+        () -> {
+          io.setVoltage(voltage);
+        },
+        () -> {
+          io.setVoltage(Volts.zero());
+        });
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
     io.updateInputs(inputs);
-    inputs.setAngle = setAngle;
+    inputs.positionDeg = inputs.position.in(Degrees);
     Logger.processInputs("Hood", inputs);
+  }
+
+  public Command resetEncoder() {
+    return this.runOnce(io::resetEncoder).ignoringDisable(true);
+  }
+
+  public Command autoZero() {
+    return Commands.sequence(
+        this.runVoltage(Volts.of(-1)).until(() -> inputs.velocity.in(RadiansPerSecond) < 0.1),
+        resetEncoder());
   }
 }

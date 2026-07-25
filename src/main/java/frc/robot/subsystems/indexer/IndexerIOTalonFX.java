@@ -7,6 +7,8 @@ package frc.robot.subsystems.indexer;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Volts;
 
+import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
@@ -23,10 +25,8 @@ import frc.robot.util.PhoenixUtil;
 
 /** Add your docs here. */
 public class IndexerIOTalonFX implements IndexerIO {
-  private final TalonFX talon;
-  private final TalonFXConfiguration config = new TalonFXConfiguration();
-  private final VoltageOut applyVoltage = new VoltageOut(0.0).withEnableFOC(true);
-  private final TorqueCurrentFOC applyCurrent = new TorqueCurrentFOC(0.0);
+  private final TalonFX hopperTalon;
+  private TalonFXConfiguration hopperConfig = new TalonFXConfiguration();
 
   private final StatusSignal<AngularVelocity> velocity;
   private final StatusSignal<Voltage> appliedVoltage;
@@ -34,54 +34,59 @@ public class IndexerIOTalonFX implements IndexerIO {
   private final StatusSignal<Current> supply;
   private final StatusSignal<Temperature> temp;
 
+  private final VoltageOut voltageOut = new VoltageOut(0.0);
+  private final TorqueCurrentFOC torqueCurrent = new TorqueCurrentFOC(0.0);
+
   public IndexerIOTalonFX() {
-    talon = new TalonFX(RobotMap.indexer, RobotMap.systemBus);
-    config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-    config.CurrentLimits.StatorCurrentLimitEnable = true;
-    config.CurrentLimits.StatorCurrentLimit = IndexerConstants.CurrentLimits.maxStator.in(Amps);
-    config.CurrentLimits.SupplyCurrentLimitEnable = true;
-    config.CurrentLimits.SupplyCurrentLowerTime = 0.0;
-    config.CurrentLimits.SupplyCurrentLimit = IndexerConstants.CurrentLimits.maxSupply.in(Amps);
+    hopperTalon = new TalonFX(RobotMap.hopper, RobotMap.systemBus);
 
-    config.Voltage.PeakForwardVoltage = IndexerConstants.VoltageLimits.peakForwardVoltage.in(Volts);
-    config.Voltage.PeakReverseVoltage = IndexerConstants.VoltageLimits.peakReverseVoltage.in(Volts);
+    hopperConfig.CurrentLimits.StatorCurrentLimit =
+        (int) IndexerConstants.CurrentLimits.maxStator.in(Amps);
+    hopperConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+    hopperConfig.CurrentLimits.SupplyCurrentLimit =
+        (int) IndexerConstants.CurrentLimits.maxSupply.in(Amps);
+    hopperConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-    config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-    config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    hopperConfig.Voltage.PeakForwardVoltage =
+        (int) IndexerConstants.VoltageLimits.maxForward.in(Volts);
+    hopperConfig.Voltage.PeakReverseVoltage =
+        (int) IndexerConstants.VoltageLimits.maxReverse.in(Volts);
 
-    PhoenixUtil.tryUntilOk(15, () -> (talon.getConfigurator().apply(config)));
+    hopperConfig.CurrentLimits.SupplyCurrentLowerTime = 0.0;
 
-    velocity = talon.getVelocity();
-    appliedVoltage = talon.getMotorVoltage();
-    stator = talon.getStatorCurrent();
-    supply = talon.getSupplyCurrent();
-    temp = talon.getDeviceTemp();
+    hopperConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+    hopperConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
-    StatusSignal.setUpdateFrequencyForAll(50.0, velocity, appliedVoltage, stator, supply, temp);
+    PhoenixUtil.tryUntilOk(5, () -> hopperTalon.getConfigurator().apply(hopperConfig, 0.25));
 
-    PhoenixUtil.tryUntilOk(5, () -> (talon.optimizeBusUtilization()));
+    velocity = hopperTalon.getVelocity();
+    appliedVoltage = hopperTalon.getMotorVoltage();
+    stator = hopperTalon.getStatorCurrent();
+    supply = hopperTalon.getSupplyCurrent();
+    temp = hopperTalon.getDeviceTemp();
+
+    PhoenixUtil.tryUntilOk(
+        5,
+        () ->
+            BaseStatusSignal.setUpdateFrequencyForAll(
+                50.0, velocity, appliedVoltage, stator, supply, temp));
+    PhoenixUtil.tryUntilOk(5, () -> hopperTalon.optimizeBusUtilization());
   }
 
   @Override
   public void updateInputs(IndexerInputs inputs) {
-    StatusSignal.refreshAll(velocity, appliedVoltage, stator, supply, temp);
-    inputs.connected = StatusSignal.isAllGood(velocity, appliedVoltage, stator, supply, temp);
-    inputs.velocity = velocity.getValue();
-    inputs.stator = stator.getValue();
-    inputs.supply = supply.getValue();
-    inputs.temp = temp.getValue();
-    inputs.voltage = appliedVoltage.getValue();
+    StatusCode status = BaseStatusSignal.refreshAll(velocity, appliedVoltage, stator, supply, temp);
+    inputs.hopperConnected = hopperTalon.isConnected();
+    inputs.hopperAlive = status == StatusCode.OK;
+    inputs.hopperVelocity = velocity.getValue();
+    inputs.hopperVoltage = appliedVoltage.getValue();
+    inputs.hopperStatorCurrent = stator.getValue();
+    inputs.hopperSupplyCurrent = supply.getValue();
+    inputs.hopperTemperature = temp.getValue();
   }
 
-  public void setVoltage(Voltage applied) {
-    talon.setControl(applyVoltage.withOutput(applied));
-
-    if (applied.magnitude() == 0) {
-      talon.stopMotor();
-    }
-  }
-
-  public void setCurrent(Current applied) {
-    talon.setControl(applyCurrent.withOutput(applied));
+  @Override
+  public void setVoltage(Voltage voltage) {
+    hopperTalon.setControl(voltageOut.withOutput(voltage));
   }
 }

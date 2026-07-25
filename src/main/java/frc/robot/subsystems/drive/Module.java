@@ -16,7 +16,6 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
-import frc.robot.util.BatteryLogger;
 import org.littletonrobotics.junction.Logger;
 
 public class Module {
@@ -31,18 +30,15 @@ public class Module {
   private final Alert turnDisconnectedAlert;
   private final Alert turnEncoderDisconnectedAlert;
   private SwerveModulePosition[] odometryPositions = new SwerveModulePosition[] {};
-  private BatteryLogger batteryLogger;
 
   public Module(
       ModuleIO io,
       int index,
       SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>
-          constants,
-      BatteryLogger logger) {
+          constants) {
     this.io = io;
     this.index = index;
     this.constants = constants;
-    this.batteryLogger = logger;
     driveDisconnectedAlert =
         new Alert(
             "Disconnected drive motor on module " + Integer.toString(index) + ".",
@@ -68,11 +64,6 @@ public class Module {
       Rotation2d angle = inputs.odometryTurnPositions[i];
       odometryPositions[i] = new SwerveModulePosition(positionMeters, angle);
     }
-
-    batteryLogger.reportCurrentUsage(
-        "Drive/Module" + Integer.toString(index) + "/Drive", true, inputs.driveSupplyCurrentAmps);
-    batteryLogger.reportCurrentUsage(
-        "Drive/Module" + Integer.toString(index) + "/Turn", true, inputs.turnSupplyCurrentAmps);
 
     // Update alerts
     driveDisconnectedAlert.set(!inputs.driveConnected);
