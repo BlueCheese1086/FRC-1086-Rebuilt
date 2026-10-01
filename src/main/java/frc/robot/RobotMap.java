@@ -28,7 +28,8 @@ public class RobotMap {
   }
 
   public static class HoodMap {
-    public static final int left = 0; // james said its this
-    public static final int right = 6;
+    public static final int left = 1; // james said its this
+    public static final int right = 2;
+    public static final int encoder = 61;
   }
 }

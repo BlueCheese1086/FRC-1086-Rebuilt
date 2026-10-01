@@ -78,9 +78,9 @@ public class ShooterIOTalonFX implements ShooterIO {
     velocity = shooter.getVelocity();
     volts = shooter.getMotorVoltage();
 
-    velocity.setUpdateFrequency(250.0);
-    acceleration.setUpdateFrequency(250.0);
-    supplyCurrent.setUpdateFrequency(250.0);
+    velocity.setUpdateFrequency(50.0);
+    acceleration.setUpdateFrequency(50.0);
+    supplyCurrent.setUpdateFrequency(50.0);
     BaseStatusSignal.setUpdateFrequencyForAll(
         50.0, acceleration, position, statorCurrent, temp, volts);
     shooter.optimizeBusUtilization();
