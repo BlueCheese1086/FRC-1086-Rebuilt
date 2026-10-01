@@ -76,7 +76,8 @@ public class VisionConstants {
               new Rotation3d(Degrees.zero(), Degrees.of(-18.1), Degrees.zero()))
           .plus(
               new Transform3d(
-                  new Translation3d(24.1 / 1000.0, Rotation3d.kZero), Rotation3d.kZero));
+                  new Translation3d(24.1 / 1000.0, 0.0, Units.inchesToMeters(-0.3125)),
+                  Rotation3d.kZero));
 
   public static double trigLinearStdDevBaseline = 0.5;
   public static double trigAngularStdDevBaseline = Double.POSITIVE_INFINITY; // Radians
