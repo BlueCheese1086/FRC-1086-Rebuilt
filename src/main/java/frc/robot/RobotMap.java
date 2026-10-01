@@ -14,7 +14,7 @@ public class RobotMap {
   // TODO: Replace all these with the actual ids
   public static class IntakeMap {
     public static final int pivot = 41;
-    public static final int rollerLeft = 42;
+    public static final int rollerLeft = 32;
     public static final int rollerRight = 43;
   }
 
