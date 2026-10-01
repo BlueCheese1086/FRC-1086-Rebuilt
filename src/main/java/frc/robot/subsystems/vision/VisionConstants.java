@@ -78,7 +78,7 @@ public class VisionConstants {
               new Transform3d(
                   new Translation3d(24.1 / 1000.0, Rotation3d.kZero), Rotation3d.kZero));
 
-  public static double trigLinearStdDevBaseline = 0.002;
+  public static double trigLinearStdDevBaseline = 0.5;
   public static double trigAngularStdDevBaseline = Double.POSITIVE_INFINITY; // Radians
 
   public static double multitagLinearStdDevBaseline = 0.08;
