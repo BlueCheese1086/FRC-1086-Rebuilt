@@ -1,9 +1,12 @@
 package frc.robot.subsystems.vision;
 
+import static edu.wpi.first.units.Units.Degrees;
+
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
 import frc.robot.util.LoggedTunableNumber;
@@ -64,8 +67,18 @@ public class VisionConstants {
               Units.degreesToRadians(7.6307485467),
               -Units.degreesToRadians(30.0),
               Units.degreesToRadians(180.0 - 17.1921978943)));
+  public static Transform3d robotToCenterCam =
+      new Transform3d(
+              new Translation3d(
+                  0,
+                  -Units.inchesToMeters(2.236677),
+                  Units.inchesToMeters(21.143719 + (0.0625) + 3.125)),
+              new Rotation3d(Degrees.zero(), Degrees.of(-18.1), Degrees.zero()))
+          .plus(
+              new Transform3d(
+                  new Translation3d(24.1 / 1000.0, Rotation3d.kZero), Rotation3d.kZero));
 
-  public static double trigLinearStdDevBaseline = 0.5;
+  public static double trigLinearStdDevBaseline = 0.002;
   public static double trigAngularStdDevBaseline = Double.POSITIVE_INFINITY; // Radians
 
   public static double multitagLinearStdDevBaseline = 0.08;

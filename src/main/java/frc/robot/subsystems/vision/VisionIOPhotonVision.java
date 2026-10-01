@@ -5,14 +5,17 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 import org.photonvision.PhotonCamera;
 
 /** IO implementation for real PhotonVision hardware. */
+@SuppressWarnings("unused")
 public class VisionIOPhotonVision implements VisionIO {
   protected final PhotonCamera camera;
   protected Transform3d robotToCamera;
@@ -94,6 +97,28 @@ public class VisionIOPhotonVision implements VisionIO {
           Transform3d fieldToRobot = fieldToCamera.plus(robotToCamera.inverse());
           Pose3d robotPose = new Pose3d(fieldToRobot.getTranslation(), fieldToRobot.getRotation());
 
+          // Trig Test
+          Rotation2d headingSample = rotationSupplier.get();
+          double dist = cameraToTarget.getTranslation().getNorm();
+          Translation3d cameraToTargetTranslation =
+              new Translation3d(
+                      dist,
+                      new Rotation3d(
+                          0, -Math.toRadians(target.getPitch()), -Math.toRadians(target.getYaw())))
+                  .rotateBy(robotToCamera.getRotation())
+                  .rotateBy(new Rotation3d(headingSample));
+          Pose3d tagPose2d = tagPose.get();
+          Translation3d fieldToCameraTranslation =
+              tagPose2d.getTranslation().plus(cameraToTargetTranslation.unaryMinus());
+
+          Translation3d camToRobotTranslation =
+              robotToCamera.getTranslation().unaryMinus().rotateBy(new Rotation3d(headingSample));
+
+          Pose3d poseEstimated =
+              new Pose3d(
+                  fieldToCameraTranslation.plus(camToRobotTranslation),
+                  new Rotation3d(headingSample));
+          Logger.recordOutput("Vision/" + camera.getName() + "/Trig Estimate", poseEstimated);
           // Add tag ID
           tagIds.add((short) target.fiducialId);
 
@@ -111,8 +136,8 @@ public class VisionIOPhotonVision implements VisionIO {
           poseObservations.add(
               new PoseObservation(
                   result.getTimestampSeconds(), // Timestamp
-                  robot, // 3D pose estimate
-                  target.poseAmbiguity, // Ambiguity
+                  poseEstimated, // 3D pose estimate
+                  0.0, // Ambiguity
                   1, // Tag count
                   cameraToTarget.getTranslation().getNorm(), // Average tag distance
                   PoseObservationType.PHOTONVISION_TRIG)); // Observation type

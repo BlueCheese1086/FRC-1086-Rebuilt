@@ -46,14 +46,13 @@ public class HoodIOServo implements HoodIO {
     rightServo.setBoundsMicroseconds(2000, 1800, 1500, 1200, 1000);
     encoderConfig = new CANcoderConfiguration();
     hoodEncoder = new CANcoder(61, RobotMap.systemBus);
-    encoderConfig.MagnetSensor.MagnetOffset = -0.225;
     encoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
     hoodEncoder.getConfigurator().apply(encoderConfig);
     hoodEncoder.optimizeBusUtilization();
     hoodEncoder.setPosition(Degrees.of(81.0 * 3));
 
     BaseStatusSignal.setUpdateFrequencyForAll(
-        250.0, hoodEncoder.getPosition(), hoodEncoder.getAbsolutePosition());
+        50.0, hoodEncoder.getPosition(), hoodEncoder.getAbsolutePosition());
     setPosition(currentPosition);
   }
 
@@ -98,6 +97,6 @@ public class HoodIOServo implements HoodIO {
     inputs.rightPosition = rightServo.getPosition();
     inputs.targetPosition = targetPosition;
     inputs.hoodAngle = hoodEncoder.getPosition().getValue().in(Degrees) / 3;
-    inputs.absoulteAngle = hoodEncoder.getAbsolutePosition().getValueAsDouble();
+    inputs.absoulteAngle = hoodEncoder.getAbsolutePosition().getValueAsDouble() / 3;
   }
 }

@@ -69,7 +69,6 @@ import frc.robot.subsystems.shooter.shooterUtil.PassingManager.PassingParams;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
-import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.AllianceFlipUtil;
@@ -158,10 +157,7 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOPhotonVision(
-                    "backLeft", VisionConstants.robotToLeftCam, drive::getRotation),
-                new VisionIOPhotonVision(
-                    "backRight", VisionConstants.robotToRightCam, drive::getRotation),
-                new VisionIOLimelight("limelight-marble", drive::getRotation));
+                    "center", VisionConstants.robotToCenterCam, drive::getRotation));
 
         intake = new Intake(new IntakeIOTalonFX(), batteryLogger);
         indexer = new Indexer(new IndexerIOTalonFX(), batteryLogger);
@@ -189,9 +185,7 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOPhotonVisionSim(
-                    "backLeft", VisionConstants.robotToLeftCam, drive::getPose),
-                new VisionIOPhotonVisionSim(
-                    "backRight", VisionConstants.robotToRightCam, drive::getPose));
+                    "center", VisionConstants.robotToCenterCam, drive::getPose));
         indexer = new Indexer(new IndexerIOSim(), batteryLogger);
         intake = new Intake(new IntakeIOSim(), batteryLogger);
         shooter =

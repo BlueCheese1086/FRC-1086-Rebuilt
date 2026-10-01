@@ -68,7 +68,9 @@ public class Shooter extends SubsystemBase {
   }
 
   /**
-   * Sets the velocity setpoint of the shooter. This is the value that the shooter will try to get to.
+   * Sets the velocity setpoint of the shooter. This is the value that the shooter will try to get
+   * to.
+   *
    * @param radPerSec The new velocity setpoint
    */
   public void setVelocitySetpoint(Supplier<AngularVelocity> radPerSec) {
@@ -79,6 +81,7 @@ public class Shooter extends SubsystemBase {
 
   /**
    * Runs the feeder at a specified voltage. Intended to be used within safe tolerances.
+   *
    * @param volts the desired output voltage
    */
   public Command runFeed(double volts) {
@@ -87,6 +90,7 @@ public class Shooter extends SubsystemBase {
 
   /**
    * Sets the voltage of the shooter motors
+   *
    * @param volts the request output voltage
    */
   public Command setVoltage(double volts) {
@@ -99,9 +103,7 @@ public class Shooter extends SubsystemBase {
         .finallyDo(this::stopShooter);
   }
 
-  /**
-   * Stops both the feeder and shooter motors
-   */
+  /** Stops both the feeder and shooter motors */
   public void stopAll() {
     for (int i = 0; i < io.length; i++) {
       io[i].setVoltage(0.0);
@@ -109,9 +111,7 @@ public class Shooter extends SubsystemBase {
     }
     feederIO.setFeedVoltage(0.0);
   }
-  /**
-   * Stops only the shooter
-   */
+  /** Stops only the shooter */
   public void stopShooter() {
     for (int i = 0; i < io.length; i++) {
       // io[i].setVoltage(0.0);
@@ -119,9 +119,7 @@ public class Shooter extends SubsystemBase {
     }
   }
 
-  /**
-   * Stops only the feeder
-   */
+  /** Stops only the feeder */
   public void stopFeeder() {
     feederIO.setFeedVoltage(0.0);
   }
@@ -135,6 +133,7 @@ public class Shooter extends SubsystemBase {
 
   /**
    * Records the shot into the file
+   *
    * @param drivePose the pose of the robot
    * @param hoodAngle the hood angle used
    * @param tof the time it took for the shot to land
@@ -168,6 +167,7 @@ public class Shooter extends SubsystemBase {
 
   /**
    * Gets the Pose3ds of each of the shooter lanes for logging
+   *
    * @param robotPose the robot's 2d pose
    * @return the pose3ds of the shooter lanes
    */
@@ -180,9 +180,7 @@ public class Shooter extends SubsystemBase {
     };
   }
 
-  /**
-   * The periodic function
-   */
+  /** The periodic function */
   @Override
   public void periodic() {
     for (int i = 0; i < io.length; i++) {
@@ -195,6 +193,7 @@ public class Shooter extends SubsystemBase {
 
   /**
    * Gets the Command to run the System Identification Routine on the Shooter
+   *
    * @param timeout How long each stage of the routine should run
    * @param i Which shooter IO should run
    * @param string The unique name of the System Identification Test
@@ -215,6 +214,7 @@ public class Shooter extends SubsystemBase {
 
   /**
    * Gets the command to run the Quasistic Portion of the SysID Routine
+   *
    * @param direction The direction the motor should output
    * @param index Which shooter IO you wanted to run the routine on
    * @param name The name of the Sysid Test
@@ -237,6 +237,7 @@ public class Shooter extends SubsystemBase {
 
   /**
    * Gets the command to run the Quasistic Portion of the SysID Routine
+   *
    * @param direction The direction the motor should output
    * @param index Which shooter IO you wanted to run the routine on
    * @param name The name of the Sysid Test

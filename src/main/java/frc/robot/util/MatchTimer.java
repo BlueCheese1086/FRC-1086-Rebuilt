@@ -25,7 +25,9 @@ public class MatchTimer {
   private static Timer timer = new Timer();
   private static Timer shiftTimer = new Timer();
 
-  /** Named match segments used to describe the robot's current teleop or autonomous timing state. */
+  /**
+   * Named match segments used to describe the robot's current teleop or autonomous timing state.
+   */
   public static enum Shift {
     /** Autonomous period. */
     Autonomous("Auto"),
