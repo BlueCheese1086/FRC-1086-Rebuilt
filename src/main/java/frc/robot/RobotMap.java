@@ -9,7 +9,7 @@ import frc.robot.generated.TunerConstants;
 
 public class RobotMap {
   public static final CANBus driveBus = TunerConstants.kCANBus;
-  public static final CANBus systemBus = new CANBus("SuperBus");
+  public static final CANBus systemBus = new CANBus("");
 
   // TODO: Replace all these with the actual ids
   public static class IntakeMap {
