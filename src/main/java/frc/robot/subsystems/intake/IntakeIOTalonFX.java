@@ -77,7 +77,8 @@ public class IntakeIOTalonFX implements IntakeIO {
 
     config.CurrentLimits.SupplyCurrentLimit = IntakeConstants.CurrentLimits.maxSupply.in(Amps);
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
-
+    config.Voltage.PeakForwardVoltage = 12.0;
+    config.Voltage.PeakReverseVoltage = -12.0;
     config.Slot1.kV = PID.rollerkv.getAsDouble();
     config.Slot1.kS = PID.rollerks.getAsDouble();
     config.Slot1.kP = PID.rollerkP.getAsDouble();
