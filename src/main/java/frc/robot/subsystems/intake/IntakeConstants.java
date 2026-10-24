@@ -68,10 +68,10 @@ public class IntakeConstants {
   public static class VoltageLimits {
     /** Maximum forward voltage. */
     public static final Voltage peakForwardVoltage =
-        Volts.of(3.0); // is this rollers or is this pivot, both - martin
+        Volts.of(8.0); // is this rollers or is this pivot, pivot - martin
 
     /** Maximum reverse voltage. */
-    public static final Voltage peakReverseVoltage = Volts.of(-4.0);
+    public static final Voltage peakReverseVoltage = Volts.of(-8.0);
   }
 
   /** Named intake positions and roller targets. */

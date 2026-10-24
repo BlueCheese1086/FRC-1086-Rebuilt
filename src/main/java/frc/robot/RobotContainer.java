@@ -645,8 +645,7 @@ public class RobotContainer {
     return Commands.run(
             () -> {
               controller.setRumble(RumbleType.kBothRumble, intensity);
-            }
-            )
+            })
         .withTimeout(timeout)
         .finallyDo(
             () -> {
