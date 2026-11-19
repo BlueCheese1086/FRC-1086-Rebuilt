@@ -1,0 +1,66 @@
+{
+ "name":"otsr_ons",
+ "version":3,
+ "snapshot":{
+  "waypoints":[
+    {"x":3.6, "y":0.5, "heading":3.141592653589793, "intervals":11, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
+    {"x":3.6, "y":0.5, "heading":1.28, "intervals":40, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false}],
+  "constraints":[
+    {"from":"first", "to":"last", "data":{"type":"KeepInRectangle", "props":{"x":0.0, "y":0.0, "w":16.541, "h":8.0692}}, "enabled":false}],
+  "targetDt":0.05
+ },
+ "params":{
+  "waypoints":[
+    {"x":{"exp":"otsr.x", "val":3.6}, "y":{"exp":"otsr.y", "val":0.5}, "heading":{"exp":"otsr.heading", "val":3.141592653589793}, "intervals":11, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
+    {"x":{"exp":"ons.x", "val":3.6}, "y":{"exp":"ons.y", "val":0.5}, "heading":{"exp":"ons.heading", "val":1.28}, "intervals":40, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false}],
+  "constraints":[
+    {"from":"first", "to":"last", "data":{"type":"KeepInRectangle", "props":{"x":{"exp":"0 m", "val":0.0}, "y":{"exp":"0 m", "val":0.0}, "w":{"exp":"16.541 m", "val":16.541}, "h":{"exp":"8.0692 m", "val":8.0692}}}, "enabled":false}],
+  "targetDt":{
+   "exp":"0.05 s",
+   "val":0.05
+  }
+ },
+ "trajectory":{
+  "config":{
+   "frontLeft":{
+    "x":0.2794,
+    "y":0.2794
+   },
+   "backLeft":{
+    "x":-0.2794,
+    "y":0.2794
+   },
+   "mass":65.77089365,
+   "inertia":6.0,
+   "gearing":6.5,
+   "radius":0.04445,
+   "vmax":628.3185307179587,
+   "tmax":1.2,
+   "cof":1.5,
+   "bumper":{
+    "front":0.4064,
+    "side":0.4064,
+    "back":0.4064
+   },
+   "differentialTrackWidth":0.5588
+  },
+  "sampleType":"Swerve",
+  "waypoints":[0.0,0.17164],
+  "samples":[
+    {"t":0.0, "x":3.6, "y":0.5, "heading":3.14159, "vx":0.0, "vy":0.0, "omega":-10.8464, "ax":0.0, "ay":0.0, "alpha":0.0, "fx":[0.0,0.0,0.0,0.0], "fy":[0.0,0.0,0.0,0.0]},
+    {"t":0.0156, "x":3.6, "y":0.5, "heading":2.97235, "vx":0.0, "vy":0.0, "omega":-10.8464, "ax":0.0, "ay":0.0, "alpha":0.0, "fx":[0.0,0.0,0.0,0.0], "fy":[0.0,0.0,0.0,0.0]},
+    {"t":0.03121, "x":3.6, "y":0.5, "heading":2.80312, "vx":0.0, "vy":0.0, "omega":-10.8464, "ax":0.0, "ay":0.0, "alpha":0.0, "fx":[0.0,0.0,0.0,0.0], "fy":[0.0,0.0,0.0,0.0]},
+    {"t":0.04681, "x":3.6, "y":0.5, "heading":2.63388, "vx":0.0, "vy":0.0, "omega":-10.8464, "ax":0.0, "ay":0.0, "alpha":0.0, "fx":[0.0,0.0,0.0,0.0], "fy":[0.0,0.0,0.0,0.0]},
+    {"t":0.06241, "x":3.6, "y":0.5, "heading":2.46464, "vx":0.0, "vy":0.0, "omega":-10.8464, "ax":0.0, "ay":0.0, "alpha":0.0, "fx":[0.0,0.0,0.0,0.0], "fy":[0.0,0.0,0.0,0.0]},
+    {"t":0.07802, "x":3.6, "y":0.5, "heading":2.2954, "vx":0.0, "vy":0.0, "omega":-10.8464, "ax":0.0, "ay":0.0, "alpha":0.0, "fx":[0.0,0.0,0.0,0.0], "fy":[0.0,0.0,0.0,0.0]},
+    {"t":0.09362, "x":3.6, "y":0.5, "heading":2.12616, "vx":0.0, "vy":0.0, "omega":-10.8464, "ax":0.0, "ay":0.0, "alpha":0.0, "fx":[0.0,0.0,0.0,0.0], "fy":[0.0,0.0,0.0,0.0]},
+    {"t":0.10922, "x":3.6, "y":0.5, "heading":1.95692, "vx":0.0, "vy":0.0, "omega":-10.8464, "ax":0.0, "ay":0.0, "alpha":0.0, "fx":[0.0,0.0,0.0,0.0], "fy":[0.0,0.0,0.0,0.0]},
+    {"t":0.12483, "x":3.6, "y":0.5, "heading":1.78769, "vx":0.0, "vy":0.0, "omega":-10.8464, "ax":0.0, "ay":0.0, "alpha":0.00035, "fx":[-0.00072,0.00112,0.00072,-0.00112], "fy":[-0.00112,-0.00072,0.00112,0.00072]},
+    {"t":0.14043, "x":3.6, "y":0.5, "heading":1.61845, "vx":0.0, "vy":0.0, "omega":-10.84639, "ax":0.0, "ay":0.0, "alpha":0.11866, "fx":[-0.30299,0.33333,0.30299,-0.33333], "fy":[-0.33333,-0.30299,0.33333,0.30299]},
+    {"t":0.15603, "x":3.6, "y":0.5, "heading":1.44921, "vx":0.0, "vy":0.0, "omega":-10.84454, "ax":0.0, "ay":0.0, "alpha":25.87497, "fx":[-77.36826,60.51976,77.36826,-60.51976], "fy":[-60.51976,-77.36826,60.51976,77.36826]},
+    {"t":0.17164, "x":3.6, "y":0.5, "heading":1.28, "vx":0.0, "vy":0.0, "omega":-10.44081, "ax":0.0, "ay":0.0, "alpha":0.0, "fx":[0.0,0.0,0.0,0.0], "fy":[0.0,0.0,0.0,0.0]}],
+  "splits":[0]
+ },
+ "events":[
+   {"name":"Marker", "from":{"target":0, "targetTimestamp":0.0, "offset":{"exp":"0 s", "val":0.0}}, "event":{"type":"named", "data":{"name":"startFeeder"}}}]
+}

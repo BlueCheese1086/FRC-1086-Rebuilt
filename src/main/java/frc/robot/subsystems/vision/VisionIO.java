@@ -1,0 +1,64 @@
+// Copyright (c) 2021-2026 Littleton Robotics
+// http://github.com/Mechanical-Advantage
+//
+// Use of this source code is governed by a BSD
+// license that can be found in the LICENSE file
+// at the root directory of this project.
+
+package frc.robot.subsystems.vision;
+
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import org.littletonrobotics.junction.AutoLog;
+
+public interface VisionIO {
+  @AutoLog
+  public static class VisionIOInputs {
+    public boolean connected = false;
+    public TargetObservation latestTargetObservation =
+        new TargetObservation(Rotation2d.kZero, Rotation2d.kZero);
+    public PoseObservation[] poseObservations = new PoseObservation[0];
+    public String cameraName = new String();
+    public int[] tagIds = new int[0];
+  }
+
+  public static record rejectionReason(
+      boolean tagCount,
+      boolean singleTagMaxAmbiguity,
+      boolean ZLimits,
+      boolean averageDist,
+      boolean singleTagDist,
+      boolean farOffFieldX,
+      boolean farOffFieldY,
+      boolean behindDriverX,
+      boolean behindDriverY,
+      boolean timestamp,
+      PoseObservationType type,
+      Pose3d pose) {}
+
+  /** Represents the angle to a simple target, not used for pose estimation. */
+  public static record TargetObservation(Rotation2d tx, Rotation2d ty) {}
+
+  /** Represents a robot pose sample used for pose estimation. */
+  public static record PoseObservation(
+      double timestamp,
+      Pose3d pose,
+      double ambiguity,
+      int tagCount,
+      double averageTagDistance,
+      PoseObservationType type) {}
+
+  public static enum PoseObservationType {
+    LIMELIGHT_MEGATAG_1,
+    LIMELIGHT_MEGATAG_2,
+    PHOTONVISION_TRIG,
+    PHOTONVISION_FUSED,
+    PHOTONVISION_LOWEST_AMBIGUITY,
+    PHOTONVISION_CLOSEST_TO_REFERENCE,
+    PHOTONVISION_CONSTRAINED_PNP,
+    PHOTONVISION_SOLVE_PNP,
+    PHOTONVISION_MULTITAG
+  }
+
+  public default void updateInputs(VisionIOInputs inputs) {}
+}

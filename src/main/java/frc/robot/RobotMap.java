@@ -1,0 +1,33 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package frc.robot;
+
+import com.ctre.phoenix6.CANBus;
+import frc.robot.generated.TunerConstants;
+
+public class RobotMap {
+  public static final CANBus driveBus = TunerConstants.kCANBus;
+  public static final CANBus systemBus = new CANBus("");
+
+  public static class IntakeMap {
+    public static final int pivot = 41;
+    public static final int rollerLeft = 32;
+    public static final int rollerRight = 33;
+  }
+
+  public static final int indexer = 11;
+
+  public static class ShooterMap {
+    public static final int left = 24;
+    public static final int middle = 23;
+    public static final int right = 22;
+    public static final int feeder = 21;
+  }
+
+  public static class HoodMap {
+    public static final int left = 1; // james said its this
+    public static final int right = 2;
+  }
+}

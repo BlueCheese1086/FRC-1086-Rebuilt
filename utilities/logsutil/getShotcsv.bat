@@ -1,0 +1,1 @@
+scp lvuser@10.10.86.2:/home/lvuser/shot.csv .
