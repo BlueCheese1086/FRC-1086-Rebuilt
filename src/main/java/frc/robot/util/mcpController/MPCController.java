@@ -26,41 +26,25 @@ import java.util.function.Supplier;
 /**
  * Acceleration MPC with separate measured and commanded velocity states.
  *
- * <p>
- * The optimizer slews a persistent FIELD-relative velocity command. Its rollout
- * models measured
- * velocity approaching that command using VelocityResponse. Measurements
- * initialize each predicted
- * robot state, but do not overwrite the saved command on every cycle. This
- * avoids feeding normal
+ * <p>The optimizer slews a persistent FIELD-relative velocity command. Its rollout models measured
+ * velocity approaching that command using VelocityResponse. Measurements initialize each predicted
+ * robot state, but do not overwrite the saved command on every cycle. This avoids feeding normal
  * module overspeed back into a higher velocity command.
  *
- * <p>
- * Velocity tracking costs have a configurable deadband; position and heading
- * costs do not.
- * Acceleration limits constrain COMMAND slew, not guaranteed physical tire
- * acceleration. Predicted
- * speed limits are soft; the returned command is hard saturated.
- * Drive.runVelocity already
- * discretizes/desaturates, so the returned robot-relative speeds are
- * continuous.
+ * <p>Velocity tracking costs have a configurable deadband; position and heading costs do not.
+ * Acceleration limits constrain COMMAND slew, not guaranteed physical tire acceleration. Predicted
+ * speed limits are soft; the returned command is hard saturated. Drive.runVelocity already
+ * discretizes/desaturates, so the returned robot-relative speeds are continuous.
  *
- * <p>
- * Call once per configured period on one thread and reset at each independent
- * drive section. The
- * follower uses measured elapsed time for progress/timeout bookkeeping. A
- * best-effort solve budget
- * limits optimizer work, but is not a hard real-time guarantee on the roboRIO
- * JVM.
+ * <p>Call once per configured period on one thread and reset at each independent drive section. The
+ * follower uses measured elapsed time for progress/timeout bookkeeping. A best-effort solve budget
+ * limits optimizer work, but is not a hard real-time guarantee on the roboRIO JVM.
  */
 public final class MPCController {
-  /**
-   * Fraction of command-minus-measured velocity error corrected per configured
-   * period.
-   */
+  /** Fraction of command-minus-measured velocity error corrected per configured period. */
   public record VelocityResponse(double parallel, double perpendicular, double angular) {
     public VelocityResponse {
-      for (double value : new double[] { parallel, perpendicular, angular }) {
+      for (double value : new double[] {parallel, perpendicular, angular}) {
         if (!Double.isFinite(value) || value <= 0 || value > 1) {
           throw new IllegalArgumentException("Velocity response fractions must be in (0, 1]");
         }
@@ -90,8 +74,7 @@ public final class MPCController {
 
   private static final long SOLVE_BUDGET_NANOS = 6_000_000L;
 
-  public record Acceleration(double fieldAxMps2, double fieldAyMps2, double alphaRadPerSec2) {
-  }
+  public record Acceleration(double fieldAxMps2, double fieldAyMps2, double alphaRadPerSec2) {}
 
   public record Diagnostics(
       int iterations,
@@ -99,8 +82,7 @@ public final class MPCController {
       double cost,
       double solveTimeMillis,
       boolean outputLimited,
-      double maxPredictedSpeedViolationMps) {
-  }
+      double maxPredictedSpeedViolationMps) {}
 
   private final MPCConfig config;
   private final VelocityResponse velocityResponse;
@@ -150,15 +132,10 @@ public final class MPCController {
     return config;
   }
 
-  /**
-   * Clear warm start after interruption, odometry reset, or a new independent
-   * driving section.
-   */
+  /** Clear warm start after interruption, odometry reset, or a new independent driving section. */
   public void reset() {
-    for (double[] row : inputs)
-      Arrays.fill(row, 0.0);
-    for (double[] row : states)
-      Arrays.fill(row, 0.0);
+    for (double[] row : inputs) Arrays.fill(row, 0.0);
+    for (double[] row : states) Arrays.fill(row, 0.0);
     Arrays.fill(previousAcceleration, 0.0);
     Arrays.fill(commandVelocity, 0.0);
     commandInitialized = false;
@@ -168,8 +145,7 @@ public final class MPCController {
   }
 
   /**
-   * Returns ROBOT-relative continuous ChassisSpeeds. Supply exactly horizonSteps
-   * references: index
+   * Returns ROBOT-relative continuous ChassisSpeeds. Supply exactly horizonSteps references: index
    * 0 is the target at now+dt, index 1 at now+2*dt, ..., NOT a sample at now.
    */
   public ChassisSpeeds calculate(
@@ -184,10 +160,7 @@ public final class MPCController {
     return calculate(measured, futureReferences, config.periodSeconds());
   }
 
-  /**
-   * References must be spaced by controlPeriodSeconds; supports a slower measured
-   * loop.
-   */
+  /** References must be spaced by controlPeriodSeconds; supports a slower measured loop. */
   public ChassisSpeeds calculate(
       MPCState measured, List<MPCReference> futureReferences, double controlPeriodSeconds) {
     if (!Double.isFinite(controlPeriodSeconds) || controlPeriodSeconds <= 0) {
@@ -212,16 +185,16 @@ public final class MPCController {
     double ey = speed > 0.1 ? measured.fieldVyMps() / speed : 0.0;
     double periodScale = dt / config.periodSeconds();
     double parallel = 1.0 - Math.pow(1.0 - velocityResponse.parallel(), periodScale);
-    double perpendicular = speed > 0.1
-        ? 1.0 - Math.pow(1.0 - velocityResponse.perpendicular(), periodScale)
-        : parallel;
+    double perpendicular =
+        speed > 0.1
+            ? 1.0 - Math.pow(1.0 - velocityResponse.perpendicular(), periodScale)
+            : parallel;
     responseAngular = 1.0 - Math.pow(1.0 - velocityResponse.angular(), periodScale);
     responseXX = perpendicular + (parallel - perpendicular) * ex * ex;
     responseXY = (parallel - perpendicular) * ex * ey;
     responseYY = perpendicular + (parallel - perpendicular) * ey * ey;
     if (warm) {
-      for (int i = 0; i < n - 1; i++)
-        System.arraycopy(inputs[i + 1], 0, inputs[i], 0, 3);
+      for (int i = 0; i < n - 1; i++) System.arraycopy(inputs[i + 1], 0, inputs[i], 0, 3);
       // Hold the terminal acceleration as a warm start only; the optimizer may change
       // it.
     }
@@ -233,8 +206,7 @@ public final class MPCController {
       throw new IllegalArgumentException("State/reference magnitude overflow");
 
     for (int iteration = 0; iteration < config.maxIterations(); iteration++) {
-      if (iterations > 0 && System.nanoTime() - start >= SOLVE_BUDGET_NANOS)
-        break;
+      if (iterations > 0 && System.nanoTime() - start >= SOLVE_BUDGET_NANOS) break;
       iterations++;
       // evaluate(...,true) has refreshed the gradient at inputs.
       double trialStep = Math.min(stepSize * 1.2, 1.0);
@@ -247,8 +219,7 @@ public final class MPCController {
         movement = 0.0;
         maxMovement = 0.0;
         for (int k = 0; k < n; k++) {
-          for (int j = 0; j < 3; j++)
-            candidate[k][j] = inputs[k][j] - trialStep * gradient[k][j];
+          for (int j = 0; j < 3; j++) candidate[k][j] = inputs[k][j] - trialStep * gradient[k][j];
           projectAcceleration(candidate[k]);
           for (int j = 0; j < 3; j++) {
             double delta = candidate[k][j] - inputs[k][j];
@@ -260,19 +231,18 @@ public final class MPCController {
         candidateCost = evaluate(measured, candidate, false);
         // Quadratic upper-bound test gives a descent step for projected gradient.
         if (Double.isFinite(candidateCost)
-            && candidateCost <= cost
-                + directionalDerivative
-                + movement / (2.0 * trialStep)
-                + 1e-10 * Math.max(1.0, Math.abs(cost))) {
+            && candidateCost
+                <= cost
+                    + directionalDerivative
+                    + movement / (2.0 * trialStep)
+                    + 1e-10 * Math.max(1.0, Math.abs(cost))) {
           accepted = true;
           break;
         }
         trialStep *= 0.5;
       }
-      if (!accepted)
-        break; // Keep last accepted feasible inputs; not reported as converged.
-      for (int k = 0; k < n; k++)
-        System.arraycopy(candidate[k], 0, inputs[k], 0, 3);
+      if (!accepted) break; // Keep last accepted feasible inputs; not reported as converged.
+      for (int k = 0; k < n; k++) System.arraycopy(candidate[k], 0, inputs[k], 0, 3);
       stepSize = trialStep;
       cost = candidateCost;
       // Projected gradient mapping, rather than a tiny step alone, tests convergence.
@@ -312,13 +282,14 @@ public final class MPCController {
     commandVelocity[1] = vy;
     commandVelocity[2] = omega;
     warm = true;
-    diagnostics = new Diagnostics(
-        iterations,
-        converged,
-        cost,
-        (System.nanoTime() - start) / 1e6,
-        outputLimited,
-        maximumSpeedViolation());
+    diagnostics =
+        new Diagnostics(
+            iterations,
+            converged,
+            cost,
+            (System.nanoTime() - start) / 1e6,
+            outputLimited,
+            maximumSpeedViolation());
     return ChassisSpeeds.fromFieldRelativeSpeeds(
         vx, vy, omega, Rotation2d.fromRadians(measured.headingRadians()));
   }
@@ -327,10 +298,7 @@ public final class MPCController {
     return diagnostics;
   }
 
-  /**
-   * Planned states before output saturation. Allocates; use on demand for
-   * logging.
-   */
+  /** Planned states before output saturation. Allocates; use on demand for logging. */
   public Pose2d[] getPredictedPoses() {
     Pose2d[] result = new Pose2d[n + 1];
     for (int k = 0; k <= n; k++) {
@@ -380,15 +348,13 @@ public final class MPCController {
       acceleration[0] *= scale;
       acceleration[1] *= scale;
     }
-    acceleration[2] = Math.max(
-        -l.maxAngularAccelerationRadPerSec2(),
-        Math.min(l.maxAngularAccelerationRadPerSec2(), acceleration[2]));
+    acceleration[2] =
+        Math.max(
+            -l.maxAngularAccelerationRadPerSec2(),
+            Math.min(l.maxAngularAccelerationRadPerSec2(), acceleration[2]));
   }
 
-  /**
-   * Roll out [pose, measured velocity, command velocity] and differentiate by
-   * adjoints.
-   */
+  /** Roll out [pose, measured velocity, command velocity] and differentiate by adjoints. */
   private double evaluate(MPCState measured, double[][] accelerations, boolean differentiate) {
     MPCConfig.Weights w = config.weights();
     states[0][0] = measured.xMeters();
@@ -401,8 +367,7 @@ public final class MPCController {
     double cost = 0.0;
     for (int k = 0; k < n; k++) {
       double[] before = states[k], after = states[k + 1];
-      for (int j = 0; j < 3; j++)
-        after[j + 6] = before[j + 6] + dt * accelerations[k][j];
+      for (int j = 0; j < 3; j++) after[j + 6] = before[j + 6] + dt * accelerations[k][j];
       double dx = after[6] - before[3], dy = after[7] - before[4];
       after[3] = before[3] + responseXX * dx + responseXY * dy;
       after[4] = before[4] + responseXY * dx + responseYY * dy;
@@ -418,12 +383,14 @@ public final class MPCController {
       double vyError = after[4] - references[k][4];
       double speedError = Math.hypot(vxError, vyError);
       double excess = Math.max(0, speedError - trackingTolerance.linearMps());
-      double omegaError = deadband(after[5] - references[k][5], trackingTolerance.angularRadPerSec());
-      cost += terminal
-          * (w.position() * (positionErrorX * positionErrorX + positionErrorY * positionErrorY)
-              + w.heading() * headingError * headingError
-              + w.velocity() * excess * excess
-              + w.angularVelocity() * omegaError * omegaError);
+      double omegaError =
+          deadband(after[5] - references[k][5], trackingTolerance.angularRadPerSec());
+      cost +=
+          terminal
+              * (w.position() * (positionErrorX * positionErrorX + positionErrorY * positionErrorY)
+                  + w.heading() * headingError * headingError
+                  + w.velocity() * excess * excess
+                  + w.angularVelocity() * omegaError * omegaError);
       // Apply soft speed bounds to both physical predictions and commanded
       // velocities.
       cost += speedPenalty(after, 3, null) + speedPenalty(after, 6, null);
@@ -434,8 +401,7 @@ public final class MPCController {
         cost += accelerationWeight(j) * a * a + changeWeight(j) * change * change;
       }
     }
-    if (!differentiate)
-      return cost;
+    if (!differentiate) return cost;
 
     double lpX = 0, lpY = 0, lpTheta = 0;
     double lvX = 0, lvY = 0, lvOmega = 0;
@@ -449,14 +415,16 @@ public final class MPCController {
       double dx = state[3] - ref[3], dy = state[4] - ref[4];
       double speedError = Math.hypot(dx, dy);
       if (speedError > trackingTolerance.linearMps()) {
-        double g = 2 * terminal * w.velocity() * (speedError - trackingTolerance.linearMps()) / speedError;
+        double g =
+            2 * terminal * w.velocity() * (speedError - trackingTolerance.linearMps()) / speedError;
         lvX += g * dx;
         lvY += g * dy;
       }
-      lvOmega += 2
-          * terminal
-          * w.angularVelocity()
-          * deadband(state[5] - ref[5], trackingTolerance.angularRadPerSec());
+      lvOmega +=
+          2
+              * terminal
+              * w.angularVelocity()
+              * deadband(state[5] - ref[5], trackingTolerance.angularRadPerSec());
       // Reuse preallocated scratch vectors for speed-penalty derivatives.
       speedPenalty(state, 3, speedGradient);
       lvX += speedGradient[0];
@@ -483,8 +451,7 @@ public final class MPCController {
         double a = accelerations[k][j];
         double previous = k == 0 ? previousAcceleration[j] : accelerations[k - 1][j];
         double smooth = a - previous;
-        if (k + 1 < n)
-          smooth += a - accelerations[k + 1][j];
+        if (k + 1 < n) smooth += a - accelerations[k + 1][j];
         gradient[k][j] += 2 * accelerationWeight(j) * a + 2 * changeWeight(j) * smooth;
       }
       lvX = 0.5 * dt * lpX + qx - bx;
@@ -512,7 +479,8 @@ public final class MPCController {
       double g = linear > 1e-12 ? 2 * weight * (moduleOver + linearOver) / linear : 0;
       derivative[0] = g * vx;
       derivative[1] = g * vy;
-      derivative[2] = 2 * weight * Math.signum(omega) * (radius * moduleOver + radius * radius * angularOver);
+      derivative[2] =
+          2 * weight * Math.signum(omega) * (radius * moduleOver + radius * radius * angularOver);
     }
     return weight
         * (moduleOver * moduleOver
@@ -549,10 +517,7 @@ public final class MPCController {
     return Math.atan2(Math.sin(radians), Math.cos(radians));
   }
 
-  /**
-   * SI units throughout. Defaults are starting values, not identified robot
-   * parameters.
-   */
+  /** SI units throughout. Defaults are starting values, not identified robot parameters. */
   public record MPCConfig(
       double periodSeconds,
       int horizonSteps,
@@ -575,10 +540,8 @@ public final class MPCController {
     }
 
     /**
-     * A 1 second nominal horizon at 20 ms. Tune command slew limits for the
-     * drivetrain.
-     * maxModuleSpeedMps is the wheel speed limit, not a trajectory's preferred
-     * cruising speed.
+     * A 1 second nominal horizon at 20 ms. Tune command slew limits for the drivetrain.
+     * maxModuleSpeedMps is the wheel speed limit, not a trajectory's preferred cruising speed.
      */
     public static MPCConfig startingPoint(double maxModuleSpeedMps, double driveBaseRadiusMeters) {
       positive(maxModuleSpeedMps, "maxModuleSpeedMps");
@@ -625,10 +588,8 @@ public final class MPCController {
     }
 
     /**
-     * Command acceleration bounds are hard optimizer constraints. Predicted speed
-     * bounds are SOFT
-     * costs; the returned command is hard limited. See MPCController for the
-     * conservative module
+     * Command acceleration bounds are hard optimizer constraints. Predicted speed bounds are SOFT
+     * costs; the returned command is hard limited. See MPCController for the conservative module
      * budget.
      */
     public record Limits(
@@ -649,26 +610,21 @@ public final class MPCController {
     }
 
     static void finite(double value, String name) {
-      if (!Double.isFinite(value))
-        throw new IllegalArgumentException(name + " must be finite");
+      if (!Double.isFinite(value)) throw new IllegalArgumentException(name + " must be finite");
     }
 
     private static void positive(double value, String name) {
       finite(value, name);
-      if (value <= 0)
-        throw new IllegalArgumentException(name + " must be positive");
+      if (value <= 0) throw new IllegalArgumentException(name + " must be positive");
     }
 
     private static void nonnegative(double value, String name) {
       finite(value, name);
-      if (value < 0)
-        throw new IllegalArgumentException(name + " must be nonnegative");
+      if (value < 0) throw new IllegalArgumentException(name + " must be nonnegative");
     }
   }
 
-  /**
-   * Measured chassis state. Velocities are FIELD relative; heading is in radians.
-   */
+  /** Measured chassis state. Velocities are FIELD relative; heading is in radians. */
   public record MPCState(
       double xMeters,
       double yMeters,
@@ -705,10 +661,8 @@ public final class MPCController {
   }
 
   /**
-   * One future reference. Pose uses the field frame and robot heading (not travel
-   * heading).
-   * Velocity is FIELD relative in m/s; omega is rad/s. Immutable primitive
-   * velocity values avoid
+   * One future reference. Pose uses the field frame and robot heading (not travel heading).
+   * Velocity is FIELD relative in m/s; omega is rad/s. Immutable primitive velocity values avoid
    * retaining a mutable ChassisSpeeds supplied by another subsystem.
    */
   public record MPCReference(
@@ -729,12 +683,9 @@ public final class MPCController {
   }
 
   /**
-   * Time-based preview over an already generated, already alliance-transformed
-   * driving section. Can
-   * span multiple trajectories, but does not smooth their geometry, regenerate
-   * them, execute named
-   * commands/events, or construct an auto. End the section at a planned stop,
-   * e.g. Paths1-3.
+   * Time-based preview over an already generated, already alliance-transformed driving section. Can
+   * span multiple trajectories, but does not smooth their geometry, regenerate them, execute named
+   * commands/events, or construct an auto. End the section at a planned stop, e.g. Paths1-3.
    */
   public static final class PathPlannerMPCReference {
     private final List<PathPlannerTrajectory> trajectories;
@@ -743,8 +694,7 @@ public final class MPCController {
 
     public PathPlannerMPCReference(List<PathPlannerTrajectory> trajectories) {
       this.trajectories = List.copyOf(trajectories);
-      if (this.trajectories.isEmpty())
-        throw new IllegalArgumentException("No trajectories");
+      if (this.trajectories.isEmpty()) throw new IllegalArgumentException("No trajectories");
       endTimes = new double[this.trajectories.size()];
       double time = 0;
       for (int i = 0; i < endTimes.length; i++) {
@@ -769,17 +719,18 @@ public final class MPCController {
         if (i > 0) {
           var previous = this.trajectories.get(i - 1).getEndState();
           var next = trajectory.getInitialState();
-          double gap = Math.hypot(
-              previous.pose.getX() - next.pose.getX(), previous.pose.getY() - next.pose.getY());
-          double headingGap = Math.abs(previous.pose.getRotation().minus(next.pose.getRotation()).getRadians());
+          double gap =
+              Math.hypot(
+                  previous.pose.getX() - next.pose.getX(), previous.pose.getY() - next.pose.getY());
+          double headingGap =
+              Math.abs(previous.pose.getRotation().minus(next.pose.getRotation()).getRadians());
           if (gap > 0.05 || headingGap > Math.toRadians(5)) {
             throw new IllegalArgumentException(
                 "Trajectory join " + i + " has a pose discontinuity");
           }
         }
         time += duration;
-        if (!Double.isFinite(time))
-          throw new IllegalArgumentException("Total duration overflow");
+        if (!Double.isFinite(time)) throw new IllegalArgumentException("Total duration overflow");
         endTimes[i] = time;
       }
       PathPlannerTrajectoryState end = this.trajectories.get(endTimes.length - 1).getEndState();
@@ -795,10 +746,7 @@ public final class MPCController {
       return endTimes[endTimes.length - 1];
     }
 
-    /**
-     * Samples at elapsed+dt ... elapsed+N*dt. Beyond the section, hold its final
-     * stopped pose.
-     */
+    /** Samples at elapsed+dt ... elapsed+N*dt. Beyond the section, hold its final stopped pose. */
     public List<MPCReference> sampleHorizon(double elapsedSeconds, MPCConfig config) {
       MPCConfig.finite(elapsedSeconds, "elapsedSeconds");
       Objects.requireNonNull(config, "config");
@@ -811,12 +759,10 @@ public final class MPCController {
 
     public MPCReference sample(double seconds) {
       MPCConfig.finite(seconds, "seconds");
-      if (seconds >= getTotalTimeSeconds())
-        return stoppedEnd;
+      if (seconds >= getTotalTimeSeconds()) return stoppedEnd;
       seconds = Math.max(0, seconds);
       int index = 0;
-      while (index + 1 < endTimes.length && seconds >= endTimes[index])
-        index++;
+      while (index + 1 < endTimes.length && seconds >= endTimes[index]) index++;
       double localTime = seconds - (index == 0 ? 0 : endTimes[index - 1]);
       // Interpolate the dense generated states directly. This avoids relying on the
       // version-specific numerical integration inside
@@ -824,16 +770,12 @@ public final class MPCController {
       List<PathPlannerTrajectoryState> states = trajectories.get(index).getStates();
       int low = 0;
       int high = states.size() - 1;
-      if (localTime <= states.get(low).timeSeconds)
-        return fromState(states.get(low));
-      if (localTime >= states.get(high).timeSeconds)
-        return fromState(states.get(high));
+      if (localTime <= states.get(low).timeSeconds) return fromState(states.get(low));
+      if (localTime >= states.get(high).timeSeconds) return fromState(states.get(high));
       while (low + 1 < high) {
         int mid = (low + high) >>> 1;
-        if (states.get(mid).timeSeconds <= localTime)
-          low = mid;
-        else
-          high = mid;
+        if (states.get(mid).timeSeconds <= localTime) low = mid;
+        else high = mid;
       }
       PathPlannerTrajectoryState a = states.get(low), b = states.get(high);
       double fraction = (localTime - a.timeSeconds) / (b.timeSeconds - a.timeSeconds);
@@ -861,12 +803,9 @@ public final class MPCController {
   }
 
   /**
-   * Error-governed trajectory clock with barriers at planned stops. This class
-   * owns no motors,
-   * commands, or wall clock. Call update exactly once per MPC period using
-   * current measurements. It
-   * preserves input path geometry and saved moving joins; it does not smooth
-   * sharp joins.
+   * Error-governed trajectory clock with barriers at planned stops. This class owns no motors,
+   * commands, or wall clock. Call update exactly once per MPC period using current measurements. It
+   * preserves input path geometry and saved moving joins; it does not smooth sharp joins.
    */
   public static final class MPCPathProgress {
     public record Settings(
@@ -884,18 +823,18 @@ public final class MPCController {
         double timeoutExtraSeconds) {
       public Settings {
         double[] values = {
-            slowErrorMeters,
-            pauseErrorMeters,
-            slowHeadingRadians,
-            pauseHeadingRadians,
-            positionToleranceMeters,
-            headingToleranceRadians,
-            speedToleranceMps,
-            omegaToleranceRadPerSec,
-            settleSeconds,
-            rateIncreasePerSecond,
-            timeoutMultiplier,
-            timeoutExtraSeconds
+          slowErrorMeters,
+          pauseErrorMeters,
+          slowHeadingRadians,
+          pauseHeadingRadians,
+          positionToleranceMeters,
+          headingToleranceRadians,
+          speedToleranceMps,
+          omegaToleranceRadPerSec,
+          settleSeconds,
+          rateIncreasePerSecond,
+          timeoutMultiplier,
+          timeoutExtraSeconds
         };
         for (double v : values) {
           if (!Double.isFinite(v) || v <= 0)
@@ -935,12 +874,10 @@ public final class MPCController {
         boolean settling,
         boolean finished,
         boolean timedOut,
-        Pose2d targetPose) {
-    }
+        Pose2d targetPose) {}
 
     private record Section(
-        PathPlannerMPCReference preview, int firstPath, int lastPath, double[] pathEndTimes) {
-    }
+        PathPlannerMPCReference preview, int firstPath, int lastPath, double[] pathEndTimes) {}
 
     private final List<String> names;
     private final List<Section> sections;
@@ -975,11 +912,13 @@ public final class MPCController {
       // settled.
       for (int i = 0; i < copy.size(); i++) {
         var end = copy.get(i).getEndState().fieldSpeeds;
-        boolean stop = Math.hypot(end.vxMetersPerSecond, end.vyMetersPerSecond) < 0.1
-            && Math.abs(end.omegaRadiansPerSecond) < 0.1;
+        boolean stop =
+            Math.hypot(end.vxMetersPerSecond, end.vyMetersPerSecond) < 0.1
+                && Math.abs(end.omegaRadiansPerSecond) < 0.1;
         if (stop || i == copy.size() - 1) {
           var group = copy.subList(first, i + 1);
-          var preview = new PathPlannerMPCReference(group); // Validates final stop and internal joins.
+          var preview =
+              new PathPlannerMPCReference(group); // Validates final stop and internal joins.
           double[] boundaries = new double[group.size()];
           double sum = 0;
           for (int j = 0; j < group.size(); j++) {
@@ -1008,16 +947,14 @@ public final class MPCController {
     }
 
     /**
-     * Returns true when advancing to a new section. elapsedSeconds is real time
-     * since last update.
+     * Returns true when advancing to a new section. elapsedSeconds is real time since last update.
      */
     public boolean update(MPCState measured, double elapsedSeconds) {
       Objects.requireNonNull(measured);
       if (!Double.isFinite(elapsedSeconds) || elapsedSeconds <= 0) {
         throw new IllegalArgumentException("elapsedSeconds must be finite and positive");
       }
-      if (finished)
-        return false;
+      if (finished) return false;
       double dt = elapsedSeconds;
       sectionWallTime += dt;
       Section section = sections.get(sectionIndex);
@@ -1029,37 +966,42 @@ public final class MPCController {
 
       if (referenceTime >= duration) {
         referenceRate = 0;
-        boolean settled = positionError <= settings.positionToleranceMeters()
-            && headingError <= settings.headingToleranceRadians()
-            && Math.hypot(measured.fieldVxMps(), measured.fieldVyMps()) <= settings.speedToleranceMps()
-            && Math.abs(measured.omegaRadPerSec()) <= settings.omegaToleranceRadPerSec();
+        boolean settled =
+            positionError <= settings.positionToleranceMeters()
+                && headingError <= settings.headingToleranceRadians()
+                && Math.hypot(measured.fieldVxMps(), measured.fieldVyMps())
+                    <= settings.speedToleranceMps()
+                && Math.abs(measured.omegaRadPerSec()) <= settings.omegaToleranceRadPerSec();
         stableTime = settled ? stableTime + Math.min(dt, config.periodSeconds()) : 0;
         if (stableTime + 1e-9 >= settings.settleSeconds()) {
-          if (sectionIndex + 1 == sections.size())
-            finished = true;
+          if (sectionIndex + 1 == sections.size()) finished = true;
           else {
             sectionIndex++;
             referenceTime = referenceRate = sectionWallTime = stableTime = 0;
             positionError = distance(pose, sections.get(sectionIndex).preview().sample(0).pose());
-            headingError = Math.abs(
-                angleDifference(pose, sections.get(sectionIndex).preview().sample(0).pose()));
+            headingError =
+                Math.abs(
+                    angleDifference(pose, sections.get(sectionIndex).preview().sample(0).pose()));
             return true;
           }
         }
       } else {
-        double requestedRate = Math.min(
-            rateForError(
-                positionError, settings.slowErrorMeters(), settings.pauseErrorMeters()),
-            rateForError(
-                headingError, settings.slowHeadingRadians(), settings.pauseHeadingRadians()));
+        double requestedRate =
+            Math.min(
+                rateForError(
+                    positionError, settings.slowErrorMeters(), settings.pauseErrorMeters()),
+                rateForError(
+                    headingError, settings.slowHeadingRadians(), settings.pauseHeadingRadians()));
         // Drop the reference rate immediately when behind; resume smoothly after
         // recovery.
-        referenceRate = Math.min(requestedRate, referenceRate + settings.rateIncreasePerSecond() * dt);
+        referenceRate =
+            Math.min(requestedRate, referenceRate + settings.rateIncreasePerSecond() * dt);
         referenceTime = Math.min(duration, referenceTime + dt * referenceRate);
         stableTime = 0;
       }
       if (!finished
-          && sectionWallTime > duration * settings.timeoutMultiplier() + settings.timeoutExtraSeconds()) {
+          && sectionWallTime
+              > duration * settings.timeoutMultiplier() + settings.timeoutExtraSeconds()) {
         timedOut = finished = true; // Abort the entire sequence; never skip an unfinished stop.
         referenceRate = 0;
       }
@@ -1067,10 +1009,8 @@ public final class MPCController {
     }
 
     /**
-     * Samples ahead on the governed clock. Reference velocities are scaled with
-     * that same clock.
-     * After the section endpoint all future samples hold its stopped pose, even if
-     * more paths
+     * Samples ahead on the governed clock. Reference velocities are scaled with that same clock.
+     * After the section endpoint all future samples hold its stopped pose, even if more paths
      * exist.
      */
     public List<MPCReference> sampleHorizon() {
@@ -1107,8 +1047,7 @@ public final class MPCController {
       Section section = sections.get(sectionIndex);
       int local = 0;
       while (local + 1 < section.pathEndTimes().length
-          && referenceTime >= section.pathEndTimes()[local])
-        local++;
+          && referenceTime >= section.pathEndTimes()[local]) local++;
       int pathIndex = section.firstPath() + local;
       return new Status(
           pathIndex,
@@ -1140,10 +1079,8 @@ public final class MPCController {
   }
 
   /**
-   * Regenerates reference timing without changing path geometry or files. Moving
-   * joins are retained
-   * only when travel tangents align; sharp joins and saved zero-speed joins
-   * become real stops.
+   * Regenerates reference timing without changing path geometry or files. Moving joins are retained
+   * only when travel tangents align; sharp joins and saved zero-speed joins become real stops.
    * Apply alliance/mirror transforms BEFORE calling this method.
    */
   public static final class MPCPathPreparation {
@@ -1154,21 +1091,21 @@ public final class MPCController {
         double maxAlphaRadPerSec2,
         double maxMovingJoinAngleRadians) {
       public Limits {
-        for (double x : new double[] {
-            maxSpeedMps,
-            maxAccelerationMps2,
-            maxOmegaRadPerSec,
-            maxAlphaRadPerSec2,
-            maxMovingJoinAngleRadians
-        }) {
+        for (double x :
+            new double[] {
+              maxSpeedMps,
+              maxAccelerationMps2,
+              maxOmegaRadPerSec,
+              maxAlphaRadPerSec2,
+              maxMovingJoinAngleRadians
+            }) {
           if (!Double.isFinite(x) || x <= 0)
             throw new IllegalArgumentException("Limits must be finite and positive");
         }
       }
 
       /**
-       * Conservative reference limits leave authority for the controller to correct
-       * tracking error.
+       * Conservative reference limits leave authority for the controller to correct tracking error.
        */
       public static Limits conservative(MPCConfig config) {
         var limits = config.limits();
@@ -1181,16 +1118,14 @@ public final class MPCController {
       }
     }
 
-    private MPCPathPreparation() {
-    }
+    private MPCPathPreparation() {}
 
     public static List<PathPlannerTrajectory> prepare(
         List<PathPlannerPath> paths, RobotConfig robot, Limits limits) {
       paths = List.copyOf(paths);
       Objects.requireNonNull(robot);
       Objects.requireNonNull(limits);
-      if (paths.isEmpty())
-        throw new IllegalArgumentException("No paths");
+      if (paths.isEmpty()) throw new IllegalArgumentException("No paths");
       int size = paths.size();
       double[] boundarySpeeds = new double[size + 1]; // Initial/final stops remain zero.
       for (int i = 0; i < size; i++) {
@@ -1201,28 +1136,29 @@ public final class MPCController {
         if (paths.get(i).getIdealStartingState() == null) {
           throw new IllegalArgumentException("Missing ideal starting state: " + paths.get(i).name);
         }
-        if (i == 0)
-          continue;
+        if (i == 0) continue;
         var previous = paths.get(i - 1);
         var next = paths.get(i);
         double before = previous.getGoalEndState().velocityMPS();
         double after = next.getIdealStartingState().velocityMPS();
         Translation2d a = endTangent(previous);
         Translation2d b = startTangent(next);
-        double angle = Math.abs(
-            Math.atan2(
-                a.getX() * b.getY() - a.getY() * b.getX(),
-                a.getX() * b.getX() + a.getY() * b.getY()));
+        double angle =
+            Math.abs(
+                Math.atan2(
+                    a.getX() * b.getY() - a.getY() * b.getX(),
+                    a.getX() * b.getX() + a.getY() * b.getY()));
         if (before >= 0.1
             && after >= 0.1
             && a.getNorm() > 1e-9
             && b.getNorm() > 1e-9
             && angle <= limits.maxMovingJoinAngleRadians()) {
-          boundarySpeeds[i] = Math.min(
-              Math.min(before, after),
+          boundarySpeeds[i] =
               Math.min(
-                  endpointSpeedCap(previous, true, limits),
-                  endpointSpeedCap(next, false, limits)));
+                  Math.min(before, after),
+                  Math.min(
+                      endpointSpeedCap(previous, true, limits),
+                      endpointSpeedCap(next, false, limits)));
         }
       }
       List<PathPlannerTrajectory> result = new ArrayList<>();
@@ -1233,17 +1169,18 @@ public final class MPCController {
           zones.add(
               new ConstraintsZone(z.minPosition(), z.maxPosition(), cap(z.constraints(), limits)));
         }
-        var path = new PathPlannerPath(
-            original.getWaypoints(),
-            original.getRotationTargets(),
-            original.getPointTowardsZones(),
-            zones,
-            original.getEventMarkers(),
-            cap(original.getGlobalConstraints(), limits),
-            new IdealStartingState(
-                boundarySpeeds[i], original.getIdealStartingState().rotation()),
-            new GoalEndState(boundarySpeeds[i + 1], original.getGoalEndState().rotation()),
-            original.isReversed());
+        var path =
+            new PathPlannerPath(
+                original.getWaypoints(),
+                original.getRotationTargets(),
+                original.getPointTowardsZones(),
+                zones,
+                original.getEventMarkers(),
+                cap(original.getGlobalConstraints(), limits),
+                new IdealStartingState(
+                    boundarySpeeds[i], original.getIdealStartingState().rotation()),
+                new GoalEndState(boundarySpeeds[i + 1], original.getGoalEndState().rotation()),
+                original.isReversed());
         path.name = original.name;
         path.preventFlipping = true; // These are already transformed references.
         result.add(path.getIdealTrajectory(robot).orElseThrow());
@@ -1289,20 +1226,16 @@ public final class MPCController {
   }
 
   /**
-   * Follows path files in order using the existing MPCController, a governed
-   * reference clock, and
-   * completion barriers at stopped endpoints. Does not run .auto named commands
-   * or reset odometry.
-   * Call at the configured robot loop period. Constructing does not load or move
-   * anything.
+   * Follows path files in order using the existing MPCController, a governed reference clock, and
+   * completion barriers at stopped endpoints. Does not run .auto named commands or reset odometry.
+   * Call at the configured robot loop period. Constructing does not load or move anything.
    */
   public static final class MPCPathFollower extends Command {
     public record Telemetry(
         MPCPathProgress.Status progress,
         MPCController.Diagnostics optimizer,
         Pose2d[] predictedPoses,
-        ChassisSpeeds commandedRobotSpeeds) {
-    }
+        ChassisSpeeds commandedRobotSpeeds) {}
 
     private final Supplier<Pose2d> poseSupplier;
     private final Supplier<ChassisSpeeds> speedSupplier;
@@ -1337,8 +1270,7 @@ public final class MPCController {
           config,
           MPCPathProgress.Settings.defaults(),
           false,
-          value -> {
-          },
+          value -> {},
           drive,
           pathNames);
     }
@@ -1448,8 +1380,7 @@ public final class MPCController {
       this.mirror = mirror;
       this.telemetry = Objects.requireNonNull(telemetry);
       names = List.copyOf(Arrays.asList(pathNames));
-      if (names.isEmpty())
-        throw new IllegalArgumentException("No path names");
+      if (names.isEmpty()) throw new IllegalArgumentException("No path names");
       controller = new MPCController(config, response, trackingTolerance);
       this.referenceLimits = Objects.requireNonNull(referenceLimits);
       addRequirements(Objects.requireNonNull(drive));
@@ -1477,13 +1408,12 @@ public final class MPCController {
           String diagnosticKey = "MPC/Loaded/" + name + "/";
           SmartDashboard.putNumber(diagnosticKey + "RawEndX", rawEnd.getX());
           SmartDashboard.putNumber(diagnosticKey + "RawEndY", rawEnd.getY());
-          if (mirror)
-            path = path.mirrorPath();
-          if (red && !path.preventFlipping)
-            path = path.flipPath();
+          if (mirror) path = path.mirrorPath();
+          if (red && !path.preventFlipping) path = path.flipPath();
           paths.add(path);
         }
-        List<PathPlannerTrajectory> trajectories = MPCPathPreparation.prepare(paths, robotConfig, referenceLimits);
+        List<PathPlannerTrajectory> trajectories =
+            MPCPathPreparation.prepare(paths, robotConfig, referenceLimits);
         // Log the exact trajectories supplied to this MPC, rather than an unrelated
         // AutoBuilder
         // path.
@@ -1503,8 +1433,8 @@ public final class MPCController {
                   + "start=(%.3f, %.3f) fieldEnd=(%.3f, %.3f, %.1f deg)%n",
               names.get(i),
               new java.io.File(
-                  Filesystem.getDeployDirectory(),
-                  "pathplanner/paths/" + names.get(i) + ".path")
+                      Filesystem.getDeployDirectory(),
+                      "pathplanner/paths/" + names.get(i) + ".path")
                   .getAbsolutePath(),
               rawEnds.get(i).getX(),
               rawEnds.get(i).getY(),
@@ -1524,16 +1454,14 @@ public final class MPCController {
 
     @Override
     public void execute() {
-      if (failed || progress == null || progress.isFinished())
-        return;
+      if (failed || progress == null || progress.isFinished()) return;
       try {
         Pose2d pose = poseSupplier.get();
         ChassisSpeeds speeds = speedSupplier.get();
         double now = Timer.getTimestamp();
         double elapsed = Math.max(1e-6, now - lastUpdateSeconds);
         lastUpdateSeconds = now;
-        if (progress.update(MPCState.fromRobotRelative(pose, speeds), elapsed))
-          controller.reset();
+        if (progress.update(MPCState.fromRobotRelative(pose, speeds), elapsed)) controller.reset();
         if (progress.hasTimedOut()) {
           fail("MPC section timed out near " + progress.getStatus().pathName(), null);
           return;
@@ -1542,12 +1470,13 @@ public final class MPCController {
         // spikes;
         // progress/timeout bookkeeping above still uses the complete elapsed wall time.
         double predictionPeriod = Math.max(config.periodSeconds(), Math.min(0.06, elapsed));
-        ChassisSpeeds command = progress.isFinished()
-            ? new ChassisSpeeds()
-            : controller.calculate(
-                MPCState.fromRobotRelative(pose, speeds),
-                progress.sampleHorizon(predictionPeriod),
-                predictionPeriod);
+        ChassisSpeeds command =
+            progress.isFinished()
+                ? new ChassisSpeeds()
+                : controller.calculate(
+                    MPCState.fromRobotRelative(pose, speeds),
+                    progress.sampleHorizon(predictionPeriod),
+                    predictionPeriod);
         output.accept(command);
         var status = progress.getStatus();
         if (status.pathIndex() != displayedPathIndex) {
@@ -1580,10 +1509,8 @@ public final class MPCController {
     private void fail(String message, Exception cause) {
       failed = true;
       output.accept(new ChassisSpeeds());
-      if (cause == null)
-        DriverStation.reportError(message, false);
-      else
-        DriverStation.reportError(message + ": " + cause.getMessage(), cause.getStackTrace());
+      if (cause == null) DriverStation.reportError(message, false);
+      else DriverStation.reportError(message + ": " + cause.getMessage(), cause.getStackTrace());
     }
   }
 }

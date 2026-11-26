@@ -1,10 +1,14 @@
 package frc.robot.subsystems.vision;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
+
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,7 +26,7 @@ public class VisionIOPhotonVision implements VisionIO {
   /**
    * Creates a new VisionIOPhotonVision.
    *
-   * @param name The configured name of the camera.
+   * @param name             The configured name of the camera.
    * @param rotationSupplier The 3D position of the camera relative to the robot.
    */
   public VisionIOPhotonVision(
@@ -45,10 +49,9 @@ public class VisionIOPhotonVision implements VisionIO {
     for (var result : camera.getAllUnreadResults()) {
       // Update latest target observation
       if (result.hasTargets()) {
-        inputs.latestTargetObservation =
-            new TargetObservation(
-                Rotation2d.fromDegrees(result.getBestTarget().getYaw()),
-                Rotation2d.fromDegrees(result.getBestTarget().getPitch()));
+        inputs.latestTargetObservation = new TargetObservation(
+            Rotation2d.fromDegrees(result.getBestTarget().getYaw()),
+            Rotation2d.fromDegrees(result.getBestTarget().getPitch()));
       } else {
         inputs.latestTargetObservation = new TargetObservation(Rotation2d.kZero, Rotation2d.kZero);
       }
@@ -87,25 +90,38 @@ public class VisionIOPhotonVision implements VisionIO {
         // Calculate robot pose
         var tagPose = aprilTagLayout.getTagPose(target.fiducialId);
         if (tagPose.isPresent()) {
-          Transform3d fieldToTarget =
-              new Transform3d(tagPose.get().getTranslation(), tagPose.get().getRotation());
           Transform3d cameraToTarget = target.bestCameraToTarget;
-          Transform3d fieldToCamera = fieldToTarget.plus(cameraToTarget.inverse());
-          Transform3d fieldToRobot = fieldToCamera.plus(robotToCamera.inverse());
-          Pose3d robotPose = new Pose3d(fieldToRobot.getTranslation(), fieldToRobot.getRotation());
+
+          // Ideally, sample field-relative heading at result.getTimestampSeconds().
+          Rotation2d heading = rotationSupplier.get();
+
+          double distance = target.bestCameraToTarget.getTranslation().getNorm();
+
+          // Reconstruct camera-to-tag vector from range and measured image angles.
+          // Rotate into robot coordinates, then into field coordinates.
+          Translation2d cameraToTagField = new Translation3d(
+              distance,
+              new Rotation3d(
+                  0.0,
+                  -Math.toRadians(target.getPitch()),
+                  -Math.toRadians(target.getYaw())))
+              .rotateBy(robotToCamera.getRotation())
+              .toTranslation2d()
+              .rotateBy(heading);
+
+          // Tag position minus camera-to-tag vector gives camera position.
+          Translation2d cameraPosition = tagPose.get().getTranslation().toTranslation2d()
+              .minus(cameraToTagField);
+
+          // Account for the camera's offset from the robot center.
+          Translation2d robotPosition = cameraPosition.minus(
+              robotToCamera.getTranslation().toTranslation2d()
+                  .rotateBy(heading));
+
+          Pose3d robot = new Pose3d(new Pose2d(robotPosition, heading));
 
           // Add tag ID
           tagIds.add((short) target.fiducialId);
-
-          Pose3d robot =
-              new Pose3d(
-                  robotPose.getX(),
-                  robotPose.getY(),
-                  robotPose.getZ(),
-                  new Rotation3d(
-                      robotPose.getRotation().getX(),
-                      robotPose.getRotation().getY(),
-                      rotationSupplier.get().getRadians()));
 
           // Add observation
           poseObservations.add(

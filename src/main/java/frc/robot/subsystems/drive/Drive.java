@@ -47,9 +47,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
-import frc.robot.Robot;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.util.BatteryLogger;
 import frc.robot.util.mcpController.MPCController;
 import frc.robot.util.mcpController.MPCController.*;
@@ -435,6 +433,10 @@ public class Drive extends SubsystemBase {
     return getPose().getRotation();
   }
 
+  public Rotation2d getGyroRotation(){
+    return rawGyroRotation;
+  }
+
   /** Resets the current odometry pose. */
   public void setPose(Pose2d pose) {
     // RobotState.getInstance().resetPose(pose);
@@ -449,73 +451,9 @@ public class Drive extends SubsystemBase {
       Pose2d visionRobotPoseMeters,
       double timestampSeconds,
       Matrix<N3, N1> visionMeasurementStdDevs) {
-    if (!Robot.isReal()) return;
-    if (visionRobotPoseMeters != null)
-      Logger.recordOutput("Vision/Fusion/CandidatePose", visionRobotPoseMeters);
-    Logger.recordOutput("Vision/Fusion/Accepted", false);
-    double now = Timer.getFPGATimestamp();
-    double age = now - timestampSeconds;
-    Logger.recordOutput("Vision/Fusion/AgeSeconds", age);
-    String rejection = null;
-    if (visionRobotPoseMeters == null
-        || visionMeasurementStdDevs == null
-        || !Double.isFinite(timestampSeconds)
-        || !Double.isFinite(visionRobotPoseMeters.getX())
-        || !Double.isFinite(visionRobotPoseMeters.getY())
-        || !Double.isFinite(visionRobotPoseMeters.getRotation().getRadians())) {
-      rejection = "Invalid measurement";
-    } else if (age > VisionConstants.maxVisionAgeSeconds
-        || age < -VisionConstants.maxVisionFutureSeconds) {
-      rejection = "Stale or future timestamp";
-    } else if (!Double.isFinite(latestOdometryTimestampSeconds)
-        || timestampSeconds < firstOdometryTimestampSeconds
-        || timestampSeconds < lastPoseResetTimestampSeconds
-        || timestampSeconds
-            > latestOdometryTimestampSeconds + VisionConstants.maxVisionFutureSeconds) {
-      rejection = "Outside odometry history or before pose reset";
-    }
-    if (rejection != null) {
-      rejectVisionFusion(rejection);
-      return;
-    }
-    var historicalPose = poseEstimator.sampleAt(timestampSeconds);
-    if (historicalPose.isEmpty()) {
-      rejectVisionFusion("No pose history");
-      return;
-    }
-    double innovation =
-        historicalPose.get().getTranslation().getDistance(visionRobotPoseMeters.getTranslation());
-    Logger.recordOutput("Vision/Fusion/InnovationMeters", innovation);
-    // Compare against where we were when the camera took the frame, not where we are now.
-    if (innovation > VisionConstants.maxVisionTranslationInnovationMeters) {
-      rejectVisionFusion("Translation innovation");
-      return;
-    }
-    double sx = visionMeasurementStdDevs.get(0, 0);
-    double sy = visionMeasurementStdDevs.get(1, 0);
-    double st = visionMeasurementStdDevs.get(2, 0);
-    if (!Double.isFinite(sx)
-        || sx <= 0
-        || !Double.isFinite(sy)
-        || sy <= 0
-        || Double.isNaN(st)
-        || st <= 0) {
-      rejectVisionFusion("Invalid standard deviations");
-      return;
-    }
-    // Keep gyro heading while evaluating this fix. Infinity intentionally gives vision zero yaw
-    // gain.
-    Matrix<N3, N1> safeStdDevs =
-        VecBuilder.fill(sx, sy, VisionConstants.useVisionHeading ? st : Double.POSITIVE_INFINITY);
-    Pose2d before = getPose();
-    poseEstimator.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, safeStdDevs);
-    Logger.recordOutput(
-        "Vision/Fusion/PositionShiftMeters",
-        before.getTranslation().getDistance(getPose().getTranslation()));
-    Logger.recordOutput("Vision/Fusion/Accepted", true);
-    Logger.recordOutput("Vision/Fusion/RejectionReason", "");
-    Logger.recordOutput("Vision/Fusion/AcceptedCount", ++visionFusionAcceptedCount);
+    poseEstimator.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds);
   }
+  // Keep gyro heading while evaluating this fix. Infinity intentionally gives vision zero ya
 
   private void rejectVisionFusion(String reason) {
     Logger.recordOutput("Vision/Fusion/Accepted", false);

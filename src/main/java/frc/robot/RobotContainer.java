@@ -158,7 +158,7 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOPhotonVision(
-                    "center", VisionConstants.robotToCenter, drive::getRotation));
+                    "center", VisionConstants.robotToCenter, drive::getGyroRotation));
 
         intake = new Intake(new IntakeIOTalonFX(), batteryLogger);
         indexer = new Indexer(new IndexerIOTalonFX(), batteryLogger);
@@ -166,7 +166,8 @@ public class RobotContainer {
             new Shooter(
                 new FeederIOTalonFX(RobotMap.ShooterMap.feeder),
                 new ShooterIOTalonFX(RobotMap.ShooterMap.left, false),
-                new ShooterIOTalonFX(RobotMap.ShooterMap.middle, true));
+                new ShooterIOTalonFX(RobotMap.ShooterMap.middle, true),
+                new ShooterIOTalonFX(RobotMap.ShooterMap.right, true));
         hood = new Hood(new HoodIOServo());
         break;
 
@@ -666,17 +667,13 @@ public class RobotContainer {
               }
             },
             drive),
-        // drive.mpcAutoCommand("MPC1", "MCP2"));
+        // drive.mpcAutoCommand("MiddleDepot", "Depot Shoot"));
         intake.setPosition(IntakeConstants.Setpoints.deployed),
         Commands.race(
-            drive.mpcAutoCommand("MPC1"),
-            intake.setVoltage(IntakeConstants.Setpoints.run)
-        ),
+            drive.mpcAutoCommand("MPC1"), intake.setVoltage(IntakeConstants.Setpoints.run)),
         getShootCommand().withTimeout(5.0),
         Commands.race(
-            drive.mpcAutoCommand("MCP2"),
-            intake.setVoltage(IntakeConstants.Setpoints.run)
-        ),
+            drive.mpcAutoCommand("MCP2"), intake.setVoltage(IntakeConstants.Setpoints.run)),
         getShootCommand().withTimeout(5.0));
     // intake.setPosition(IntakeConstants.Setpoints.deployed),
     // Commands.race(

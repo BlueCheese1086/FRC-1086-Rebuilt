@@ -40,12 +40,9 @@ import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 /**
- * The VM is configured to automatically run this class, and to call the
- * functions corresponding to
- * each mode, as described in the TimedRobot documentation. If you change the
- * name of this class or
- * the package after creating this project, you must also update the
- * build.gradle file in the
+ * The VM is configured to automatically run this class, and to call the functions corresponding to
+ * each mode, as described in the TimedRobot documentation. If you change the name of this class or
+ * the package after creating this project, you must also update the build.gradle file in the
  * project.
  */
 public class Robot extends LoggedRobot {
@@ -54,10 +51,11 @@ public class Robot extends LoggedRobot {
 
   private static final boolean IS_PRACTICE = !DriverStation.isFMSAttached();
   private static final String LOG_DIRECTORY = "/U/logs";
-  private static final long MIN_FREE_SPACE = IS_PRACTICE
-      ? 100000000
-      : // 100 MB
-      1000000000; // 1 GB
+  private static final long MIN_FREE_SPACE =
+      IS_PRACTICE
+          ? 100000000
+          : // 100 MB
+          1000000000; // 1 GB
 
   public Robot() {
     // // Record metadata
@@ -84,24 +82,19 @@ public class Robot extends LoggedRobot {
         File file = new File(LOG_DIRECTORY);
         boolean useUsb = file.exists() && file.isDirectory();
 
-        System.out.println(
-            useUsb ? "Logging to USB Drive" : "Logging to RoboRio");
+        System.out.println(useUsb ? "Logging to USB Drive" : "Logging to RoboRio");
 
         String directory = useUsb ? LOG_DIRECTORY : "/home/lvuser/logs";
 
         Logger.addDataReceiver(
-            new WPILOGWriter(
-                IS_PRACTICE
-                    ? nextPracticeLogPath(directory)
-                    : directory));
+            new WPILOGWriter(IS_PRACTICE ? nextPracticeLogPath(directory) : directory));
 
         Logger.addDataReceiver(new NT4Publisher());
         // setupLog();
         break;
 
       case SIM:
-        Logger.addDataReceiver(
-            new WPILOGWriter(nextPracticeLogPath("logs")));
+        Logger.addDataReceiver(new WPILOGWriter(nextPracticeLogPath("logs")));
         Logger.addDataReceiver(new NT4Publisher());
         break;
 
@@ -131,12 +124,13 @@ public class Robot extends LoggedRobot {
     DriverStation.silenceJoystickConnectionWarning(true);
 
     // Check for valid swerve config
-    var modules = new SwerveModuleConstants[] {
-        TunerConstants.FrontLeft,
-        TunerConstants.FrontRight,
-        TunerConstants.BackLeft,
-        TunerConstants.BackRight
-    };
+    var modules =
+        new SwerveModuleConstants[] {
+          TunerConstants.FrontLeft,
+          TunerConstants.FrontRight,
+          TunerConstants.BackLeft,
+          TunerConstants.BackRight
+        };
     for (var constants : modules) {
       if (constants.DriveMotorType != DriveMotorArrangement.TalonFX_Integrated
           || constants.SteerMotorType != SteerMotorArrangement.TalonFX_Integrated) {
@@ -144,9 +138,6 @@ public class Robot extends LoggedRobot {
             "You are using an unsupported swerve configuration, which this template does not support without manual customization. The 2025 release of Phoenix supports some swerve configurations which were not available during 2025 beta testing, preventing any development and support from the AdvantageKit developers.");
       }
     }
-
-    RobotController.setBrownoutVoltage(7.0);
-
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
     robotContainer = new RobotContainer();
@@ -183,8 +174,8 @@ public class Robot extends LoggedRobot {
     // Return to non-RT thread priority (do not modify the first argument)
     Threads.setCurrentThreadPriority(false, 10);
     if (DriverStation.getGameSpecificMessage().length() > 0 && !robotContainer.overrideAlliance) {
-      robotContainer.startingAlliance = DriverStation.getGameSpecificMessage().charAt(0) == 'R' ? Alliance.Red
-          : Alliance.Blue;
+      robotContainer.startingAlliance =
+          DriverStation.getGameSpecificMessage().charAt(0) == 'R' ? Alliance.Red : Alliance.Blue;
     }
     robotContainer.periodic();
     MatchTimer.periodic();
@@ -208,13 +199,9 @@ public class Robot extends LoggedRobot {
 
   /** This function is called periodically when disabled. */
   @Override
-  public void disabledPeriodic() {
-  }
+  public void disabledPeriodic() {}
 
-  /**
-   * This autonomous runs the autonomous command selected by your
-   * {@link RobotContainer} class.
-   */
+  /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
     autonomousCommand = robotContainer.getAutonomousCommand();
@@ -231,8 +218,7 @@ public class Robot extends LoggedRobot {
 
   /** This function is called periodically during autonomous. */
   @Override
-  public void autonomousPeriodic() {
-  }
+  public void autonomousPeriodic() {}
 
   @Override
   public void autonomousExit() {
@@ -257,8 +243,7 @@ public class Robot extends LoggedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {
-  }
+  public void teleopPeriodic() {}
 
   /** This function is called once when test mode is enabled. */
   @Override
@@ -269,18 +254,15 @@ public class Robot extends LoggedRobot {
 
   /** This function is called periodically during test mode. */
   @Override
-  public void testPeriodic() {
-  }
+  public void testPeriodic() {}
 
   /** This function is called once when the robot is first started up. */
   @Override
-  public void simulationInit() {
-  }
+  public void simulationInit() {}
 
   /** This function is called periodically whilst in simulation. */
   @Override
-  public void simulationPeriodic() {
-  }
+  public void simulationPeriodic() {}
 
   public void setupLog() {
     File directory = new File(LOG_DIRECTORY);

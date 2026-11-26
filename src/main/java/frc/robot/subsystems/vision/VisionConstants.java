@@ -8,8 +8,10 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Filesystem;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
 import frc.robot.util.LoggedTunableNumber;
+import java.io.IOException;
 
 public class VisionConstants {
   // Keep static and tunable defaults consistent with the supplied tunable value.
@@ -21,7 +23,8 @@ public class VisionConstants {
       new LoggedTunableNumber("/Vision/Tuning/TrigLinearBaseline", 0.5);
 
   public static double maxAmbiguity = 0.3;
-  // This is estimated ROBOT Z, not the camera mounting height. Allows modest bump motion.
+  // This is estimated ROBOT Z, not the camera mounting height. Allows modest bump
+  // motion.
   public static double maxZError = 0.35;
 
   // Initial filtering values, to validate against actual camera data.
@@ -37,8 +40,17 @@ public class VisionConstants {
   public static double linearStdDevMegatag1Factor = 0.8;
   public static double angularStdDevMegatag1Factor = 0.35;
 
-  public static AprilTagFieldLayout fieldLayout =
-      AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
+  public static AprilTagFieldLayout fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
+
+//   static {
+//     try {
+//       fieldLayout =
+//           new AprilTagFieldLayout(
+//               Filesystem.getDeployDirectory().toPath().resolve("fields/onetag.json"));
+//     } catch (IOException e) {
+//       throw new RuntimeException("Failed to load one-tag field layout", e);
+//     }
+//   }
 
   public static Transform3d robotToLeftCam =
       new Transform3d(
@@ -68,5 +80,5 @@ public class VisionConstants {
   public static double averageTagDistanceSingleTag = 4.5;
   public static double averageMultitag2SingleTagDistance = 4.5;
   public static double maxFusedDistance = 0.125;
-  public static PoseObservationType preferred = PoseObservationType.PHOTONVISION_TRIG;
+  public static PoseObservationType preferred = PoseObservationType.PHOTONVISION_MULTITAG;
 }
